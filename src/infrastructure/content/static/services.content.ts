@@ -64,7 +64,7 @@ export const serviceCategories: ReadonlyArray<ServiceCategory> = [
       },
       {
         title: "Sound design",
-        description: "Mix, score, and sound effects finished before the picture lock, not after.",
+        description: "Mix, score, and sound effects, finished against locked picture.",
       },
       {
         title: "VFX & cleanup",
@@ -94,10 +94,6 @@ export const serviceCategories: ReadonlyArray<ServiceCategory> = [
       {
         title: "Creative direction",
         description: "One point of creative accountability across a multi-video series.",
-      },
-      {
-        title: "Casting",
-        description: "Talent sourcing and on-camera screen tests run ahead of the shoot date.",
       },
     ],
   },

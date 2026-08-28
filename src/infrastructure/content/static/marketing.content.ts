@@ -6,13 +6,9 @@ import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar
 
 export const heroContent: HeroContent = {
   eyebrow: "Famysys Studio",
-  headlineLines: [
-    "Brand films and product videos,",
-    "produced the way Famysys builds software:",
-    "planned, versioned, shipped on schedule.",
-  ],
+  headlineLines: ["Video, produced on an engineering cadence."],
   subhead:
-    "We run video production the way an engineering team runs a release: fixed scope, fixed schedule, one point of accountability from brief to delivery.",
+    "Fixed scope, fixed schedule, one point of accountability from brief to delivery.",
   primaryCta: createCta("Book a call", "/contact"),
   secondaryCta: createCta("See the reel", "/work"),
   media: MediaRef.create({

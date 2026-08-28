@@ -7,7 +7,7 @@ describe("StaticMarketingContentRepository", () => {
 
     const hero = await repository.getHero();
 
-    expect(hero.headlineLines.length).toBeGreaterThanOrEqual(2);
+    expect(hero.headlineLines.length).toBeGreaterThanOrEqual(1);
     expect(hero.media.kind).toBe("video");
     expect(hero.media.poster).toBeDefined();
   });

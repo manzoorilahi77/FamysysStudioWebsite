@@ -58,7 +58,6 @@ const creativeAndStrategy: MegaMenuColumn = {
       "/services/creative-direction",
       "One point of creative accountability across a series.",
     ),
-    megaLink("Casting", "/services/casting", "Talent sourcing and on-camera screen tests."),
   ],
 };
 

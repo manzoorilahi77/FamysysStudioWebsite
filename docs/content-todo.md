@@ -72,7 +72,20 @@ written permission to use it before it appears on the live site:
   not fabricated data — no client confirmation needed, but the client should sanity-check that
   each limitation attributed to a competing option still reads as fair, not as a strawman, once
   it's live next to real pricing.
-- **Mega menu and services grid** (`navigation.content.ts`, `services.content.ts`): the 20
-  service offerings and their one-line descriptors are original copy describing real service
-  categories from the build brief, not fabricated claims — no TODO markers, but worth a
-  terminology pass with the studio's own team before launch.
+- **Mega menu and services grid** (`navigation.content.ts`, `services.content.ts`): the 19
+  service offerings (4 categories, one with 4 items rather than 5 — "Casting" was cut, see below)
+  and their one-line descriptors are original copy describing real service categories from the
+  build brief, not fabricated claims — no TODO markers, but worth a terminology pass with the
+  studio's own team before launch. Counts in tests are asserted as a `>= 15` floor rather than an
+  exact number for exactly this reason: a round number in code breaks the day the client adds or
+  removes a service.
+
+## Corrections made during review
+
+- **"Casting" removed** from Creative & strategy (was added to force a round "20", then cut on
+  review — casting is a production-services function, not creative strategy, and listing it
+  implied the studio staffs talent directly). Creative & strategy now has 4 offerings, not 5;
+  total is 19, not 20.
+- **Sound design descriptor corrected**: originally read "finished before the picture lock, not
+  after," which has the sequence backwards — sound is finished *against* locked picture, not
+  before it. Now reads "Mix, score, and sound effects, finished against locked picture."
