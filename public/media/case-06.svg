@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <rect width="1200" height="900" fill="#F7F5F2"/>
+  <circle cx="600" cy="423" r="216" fill="none" stroke="#1E6FFF" stroke-width="30.2"/>
+  <text x="600" y="846" text-anchor="middle" font-family="ui-monospace, monospace" font-size="29" fill="#0F2A4AB3" letter-spacing="1">FS &#183; 4:3</text>
+</svg>
