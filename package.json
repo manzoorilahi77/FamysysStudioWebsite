@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "generate:media": "node scripts/generate-media.mjs"
   },
   "dependencies": {
     "next": "^15.1.0",
