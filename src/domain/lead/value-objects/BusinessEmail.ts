@@ -2,7 +2,11 @@ import { InvalidBusinessEmailError } from "../errors/LeadErrors";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const FREE_MAIL_DOMAINS = new Set([
+/**
+ * Not exhaustive — a pragmatic, fixed list of common consumer providers rather
+ * than an attempt at a complete free-mail registry.
+ */
+export const FREE_MAIL_DOMAINS: ReadonlySet<string> = new Set([
   "gmail.com",
   "yahoo.com",
   "hotmail.com",
@@ -34,7 +38,7 @@ export class BusinessEmail {
     const domain = trimmed.split("@")[1] ?? "";
     if (FREE_MAIL_DOMAINS.has(domain)) {
       throw new InvalidBusinessEmailError(
-        `"${domain}" is a free-mail domain — a business email is required.`,
+        `Please use your work email address instead of a personal ${domain} address.`,
       );
     }
     return new BusinessEmail(trimmed, domain);
