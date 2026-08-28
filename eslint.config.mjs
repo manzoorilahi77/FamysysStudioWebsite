@@ -65,6 +65,22 @@ export default tseslint.config(
     },
   },
   {
+    files: ["src/application/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["react", "react-dom", "next", "next/*"],
+              message: "application/ must depend on domain/ only — no React or Next imports.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "vitest.setup.ts", "vitest.config.ts"],
     rules: {
       "boundaries/element-types": "off",
