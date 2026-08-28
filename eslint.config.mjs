@@ -6,7 +6,7 @@ const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 export default tseslint.config(
   {
-    ignores: [".next/**", "node_modules/**", "coverage/**", "public/**"],
+    ignores: [".next/**", "node_modules/**", "coverage/**", "public/**", "next-env.d.ts"],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
