@@ -5,6 +5,7 @@ import { StaticPortfolioRepository } from "../content/repositories/StaticPortfol
 import { StaticServiceCatalogRepository } from "../content/repositories/StaticServiceCatalogRepository";
 import { StaticSocialProofRepository } from "../content/repositories/StaticSocialProofRepository";
 import { HttpLeadRepository } from "../lead/HttpLeadRepository";
+import { StubLeadRepository } from "../lead/StubLeadRepository";
 
 /**
  * The composition root. This is the only file that constructs concrete
@@ -26,4 +27,7 @@ export const container = {
   socialProof: new StaticSocialProofRepository(),
   comparison: new StaticComparisonRepository(),
   lead: new HttpLeadRepository(),
+  // Used by the /api/demo-request route itself (the server-side target the
+  // client-side HttpLeadRepository above POSTs to) — see StubLeadRepository.
+  demoRequestIntake: new StubLeadRepository(),
 } as const;

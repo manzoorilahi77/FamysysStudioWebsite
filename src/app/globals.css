@@ -192,3 +192,113 @@ body {
     transform: scale(1);
   }
 }
+
+/* Locked card mechanics (specimen-tested, checkpoint 5 review): rest ink-04
+   fill + ink-08 border; hover escalates the border to accent and lifts 6px.
+   No shadow, ever. Shared by services tiles, case-study cards, and
+   differentiators — sections may layer an additional hover signal on top
+   (arrow reveal, media scale) but never replace this base. */
+.card-surface {
+  background-color: var(--color-ink-4);
+  border: 1px solid var(--color-ink-8);
+  border-radius: var(--radius-sm);
+  transition-property: border-color, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.card-surface:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-6px);
+}
+
+/* §4.9 Services grid — arrow reveal on hover, on top of .card-surface. */
+.service-tile-arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.card-surface:hover .service-tile-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* §4.10 Selected work — media scale on hover, disabled under reduced motion
+   via the isScaleEnabled prop rather than CSS, since JS already knows the
+   user's preference for the modal/reveal logic on this card. */
+.case-study-media {
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.case-study-card:hover .case-study-media--scalable {
+  transform: scale(1.05);
+}
+
+/* §4.11 Comparison — horizontal swipe below lg, scroll-snap + dot indicator. */
+.comparison-swipe {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comparison-swipe-item {
+  flex: 0 0 85%;
+  scroll-snap-align: center;
+}
+
+/* §4.12 Testimonial wall — vertical drift, CSS-animated, paused on hover or off-screen. */
+@keyframes testimonial-drift-down {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes testimonial-drift-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.testimonial-track {
+  animation-duration: 40s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.testimonial-track--down {
+  animation-name: testimonial-drift-down;
+}
+
+.testimonial-track--up {
+  animation-name: testimonial-drift-up;
+}
+
+.testimonial-track[data-paused="true"] {
+  animation-play-state: paused;
+}
+
+/* §4.17 Footer accordions — same disclosure pattern as the mobile drawer.
+   Below md, panels collapse per the trigger's open state. At md+, every
+   column is always visible and the accordion buttons become inert headings. */
+.footer-accordion-panel[data-open="false"] {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .footer-accordion-panel[data-open="false"] {
+    display: block;
+  }
+}

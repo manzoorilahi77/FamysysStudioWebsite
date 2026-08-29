@@ -69,4 +69,83 @@ describe("StaticMarketingContentRepository", () => {
     expect(intro.heading.length).toBeGreaterThan(0);
   });
 
+  it("returns a services section intro", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const intro = await repository.getServicesIntro();
+
+    expect(intro.eyebrow.length).toBeGreaterThan(0);
+    expect(intro.heading.length).toBeGreaterThan(0);
+  });
+
+  it("returns a work section with an intro and explore CTA", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const work = await repository.getWorkSection();
+
+    expect(work.intro.heading.length).toBeGreaterThan(0);
+    expect(work.exploreCta.label.value.length).toBeGreaterThan(0);
+  });
+
+  it("returns a comparison section intro", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const intro = await repository.getComparisonIntro();
+
+    expect(intro.eyebrow.length).toBeGreaterThan(0);
+    expect(intro.heading.length).toBeGreaterThan(0);
+  });
+
+  it("returns a testimonials section intro", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const intro = await repository.getTestimonialsIntro();
+
+    expect(intro.eyebrow.length).toBeGreaterThan(0);
+    expect(intro.heading.length).toBeGreaterThan(0);
+  });
+
+  it("returns exactly 4 process steps", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const process = await repository.getProcessBlock();
+
+    expect(process.steps).toHaveLength(4);
+    expect(process.steps.map((step) => step.title)).toEqual(["Brief", "Build", "Review", "Deliver"]);
+  });
+
+  it("returns exactly 4 differentiators", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const differentiators = await repository.getDifferentiatorsBlock();
+
+    expect(differentiators.items).toHaveLength(4);
+  });
+
+  it("returns a talent block with exactly 9 tiles", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const talent = await repository.getTalentBlock();
+
+    expect(talent.tiles).toHaveLength(9);
+    expect(talent.tiles.every((tile) => tile.aspectRatio === "1:1")).toBe(true);
+  });
+
+  it("returns a closing CTA block", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const cta = await repository.getClosingCta();
+
+    expect(cta.headlineLines.length).toBeGreaterThanOrEqual(1);
+    expect(cta.supportingParagraph.length).toBeGreaterThan(0);
+  });
+
+  it("returns footer content with legal and social links", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const footer = await repository.getFooterContent();
+
+    expect(footer.legalLinks.length).toBeGreaterThanOrEqual(2);
+    expect(footer.socialLinks.length).toBeGreaterThan(0);
+  });
 });

@@ -40,4 +40,49 @@ describe("POST /api/demo-request", () => {
 
     expect(response.status).toBe(400);
   });
+
+  it("returns 422 with an actionable field error for a free-mail address", async () => {
+    const response = await POST(
+      jsonRequest({
+        fullName: "Jane Doe",
+        email: "jane@gmail.com",
+        companyName: "Acme Inc.",
+        companySize: "11-50",
+      }),
+    );
+    const body = (await response.json()) as { errors?: { email?: string } };
+
+    expect(response.status).toBe(422);
+    expect(body.errors?.email).toMatch(/work email/i);
+  });
+
+  it("returns 422 with a field error when the full name has no last name", async () => {
+    const response = await POST(
+      jsonRequest({
+        fullName: "Jane",
+        email: "jane@acme.com",
+        companyName: "Acme Inc.",
+        companySize: "11-50",
+      }),
+    );
+    const body = (await response.json()) as { errors?: { fullName?: string } };
+
+    expect(response.status).toBe(422);
+    expect(body.errors?.fullName).toBeDefined();
+  });
+
+  it("returns 422 with a field error for an unrecognized company size", async () => {
+    const response = await POST(
+      jsonRequest({
+        fullName: "Jane Doe",
+        email: "jane@acme.com",
+        companyName: "Acme Inc.",
+        companySize: "not-a-band",
+      }),
+    );
+    const body = (await response.json()) as { errors?: { companySize?: string } };
+
+    expect(response.status).toBe(422);
+    expect(body.errors?.companySize).toBeDefined();
+  });
 });

@@ -1,10 +1,18 @@
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
+import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
+import type { FooterContent } from "../../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
 import type { ManifestoBlock } from "../../../domain/marketing/entities/ManifestoBlock";
 import type { PositioningBlock } from "../../../domain/marketing/entities/PositioningBlock";
+import type { ProcessBlock } from "../../../domain/marketing/entities/ProcessBlock";
 import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
+import type { TalentBlock } from "../../../domain/marketing/entities/TalentBlock";
 import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar";
+import type {
+  DifferentiatorsBlock,
+  WorkSection,
+} from "../../../domain/marketing/repositories/MarketingContentRepository";
 
 export const heroContent: HeroContent = {
   eyebrow: "Famysys Studio",
@@ -72,4 +80,109 @@ export const positioningBlock: PositioningBlock = {
 export const metricsIntro: SectionIntro = {
   eyebrow: "Success in numbers",
   heading: "What a quarter with Famysys Studio looks like.",
+};
+
+export const servicesIntro: SectionIntro = {
+  eyebrow: "What we make",
+  heading: "Nineteen offerings, one production process.",
+};
+
+export const workSection: WorkSection = {
+  intro: {
+    eyebrow: "Selected work",
+    heading: "Six briefs, six different constraints.",
+  },
+  exploreCta: createCta("Explore all our work", "/work"),
+};
+
+export const comparisonIntro: SectionIntro = {
+  eyebrow: "How we compare",
+  heading: "Same question, five different answers.",
+};
+
+export const testimonialsIntro: SectionIntro = {
+  eyebrow: "What clients say",
+  heading: "Ask the people who've already shipped with us.",
+};
+
+export const processBlock: ProcessBlock = {
+  eyebrow: "How a project runs",
+  heading: "Four steps. Every project, every time.",
+  steps: [
+    {
+      title: "Brief",
+      description:
+        "We turn your goal into a scoped, scheduled brief before anyone books a camera.",
+    },
+    {
+      title: "Build",
+      description: "Production runs against that scope — no rediscovering requirements mid-shoot.",
+    },
+    {
+      title: "Review",
+      description: "One structured review round, with feedback collected in one place, not three.",
+    },
+    {
+      title: "Deliver",
+      description: "Final files land on the date set at brief, in the formats you specified.",
+    },
+  ],
+};
+
+export const differentiatorsBlock: DifferentiatorsBlock = {
+  intro: {
+    eyebrow: "Why Famysys",
+    heading: "Four things that don't change between projects.",
+  },
+  items: [
+    {
+      title: "One team, start to finish",
+      description:
+        "The strategist who writes the brief is reachable through delivery — no handoff to a separate account team.",
+    },
+    {
+      title: "Fixed scope, fixed price",
+      description: "The brief is the contract. Scope changes get a conversation, not a surprise invoice.",
+    },
+    {
+      title: "Senior craft on every project",
+      description: "The same editors and colorists who pitch the work finish the work.",
+    },
+    {
+      title: "Built for repeat volume",
+      description: "Parallel pipelines mean project fifty gets the same attention as project one.",
+    },
+  ],
+};
+
+export const talentBlock: TalentBlock = {
+  eyebrow: "Who you'll work with",
+  heading: "A team you can name, not a roster you're assigned.",
+  supportingParagraph:
+    "Every engagement runs through a small group of senior editors, colorists, and producers — the same people from the first call to the last delivery.",
+  tiles: Array.from({ length: 9 }, (_, index) =>
+    MediaRef.create({
+      kind: "image",
+      src: `/media/talent-${String(index + 1).padStart(2, "0")}.svg`,
+      alt: `Placeholder portrait tile ${index + 1}`, // TODO(client): replace with real team portraits before publishing
+      aspectRatio: "1:1",
+    }),
+  ),
+};
+
+export const closingCta: ClosingCtaBlock = {
+  headlineLines: ["Let's put a number on your next quarter."],
+  supportingParagraph:
+    "Tell us what you need to ship. We'll come back with a scoped plan and a fixed price before we start.",
+};
+
+export const footerContent: FooterContent = {
+  tagline: "Video design and creative production, run like an engineering team.",
+  contactEmail: "hello@famysys.com", // TODO(client): fabricated placeholder — confirm real contact address
+  legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
+  socialLinks: [
+    createCta("Twitter", "https://twitter.com/famysysstudio"), // TODO(client): fabricated placeholder — confirm real handle or remove
+    createCta("LinkedIn", "https://www.linkedin.com/company/famysys-studio"), // TODO(client): fabricated placeholder — confirm real handle or remove
+    createCta("Instagram", "https://www.instagram.com/famysysstudio"), // TODO(client): fabricated placeholder — confirm real handle or remove
+  ],
 };

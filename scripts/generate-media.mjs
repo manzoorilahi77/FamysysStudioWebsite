@@ -224,6 +224,10 @@ const IMAGE_FILES = [
     file: `logo-${String(i + 1).padStart(2, "0")}.svg`,
     aspectRatio: "1:1",
   })),
+  ...Array.from({ length: 9 }, (_, i) => ({
+    file: `talent-${String(i + 1).padStart(2, "0")}.svg`,
+    aspectRatio: "1:1",
+  })),
 ];
 
 const VIDEO_FILES = [

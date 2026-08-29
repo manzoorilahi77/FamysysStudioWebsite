@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" width="900" height="900">
+  <rect width="900" height="900" fill="#F7F5F2"/>
+  <polygon points="450.0,207.0 637.9,531.0 262.1,531.0" fill="#0F2A4A99"/>
+  <text x="450" y="846" text-anchor="middle" font-family="ui-monospace, monospace" font-size="29" fill="#0F2A4AB3" letter-spacing="1">FS &#183; 1:1</text>
+</svg>

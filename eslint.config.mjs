@@ -86,4 +86,27 @@ export default tseslint.config(
       "boundaries/element-types": "off",
     },
   },
+  {
+    // src/presentation/lib/viewModels.ts must stay a pure mapping layer (field
+    // renames and .value extraction only) — no branching, which is where real
+    // display logic would otherwise creep in. See the file's own header comment.
+    files: ["src/presentation/lib/viewModels.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "IfStatement",
+          message: "No branching in viewModels.ts — this file is a pure mapping layer. Put decisions in a use case.",
+        },
+        {
+          selector: "ConditionalExpression",
+          message: "No ternaries in viewModels.ts — this file is a pure mapping layer. Put decisions in a use case.",
+        },
+        {
+          selector: "SwitchStatement",
+          message: "No switch in viewModels.ts — this file is a pure mapping layer. Put decisions in a use case.",
+        },
+      ],
+    },
+  },
 );

@@ -1,9 +1,17 @@
+import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
+import type { FooterContent } from "../../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
 import type { ManifestoBlock } from "../../../domain/marketing/entities/ManifestoBlock";
 import type { PositioningBlock } from "../../../domain/marketing/entities/PositioningBlock";
+import type { ProcessBlock } from "../../../domain/marketing/entities/ProcessBlock";
 import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
+import type { TalentBlock } from "../../../domain/marketing/entities/TalentBlock";
 import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar";
-import type { MarketingContentRepository } from "../../../domain/marketing/repositories/MarketingContentRepository";
+import type {
+  DifferentiatorsBlock,
+  MarketingContentRepository,
+  WorkSection,
+} from "../../../domain/marketing/repositories/MarketingContentRepository";
 
 export interface FakeMarketingContentFixtures {
   readonly hero: HeroContent;
@@ -13,6 +21,15 @@ export interface FakeMarketingContentFixtures {
   readonly marqueeEyebrow: string;
   readonly positioning: PositioningBlock;
   readonly metricsIntro: SectionIntro;
+  readonly servicesIntro: SectionIntro;
+  readonly workSection: WorkSection;
+  readonly comparisonIntro: SectionIntro;
+  readonly testimonialsIntro: SectionIntro;
+  readonly process: ProcessBlock;
+  readonly differentiators: DifferentiatorsBlock;
+  readonly talent: TalentBlock;
+  readonly closingCta: ClosingCtaBlock;
+  readonly footer: FooterContent;
 }
 
 const METHOD_NAMES = [
@@ -23,6 +40,15 @@ const METHOD_NAMES = [
   "getMarqueeEyebrow",
   "getPositioning",
   "getMetricsIntro",
+  "getServicesIntro",
+  "getWorkSection",
+  "getComparisonIntro",
+  "getTestimonialsIntro",
+  "getProcessBlock",
+  "getDifferentiatorsBlock",
+  "getTalentBlock",
+  "getClosingCta",
+  "getFooterContent",
 ] as const;
 
 type MethodName = (typeof METHOD_NAMES)[number];
@@ -35,6 +61,15 @@ const FIXTURE_KEY_BY_METHOD: Record<MethodName, keyof FakeMarketingContentFixtur
   getMarqueeEyebrow: "marqueeEyebrow",
   getPositioning: "positioning",
   getMetricsIntro: "metricsIntro",
+  getServicesIntro: "servicesIntro",
+  getWorkSection: "workSection",
+  getComparisonIntro: "comparisonIntro",
+  getTestimonialsIntro: "testimonialsIntro",
+  getProcessBlock: "process",
+  getDifferentiatorsBlock: "differentiators",
+  getTalentBlock: "talent",
+  getClosingCta: "closingCta",
+  getFooterContent: "footer",
 };
 
 export class FakeMarketingContentRepository implements MarketingContentRepository {
@@ -79,5 +114,41 @@ export class FakeMarketingContentRepository implements MarketingContentRepositor
 
   getMetricsIntro(): Promise<SectionIntro> {
     return this.resolve("getMetricsIntro");
+  }
+
+  getServicesIntro(): Promise<SectionIntro> {
+    return this.resolve("getServicesIntro");
+  }
+
+  getWorkSection(): Promise<WorkSection> {
+    return this.resolve("getWorkSection");
+  }
+
+  getComparisonIntro(): Promise<SectionIntro> {
+    return this.resolve("getComparisonIntro");
+  }
+
+  getTestimonialsIntro(): Promise<SectionIntro> {
+    return this.resolve("getTestimonialsIntro");
+  }
+
+  getProcessBlock(): Promise<ProcessBlock> {
+    return this.resolve("getProcessBlock");
+  }
+
+  getDifferentiatorsBlock(): Promise<DifferentiatorsBlock> {
+    return this.resolve("getDifferentiatorsBlock");
+  }
+
+  getTalentBlock(): Promise<TalentBlock> {
+    return this.resolve("getTalentBlock");
+  }
+
+  getClosingCta(): Promise<ClosingCtaBlock> {
+    return this.resolve("getClosingCta");
+  }
+
+  getFooterContent(): Promise<FooterContent> {
+    return this.resolve("getFooterContent");
   }
 }

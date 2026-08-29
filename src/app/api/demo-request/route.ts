@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { SubmitDemoRequest } from "../../../application/lead/SubmitDemoRequest";
+import { toDemoRequestFieldErrors } from "../../../application/lead/DemoRequestFieldErrors";
+import { container } from "../../../infrastructure/di/container";
 
 interface DemoRequestPayload {
   fullName?: unknown;
@@ -32,8 +35,15 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  // Stub only: no email or CRM integration yet. Domain-level validation (the
-  // BusinessEmail, FullName, and CompanySize invariants) runs through
-  // SubmitDemoRequest, wired to this route from checkpoint 5 onward.
-  return NextResponse.json({ status: "received" }, { status: 200 });
+  try {
+    const useCase = new SubmitDemoRequest(container.demoRequestIntake);
+    await useCase.execute({ fullName, email, companyName, companySize });
+    return NextResponse.json({ status: "received" }, { status: 200 });
+  } catch (error) {
+    const fieldErrors = toDemoRequestFieldErrors(error);
+    if (fieldErrors) {
+      return NextResponse.json({ errors: fieldErrors }, { status: 422 });
+    }
+    throw error;
+  }
 }
