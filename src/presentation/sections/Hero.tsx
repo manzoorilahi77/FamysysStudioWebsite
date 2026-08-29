@@ -25,13 +25,13 @@ export function Hero({ hero }: HeroProps) {
   return (
     <section
       aria-label="Introduction"
-      className="flex items-center bg-canvas pt-24"
+      className="flex items-center bg-ink pt-24"
       style={{ minHeight: "calc(100svh - 5rem)" }}
     >
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div>
-          <Eyebrow>{hero.eyebrow}</Eyebrow>
-          <h1 className="text-display-xl mt-4 font-semibold text-ink">
+          <Eyebrow dark>{hero.eyebrow}</Eyebrow>
+          <h1 className="text-display-xl mt-4 font-semibold text-canvas">
             {hero.headlineLines.map((line, index) => (
               <span
                 key={line}
@@ -49,7 +49,7 @@ export function Hero({ hero }: HeroProps) {
             ))}
           </h1>
           <p
-            className="text-lead mt-6 text-ink-70"
+            className="text-lead mt-6 text-canvas-80"
             style={{
               maxWidth: "60ch",
               opacity: isRevealed ? 1 : 0,
@@ -73,8 +73,8 @@ export function Hero({ hero }: HeroProps) {
               transitionTimingFunction: "var(--ease-base)",
             }}
           >
-            <Button cta={hero.primaryCta} variant="primary" />
-            <Button cta={hero.secondaryCta} variant="ghost" />
+            <Button cta={hero.primaryCta} variant="primary" dark />
+            <Button cta={hero.secondaryCta} variant="ghost" dark />
           </div>
         </div>
 

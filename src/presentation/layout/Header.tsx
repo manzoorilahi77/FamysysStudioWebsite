@@ -30,6 +30,8 @@ export function Header({ navigation }: HeaderProps) {
   }, []);
 
   const [servicesLink, ...restLinks] = navigation.primaryLinks;
+  const isDark = !isScrolled;
+  const textClass = `transition-base ${isDark ? "text-canvas" : "text-ink"}`;
 
   return (
     <header
@@ -42,7 +44,7 @@ export function Header({ navigation }: HeaderProps) {
       }}
     >
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-display-s font-medium text-ink">
+        <Link href="/" className={`text-display-s font-medium ${textClass}`} style={{ transitionDuration: "240ms" }}>
           Famysys Studio
         </Link>
 
@@ -57,7 +59,8 @@ export function Header({ navigation }: HeaderProps) {
               <button
                 id="mega-menu-trigger"
                 type="button"
-                className="text-small font-medium text-ink"
+                className={`text-small font-medium ${textClass}`}
+                style={{ transitionDuration: "240ms" }}
                 aria-expanded={isMegaOpen}
                 aria-controls="mega-menu-panel"
                 onClick={() => setIsMegaOpen((open) => !open)}
@@ -74,22 +77,28 @@ export function Header({ navigation }: HeaderProps) {
             </div>
           ) : null}
           {restLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-small font-medium text-ink">
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-small font-medium ${textClass}`}
+              style={{ transitionDuration: "240ms" }}
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <Button cta={navigation.signIn} variant="ghost" />
-          <Button cta={navigation.primaryCta} variant="primary" />
+          <Button cta={navigation.signIn} variant="ghost" dark={isDark} />
+          <Button cta={navigation.primaryCta} variant="primary" dark={isDark} />
         </div>
 
         <button
           ref={drawerTriggerRef}
           id="mobile-drawer-trigger"
           type="button"
-          className="label text-ink lg:hidden"
+          className={`label lg:hidden ${textClass}`}
+          style={{ transitionDuration: "240ms" }}
           aria-expanded={isDrawerOpen}
           aria-controls="mobile-drawer"
           onClick={() => setIsDrawerOpen(true)}

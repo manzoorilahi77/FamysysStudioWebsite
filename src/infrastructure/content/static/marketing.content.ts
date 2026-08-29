@@ -84,13 +84,13 @@ export const metricsIntro: SectionIntro = {
 
 export const servicesIntro: SectionIntro = {
   eyebrow: "What we make",
-  heading: "Nineteen offerings, one production process.",
+  heading: "Every offering, one production process.",
 };
 
 export const workSection: WorkSection = {
   intro: {
     eyebrow: "Selected work",
-    heading: "Six briefs, six different constraints.",
+    heading: "Different briefs, different constraints.",
   },
   exploreCta: createCta("Explore all our work", "/work"),
 };
@@ -136,21 +136,21 @@ export const differentiatorsBlock: DifferentiatorsBlock = {
   },
   items: [
     {
-      title: "One team, start to finish",
+      title: "One review round, one turnaround window",
       description:
-        "The strategist who writes the brief is reachable through delivery — no handoff to a separate account team.",
+        "Feedback comes back once, against a turnaround window set at brief — not an open-ended back-and-forth that eats the schedule.",
     },
     {
       title: "Fixed scope, fixed price",
       description: "The brief is the contract. Scope changes get a conversation, not a surprise invoice.",
     },
     {
-      title: "Senior craft on every project",
-      description: "The same editors and colorists who pitch the work finish the work.",
+      title: "You own the raw footage",
+      description: "Every frame we shoot is yours after delivery — archived and handed over, not held back for a future edit fee.",
     },
     {
-      title: "Built for repeat volume",
-      description: "Parallel pipelines mean project fifty gets the same attention as project one.",
+      title: "Every format, delivered once",
+      description: "Vertical, square, broadcast — cut once, exported to every spec you need, not billed as separate deliverables.",
     },
   ],
 };

@@ -381,6 +381,47 @@ correction — not deciding it here. If a fourth beat is wanted, name which sect
 §4.8 Featured Story Cards, which already has natural visual weight from its video thumbnails) and
 it goes through the same approval as any other section-order change.
 
+**Resolved (post-launch-review rework):** the flag above was acted on. §4.8 — the exact candidate
+named here — is now the fourth dark beat, and the rhythm was rebuilt rather than just having a beat
+inserted into the existing run:
+
+```
+DARK    Header + §4.2 Hero + §4.3 Logo marquee   <- one continuous ink block, no seam
+LIGHT   §4.4 Manifesto → §4.7 Metrics
+DARK    §4.8 Featured story cards
+LIGHT   §4.9 Services → §4.12 Testimonials
+DARK    §4.13 Process
+LIGHT   §4.14 Differentiators, §4.15 Talent
+DARK    §4.16 Closing CTA + §4.17 Footer
+```
+
+§4.4 flips from the original brief's dark to light — cream was never going to carry a hero, so the
+page now opens dark instead and Manifesto trades places with it. This is the structural change
+2.8.3 deferred; it went through the same review gate as any other section-order change. Knock-on
+consequences, all applied together as one pass:
+
+- **Primary button gets a dark-surface variant.** `bg-ink text-canvas` is invisible on ink itself.
+  Dark surfaces use `bg-canvas text-ink` (13.305:1) with a deepened-cream hover fill,
+  `primaryButtonHoverOnDark: '#EAE6E0'` — derived, no live-site precedent (hover states aren't
+  visible in a static capture). Ghost buttons on dark: canvas text, canvas-40 border.
+- **Card mechanics get a dark counterpart** (`.card-surface-dark`): canvas-4 fill, canvas-10
+  border, same accent-border-plus-6px-lift hover as the light version. `canvas-4` is a new opacity
+  step, following the existing `ink-4`/`ink-8` pattern rather than reusing `canvas-10` (already
+  the border color) for the fill.
+- **Header text color tracks scroll state**, not just its background. Canvas over the transparent
+  hero state, ink once the canvas background appears past the 80px threshold — animated together
+  over the same 240ms so neither state leaves unreadable links mid-transition.
+- **Client-logo and hero/story-card placeholders regenerated** for their new dark context: logo
+  marks moved from two-tone plates (which baked a canvas-field rect that would have boxed against
+  ink) to flat canvas-60 marks with no background; the hero and §4.8 video gradients swap their
+  outer stop from ink to canvas so the glow doesn't blend into the now-dark page.
+- **`meta theme-color` deviates from famysys.com.** The live site's theme-color matches its canvas
+  background (`#F7F5F2`); this page now opens on a dark hero, so mobile browser chrome is set to
+  `#0F2A4A` (ink) instead — a deliberate deviation, not an oversight, set via Next's `viewport`
+  export in `src/app/layout.tsx`.
+- **`color-scheme: light` is unchanged.** These are background colors within one light-themed page,
+  not a dark theme — nothing here resolves through `prefers-color-scheme`.
+
 ### 2.8.4 Accent gets one consistent, visible job
 
 Locked out of solid fills (2.1b) and out of the default eyebrow (2.1c), accent currently has no

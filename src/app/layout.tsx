@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Jost } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,13 @@ const jost = Jost({
 export const metadata: Metadata = {
   title: "Famysys Studio",
   description: "Famysys Studio — video design and creative production.",
+};
+
+// Deviation from famysys.com: the live site's theme-color matches its canvas
+// background (#F7F5F2). This page opens on a dark hero, so mobile browser
+// chrome is set to match ink instead — see README.md.
+export const viewport: Viewport = {
+  themeColor: "#0F2A4A",
 };
 
 export default function RootLayout({

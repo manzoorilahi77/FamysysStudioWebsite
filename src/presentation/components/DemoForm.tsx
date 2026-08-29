@@ -87,6 +87,8 @@ export function DemoForm() {
     return (
       <div ref={confirmationRef} tabIndex={-1} role="status" className="rounded-sm border border-canvas-10 p-8">
         <p className="text-display-s font-medium text-canvas">Thanks &mdash; we&apos;ll be in touch.</p>
+        {/* TODO(client): "within one business day" is an operational commitment — confirm the
+            studio can actually hold this turnaround before launch. */}
         <p className="text-body mt-2 text-canvas-80">
           Someone from Famysys Studio will reply within one business day to schedule a call.
         </p>

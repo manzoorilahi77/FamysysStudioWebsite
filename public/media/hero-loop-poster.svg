@@ -2,7 +2,7 @@
   <defs>
     <radialGradient id="glow-circular" cx="640" cy="360" r="514.0116730192029" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#1E6FFF"/>
-      <stop offset="100%" stop-color="#0F2A4A"/>
+      <stop offset="100%" stop-color="#F7F5F2"/>
     </radialGradient>
   </defs>
   <rect width="1280" height="720" fill="url(#glow-circular)"/>

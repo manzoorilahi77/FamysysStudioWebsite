@@ -11,9 +11,11 @@ interface ClientMarqueeProps {
 
 export function ClientMarquee({ eyebrow, logos }: ClientMarqueeProps) {
   return (
-    <section aria-label="Clients" className="bg-canvas py-16">
+    <section aria-label="Clients" className="bg-ink py-16">
       <Container>
-        <Eyebrow className="text-center">{eyebrow}</Eyebrow>
+        <Eyebrow dark className="text-center">
+          {eyebrow}
+        </Eyebrow>
         <div className="mt-8">
           <Marquee
             ariaLabel="Client logos"

@@ -8,7 +8,8 @@ interface MarqueeProps {
   readonly ariaLabel: string;
 }
 
-/** Infinite horizontal marquee: duplicated track translated -50% for a seamless loop, edge-masked into canvas. */
+/** Infinite horizontal marquee: duplicated track translated -50% for a seamless loop, edge-masked
+    to transparent so it fades into whatever the section's own background is. */
 export function Marquee({ items, ariaLabel }: MarqueeProps) {
   const prefersReducedMotion = useReducedMotion();
 

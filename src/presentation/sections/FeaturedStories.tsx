@@ -24,10 +24,10 @@ function StoryCard({ story, index }: StoryCardProps) {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(true)}
-        className="relative block w-full overflow-hidden rounded-sm text-left"
+        className="card-surface-dark relative block w-full overflow-hidden p-4 text-left"
         aria-haspopup="dialog"
       >
-        <div style={{ aspectRatio: "16 / 9" }} className="relative">
+        <div style={{ aspectRatio: "16 / 9" }} className="relative overflow-hidden rounded-sm">
           {story.media.poster ? (
             <Image
               src={story.media.poster}
@@ -44,8 +44,8 @@ function StoryCard({ story, index }: StoryCardProps) {
             <span className="label rounded-sm bg-canvas px-4 py-2 text-ink">Play video</span>
           </span>
         </div>
-        <p className="label mt-4 text-ink-70">{story.client}</p>
-        <p className="text-display-s mt-2 font-medium text-ink">{story.quote}</p>
+        <p className="label mt-4 text-canvas-80">{story.client}</p>
+        <p className="text-display-s mt-2 font-medium text-canvas">{story.quote}</p>
       </button>
       <h3 id={labelId} className="sr-only">
         {story.client} showreel
@@ -67,7 +67,7 @@ interface FeaturedStoriesProps {
 
 export function FeaturedStories({ stories }: FeaturedStoriesProps) {
   return (
-    <Section ariaLabel="Featured stories">
+    <Section dark ariaLabel="Featured stories">
       <Container className="grid gap-8 lg:grid-cols-2">
         {stories.map((story, index) => (
           <StoryCard key={story.client} story={story} index={index} />

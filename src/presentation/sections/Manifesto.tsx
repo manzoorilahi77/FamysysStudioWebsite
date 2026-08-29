@@ -11,22 +11,22 @@ interface ManifestoProps {
 
 export function Manifesto({ manifesto }: ManifestoProps) {
   return (
-    <Section dark ariaLabel="What we believe">
+    <Section ariaLabel="What we believe">
       <Container>
         <Reveal>
-          <Eyebrow dark>{manifesto.eyebrow}</Eyebrow>
-          <h2 className="text-display-l mt-4 font-medium text-canvas">
+          <Eyebrow>{manifesto.eyebrow}</Eyebrow>
+          <h2 className="text-display-l mt-4 font-medium text-ink">
             {manifesto.statementLines.map((line) => (
               <span key={line} className="block">
                 {line}
               </span>
             ))}
           </h2>
-          <p className="text-lead mt-6 text-canvas-80" style={{ maxWidth: "60ch" }}>
+          <p className="text-lead mt-6 text-ink-70" style={{ maxWidth: "60ch" }}>
             {manifesto.supportingParagraph}
           </p>
           <div className="mt-8">
-            <Button cta={manifesto.cta} variant="ghostInverse" />
+            <Button cta={manifesto.cta} variant="ghost" />
           </div>
         </Reveal>
       </Container>

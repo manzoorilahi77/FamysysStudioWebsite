@@ -21,6 +21,7 @@
   --color-ink-70: #0f2a4ab3;
   --color-ink-90: #0f2a4ae6;
 
+  --color-canvas-4: #f7f5f20a;
   --color-canvas-10: #f7f5f21a;
   --color-canvas-16: #f7f5f229;
   --color-canvas-40: #f7f5f266;
@@ -28,6 +29,7 @@
   --color-canvas-80: #f7f5f2cc;
 
   --color-primary-button-hover: #1a65f0;
+  --color-primary-button-hover-on-dark: #eae6e0;
 
   --radius-sm: 0.25rem;
 
@@ -208,6 +210,23 @@ body {
 }
 
 .card-surface:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-6px);
+}
+
+/* Dark-surface counterpart of .card-surface — same mechanics, canvas palette.
+   Used by §4.8's story cards and §4.13's numbered sub-features now that both
+   sit on ink. */
+.card-surface-dark {
+  background-color: var(--color-canvas-4);
+  border: 1px solid var(--color-canvas-10);
+  border-radius: var(--radius-sm);
+  transition-property: border-color, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.card-surface-dark:hover {
   border-color: var(--color-accent);
   transform: translateY(-6px);
 }

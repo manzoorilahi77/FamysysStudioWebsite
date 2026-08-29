@@ -26,6 +26,7 @@ export const inkOpacity = {
 } as const;
 
 export const canvasOpacity = {
+  4: "#F7F5F20A",
   10: "#F7F5F21A",
   16: "#F7F5F229",
   40: "#F7F5F266",
@@ -40,6 +41,7 @@ export const colorDerived = {
   bodyOnLight: "#2C2E33B3", // graphite at 70% opacity, 4.991:1 on canvas — real running body/lead color (2.1a)
   bodyOnDark: canvasOpacity[80], // 9.006:1 on ink — real running body/lead color on dark surfaces (2.1a)
   primaryButtonHover: "#1A65F0", // locked decision (checkpoint 5 review) — bg-ink primary button's hover fill
+  primaryButtonHoverOnDark: "#EAE6E0", // derived — deepened cream, hover fill for the canvas-surface primary button on dark sections
 } as const;
 
 export const type = {
