@@ -114,7 +114,7 @@ function MobileSwipe({
             <dl className="mt-4 space-y-4">
               {criteria.map((row, rowIndex) => (
                 <div key={row.label}>
-                  <dt className="label text-ink-40">{row.label}</dt>
+                  <dt className="label text-ink-70">{row.label}</dt>
                   <dd className="text-small mt-1 text-ink-70">{row.valuesByColumn[rowIndex]}</dd>
                 </div>
               ))}
@@ -122,7 +122,7 @@ function MobileSwipe({
           </div>
         ))}
       </div>
-      <div className="mt-4 flex justify-center gap-2" role="group" aria-label="Comparison columns">
+      <div className="mt-2 flex justify-center" role="group" aria-label="Comparison columns">
         {columns.map((column, index) => (
           <button
             key={column.name}
@@ -134,9 +134,15 @@ function MobileSwipe({
               const item = track?.children[index];
               item?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
             }}
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: index === activeIndex ? "var(--color-accent)" : "var(--color-ink-20)" }}
-          />
+            className="flex items-center justify-center"
+            style={{ width: "44px", height: "44px" }}
+          >
+            <span
+              aria-hidden="true"
+              className="block h-2 w-2 rounded-full"
+              style={{ backgroundColor: index === activeIndex ? "var(--color-accent)" : "var(--color-ink-20)" }}
+            />
+          </button>
         ))}
       </div>
     </div>

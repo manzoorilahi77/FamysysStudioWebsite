@@ -56,7 +56,7 @@ export function ServicesGrid({ intro, categories }: ServicesGridProps) {
               <Reveal key={offering.title} index={index % 8} staggerStepMs={40}>
                 <div className="card-surface flex h-full flex-col justify-between p-6">
                   <div>
-                    <p className="tabular text-small text-ink-40">{String(globalIndex + 1).padStart(2, "0")}</p>
+                    <p className="tabular text-small text-ink-70">{String(globalIndex + 1).padStart(2, "0")}</p>
                     <p className="text-display-s mt-3 font-medium text-ink">{offering.title}</p>
                     <p className="text-small mt-2 text-ink-70">{offering.description}</p>
                   </div>

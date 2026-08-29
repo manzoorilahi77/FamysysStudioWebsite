@@ -29,10 +29,20 @@ export async function POST(request: Request): Promise<Response> {
     !isNonEmptyString(companyName) ||
     !isNonEmptyString(companySize)
   ) {
-    return NextResponse.json(
-      { error: "fullName, email, companyName, and companySize are all required." },
-      { status: 400 },
-    );
+    const missingFieldErrors: Record<string, string> = {};
+    if (!isNonEmptyString(fullName)) {
+      missingFieldErrors.fullName = "Enter your full name.";
+    }
+    if (!isNonEmptyString(email)) {
+      missingFieldErrors.email = "Enter your business email.";
+    }
+    if (!isNonEmptyString(companyName)) {
+      missingFieldErrors.companyName = "Enter your company name.";
+    }
+    if (!isNonEmptyString(companySize)) {
+      missingFieldErrors.companySize = "Choose a company size from the list.";
+    }
+    return NextResponse.json({ errors: missingFieldErrors }, { status: 422 });
   }
 
   try {

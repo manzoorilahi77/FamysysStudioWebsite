@@ -23,10 +23,16 @@ describe("POST /api/demo-request", () => {
     expect(response.status).toBe(200);
   });
 
-  it("returns 400 when a required field is missing", async () => {
+  it("returns 422 with a field error for each missing required field", async () => {
     const response = await POST(jsonRequest({ fullName: "Jane Doe" }));
+    const body = (await response.json()) as {
+      errors?: { email?: string; companyName?: string; companySize?: string };
+    };
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
+    expect(body.errors?.email).toBeDefined();
+    expect(body.errors?.companyName).toBeDefined();
+    expect(body.errors?.companySize).toBeDefined();
   });
 
   it("returns 400 for malformed JSON", async () => {

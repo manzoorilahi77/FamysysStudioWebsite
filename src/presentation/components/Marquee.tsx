@@ -35,7 +35,12 @@ export function Marquee({ items, ariaLabel }: MarqueeProps) {
     >
       <div className="marquee-track flex w-max items-center gap-x-16">
         {[0, 1].map((copy) => (
-          <div key={copy} aria-hidden={copy === 1} className="flex items-center gap-x-16">
+          <div
+            key={copy}
+            role="presentation"
+            aria-hidden={copy === 1 ? true : undefined}
+            className="flex items-center gap-x-16"
+          >
             {items.map((item) => (
               <div key={item.key} role="listitem">
                 {item.content}
