@@ -4,6 +4,7 @@ import { CaseStudyCard } from "../components/CaseStudyCard";
 import { Container } from "../components/Container";
 import { Reveal } from "../components/Reveal";
 import { Section } from "../components/Section";
+import { SectionHeader } from "../components/SectionHeader";
 
 interface SelectedWorkProps {
   readonly intro: SectionIntro;
@@ -14,13 +15,11 @@ export function SelectedWork({ intro, caseStudies }: SelectedWorkProps) {
   return (
     <Section ariaLabel={intro.heading}>
       <Container>
-        <div className="mx-auto max-w-[46ch] text-center">
-          <h2 className="text-display-l font-medium text-ink">{intro.heading}</h2>
-          <p className="text-lead mt-6 text-ink-70">{intro.body}</p>
-        </div>
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <SectionHeader heading={intro.heading} body={intro.body} />
+        {/* Bento stays here: these tiles carry media and genuinely differ. */}
+        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {caseStudies.map((caseStudy, index) => (
-            <Reveal key={caseStudy.slug} index={index % 8} staggerStepMs={40}>
+            <Reveal key={caseStudy.slug} index={index % 8} staggerStepMs={60}>
               <CaseStudyCard caseStudy={caseStudy} />
             </Reveal>
           ))}

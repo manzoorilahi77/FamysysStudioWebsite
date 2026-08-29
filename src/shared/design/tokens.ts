@@ -18,6 +18,7 @@ export const color = {
 // Opacity ramps — the alpha steps are unchanged; only the base colour moved.
 export const inkOpacity = {
   4: "#0B2C4D0A",
+  6: "#0B2C4D0F", // added for the card resting fill — see .card-surface in globals.css
   8: "#0B2C4D14",
   12: "#0B2C4D1F",
   20: "#0B2C4D33",
@@ -92,8 +93,15 @@ export const weight = {
 
 export const radius = "0.25rem"; // measured — famysys.com --radius-sm, applied site-wide
 
+// Vertical rhythm is deliberately uneven. Light sections run at the base measure;
+// dark sections get noticeably more air so each one reads as a held breath rather
+// than another row of the same page; the two standalone centred statements get the
+// most of all, since the space around them is what makes the centring read as a
+// decision instead of a default.
 export const spacing = {
   section: "clamp(4.5rem, 10vh, 8.5rem)",
+  sectionDark: "clamp(6.5rem, 14vh, 12rem)",
+  statement: "clamp(8rem, 18vh, 15rem)",
   gutter: "clamp(1.25rem, 5vw, 5.5rem)",
 } as const;
 

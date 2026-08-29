@@ -13,11 +13,14 @@ const COLUMN_SIZE = 2;
 /** Four columns, each drifting at a different speed/direction/offset so the mosaic reads as
     one deliberately staggered field rather than a repeating tile. Reuses the testimonial-track
     drift keyframes (identical translateY(-50%) loop mechanic, just applied vertically here too). */
+// Durations were 22-34s, which was technically motion but read as a still image at
+// any normal dwell time. Halved, and the spread between the fastest and slowest column
+// widened, so the columns visibly slide past one another rather than drifting in step.
 const COLUMNS = [
-  { offset: "0rem", duration: "26s", direction: "down" as const },
-  { offset: "3rem", duration: "34s", direction: "up" as const },
-  { offset: "-1.5rem", duration: "22s", direction: "down" as const },
-  { offset: "4rem", duration: "30s", direction: "up" as const },
+  { offset: "0rem", duration: "13s", direction: "down" as const },
+  { offset: "3rem", duration: "19s", direction: "up" as const },
+  { offset: "-1.5rem", duration: "11s", direction: "down" as const },
+  { offset: "4rem", duration: "16s", direction: "up" as const },
 ];
 
 export function HeroMosaic({ tiles }: HeroMosaicProps) {

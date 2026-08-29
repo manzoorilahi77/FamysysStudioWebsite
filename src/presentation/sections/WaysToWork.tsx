@@ -3,6 +3,7 @@ import type { EngagementTierView, WaysToWorkBlockView } from "../lib/viewModels"
 import { Container } from "../components/Container";
 import { Reveal } from "../components/Reveal";
 import { Section } from "../components/Section";
+import { SectionHeader } from "../components/SectionHeader";
 
 interface WaysToWorkProps {
   readonly waysToWork: WaysToWorkBlockView;
@@ -41,12 +42,11 @@ export function WaysToWork({ waysToWork }: WaysToWorkProps) {
   return (
     <Section ariaLabel={waysToWork.heading}>
       <Container>
-        <div className="mx-auto max-w-[46ch] text-center">
-          <h2 className="text-display-l font-medium text-ink">{waysToWork.heading}</h2>
-          <p className="text-lead mt-6 text-ink-70">{waysToWork.body}</p>
-        </div>
+        <SectionHeader heading={waysToWork.heading} body={waysToWork.body} />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Bento stays here too: 3 + 1 is a real hierarchy, three tiers against a
+            wider custom card, not an uneven span for its own sake. */}
+        <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-3">
           {waysToWork.tiers.map((tier, index) => (
             <Reveal key={tier.name} index={index} staggerStepMs={60}>
               <TierCard tier={tier} />

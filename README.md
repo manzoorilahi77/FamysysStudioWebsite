@@ -199,13 +199,38 @@ The first two are called out again, with full context, in design spec §2.8.3.
 
 ## Layout conventions worth knowing
 
-- **Odd-numbered card rows resolve as 2 + 3** over a six-column grid — the first two cards take
-  three columns, the last three take two. How We Work (5 steps) and Why Famysys (5 reasons) both
-  use it, so the two odd sections resolve the same way instead of each inventing something.
-- **What We Do's bento fills both rows exactly**: six tiles over four columns, with the tile that
-  opens each row spanning two. Asymmetric without leaving a hole.
+- **Everything is flush left, with exactly two exceptions.** Section headings sit at the
+  container's left edge with the eyebrow above them; body copy, card content and section intros
+  are all left-aligned. The only centred elements on the page are the thesis line in The
+  Differentiator and the final CTA heading — both display-size statements standing alone. That
+  scarcity is the point: centring reads as a decision only when it is not the default.
+  `SectionHeader` is the shared component; a section that does not use it is a bug.
+- **Bento only where tiles genuinely differ.** Selected Work (media tiles) and Ways to Work
+  (three tiers plus a wider custom card) keep uneven spans because the hierarchy is real.
+  Everything else is an even grid with `auto-rows-fr`: What We Do is 3 × 2, The Differentiator
+  2 × 2, and How We Work and Why Famysys both resolve their five tiles as **3 + 2** over six
+  columns — three `col-span-2` tiles, then two `col-span-3`. Both rows fill exactly, so no
+  section leaves a hole.
+- **Card fill is `ink-06`, not `ink-08`.** The limiting factor is not body copy — graphite-70
+  stays above 4.5:1 as far as ink-12 — but the accent `text-small` on the engagement-tier cards,
+  which reads 4.570:1 on ink-06 and fails at ink-07 (4.485:1). Border is `ink-12`.
 - **The inline nav needs `xl`, not `lg`.** The real page names ("Ways to Work With Us", "Creative
   Services") are long enough that the header collapses to the mobile drawer below 1280px.
+- **Vertical rhythm is deliberately uneven** — `spacing.section` for light sections,
+  `spacing.sectionDark` for dark ones, `spacing.statement` for the final CTA.
+
+## Motion
+
+Every effect below is gated on `prefers-reduced-motion` and re-verified after each change.
+
+| Effect | Where | Mechanism |
+|---|---|---|
+| Continuous mosaic drift | Hero | Four CSS-animated columns, 11–19s, alternating direction — never at rest |
+| Line-by-line heading reveal | Every display heading | `RevealHeading` measures which rendered line each word landed on and gives that line an 80ms-stepped delay; words clip up from their own baseline |
+| Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
+| Step numerals | How We Work | `ClipNumber` — each numeral clips up on its own observer as its step enters |
+| Card hover | All cards | Accent border, 6px lift, no shadow; media tiles add a 1.05 scale |
+| Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1 |
 
 ## Placeholder media
 

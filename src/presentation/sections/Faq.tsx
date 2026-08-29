@@ -88,7 +88,7 @@ export function Faq({ faq }: FaqProps) {
         {/* TODO(client): the brief supplies no heading for the FAQ section — the
             accessible name above is a placeholder until the client provides one.
             See docs/content-todo.md. */}
-        <div className="mx-auto max-w-[72ch]">
+        <div className="max-w-[72ch]">
           {faq.items.map((item, index) => (
             <FaqRow
               key={item.question}

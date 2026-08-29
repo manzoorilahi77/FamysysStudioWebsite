@@ -1,7 +1,10 @@
 import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
+import { spacing } from "../../shared/design/tokens";
 import { Container } from "../components/Container";
 import { Reveal } from "../components/Reveal";
+import { RevealHeading } from "../components/RevealHeading";
 import { Section } from "../components/Section";
+import { SectionHeader } from "../components/SectionHeader";
 
 interface DifferentiatorProps {
   readonly differentiator: DifferentiatorBlock;
@@ -11,15 +14,16 @@ export function Differentiator({ differentiator }: DifferentiatorProps) {
   return (
     <Section ariaLabel={differentiator.heading}>
       <Container>
-        <div className="mx-auto max-w-[46ch] text-center">
-          <h2 className="text-display-l font-medium text-ink">{differentiator.heading}</h2>
-          <p className="text-lead mt-6 text-ink-70">{differentiator.body}</p>
-          <p className="text-body mt-6 font-medium text-ink">{differentiator.leadIn}</p>
-        </div>
+        <SectionHeader
+          heading={differentiator.heading}
+          body={differentiator.body}
+          leadIn={differentiator.leadIn}
+        />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        {/* Four elements of equal weight — an even 2 x 2. */}
+        <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2">
           {differentiator.elements.map((element, index) => (
-            <Reveal key={element.title} index={index}>
+            <Reveal key={element.title} index={index} staggerStepMs={60}>
               <div className="card-surface h-full p-8">
                 <p className="text-display-s font-medium text-ink">{element.title}</p>
                 <p className="text-body mt-3 text-ink-70">{element.description}</p>
@@ -28,12 +32,17 @@ export function Differentiator({ differentiator }: DifferentiatorProps) {
           ))}
         </div>
 
-        {/* The page's thesis — the strongest typographic moment after the hero. */}
-        <Reveal>
-          <p className="text-display-l mx-auto mt-20 max-w-[24ch] text-center font-medium text-ink">
+        {/* One of the page's two centred moments: the thesis, at display size, standing
+            alone with the statement measure of space around it. Everything else on the
+            page is flush left, which is what lets this one land. */}
+        <div style={{ marginTop: spacing.statement }}>
+          <RevealHeading
+            as="p"
+            className="text-display-l mx-auto max-w-[24ch] text-center font-medium text-balance text-ink"
+          >
             {differentiator.closingStatement}
-          </p>
-        </Reveal>
+          </RevealHeading>
+        </div>
       </Container>
     </Section>
   );

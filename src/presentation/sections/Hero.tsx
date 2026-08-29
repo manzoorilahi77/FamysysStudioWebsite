@@ -5,6 +5,7 @@ import type { HeroContentView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { HeroMosaic } from "../components/HeroMosaic";
 import { Container } from "../components/Container";
+import { RevealHeading } from "../components/RevealHeading";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface HeroProps {
@@ -29,17 +30,12 @@ export function Hero({ hero }: HeroProps) {
     >
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:items-stretch">
         <div>
-          <h1
-            className="text-display-xl font-semibold text-canvas"
-            style={{
-              clipPath: prefersReducedMotion || isRevealed ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
-              transitionProperty: "clip-path",
-              transitionDuration: prefersReducedMotion ? "120ms" : "500ms",
-              transitionTimingFunction: "var(--ease-base)",
-            }}
-          >
+          {/* The h1 uses the same line-by-line reveal as every other display heading
+              on the page; it just fires on mount rather than on scroll, because it is
+              already in view. */}
+          <RevealHeading as="h1" className="text-display-xl font-semibold text-canvas">
             {hero.heading}
-          </h1>
+          </RevealHeading>
           <p
             className="text-lead mt-6 text-canvas-80"
             style={{

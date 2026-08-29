@@ -13,6 +13,7 @@
   --color-hairline-on-dark: #f4f1e81a;
 
   --color-ink-4: #0b2c4d0a;
+  --color-ink-6: #0b2c4d0f;
   --color-ink-8: #0b2c4d14;
   --color-ink-12: #0b2c4d1f;
   --color-ink-20: #0b2c4d33;
@@ -36,6 +37,8 @@
 
   --spacing-gutter: clamp(1.25rem, 5vw, 5.5rem);
   --spacing-section: clamp(4.5rem, 10vh, 8.5rem);
+  --spacing-section-dark: clamp(6.5rem, 14vh, 12rem);
+  --spacing-statement: clamp(8rem, 18vh, 15rem);
 }
 
 :root {
@@ -156,6 +159,48 @@ body {
   transition-timing-function: var(--ease-base);
 }
 
+/* Display headings reveal a line at a time rather than fading in as one block.
+   Each word is its own clipping box; RevealHeading measures which rendered line a
+   word landed on and gives every word on that line the same delay, so the line
+   rises together. The padding/negative-margin pair stops the clip from cropping
+   descenders. Under reduced motion the words hold still and the heading simply
+   fades — see RevealHeading, which drops the delays too. */
+.reveal-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.reveal-word-inner {
+  display: inline-block;
+  transform: translateY(110%);
+  transition-property: transform;
+  transition-duration: 620ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.reveal-word[data-visible="true"] .reveal-word-inner {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-word-inner,
+  .reveal-word[data-visible="true"] .reveal-word-inner {
+    transform: none;
+  }
+}
+
+/* Dark sections settle their background as they enter: they start one step off
+   full ink and resolve to it. The start state is ink-90 over canvas (#223F5C),
+   which still holds canvas text at 9.616:1, so nothing is unreadable mid-fade. */
+.section-fade {
+  transition-property: background-color;
+  transition-duration: 900ms;
+  transition-timing-function: var(--ease-base);
+}
+
 /* Marquee — CSS-driven, no JS per-frame loop. */
 @keyframes marquee-scroll {
   from {
@@ -226,14 +271,20 @@ body {
   }
 }
 
-/* Locked card mechanics (specimen-tested, checkpoint 5 review): rest ink-04
-   fill + ink-08 border; hover escalates the border to accent and lifts 6px.
-   No shadow, ever. Shared by services tiles, case-study cards, and
-   differentiators — sections may layer an additional hover signal on top
-   (arrow reveal, media scale) but never replace this base. */
+/* Locked card mechanics (specimen-tested, checkpoint 5 review): hover escalates
+   the border to accent and lifts 6px. No shadow, ever. Shared by services tiles,
+   case-study cards, and differentiators — sections may layer an additional hover
+   signal on top (arrow reveal, media scale) but never replace this base.
+   The resting fill moved from ink-04 to ink-06 when the palette changed: against the
+   warmer #F4F1E8 canvas, ink-04 separated by only 1.076:1 and cards read as bare text.
+   ink-06 separates by 1.118:1. The binding constraint on how dark it can go is not
+   graphite-70 body copy, which holds above 4.5:1 all the way to ink-12, but the accent
+   `text-small` on the engagement-tier cards: it reads 4.570:1 on ink-06, 4.485:1 on
+   ink-07 and 4.435:1 on ink-08. ink-06 is therefore the darkest compliant fill. The
+   border steps to ink-12 to keep the edge reading against it. */
 .card-surface {
-  background-color: var(--color-ink-4);
-  border: 1px solid var(--color-ink-8);
+  background-color: var(--color-ink-6);
+  border: 1px solid var(--color-ink-12);
   border-radius: var(--radius-sm);
   transition-property: border-color, transform;
   transition-duration: var(--duration-fast);
@@ -248,9 +299,13 @@ body {
 /* Dark-surface counterpart of .card-surface — same mechanics, canvas palette.
    Used by §4.8's story cards and §4.13's numbered sub-features now that both
    sit on ink. */
+/* The dark card keeps its canvas-4 fill: it already separates from ink by 1.111:1,
+   the same order as the light card's new 1.152:1. Going to canvas-10 would drop the
+   step numbers (accentOnDark) on the card from 4.515:1 to 3.785:1. Only the border
+   steps up, mirroring the light card. */
 .card-surface-dark {
   background-color: var(--color-canvas-4);
-  border: 1px solid var(--color-canvas-10);
+  border: 1px solid var(--color-canvas-16);
   border-radius: var(--radius-sm);
   transition-property: border-color, transform;
   transition-duration: var(--duration-fast);
