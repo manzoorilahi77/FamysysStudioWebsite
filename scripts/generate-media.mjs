@@ -130,24 +130,25 @@ const DRIFT_PATTERNS = {
   circular: { type: "circular", x0Frac: 0.5, y0Frac: 0.5, seed: 1 },
   diagonal: { type: "radial", x0Frac: 0.3, y0Frac: 0.7, seed: 2 },
   vertical: { type: "spiral", x0Frac: 0.7, y0Frac: 0.3, seed: 3 },
+  ascending: { type: "radial", x0Frac: 0.5, y0Frac: 0.82, seed: 4 },
 };
 
 /** A static radial-gradient poster approximating the video's opening frame. */
-function posterSvg(patternName) {
+function posterSvg(patternName, width = VIDEO_W, height = VIDEO_H) {
   const pattern = DRIFT_PATTERNS[patternName];
-  const cx = VIDEO_W * pattern.x0Frac;
-  const cy = VIDEO_H * pattern.y0Frac;
-  const r = Math.hypot(VIDEO_W, VIDEO_H) * 0.35;
+  const cx = width * pattern.x0Frac;
+  const cy = height * pattern.y0Frac;
+  const r = Math.hypot(width, height) * 0.35;
   const gradientId = `glow-${patternName}`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIDEO_W} ${VIDEO_H}" width="${VIDEO_W}" height="${VIDEO_H}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
   <defs>
     <radialGradient id="${gradientId}" cx="${cx}" cy="${cy}" r="${r}" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="${COLOR.accent}"/>
       <stop offset="100%" stop-color="${COLOR.ink}"/>
     </radialGradient>
   </defs>
-  <rect width="${VIDEO_W}" height="${VIDEO_H}" fill="url(#${gradientId})"/>
+  <rect width="${width}" height="${height}" fill="url(#${gradientId})"/>
 </svg>
 `;
 }
@@ -157,12 +158,12 @@ function toFfmpegColor(hex) {
   return `0x${hex.slice(1)}`;
 }
 
-function generateVideo(outputPath, patternName) {
+function generateVideo(outputPath, patternName, width = VIDEO_W, height = VIDEO_H) {
   const pattern = DRIFT_PATTERNS[patternName];
-  const x0 = Math.round(VIDEO_W * pattern.x0Frac);
-  const y0 = Math.round(VIDEO_H * pattern.y0Frac);
+  const x0 = Math.round(width * pattern.x0Frac);
+  const y0 = Math.round(height * pattern.y0Frac);
   const options = [
-    `size=${VIDEO_W}x${VIDEO_H}`,
+    `size=${width}x${height}`,
     `rate=${FPS}`,
     `duration=${DURATION}`,
     `type=${pattern.type}`,
@@ -229,6 +230,13 @@ const VIDEO_FILES = [
   { file: "hero-loop.mp4", poster: "hero-loop-poster.svg", pattern: "circular" },
   { file: "story-01.mp4", poster: "story-01-poster.svg", pattern: "diagonal" },
   { file: "story-02.mp4", poster: "story-02-poster.svg", pattern: "vertical" },
+  {
+    file: "positioning.mp4",
+    poster: "positioning-poster.svg",
+    pattern: "ascending",
+    width: 960,
+    height: 1280,
+  },
 ];
 
 function main() {
@@ -241,10 +249,10 @@ function main() {
     console.log(`wrote ${file}`);
   });
 
-  for (const { file, poster, pattern } of VIDEO_FILES) {
-    writeFileSync(join(MEDIA_DIR, poster), posterSvg(pattern));
+  for (const { file, poster, pattern, width, height } of VIDEO_FILES) {
+    writeFileSync(join(MEDIA_DIR, poster), posterSvg(pattern, width, height));
     console.log(`wrote ${poster}`);
-    generateVideo(join(MEDIA_DIR, file), pattern);
+    generateVideo(join(MEDIA_DIR, file), pattern, width, height);
     console.log(`wrote ${file}`);
   }
 

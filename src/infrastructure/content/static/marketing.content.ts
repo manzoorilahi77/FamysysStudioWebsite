@@ -2,6 +2,8 @@ import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
 import type { ManifestoBlock } from "../../../domain/marketing/entities/ManifestoBlock";
+import type { PositioningBlock } from "../../../domain/marketing/entities/PositioningBlock";
+import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
 import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar";
 
 export const heroContent: HeroContent = {
@@ -45,3 +47,29 @@ export const valuePillars: ReadonlyArray<ValuePillar> = [
       "Strategy, production, and delivery sit inside one team. No handoff between the people who plan the work and the people who make it.",
   },
 ];
+
+export const pillarsIntro: SectionIntro = {
+  eyebrow: "How we're built",
+  heading: "Three commitments, not a slogan.",
+};
+
+export const marqueeEyebrow = "Studios and in-house teams already shipping with us";
+
+export const positioningBlock: PositioningBlock = {
+  eyebrow: "Where we sit",
+  heading: "Studio discipline, agency reach.",
+  supportingParagraph:
+    "We run production like an engineering team runs a release: scoped, scheduled, and reviewed before it ships. Clients get agency-grade creative without the agency-grade unpredictability.",
+  media: MediaRef.create({
+    kind: "video",
+    src: "/media/positioning.mp4",
+    poster: "/media/positioning-poster.svg",
+    alt: "Looping placeholder reel illustrating the studio's positioning",
+    aspectRatio: "3:4",
+  }),
+};
+
+export const metricsIntro: SectionIntro = {
+  eyebrow: "Success in numbers",
+  heading: "What a quarter with Famysys Studio looks like.",
+};

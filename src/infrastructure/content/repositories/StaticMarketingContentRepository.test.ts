@@ -32,4 +32,41 @@ describe("StaticMarketingContentRepository", () => {
       "One team, end to end",
     ]);
   });
+
+  it("returns a pillars section intro", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const intro = await repository.getPillarsIntro();
+
+    expect(intro.eyebrow.length).toBeGreaterThan(0);
+    expect(intro.heading.length).toBeGreaterThan(0);
+  });
+
+  it("returns a marquee eyebrow", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const eyebrow = await repository.getMarqueeEyebrow();
+
+    expect(eyebrow.length).toBeGreaterThan(0);
+  });
+
+  it("returns a positioning block with a tall video media reference", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const positioning = await repository.getPositioning();
+
+    expect(positioning.media.kind).toBe("video");
+    expect(positioning.media.aspectRatio).toBe("3:4");
+    expect(positioning.media.poster).toBeDefined();
+  });
+
+  it("returns a metrics section intro", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const intro = await repository.getMetricsIntro();
+
+    expect(intro.eyebrow.length).toBeGreaterThan(0);
+    expect(intro.heading.length).toBeGreaterThan(0);
+  });
+
 });

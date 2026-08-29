@@ -1,41 +1,83 @@
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
 import type { ManifestoBlock } from "../../../domain/marketing/entities/ManifestoBlock";
+import type { PositioningBlock } from "../../../domain/marketing/entities/PositioningBlock";
+import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
 import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar";
 import type { MarketingContentRepository } from "../../../domain/marketing/repositories/MarketingContentRepository";
 
+export interface FakeMarketingContentFixtures {
+  readonly hero: HeroContent;
+  readonly manifesto: ManifestoBlock;
+  readonly pillars: ReadonlyArray<ValuePillar>;
+  readonly pillarsIntro: SectionIntro;
+  readonly marqueeEyebrow: string;
+  readonly positioning: PositioningBlock;
+  readonly metricsIntro: SectionIntro;
+}
+
+const METHOD_NAMES = [
+  "getHero",
+  "getManifesto",
+  "getValuePillars",
+  "getPillarsIntro",
+  "getMarqueeEyebrow",
+  "getPositioning",
+  "getMetricsIntro",
+] as const;
+
+type MethodName = (typeof METHOD_NAMES)[number];
+
+const FIXTURE_KEY_BY_METHOD: Record<MethodName, keyof FakeMarketingContentFixtures> = {
+  getHero: "hero",
+  getManifesto: "manifesto",
+  getValuePillars: "pillars",
+  getPillarsIntro: "pillarsIntro",
+  getMarqueeEyebrow: "marqueeEyebrow",
+  getPositioning: "positioning",
+  getMetricsIntro: "metricsIntro",
+};
+
 export class FakeMarketingContentRepository implements MarketingContentRepository {
-  heroCalls = 0;
-  manifestoCalls = 0;
-  pillarsCalls = 0;
+  callCounts: Record<MethodName, number> = Object.fromEntries(
+    METHOD_NAMES.map((name) => [name, 0]),
+  ) as Record<MethodName, number>;
   error: Error | undefined;
 
-  constructor(
-    private readonly hero: HeroContent,
-    private readonly manifesto: ManifestoBlock,
-    private readonly pillars: ReadonlyArray<ValuePillar>,
-  ) {}
+  constructor(private readonly fixtures: FakeMarketingContentFixtures) {}
 
-  async getHero(): Promise<HeroContent> {
-    this.heroCalls += 1;
+  private async resolve<T>(method: MethodName): Promise<T> {
+    this.callCounts[method] += 1;
     if (this.error) {
       throw this.error;
     }
-    return this.hero;
+    return this.fixtures[FIXTURE_KEY_BY_METHOD[method]] as T;
   }
 
-  async getManifesto(): Promise<ManifestoBlock> {
-    this.manifestoCalls += 1;
-    if (this.error) {
-      throw this.error;
-    }
-    return this.manifesto;
+  getHero(): Promise<HeroContent> {
+    return this.resolve("getHero");
   }
 
-  async getValuePillars(): Promise<ReadonlyArray<ValuePillar>> {
-    this.pillarsCalls += 1;
-    if (this.error) {
-      throw this.error;
-    }
-    return this.pillars;
+  getManifesto(): Promise<ManifestoBlock> {
+    return this.resolve("getManifesto");
+  }
+
+  getValuePillars(): Promise<ReadonlyArray<ValuePillar>> {
+    return this.resolve("getValuePillars");
+  }
+
+  getPillarsIntro(): Promise<SectionIntro> {
+    return this.resolve("getPillarsIntro");
+  }
+
+  getMarqueeEyebrow(): Promise<string> {
+    return this.resolve("getMarqueeEyebrow");
+  }
+
+  getPositioning(): Promise<PositioningBlock> {
+    return this.resolve("getPositioning");
+  }
+
+  getMetricsIntro(): Promise<SectionIntro> {
+    return this.resolve("getMetricsIntro");
   }
 }
