@@ -23,6 +23,7 @@ export function FinalCta({ closingCta }: FinalCtaProps) {
         <RevealHeading
           as="h2"
           className="text-display-xl mx-auto max-w-[15ch] text-center font-semibold text-balance text-canvas"
+          accent={["creative requirement?"]}
         >
           {closingCta.heading}
         </RevealHeading>

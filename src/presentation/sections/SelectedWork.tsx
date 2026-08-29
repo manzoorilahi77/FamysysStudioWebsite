@@ -11,16 +11,29 @@ interface SelectedWorkProps {
   readonly caseStudies: ReadonlyArray<CaseStudyView>;
 }
 
+// Two tiles a row at desktop with the ratios cycling, so no two rows are the same
+// height. A portfolio grid should not march.
+const ASPECT_RATIOS = ["4 / 3", "3 / 4", "1 / 1", "4 / 3", "3 / 4", "4 / 3", "1 / 1", "3 / 4"];
+
 export function SelectedWork({ intro, caseStudies }: SelectedWorkProps) {
   return (
-    <Section ariaLabel={intro.heading}>
+    <Section ariaLabel={intro.heading} className="work-section">
       <Container>
         <SectionHeader heading={intro.heading} body={intro.body} />
-        {/* Bento stays here: these tiles carry media and genuinely differ. */}
-        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {/* The first tile runs out to the viewport edge — see .work-bleed. */}
+        <div className="mt-14 grid items-start gap-8 md:grid-cols-2">
           {caseStudies.map((caseStudy, index) => (
-            <Reveal key={caseStudy.slug} index={index % 8} staggerStepMs={60}>
-              <CaseStudyCard caseStudy={caseStudy} />
+            <Reveal
+              key={caseStudy.slug}
+              index={index % 2}
+              staggerStepMs={60}
+              className={index === 0 ? "work-bleed" : ""}
+            >
+              <CaseStudyCard
+                caseStudy={caseStudy}
+                aspectRatio={ASPECT_RATIOS[index] ?? "4 / 3"}
+                isPriority={index === 0}
+              />
             </Reveal>
           ))}
         </div>

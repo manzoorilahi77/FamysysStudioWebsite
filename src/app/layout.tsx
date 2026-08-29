@@ -1,10 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Jost } from "next/font/google";
+import { Instrument_Serif, Jost } from "next/font/google";
 import "./globals.css";
 
 const jost = Jost({
   subsets: ["latin"],
   variable: "--font-jost",
+  display: "swap",
+});
+
+// DEVIATION (brand deviation 5, PENDING MANAGER APPROVAL): the brand rules specify
+// Jost with a fallback stack and no second typeface. Instrument Serif Italic is added
+// as a display accent only — see docs spec §2.8.3 and README.md. It is scoped to the
+// `Accent` component and must never reach body copy, card titles, eyebrows, nav or
+// buttons; a test fails the build if it appears more than five times on the page.
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: "italic",
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -25,7 +38,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={jost.variable}>
+    <html lang="en" className={`${jost.variable} ${instrumentSerif.variable}`}>
       <body>
         <a
           href="#main-content"

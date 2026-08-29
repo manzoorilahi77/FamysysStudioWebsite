@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { NavigationMenuView } from "../lib/viewModels";
 import { Button } from "../components/Button";
+import { Wordmark } from "../components/Wordmark";
 import { MegaMenu } from "./MegaMenu";
 import { MobileDrawer } from "./MobileDrawer";
 
@@ -51,8 +52,8 @@ export function Header({ navigation }: HeaderProps) {
           are long enough that the inline nav needs the full container width and
           only fits from xl up — below that it collapses to the drawer. */}
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
-        <Link href="/" className={`text-display-s font-medium ${textClass}`} style={{ transitionDuration: "240ms" }}>
-          Famysys Studio
+        <Link href="/" className="shrink-0" aria-label="Famysys Studio, home">
+          <Wordmark alt="" dark={isDark} crossfade priority className="h-7" />
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-6 xl:flex">

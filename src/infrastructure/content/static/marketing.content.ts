@@ -17,17 +17,28 @@ import type { WaysToWorkBlock } from "../../../domain/marketing/entities/Engagem
 import type { WhyFamysysBlock } from "../../../domain/marketing/entities/WhyFamysysBlock";
 import type { WhatWeDoIntro } from "../../../domain/marketing/repositories/MarketingContentRepository";
 
-// Mixed aspect ratios so the hero mosaic's staggered columns don't read as one
-// repeated tile size. Eight slots, ready for real stills one-for-one.
-const MOSAIC_ASPECT_RATIOS: ReadonlyArray<AspectRatio> = [
-  "3:4",
-  "1:1",
-  "4:3",
-  "1:1",
-  "3:4",
-  "4:3",
-  "1:1",
-  "3:4",
+// Mixed aspect ratios so the hero mosaic's staggered columns don't read as one repeated
+// tile size. Eight slots, ready for real Famysys Studio stills one-for-one.
+//
+// TODO(client): every file below is stock photography from Unsplash, standing in until
+// the studio's own production stills exist. Source URLs are listed in
+// docs/content-todo.md. The alt text describes what each stock frame actually shows, so
+// it has to be rewritten alongside the images.
+interface MosaicTile {
+  readonly file: string;
+  readonly alt: string;
+  readonly aspectRatio: AspectRatio;
+}
+
+const MOSAIC_TILES: ReadonlyArray<MosaicTile> = [
+  { file: "mosaic-01", alt: "A clapperboard held up at the start of a take.", aspectRatio: "3:4" },
+  { file: "mosaic-02", alt: "A video edit timeline filling a monitor.", aspectRatio: "1:1" },
+  { file: "mosaic-03", alt: "A camera body and two lenses laid out on a dark surface.", aspectRatio: "4:3" },
+  { file: "mosaic-04", alt: "Footage open in an editing application on a desktop display.", aspectRatio: "1:1" },
+  { file: "mosaic-05", alt: "A camera rig filming a performer under coloured light.", aspectRatio: "3:4" },
+  { file: "mosaic-06", alt: "A designer's desk with creative-suite app icons on a tablet.", aspectRatio: "4:3" },
+  { file: "mosaic-07", alt: "A mirrorless camera beside a laptop showing a photo library.", aspectRatio: "1:1" },
+  { file: "mosaic-08", alt: "A compact camera lit in blue and magenta.", aspectRatio: "3:4" },
 ];
 
 export const heroContent: HeroContent = {
@@ -36,12 +47,12 @@ export const heroContent: HeroContent = {
   primaryCta: createCta("Start a Conversation", "/contact"),
   secondaryCta: createCta("Explore Our Services", "/creative-services"),
   supportingLine: "Project-based when you need it. Ongoing when you need more.",
-  mosaicTiles: MOSAIC_ASPECT_RATIOS.map((aspectRatio, index) =>
+  mosaicTiles: MOSAIC_TILES.map((tile) =>
     MediaRef.create({
       kind: "image",
-      src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
-      alt: `Placeholder creative still ${index + 1}`, // TODO(client): replace with real production stills
-      aspectRatio,
+      src: `/media/${tile.file}.jpg`,
+      alt: tile.alt,
+      aspectRatio: tile.aspectRatio,
     }),
   ),
 };

@@ -194,6 +194,14 @@ menu, mobile drawer) that hang off the dark header.
    derivation of the brand accent, not a new color, and it exists only because no opacity ramp of
    `#1C50FF` can be made legible on `#0B2C4D`. Removing it would mean dropping accent from every
    dark surface in favour of cream.
+5. **A second typeface — Instrument Serif Italic — is used as a display accent. PENDING MANAGER
+   APPROVAL.** The brand rules specify Jost with a fallback stack and nothing else. The serif
+   appears in exactly four places, all display-size: the last three words of the hero headline,
+   one word in The Differentiator's heading, two words in the thesis line, and two in the final CTA
+   heading. It is reachable only through `RevealHeading`'s `accent` prop and is banned from body
+   copy, card titles, eyebrows, nav and buttons — a check in the verification pass fails if more
+   than five accent phrases appear or if one lands anywhere it shouldn't. Set 5% up on the
+   surrounding Jost, because serif italic reads optically smaller at the same px.
 
 The first two are called out again, with full context, in design spec §2.8.3.
 
@@ -205,12 +213,22 @@ The first two are called out again, with full context, in design spec §2.8.3.
   Differentiator and the final CTA heading — both display-size statements standing alone. That
   scarcity is the point: centring reads as a decision only when it is not the default.
   `SectionHeader` is the shared component; a section that does not use it is a bug.
-- **Bento only where tiles genuinely differ.** Selected Work (media tiles) and Ways to Work
-  (three tiers plus a wider custom card) keep uneven spans because the hierarchy is real.
-  Everything else is an even grid with `auto-rows-fr`: What We Do is 3 × 2, The Differentiator
-  2 × 2, and How We Work and Why Famysys both resolve their five tiles as **3 + 2** over six
-  columns — three `col-span-2` tiles, then two `col-span-3`. Both rows fill exactly, so no
-  section leaves a hole.
+- **No two sections repeat the same block shape.** Nine sections all reading heading-then-even-grid
+  is what made the page feel uniform even where the content differed, so each section now takes the
+  shape its content actually has:
+
+  | Section | Block below the header |
+  |---|---|
+  | What We Do | Even 3 × 2 grid of equal cards |
+  | The Differentiator | Asymmetric split — header in 5 of 12 columns, elements stacked in 6, offset one |
+  | How We Work | Horizontal sequence: five numerals on one hairline, copy beneath; the rule runs down the left below `lg` |
+  | Ways to Work | 3 + 1 bento — three tiers, then a wider custom card |
+  | Selected Work | Two media tiles a row with cycling aspect ratios; the first breaks the container to the viewport edge |
+  | Why Famysys | Five alternating full-width rows on hairlines, label and description swapping sides |
+  | FAQ | Accordion at a 72ch measure |
+
+  Uneven spans are reserved for tiles that genuinely differ in weight or carry media. Even grids
+  use `auto-rows-fr` and fill their last row exactly, so none of them leaves a hole.
 - **Card fill is `ink-06`, not `ink-08`.** The limiting factor is not body copy — graphite-70
   stays above 4.5:1 as far as ink-12 — but the accent `text-small` on the engagement-tier cards,
   which reads 4.570:1 on ink-06 and fails at ink-07 (4.485:1). Border is `ink-12`.
@@ -225,8 +243,8 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 
 | Effect | Where | Mechanism |
 |---|---|---|
-| Continuous mosaic drift | Hero | Four CSS-animated columns, 11–19s, alternating direction — never at rest |
-| Line-by-line heading reveal | Every display heading | `RevealHeading` measures which rendered line each word landed on and gives that line an 80ms-stepped delay; words clip up from their own baseline |
+| Continuous mosaic drift | Hero | Three CSS-animated columns, 11–19s, alternating direction — never at rest. Each loop copy repeats until it is taller than the column, or a gap scrolls into view at the bottom |
+| Line-by-line heading reveal | Every display heading | `RevealHeading` measures which rendered line each word landed on and gives that line an 80ms-stepped delay; words clip up from their own baseline. Tops are clustered with a tolerance rather than compared exactly, because an accented word is 5% larger and so sits in a taller box on the same baseline |
 | Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
 | Step numerals | How We Work | `ClipNumber` — each numeral clips up on its own observer as its step enters |
 | Card hover | All cards | Accent border, 6px lift, no shadow; media tiles add a 1.05 scale |

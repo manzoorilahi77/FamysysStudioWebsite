@@ -7,6 +7,9 @@ interface SectionHeaderProps {
   readonly body?: string | undefined;
   readonly leadIn?: string | undefined;
   readonly dark?: boolean;
+  readonly className?: string;
+  /** Display-accent phrases, forwarded to RevealHeading. Used by one section only. */
+  readonly accent?: ReadonlyArray<string> | undefined;
 }
 
 /**
@@ -17,11 +20,20 @@ interface SectionHeaderProps {
  * both are display-size statements standing alone, which is what makes the centring
  * read as deliberate rather than as a default.
  */
-export function SectionHeader({ heading, eyebrow, body, leadIn, dark = false }: SectionHeaderProps) {
+export function SectionHeader({
+  heading,
+  eyebrow,
+  body,
+  leadIn,
+  dark = false,
+  className = "max-w-[62ch]",
+  accent,
+}: SectionHeaderProps) {
   return (
-    <div className="max-w-[62ch]">
+    <div className={className}>
       {eyebrow ? <Eyebrow dark={dark}>{eyebrow}</Eyebrow> : null}
       <RevealHeading
+        accent={accent}
         className={`text-display-l font-medium ${eyebrow ? "mt-4" : ""} ${dark ? "text-canvas" : "text-ink"}`}
       >
         {heading}

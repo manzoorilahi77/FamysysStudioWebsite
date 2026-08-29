@@ -53,6 +53,19 @@ and not re-guessed. Values are exact to 3 decimals; treat ±0.01 as rounding noi
 >   3:1 non-text floor. The lightened `accentOnDark` variant §2.1c introduced is therefore still
 >   required — re-derived from the new accent as `#7995F5` (5.015:1) — and its scope widened from
 >   text to every accent role on a dark surface, focus rings and hover borders included.
+>
+> **Deviation 5 — a second typeface. PENDING MANAGER APPROVAL.** The brand rules specify Jost with
+> a fallback stack and no second face. **Instrument Serif Italic** (Google Fonts, free for
+> commercial use) is loaded via `next/font` as `--font-instrument-serif` and exposed to the token
+> layer as `type.displayAccent` / `--font-display-accent`. It is a display accent only, scoped to
+> `RevealHeading`'s `accent` prop, and appears in exactly four places on the page — the close of the
+> hero headline, one word in The Differentiator's heading, two in the thesis line, two in the final
+> CTA heading. It is set 5% up on the surrounding Jost (`type.displayAccentScale`), because serif
+> italic reads optically smaller at the same px; line-height stays the heading's. It must never
+> reach body copy, card titles, eyebrows, nav or buttons, and the verification pass fails the build
+> if more than five accent phrases appear or if one lands in a banned context. **If the manager
+> declines this, delete the `Instrument_Serif` import in `src/app/layout.tsx`, the
+> `.text-display-accent` rule, and every `accent={[...]}` prop — nothing else depends on it.**
 
 ### 2.1 Measured — colors (HISTORICAL — see 2.0)
 

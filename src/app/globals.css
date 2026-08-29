@@ -3,6 +3,7 @@
 /* Design tokens — mirrors src/shared/design/tokens.ts. Keep both in sync. */
 @theme {
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-display-accent: var(--font-instrument-serif), ui-serif, Georgia, serif;
 
   --color-canvas: #f4f1e8;
   --color-ink: #0b2c4d;
@@ -165,17 +166,24 @@ body {
    rises together. The padding/negative-margin pair stops the clip from cropping
    descenders. Under reduced motion the words hold still and the heading simply
    fades — see RevealHeading, which drops the delays too. */
+/* The clip is `clip-path`, not `overflow: hidden`, and the box aligns on the baseline
+   rather than the bottom. An inline-block with clipped overflow takes its margin edge
+   as its baseline, which is fine while every word shares one font — and wrong the
+   moment a word is set in the accent serif at a different size, because the two faces
+   would sit on different baselines. clip-path clips without touching baseline
+   behaviour. The bottom padding gives descenders room inside the clip; the top and
+   side bleed keeps ascenders and the italic's overhang from being shaved. */
 .reveal-word {
   display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
+  vertical-align: baseline;
+  padding-bottom: 0.22em;
+  margin-bottom: -0.22em;
+  clip-path: inset(-0.5em -0.2em 0 -0.15em);
 }
 
 .reveal-word-inner {
   display: inline-block;
-  transform: translateY(110%);
+  transform: translateY(150%);
   transition-property: transform;
   transition-duration: 620ms;
   transition-timing-function: var(--ease-base);
@@ -190,6 +198,17 @@ body {
   .reveal-word[data-visible="true"] .reveal-word-inner {
     transform: none;
   }
+}
+
+/* Display accent face — Instrument Serif Italic, reachable only through the `Accent`
+   presentation component. Sized in `em` so it tracks whatever display step it sits in.
+   The 5% bump is optical: serif italic reads smaller than Jost at the same px. Jost's
+   display tracking is tuned for Jost, so the accent resets most of it. */
+.text-display-accent {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  font-size: 1.05em;
+  letter-spacing: -0.01em;
 }
 
 /* Dark sections settle their background as they enter: they start one step off
@@ -415,6 +434,88 @@ body {
 .hero-mosaic-edge-mask {
   mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+}
+
+/* How We Work — a sequence, not tiles. Each step contributes a numeral and a hairline
+   that fills the rest of its track, so the segments join into one continuous rule
+   through the numerals: horizontal across the row at lg+, vertical down the left below
+   it. The rule is a sibling of the numeral rather than a line behind it, which means no
+   background chip is needed to mask it — important here, since the section's own
+   background animates as it enters and a chip would visibly lag it. */
+.process-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.25rem;
+}
+
+.process-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.process-rule {
+  width: 1px;
+  flex: 1 1 auto;
+  min-height: 1.5rem;
+  background-color: var(--color-canvas-16);
+}
+
+.process-content {
+  padding-bottom: 2.5rem;
+}
+
+.process-step:last-child .process-rule {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .process-step {
+    display: block;
+  }
+  .process-rail {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  .process-rule {
+    width: auto;
+    height: 1px;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+  .process-content {
+    padding-top: 1.5rem;
+    padding-bottom: 0;
+  }
+}
+
+/* Why Famysys — alternating full-width rows separated by hairlines, denser and more
+   editorial than five equal cards. The label and the description swap columns row by
+   row; both stay left-aligned inside their own column, so the page's alignment rule
+   survives the alternation. */
+.reason-row {
+  border-top: 1px solid var(--color-ink-8);
+}
+
+.reason-row:last-child {
+  border-bottom: 1px solid var(--color-ink-8);
+}
+
+/* Selected Work — the first tile breaks the container and runs to the viewport edge, so
+   the portfolio grid reads as less contained than the content grids above it. The
+   breakout is a negative margin sized off the container gutter; `overflow-x: clip` on
+   the section absorbs any scrollbar-width discrepancy in the 100vw term without
+   creating a scroll container (unlike `hidden`, `clip` leaves the vertical axis
+   genuinely visible, so card hover lifts are not cropped). */
+.work-section {
+  overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+  .work-bleed {
+    margin-left: calc(-1 * (var(--spacing-gutter) + max(0px, (100vw - 80rem) / 2)));
+  }
 }
 
 /* §4.11 Comparison — horizontal swipe below lg, scroll-snap + dot indicator. */

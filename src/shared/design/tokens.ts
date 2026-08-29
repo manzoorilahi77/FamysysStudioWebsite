@@ -56,7 +56,14 @@ export const colorDerived = {
 } as const;
 
 export const type = {
-  sans: "var(--font-jost)", // measured — famysys.com --font-jost, loaded via next/font/google
+  sans: "var(--font-jost)", // brand — famysys.com --font-jost, loaded via next/font/google
+  // DEVIATION (brand deviation 5, PENDING MANAGER APPROVAL): the brand rules specify Jost
+  // and a fallback stack, no second typeface. Instrument Serif Italic is a display accent
+  // only, reachable exclusively through the `Accent` presentation component.
+  displayAccent: "var(--font-display-accent)",
+  // Serif italic reads optically smaller than Jost at the same px, so accented words are
+  // set 5% up. Measured against the surrounding Jost cap-height, not guessed.
+  displayAccentScale: 1.05,
 } as const;
 
 // DEVIATION (fidelity-loop pass 1, gap #2): famysys.com's own display sizes read quiet next to

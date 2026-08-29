@@ -33,7 +33,11 @@ export function Hero({ hero }: HeroProps) {
           {/* The h1 uses the same line-by-line reveal as every other display heading
               on the page; it just fires on mount rather than on scroll, because it is
               already in view. */}
-          <RevealHeading as="h1" className="text-display-xl font-semibold text-canvas">
+          <RevealHeading
+            as="h1"
+            className="text-display-xl font-semibold text-canvas"
+            accent={["the agency overhead."]}
+          >
             {hero.heading}
           </RevealHeading>
           <p

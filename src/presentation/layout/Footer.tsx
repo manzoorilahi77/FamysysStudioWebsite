@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { FooterContentView, MegaMenuColumnView } from "../lib/viewModels";
+import { Wordmark } from "../components/Wordmark";
 
 interface FooterProps {
   readonly megaMenu: ReadonlyArray<MegaMenuColumnView>;
@@ -52,7 +53,7 @@ export function Footer({ megaMenu, footer }: FooterProps) {
       <div className="mx-auto w-full" style={{ maxWidth: "80rem", paddingInline: "var(--spacing-gutter)" }}>
         <div className="grid gap-8 py-16 md:grid-cols-5">
           <div className="md:col-span-1">
-            <p className="text-display-s font-medium text-canvas">Famysys Studio</p>
+            <Wordmark alt="Famysys Studio" dark className="h-8" />
             <p className="text-small mt-3 text-canvas-80">{footer.tagline}</p>
             <a href={`mailto:${footer.contactEmail}`} className="text-small mt-3 block text-canvas-80">
               {footer.contactEmail}

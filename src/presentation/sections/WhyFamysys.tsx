@@ -8,30 +8,46 @@ interface WhyFamysysProps {
   readonly whyFamysys: WhyFamysysBlock;
 }
 
-// Same 3 + 2 resolution as How We Work, so the two odd-numbered sections settle the
-// same way instead of each inventing one: three two-column tiles, then two
-// three-column tiles. Both rows fill their six columns exactly.
-const NARROW_REASON_COUNT = 3;
-
+/**
+ * Alternating full-width rows on hairlines rather than five equal cards: label and
+ * description swap columns row by row, which reads denser and more editorial and stops
+ * this section from repeating the shape of What We Do. Both halves stay left-aligned
+ * inside their own column, so the alternation never becomes ragged centring.
+ */
 export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
   return (
     <Section ariaLabel={whyFamysys.heading}>
       <Container>
         <SectionHeader heading={whyFamysys.heading} body={whyFamysys.body} />
-        <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-6">
-          {whyFamysys.reasons.map((reason, index) => (
-            <Reveal
-              key={reason.title}
-              index={index}
-              staggerStepMs={60}
-              className={index < NARROW_REASON_COUNT ? "lg:col-span-2" : "lg:col-span-3"}
-            >
-              <div className="card-surface h-full p-8">
-                <p className="text-display-s font-medium text-ink">{reason.title}</p>
-                <p className="text-body mt-3 text-ink-70">{reason.description}</p>
-              </div>
-            </Reveal>
-          ))}
+        <div className="mt-14">
+          {whyFamysys.reasons.map((reason, index) => {
+            const isFlipped = index % 2 === 1;
+            return (
+              <Reveal
+                key={reason.title}
+                index={index}
+                staggerStepMs={60}
+                className="reason-row py-8"
+              >
+                <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
+                  <p
+                    className={`text-display-s font-medium text-ink lg:col-span-4 ${
+                      isFlipped ? "lg:order-2 lg:col-start-9" : ""
+                    }`}
+                  >
+                    {reason.title}
+                  </p>
+                  <p
+                    className={`text-body text-ink-70 lg:col-span-6 ${
+                      isFlipped ? "lg:order-1 lg:col-start-1" : "lg:col-start-7"
+                    }`}
+                  >
+                    {reason.description}
+                  </p>
+                </div>
+              </Reveal>
+            );
+          })}
         </div>
       </Container>
     </Section>

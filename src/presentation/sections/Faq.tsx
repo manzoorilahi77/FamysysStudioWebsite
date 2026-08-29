@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { FaqBlockView, FaqItemView } from "../lib/viewModels";
 import { Container } from "../components/Container";
 import { Section } from "../components/Section";
+import { SectionHeader } from "../components/SectionHeader";
 
 interface FaqProps {
   readonly faq: FaqBlockView;
@@ -85,10 +86,12 @@ export function Faq({ faq }: FaqProps) {
   return (
     <Section ariaLabel="Frequently asked questions">
       <Container>
-        {/* TODO(client): the brief supplies no heading for the FAQ section — the
-            accessible name above is a placeholder until the client provides one.
-            See docs/content-todo.md. */}
-        <div className="max-w-[72ch]">
+        {/* TODO(client): the brief supplies seven Q&As but no heading or eyebrow for
+            the section. The placeholder below keeps the structure right — every other
+            section opens with a SectionHeader — and is deliberately conspicuous so it
+            cannot ship unnoticed. See docs/content-todo.md. */}
+        <SectionHeader eyebrow="Questions" heading="TODO(client)" />
+        <div className="mt-14 max-w-[72ch]">
           {faq.items.map((item, index) => (
             <FaqRow
               key={item.question}

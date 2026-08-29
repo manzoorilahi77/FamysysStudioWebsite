@@ -9,35 +9,35 @@ interface HowWeWorkProps {
   readonly process: ProcessBlock;
 }
 
-// Five steps of equal weight resolve as 3 + 2 with no hole: a six-column grid where
-// the first three steps take two columns each (2+2+2) and the last two take three
-// (3+3). Both rows fill exactly, and `auto-rows-fr` keeps the cards level.
-const NARROW_STEP_COUNT = 3;
-
+/**
+ * A process, laid out as one. Five steps run left to right along a single hairline with
+ * the numerals sitting on it and the copy beneath; below `lg` the same rule runs down
+ * the left instead. Cards would have said "five things"; the rule says "in this order".
+ */
 export function HowWeWork({ process }: HowWeWorkProps) {
   return (
     <Section dark ariaLabel={process.heading}>
       <Container>
         <SectionHeader dark heading={process.heading} />
-        <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-6">
+        <ol className="mt-14 grid list-none gap-0 lg:grid-cols-5 lg:gap-6">
           {process.steps.map((step, index) => (
-            <Reveal
-              key={step.title}
-              index={index}
-              staggerStepMs={60}
-              className={index < NARROW_STEP_COUNT ? "lg:col-span-2" : "lg:col-span-3"}
-            >
-              <div className="card-surface-dark h-full p-6">
-                <ClipNumber
-                  value={String(index + 1).padStart(2, "0")}
-                  className="text-display-m font-medium text-accent-on-dark"
-                />
-                <p className="text-display-s mt-3 font-medium text-canvas">{step.title}</p>
-                <p className="text-body mt-2 text-canvas-80">{step.description}</p>
-              </div>
-            </Reveal>
+            <li key={step.title}>
+              <Reveal index={index} staggerStepMs={60} className="process-step">
+                <div className="process-rail">
+                  <ClipNumber
+                    value={String(index + 1).padStart(2, "0")}
+                    className="text-display-l font-medium text-accent-on-dark"
+                  />
+                  <span className="process-rule" aria-hidden="true" />
+                </div>
+                <div className="process-content">
+                  <p className="text-display-s font-medium text-canvas">{step.title}</p>
+                  <p className="text-body mt-2 text-canvas-80">{step.description}</p>
+                </div>
+              </Reveal>
+            </li>
           ))}
-        </div>
+        </ol>
       </Container>
     </Section>
   );
