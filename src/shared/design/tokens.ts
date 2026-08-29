@@ -1,47 +1,57 @@
-// Every value here is measured off the live famysys.com compiled CSS bundle
-// (or a documented, contrast-checked derivation of one). See
-// docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md §2 for
-// the full sourcing and contrast-ratio rationale behind each token below.
+// The four base colours below are the client's official brand palette, issued by the
+// manager. They supersede the values previously measured off the live famysys.com CSS
+// bundle. Everything else in this block is derived from them: the opacity ramps are the
+// same alpha steps applied to the new bases, and each entry in `colorDerived` records the
+// contrast ratio that justifies it. See
+// docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md §2 for the full audit.
 // Mirror any change here into the matching CSS variable in src/app/globals.css.
 
 export const color = {
-  canvas: "#F7F5F2", // measured — famysys.com --color-canvas
-  ink: "#0F2A4A", // measured — headings only, never body copy (see 2.1a)
-  graphite: "#2C2E33", // measured — reserved for eyebrows/opacity variants, not body copy
-  accent: "#1E6FFF", // measured — never a solid fill (2.1b)
-  hairline: "#0F2A4A14", // measured — ink-08, light-surface border color
-  hairlineOnDark: "#F7F5F21A", // measured — canvas-10, dark-surface border color
+  canvas: "#F4F1E8", // brand — Warm White
+  ink: "#0B2C4D", // brand — Deep Enterprise Blue. Headings and dark surfaces, never body copy (2.1a)
+  graphite: "#24282C", // brand — Graphite Charcoal. Used through its opacity ramp, not flat (2.1a)
+  accent: "#1C50FF", // brand — Electric Blue. 5.107:1 on canvas, so now valid as text and as a fill (2.1b)
+  hairline: "#0B2C4D14", // ink-08, light-surface border color
+  hairlineOnDark: "#F4F1E81A", // canvas-10, dark-surface border color
 } as const;
 
-// Opacity ramps, measured.
+// Opacity ramps — the alpha steps are unchanged; only the base colour moved.
 export const inkOpacity = {
-  4: "#0F2A4A0A",
-  8: "#0F2A4A14",
-  12: "#0F2A4A1F",
-  20: "#0F2A4A33",
-  40: "#0F2A4A66",
-  60: "#0F2A4A99",
-  70: "#0F2A4AB3",
-  90: "#0F2A4AE6",
+  4: "#0B2C4D0A",
+  8: "#0B2C4D14",
+  12: "#0B2C4D1F",
+  20: "#0B2C4D33",
+  40: "#0B2C4D66",
+  60: "#0B2C4D99",
+  70: "#0B2C4DB3",
+  90: "#0B2C4DE6",
 } as const;
 
 export const canvasOpacity = {
-  4: "#F7F5F20A",
-  10: "#F7F5F21A",
-  16: "#F7F5F229",
-  40: "#F7F5F266",
-  60: "#F7F5F299",
-  80: "#F7F5F2CC",
+  4: "#F4F1E80A",
+  10: "#F4F1E81A",
+  16: "#F4F1E829",
+  40: "#F4F1E866",
+  60: "#F4F1E899",
+  80: "#F4F1E8CC",
 } as const;
 
 export const colorDerived = {
-  eyebrowOnLight: inkOpacity[70], // 5.343:1 on canvas — real `.label` color (2.1c)
-  eyebrowOnDark: color.canvas, // derived — confirmed by render, deliberately asymmetric (2.1c)
-  accentOnDark: "#5C96FF", // derived — accent lightened for text on ink, 5.007:1 (2.1c)
-  bodyOnLight: "#2C2E33B3", // graphite at 70% opacity, 4.991:1 on canvas — real running body/lead color (2.1a)
-  bodyOnDark: canvasOpacity[80], // 9.006:1 on ink — real running body/lead color on dark surfaces (2.1a)
-  primaryButtonHover: "#1A65F0", // locked decision (checkpoint 5 review) — bg-ink primary button's hover fill
-  primaryButtonHoverOnDark: "#EAE6E0", // derived — deepened cream, hover fill for the canvas-surface primary button on dark sections
+  eyebrowOnLight: color.accent, // 5.107:1 on canvas — the old accent failed at 4.043:1 and forced
+  // eyebrows onto ink-70; the brand accent clears the 4.5:1 text floor, so they are accent again (2.1c)
+  eyebrowOnDark: color.canvas, // 12.549:1 on ink — confirmed by render, deliberately asymmetric (2.1c)
+  // The brand accent is DARKER than the one it replaced, so it reads worse on ink, not better:
+  // 2.457:1, down from 3.291:1, which now fails even the 3:1 non-text floor. An opacity ramp
+  // cannot fix this — accent over ink only ever moves toward ink. So the lightened variant is
+  // still required, and is re-derived from the new accent (mixed 43% toward canvas) rather than
+  // carried over. Used for every accent role on a dark surface: text, borders, focus rings.
+  accentOnDark: "#7995F5", // derived — 5.015:1 on ink (2.1c)
+  bodyOnLight: "#24282CB3", // graphite at 70% opacity, 5.273:1 on canvas — running body/lead color (2.1a)
+  bodyOnDark: canvasOpacity[80], // 8.548:1 on ink — running body/lead color on dark surfaces (2.1a)
+  // The light primary button is accent-filled now that canvas text on accent clears 4.5:1
+  // (5.107:1). Its hover darkens the accent 14% toward ink and holds 5.823:1.
+  primaryButtonHover: "#1A4BE6", // derived — accent-filled primary button's hover fill
+  primaryButtonHoverOnDark: "#E4E3DD", // derived — deepened cream, hover fill for the canvas-surface primary button on dark sections
 } as const;
 
 export const type = {

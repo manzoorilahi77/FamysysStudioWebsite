@@ -121,49 +121,79 @@ comment.
 ## Design tokens
 
 `src/shared/design/tokens.ts` is the source of truth (mirrored into CSS custom properties in
-`src/app/globals.css` — the file's header comment is the reminder to keep both in sync). Every
-color is one of two kinds:
+`src/app/globals.css` — the file's header comment is the reminder to keep both in sync).
 
-| Kind | Meaning |
-|---|---|
-| **Measured** | Read directly off famysys.com's live, compiled CSS — not a guess, not "close enough." |
-| **Derived** | famysys.com has no real precedent for this exact use (e.g. a dark-surface eyebrow, a hover fill), so the value was computed and confirmed by render against the project's own contrast rules (§2.2 of the design spec). |
+The four base colors are the client's **official brand palette**. They replaced the values
+originally measured off famysys.com's compiled CSS, so "measured" no longer applies to any color:
+every color is either a brand base, an opacity step off a brand base, or a value derived from one
+and justified by a contrast ratio.
 
 | Token | Value | Kind | Note |
 |---|---|---|---|
-| `color.canvas` | `#F7F5F2` | Measured | Page background, light-surface text on dark |
-| `color.ink` | `#0F2A4A` | Measured | Headings only, dark-surface background — never body copy |
-| `color.graphite` | `#2C2E33` | Measured | Reserved for the opacity ramp behind body copy, not used flat |
-| `color.accent` | `#1E6FFF` | Measured | Never a solid fill — underlines, borders, focus rings, active states |
-| `colorDerived.eyebrowOnLight` (`ink-70`) | `#0F2A4AB3` | Measured | Real `.label` color on famysys.com, 5.343:1 on canvas |
-| `colorDerived.eyebrowOnDark` | `#F7F5F2` (full canvas) | Derived | No real dark-eyebrow precedent; confirmed by render (§2.1c) |
-| `colorDerived.accentOnDark` | `#5C96FF` | Derived | Accent lightened for 5.007:1 text contrast on ink |
-| `colorDerived.bodyOnLight` (`graphite-70`) | `#2C2E33B3` | Measured | Real running body/lead color, 4.991:1 on canvas |
-| `colorDerived.bodyOnDark` (`canvas-80`) | `#F7F5F2CC` | Measured | Real running body/lead color on dark surfaces, 9.006:1 |
-| `colorDerived.primaryButtonHover` | `#1A65F0` | Locked decision | Chosen at checkpoint 5 review, no live-site precedent |
-| `colorDerived.primaryButtonHoverOnDark` | `#EAE6E0` | Derived | Deepened cream; hover states aren't visible in a static capture |
-| `type.sans` | Jost | Measured | famysys.com's `--font-jost`, loaded via `next/font/google` |
+| `color.ink` | `#0B2C4D` | Brand | Deep Enterprise Blue. Headings and dark surfaces — never body copy |
+| `color.graphite` | `#24282C` | Brand | Graphite Charcoal. Used through its opacity ramp, not flat |
+| `color.canvas` | `#F4F1E8` | Brand | Warm White. Page background, and light-surface text on dark |
+| `color.accent` | `#1C50FF` | Brand | Electric Blue |
+| `colorDerived.eyebrowOnLight` | `#1C50FF` (accent) | Derived | 5.107:1 on canvas |
+| `colorDerived.eyebrowOnDark` | `#F4F1E8` (full canvas) | Derived | 12.549:1 on ink; asymmetric on purpose (§2.1c) |
+| `colorDerived.accentOnDark` | `#7995F5` | Derived | Accent mixed 43% toward canvas — 5.015:1 on ink |
+| `colorDerived.bodyOnLight` (`graphite-70`) | `#24282CB3` | Derived | Running body/lead color, 5.273:1 on canvas |
+| `colorDerived.bodyOnDark` (`canvas-80`) | `#F4F1E8CC` | Derived | Running body/lead color on dark, 8.548:1 on ink |
+| `colorDerived.primaryButtonHover` | `#1A4BE6` | Derived | Accent 14% toward ink; canvas text holds 5.823:1 |
+| `colorDerived.primaryButtonHoverOnDark` | `#E4E3DD` | Derived | Deepened cream, matching the previous palette's hover delta |
+| `type.sans` | Jost | Brand | Unchanged by the palette reissue; loaded via `next/font/google` |
 | `radius` | `0.25rem` | Measured | famysys.com's `--radius-sm`, applied site-wide |
 
-See the design spec §2 for the full token list (type scale, spacing, motion durations) and the
-contrast-ratio table backing every color decision above.
+The `ink-*` and `canvas-*` ramps keep the same alpha steps as before — only the base color moved.
 
-## Documented deviations from famysys.com
+### Contrast audit (brand palette)
 
-The build intentionally departs from the live site in three places:
+Measured with the WCAG 2.x relative-luminance formula; translucent values are composited over
+their real backdrop first. Regenerate with the script in the design spec if a token changes.
 
-1. **`.label` (eyebrow) color is asymmetric between surfaces.** Light surfaces use the real,
-   measured `ink-70`. Dark surfaces use full `canvas` rather than the closest real precedent
-   (`canvas-60`), because `canvas-60` measures below this project's own dark-surface body-copy
-   color and would make eyebrows recede under the text they're supposed to introduce — confirmed
-   by render, not just computed. See design spec §2.1c for the full reasoning.
-2. **`meta theme-color` is `#0F2A4A` (ink), not `#F7F5F2` (canvas) like the live site.** The
+| Pair | Ratio | Floor | |
+|---|---|---|---|
+| accent on canvas | 5.107:1 | 4.5 | pass |
+| graphite on canvas | 13.142:1 | 4.5 | pass |
+| ink on canvas | 12.549:1 | 4.5 | pass |
+| canvas on ink | 12.549:1 | 4.5 | pass |
+| white on accent | 5.768:1 | 4.5 | pass |
+| canvas on accent | 5.107:1 | 4.5 | pass |
+| ink-70 on canvas | 5.212:1 | 4.5 | pass |
+| graphite-70 on canvas | 5.273:1 | 4.5 | pass |
+| canvas-80 on ink | 8.548:1 | 4.5 | pass |
+| accent border on ink-04 | 4.748:1 | 3 | pass |
+| `accentOnDark` on ink | 5.015:1 | 4.5 | pass |
+| **accent on ink** | **2.457:1** | 3 | **fail — never used; see below** |
+
+Two hairline values sit below 3:1 (`ink-8` on canvas at 1.152:1, `canvas-10` on ink at 1.325:1).
+That is unchanged from the previous palette and intended: these are decorative dividers and card
+edges, not the boundary of any control, so WCAG 1.4.11 does not apply to them. Every border that
+*does* carry meaning — hover state, focus ring, selected state — uses accent or `accentOnDark`.
+
+**The accent is never placed on ink.** It reads 2.457:1 there, below even the 3:1 non-text floor,
+and an opacity ramp cannot help — accent over ink only moves toward ink. Dark surfaces therefore
+use `accentOnDark` for every accent role: text, hover borders, and focus rings. The focus ring
+switches automatically through a `--color-focus-ring` custom property, set by the `.surface-dark`
+class that every ink surface carries; `.surface-light` puts it back for the light panels (mega
+menu, mobile drawer) that hang off the dark header.
+
+## Documented deviations
+
+1. **`.label` (eyebrow) color is asymmetric between surfaces.** Light surfaces use accent; dark
+   surfaces use full `canvas` rather than `accentOnDark`, which would also pass at 5.015:1. The
+   dark treatment is a locked, render-confirmed decision — see design spec §2.1c.
+2. **`meta theme-color` is `#0B2C4D` (ink), not `#F4F1E8` (canvas) like the live site.** The
    page opens on a dark hero that forms one continuous ink block with the header, so the mobile
    browser chrome color was changed to match rather than clash with it. Set via Next's `viewport`
    export in `src/app/layout.tsx`.
 3. **`display-xl` and `display-l` run roughly 30% larger than famysys.com's measured values**
    (mobile floors unchanged). famysys.com is a quieter site; the studio page wants the bigger
    display type. Recorded in `tokens.ts` and `globals.css` at the point of definition.
+4. **`accentOnDark` is a fifth hex, outside the strict four-color brand palette.** It is a
+   derivation of the brand accent, not a new color, and it exists only because no opacity ramp of
+   `#1C50FF` can be made legible on `#0B2C4D`. Removing it would mean dropping accent from every
+   dark surface in favour of cream.
 
 The first two are called out again, with full context, in design spec §2.8.3.
 

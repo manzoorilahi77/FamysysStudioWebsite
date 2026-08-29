@@ -32,10 +32,14 @@ export function Header({ navigation }: HeaderProps) {
   const [servicesLink, ...restLinks] = navigation.primaryLinks;
   const isDark = !isScrolled;
   const textClass = `transition-base ${isDark ? "text-canvas" : "text-ink"}`;
+  // While unscrolled the bar is transparent over the ink hero, so its focus rings need the
+  // dark-surface ring colour; once it fills with canvas they go back to the raw accent. The
+  // mega menu and drawer hang off this element and opt back out with .surface-light.
+  const surfaceClass = isDark ? "surface-dark" : "";
 
   return (
     <header
-      className="transition-base fixed inset-x-0 top-0 z-40 border-b"
+      className={`transition-base fixed inset-x-0 top-0 z-40 border-b ${surfaceClass}`}
       style={{
         backgroundColor: isScrolled ? "var(--color-canvas)" : "transparent",
         borderColor: isScrolled ? "var(--color-ink-8)" : "transparent",

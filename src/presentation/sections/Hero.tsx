@@ -24,7 +24,7 @@ export function Hero({ hero }: HeroProps) {
   return (
     <section
       aria-label="Introduction"
-      className="flex items-center bg-ink pt-24"
+      className="surface-dark flex items-center bg-ink pt-24"
       style={{ minHeight: "calc(100svh - 5rem)" }}
     >
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:items-stretch">

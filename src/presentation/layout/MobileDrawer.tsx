@@ -70,7 +70,7 @@ export function MobileDrawer({
       aria-modal="true"
       aria-labelledby={triggerId}
       tabIndex={-1}
-      className="transition-base fixed inset-0 z-50 bg-canvas"
+      className="surface-light transition-base fixed inset-0 z-50 bg-canvas"
       style={{
         opacity: isOpen ? 1 : 0,
         visibility: isOpen ? "visible" : "hidden",

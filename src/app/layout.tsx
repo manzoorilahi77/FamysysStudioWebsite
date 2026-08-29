@@ -14,10 +14,11 @@ export const metadata: Metadata = {
 };
 
 // Deviation from famysys.com: the live site's theme-color matches its canvas
-// background (#F7F5F2). This page opens on a dark hero, so mobile browser
-// chrome is set to match ink instead — see README.md.
+// background. This page opens on a dark hero, so mobile browser chrome is set to
+// match ink instead — see README.md. Kept as a literal because Next reads this at
+// build time from a static export, so it cannot import the token module.
 export const viewport: Viewport = {
-  themeColor: "#0F2A4A",
+  themeColor: "#0B2C4D",
 };
 
 export default function RootLayout({

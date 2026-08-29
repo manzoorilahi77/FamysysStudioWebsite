@@ -46,7 +46,7 @@ export function MegaMenu({ columns, isOpen, onClose, panelId, triggerId }: MegaM
           onClose();
         }
       }}
-      className="transition-base absolute inset-x-0 top-full border-b border-ink-8 bg-canvas shadow-none"
+      className="surface-light transition-base absolute inset-x-0 top-full border-b border-ink-8 bg-canvas shadow-none"
       style={{
         opacity: isOpen ? 1 : 0,
         transform: prefersReducedMotion || isOpen ? "translateY(0)" : "translateY(-8px)",

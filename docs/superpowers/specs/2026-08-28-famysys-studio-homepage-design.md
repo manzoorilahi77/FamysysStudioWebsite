@@ -22,7 +22,39 @@ All ratios in this section were computed programmatically (Node, standard WCAG r
 formula) against real measured hex/opacity values pulled from the bundle — not hand-calculated,
 and not re-guessed. Values are exact to 3 decimals; treat ±0.01 as rounding noise, not signal.
 
-### 2.1 Measured — colors
+### 2.0 SUPERSEDED — the client's official brand palette replaced the measured colors
+
+> **Read this before anything else in §2.** On 2026-08-30 the manager issued the official brand
+> palette. It supersedes every hex value recorded in §2 below.
+>
+> | Role | Brand value | Was (measured) |
+> |---|---|---|
+> | ink | `#0B2C4D` Deep Enterprise Blue | `#0F2A4A` |
+> | graphite | `#24282C` Graphite Charcoal | `#2C2E33` |
+> | canvas | `#F4F1E8` Warm White | `#F7F5F2` |
+> | accent | `#1C50FF` Electric Blue | `#1E6FFF` |
+>
+> Jost is unchanged. The `ink-*` and `canvas-*` opacity ramps keep the same alpha steps; only the
+> base color moved. **`src/shared/design/tokens.ts` is the live source of truth**, and the current
+> contrast audit lives in `README.md` under "Design tokens". The rest of §2 is kept as the record
+> of how the original palette was derived and why each rule exists — the *reasoning* still stands,
+> the *numbers* do not.
+>
+> Three findings from the re-audit against the brand palette, because they reverse decisions
+> §2.1b and §2.1c argue for:
+>
+> - **Accent now works as text on canvas** (5.107:1, up from 4.043:1). §2.1c moved eyebrows off
+>   accent because of that failure; they are accent again.
+> - **Accent now works as a solid fill** (canvas text on accent, 5.107:1; white on accent,
+>   5.768:1 — both were failing). §2.1b's "never a solid fill" rule is lifted for the light-surface
+>   primary button, which is accent-filled. It still holds on dark, where an accent fill separates
+>   from its ink ground by only 2.457:1.
+> - **Accent got *worse* on ink**, not better: 2.457:1, down from 3.291:1, now failing even the
+>   3:1 non-text floor. The lightened `accentOnDark` variant §2.1c introduced is therefore still
+>   required — re-derived from the new accent as `#7995F5` (5.015:1) — and its scope widened from
+>   text to every accent role on a dark surface, focus rings and hover borders included.
+
+### 2.1 Measured — colors (HISTORICAL — see 2.0)
 
 ```ts
 // src/shared/design/tokens.ts

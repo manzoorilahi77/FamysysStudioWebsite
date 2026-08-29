@@ -48,7 +48,7 @@ export function Footer({ megaMenu, footer }: FooterProps) {
   const [openColumn, setOpenColumn] = useState<string | null>(null);
 
   return (
-    <footer className="bg-ink">
+    <footer className="surface-dark bg-ink">
       <div className="mx-auto w-full" style={{ maxWidth: "80rem", paddingInline: "var(--spacing-gutter)" }}>
         <div className="grid gap-8 py-16 md:grid-cols-5">
           <div className="md:col-span-1">

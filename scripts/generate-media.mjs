@@ -22,15 +22,15 @@ const MEDIA_DIR = join(__dirname, "..", "public", "media");
 // ---------------------------------------------------------------------------
 
 const COLOR = {
-  canvas: "#F7F5F2",
-  ink: "#0F2A4A",
-  accent: "#1E6FFF",
-  accentOnDark: "#5C96FF",
-  ink40: "#0F2A4A66",
-  ink60: "#0F2A4A99",
-  ink70: "#0F2A4AB3",
-  canvas40: "#F7F5F266",
-  canvas60: "#F7F5F299",
+  canvas: "#F4F1E8",
+  ink: "#0B2C4D",
+  accent: "#1C50FF",
+  accentOnDark: "#7995F5",
+  ink40: "#0B2C4D66",
+  ink60: "#0B2C4D99",
+  ink70: "#0B2C4DB3",
+  canvas40: "#F4F1E866",
+  canvas60: "#F4F1E899",
 };
 
 // ---------------------------------------------------------------------------

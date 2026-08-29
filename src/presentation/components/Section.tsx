@@ -14,7 +14,7 @@ export function Section({ children, id, dark = false, ariaLabel, className = "" 
     <section
       id={id}
       aria-label={ariaLabel}
-      className={`${dark ? "bg-ink text-canvas" : "bg-canvas text-ink"} ${className}`}
+      className={`${dark ? "surface-dark bg-ink text-canvas" : "bg-canvas text-ink"} ${className}`}
       style={{ paddingBlock: spacing.section }}
     >
       {children}

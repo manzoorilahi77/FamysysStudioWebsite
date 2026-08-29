@@ -10,14 +10,18 @@ interface ButtonProps {
   readonly className?: string;
 }
 
+// The light primary button is accent-filled: canvas text on the brand accent is 5.107:1,
+// where the previous accent managed only 4.043:1 and forced an ink fill instead. On dark
+// sections it stays canvas-filled — an accent fill on ink separates from its ground by
+// only 2.457:1, so the button would barely read as a shape.
 const LIGHT_VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-ink text-canvas hover:bg-primary-button-hover",
+  primary: "bg-accent text-canvas hover:bg-primary-button-hover",
   ghost: "border border-ink-20 text-ink hover:border-accent",
 };
 
 const DARK_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-canvas text-ink hover:bg-primary-button-hover-on-dark",
-  ghost: "border border-canvas-40 text-canvas hover:border-accent",
+  ghost: "border border-canvas-40 text-canvas hover:border-accent-on-dark",
 };
 
 export function Button({ cta, variant = "primary", dark = false, className = "" }: ButtonProps) {

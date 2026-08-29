@@ -4,33 +4,33 @@
 @theme {
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
 
-  --color-canvas: #f7f5f2;
-  --color-ink: #0f2a4a;
-  --color-graphite: #2c2e33;
-  --color-accent: #1e6fff;
-  --color-accent-on-dark: #5c96ff;
-  --color-hairline: #0f2a4a14;
-  --color-hairline-on-dark: #f7f5f21a;
+  --color-canvas: #f4f1e8;
+  --color-ink: #0b2c4d;
+  --color-graphite: #24282c;
+  --color-accent: #1c50ff;
+  --color-accent-on-dark: #7995f5;
+  --color-hairline: #0b2c4d14;
+  --color-hairline-on-dark: #f4f1e81a;
 
-  --color-ink-4: #0f2a4a0a;
-  --color-ink-8: #0f2a4a14;
-  --color-ink-12: #0f2a4a1f;
-  --color-ink-20: #0f2a4a33;
-  --color-ink-40: #0f2a4a66;
-  --color-ink-60: #0f2a4a99;
-  --color-ink-70: #0f2a4ab3;
-  --color-ink-90: #0f2a4ae6;
+  --color-ink-4: #0b2c4d0a;
+  --color-ink-8: #0b2c4d14;
+  --color-ink-12: #0b2c4d1f;
+  --color-ink-20: #0b2c4d33;
+  --color-ink-40: #0b2c4d66;
+  --color-ink-60: #0b2c4d99;
+  --color-ink-70: #0b2c4db3;
+  --color-ink-90: #0b2c4de6;
 
-  --color-canvas-4: #f7f5f20a;
-  --color-canvas-10: #f7f5f21a;
-  --color-canvas-16: #f7f5f229;
-  --color-canvas-40: #f7f5f266;
-  --color-canvas-60: #f7f5f299;
-  --color-canvas-80: #f7f5f2cc;
+  --color-canvas-4: #f4f1e80a;
+  --color-canvas-10: #f4f1e81a;
+  --color-canvas-16: #f4f1e829;
+  --color-canvas-40: #f4f1e866;
+  --color-canvas-60: #f4f1e899;
+  --color-canvas-80: #f4f1e8cc;
 
-  --color-primary-button-hover: #1a65f0;
-  --color-primary-button-hover-on-dark: #eae6e0;
-  --color-accent-8: #1e6fff14;
+  --color-primary-button-hover: #1a4be6;
+  --color-primary-button-hover-on-dark: #e4e3dd;
+  --color-accent-8: #1c50ff14;
 
   --radius-sm: 0.25rem;
 
@@ -107,8 +107,27 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* The focus ring follows the surface it lands on. The brand accent reads 5.107:1 on
+   canvas but only 2.457:1 on ink — below the 3:1 non-text floor — so dark surfaces swap
+   in the lightened accent (5.015:1) through a scoped custom property rather than a
+   second rule. Every dark surface carries .surface-dark alongside its bg-ink. */
+:root {
+  --color-focus-ring: var(--color-accent);
+}
+
+.surface-dark {
+  --color-focus-ring: var(--color-accent-on-dark);
+}
+
+/* Resets the ring back to the raw accent for a light panel nested inside a dark
+   surface — the mega menu and mobile drawer both hang off the header, which is
+   .surface-dark while it sits transparent over the hero. */
+.surface-light {
+  --color-focus-ring: var(--color-accent);
+}
+
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -238,8 +257,10 @@ body {
   transition-timing-function: var(--ease-base);
 }
 
+/* Lightened accent, not raw accent: on ink the brand accent is 2.457:1, which is both
+   below the 3:1 non-text floor and, in practice, invisible as a hover signal. */
 .card-surface-dark:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-on-dark);
   transform: translateY(-6px);
 }
 
