@@ -7,6 +7,7 @@ import { Container } from "../components/Container";
 import { ModalPlayer } from "../components/ModalPlayer";
 import { Reveal } from "../components/Reveal";
 import { Section } from "../components/Section";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface StoryCardProps {
   readonly story: ShowreelClipView;
@@ -17,6 +18,7 @@ function StoryCard({ story, index }: StoryCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const labelId = `story-${index}-label`;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <Reveal index={index}>
@@ -35,6 +37,7 @@ function StoryCard({ story, index }: StoryCardProps) {
               fill
               style={{ objectFit: "cover" }}
               loading="lazy"
+              className={`story-media ${prefersReducedMotion ? "" : "story-media--scalable"}`}
             />
           ) : null}
           <span

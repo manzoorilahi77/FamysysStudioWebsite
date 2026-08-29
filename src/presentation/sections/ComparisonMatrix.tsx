@@ -16,6 +16,25 @@ interface ComparisonMatrixProps {
   readonly criteria: ReadonlyArray<ComparisonCriterionView>;
 }
 
+/** Filled accent check for the highlighted brand row, a neutral outline dot everywhere else —
+    the source copy is comparative prose, not a pass/fail claim about competitors, so only the
+    brand row (uniformly framed as advantageous by design) earns the "check" treatment. */
+function StatusIcon({ isBrand }: { readonly isBrand: boolean }) {
+  if (isBrand) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
+        <circle cx="9" cy="9" r="9" fill="var(--color-accent)" />
+        <path d="M5 9.2l2.4 2.4L13 6" stroke="var(--color-canvas)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
+      <circle cx="9" cy="9" r="8" fill="none" stroke="var(--color-ink-20)" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 function DesktopTable({
   columns,
   criteria,
@@ -31,39 +50,39 @@ function DesktopTable({
           <th scope="col" className="p-4 align-bottom text-small text-ink-70">
             &nbsp;
           </th>
-          {columns.map((column) => (
-            <th
-              key={column.name}
-              scope="col"
-              className="text-body p-4 align-bottom font-medium text-ink"
-              style={{
-                backgroundColor: column.isHighlighted ? "var(--color-ink-4)" : undefined,
-                borderTop: column.isHighlighted ? "2px solid var(--color-accent)" : undefined,
-              }}
-            >
-              {column.name}
+          {criteria.map((row) => (
+            <th key={row.label} scope="col" className="text-small w-40 p-4 align-bottom font-medium text-ink">
+              {row.label}
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {criteria.map((row) => (
-          <tr key={row.label} className="border-t border-ink-8">
-            <th scope="row" className="text-small p-4 align-top font-medium text-ink-70">
-              {row.label}
+        {columns.map((column, columnIndex) => (
+          <tr
+            key={column.name}
+            className="border-t border-ink-8"
+            style={{
+              backgroundColor: column.isHighlighted ? "var(--color-accent-8)" : undefined,
+              borderTop: column.isHighlighted ? "2px solid var(--color-accent)" : undefined,
+              borderBottom: column.isHighlighted ? "2px solid var(--color-accent)" : undefined,
+            }}
+          >
+            <th
+              scope="row"
+              className="text-body p-4 align-top font-medium"
+              style={{ color: column.isHighlighted ? "var(--color-accent)" : "var(--color-ink)" }}
+            >
+              {column.name}
             </th>
-            {row.valuesByColumn.map((value, columnIndex) => {
-              const column = columns[columnIndex];
-              return (
-                <td
-                  key={`${row.label}-${column?.name ?? columnIndex}`}
-                  className="text-small p-4 align-top text-ink-70"
-                  style={{ backgroundColor: column?.isHighlighted ? "var(--color-ink-4)" : undefined }}
-                >
-                  {value}
-                </td>
-              );
-            })}
+            {criteria.map((row) => (
+              <td key={`${column.name}-${row.label}`} className="p-4 align-top">
+                <div className="flex items-start gap-2">
+                  <StatusIcon isBrand={column.isHighlighted} />
+                  <span className="text-small text-ink-70">{row.valuesByColumn[columnIndex]}</span>
+                </div>
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -114,7 +133,10 @@ function MobileSwipe({
             <dl className="mt-4 space-y-4">
               {criteria.map((row, rowIndex) => (
                 <div key={row.label}>
-                  <dt className="label text-ink-70">{row.label}</dt>
+                  <dt className="flex items-center gap-2 label text-ink-70">
+                    <StatusIcon isBrand={column.isHighlighted} />
+                    {row.label}
+                  </dt>
                   <dd className="text-small mt-1 text-ink-70">{row.valuesByColumn[rowIndex]}</dd>
                 </div>
               ))}
@@ -163,8 +185,10 @@ export function ComparisonMatrix({ intro, columns, criteria }: ComparisonMatrixP
   return (
     <Section ariaLabel={intro.heading}>
       <Container>
-        <Eyebrow>{intro.eyebrow}</Eyebrow>
-        <h2 className="text-display-l mt-4 font-medium text-ink">{intro.heading}</h2>
+        <div className="mx-auto max-w-[42ch] text-center">
+          <Eyebrow>{intro.eyebrow}</Eyebrow>
+          <h2 className="text-display-l mt-4 font-medium text-ink">{intro.heading}</h2>
+        </div>
         <div className="mt-12" style={{ overflowX: isDesktop ? "auto" : undefined }}>
           {isDesktop ? (
             <DesktopTable columns={columns} criteria={criteria} />

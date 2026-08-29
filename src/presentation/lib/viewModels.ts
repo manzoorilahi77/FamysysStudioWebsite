@@ -63,6 +63,7 @@ export interface HeroContentView {
   readonly primaryCta: CtaView;
   readonly secondaryCta: CtaView;
   readonly media: MediaView;
+  readonly mosaicTiles: ReadonlyArray<MediaView>;
 }
 
 export interface ManifestoBlockView {
@@ -110,6 +111,7 @@ export interface TalentBlockView {
   readonly heading: string;
   readonly supportingParagraph: string;
   readonly tiles: ReadonlyArray<MediaView>;
+  readonly roles: ReadonlyArray<string>;
 }
 
 export interface WorkSectionView {
@@ -155,6 +157,7 @@ export function toHeroContentView(hero: HeroContent): HeroContentView {
     primaryCta: toCtaView(hero.primaryCta),
     secondaryCta: toCtaView(hero.secondaryCta),
     media: toMediaView(hero.media),
+    mosaicTiles: hero.mosaicTiles.map(toMediaView),
   };
 }
 
@@ -209,6 +212,7 @@ export function toTalentBlockView(talent: TalentBlock): TalentBlockView {
     heading: talent.heading,
     supportingParagraph: talent.supportingParagraph,
     tiles: talent.tiles.map(toMediaView),
+    roles: talent.roles,
   };
 }
 

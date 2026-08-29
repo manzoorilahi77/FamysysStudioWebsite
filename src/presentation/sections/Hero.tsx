@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { HeroContentView } from "../lib/viewModels";
-import { AutoplayVideo } from "../components/AutoplayVideo";
 import { Button } from "../components/Button";
+import { HeroMosaic } from "../components/HeroMosaic";
 import { Container } from "../components/Container";
 import { Eyebrow } from "../components/Eyebrow";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -28,7 +28,7 @@ export function Hero({ hero }: HeroProps) {
       className="flex items-center bg-ink pt-24"
       style={{ minHeight: "calc(100svh - 5rem)" }}
     >
-      <Container className="grid items-center gap-10 lg:grid-cols-2">
+      <Container className="grid items-center gap-10 lg:grid-cols-2 lg:items-stretch">
         <div>
           <Eyebrow dark>{hero.eyebrow}</Eyebrow>
           <h1 className="text-display-xl mt-4 font-semibold text-canvas">
@@ -79,16 +79,15 @@ export function Hero({ hero }: HeroProps) {
         </div>
 
         <div
-          className="overflow-hidden rounded-sm"
+          className="h-[380px] sm:h-[460px] lg:h-full"
           style={{
-            aspectRatio: "16 / 9",
             transform: prefersReducedMotion || isRevealed ? "scale(1)" : "scale(1.04)",
             transitionProperty: "transform",
             transitionDuration: prefersReducedMotion ? "120ms" : "900ms",
             transitionTimingFunction: "var(--ease-base)",
           }}
         >
-          <AutoplayVideo media={hero.media} className="h-full w-full object-cover" />
+          <HeroMosaic tiles={hero.mosaicTiles} />
         </div>
       </Container>
     </section>

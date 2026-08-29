@@ -8,4 +8,5 @@ export interface HeroContent {
   readonly primaryCta: Cta;
   readonly secondaryCta: Cta;
   readonly media: MediaRef;
+  readonly mosaicTiles: ReadonlyArray<MediaRef>;
 }

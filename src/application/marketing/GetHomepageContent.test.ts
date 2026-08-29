@@ -31,6 +31,14 @@ function fixtureHero(): HeroContent {
       alt: "Looping gradient reel",
       aspectRatio: "16:9",
     }),
+    mosaicTiles: Array.from({ length: 8 }, (_, index) =>
+      MediaRef.create({
+        kind: "image",
+        src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
+        alt: `Placeholder reel still ${index + 1}`,
+        aspectRatio: "1:1",
+      }),
+    ),
   };
 }
 
@@ -112,6 +120,7 @@ function fixtureTalentBlock(): TalentBlock {
         aspectRatio: "1:1",
       }),
     ),
+    roles: Array.from({ length: 9 }, (_, index) => `Role ${index + 1}`),
   };
 }
 

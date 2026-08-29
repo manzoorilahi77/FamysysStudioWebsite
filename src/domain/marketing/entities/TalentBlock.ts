@@ -5,4 +5,5 @@ export interface TalentBlock {
   readonly heading: string;
   readonly supportingParagraph: string;
   readonly tiles: ReadonlyArray<MediaRef>;
+  readonly roles: ReadonlyArray<string>;
 }

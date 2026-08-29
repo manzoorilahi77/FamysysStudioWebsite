@@ -48,13 +48,13 @@ export function Counter({ stat }: CounterProps) {
 
   return (
     <div ref={ref}>
-      <p className="text-display-m font-medium text-ink">
+      <p className="text-metric font-medium text-ink">
         {digits.map((digit, index) => (
           <DigitColumn key={index} digit={digit} isRolling={shouldRoll} />
         ))}
-        {stat.suffix ? <span>{stat.suffix}</span> : null}
+        {stat.suffix ? <span className="text-display-m align-baseline">{stat.suffix}</span> : null}
       </p>
-      <p className="text-small text-ink-70">{stat.label}</p>
+      <p className="text-small mt-2 text-ink-70">{stat.label}</p>
     </div>
   );
 }

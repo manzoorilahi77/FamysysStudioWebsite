@@ -22,13 +22,15 @@ export function Talent({ talent }: TalentProps) {
             {talent.supportingParagraph}
           </p>
         </Reveal>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid auto-rows-[minmax(0,1fr)] grid-flow-dense grid-cols-3 gap-3">
           {talent.tiles.map((tile, index) => (
             <TalentTile
               key={tile.src}
               media={tile}
+              role={talent.roles[index] ?? ""}
               row={Math.floor(index / GRID_SIZE)}
               column={index % GRID_SIZE}
+              isFeature={index === 0 || index === 5}
             />
           ))}
         </div>

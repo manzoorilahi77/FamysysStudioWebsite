@@ -14,8 +14,10 @@ export function Differentiators({ intro, items }: DifferentiatorsProps) {
   return (
     <Section ariaLabel={intro.heading}>
       <Container>
-        <Eyebrow>{intro.eyebrow}</Eyebrow>
-        <h2 className="text-display-l mt-4 font-medium text-ink">{intro.heading}</h2>
+        <div className="mx-auto max-w-[40ch] text-center">
+          <Eyebrow>{intro.eyebrow}</Eyebrow>
+          <h2 className="text-display-l mt-4 font-medium text-ink">{intro.heading}</h2>
+        </div>
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           {items.map((item, index) => (
             <Reveal key={item.title} index={index}>

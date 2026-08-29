@@ -30,6 +30,7 @@
 
   --color-primary-button-hover: #1a65f0;
   --color-primary-button-hover-on-dark: #eae6e0;
+  --color-accent-8: #1e6fff14;
 
   --radius-sm: 0.25rem;
 
@@ -47,21 +48,32 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Type scale — see src/shared/design/tokens.ts `typeScale` for the annotated source. */
+/* Type scale — see src/shared/design/tokens.ts `typeScale` for the annotated source.
+   DEVIATION (fidelity-loop pass 1, gap #2): display-xl and display-l's preferred-value
+   multipliers and ceilings are raised ~30% over the measured famysys.com values to match
+   Superside's dramatically larger display type; mobile floors are untouched. See tokens.ts
+   and docs spec §2.8.3 for the full log. */
 .text-display-xl {
-  font-size: clamp(clamp(1.875rem, 9.4vw, 2.125rem), min(4.4vw, 9svh), 4.75rem);
-  line-height: 1.04;
-  letter-spacing: -0.028em;
+  font-size: clamp(clamp(1.875rem, 9.4vw, 2.125rem), min(5.7vw, 11.7svh), 6.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
 }
 .text-display-l {
-  font-size: clamp(1.75rem, 2.95vw, 3.25rem);
-  line-height: 1.08;
-  letter-spacing: -0.024em;
+  font-size: clamp(1.75rem, 3.85vw, 4.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.026em;
 }
 .text-display-m {
   font-size: clamp(1.5rem, 2.25vw, 2.5rem);
   line-height: 1.18;
   letter-spacing: -0.019em;
+}
+/* DEVIATION (fidelity-loop pass 1, gap #7): §4.7 metric figures, ~3-4x display-m — no
+   famysys.com precedent at this scale, see tokens.ts `typeScale.metric`. */
+.text-metric {
+  font-size: clamp(3.5rem, 9.5vw, 10rem);
+  line-height: 0.95;
+  letter-spacing: -0.032em;
 }
 .text-display-s {
   font-size: clamp(1.1875rem, 1.45vw, 1.5rem);
@@ -231,6 +243,18 @@ body {
   transform: translateY(-6px);
 }
 
+/* Fidelity-loop pass 1, gap #9 — §4.8 story-card poster scale on hover, same
+   JS-gated-on-reduced-motion convention as .case-study-media--scalable. */
+.story-media {
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.card-surface-dark:hover .story-media--scalable {
+  transform: scale(1.05);
+}
+
 /* §4.9 Services grid — arrow reveal on hover, on top of .card-surface. */
 .service-tile-arrow {
   opacity: 0;
@@ -256,6 +280,65 @@ body {
 
 .case-study-card:hover .case-study-media--scalable {
   transform: scale(1.05);
+}
+
+/* Fidelity-loop pass 1, gaps #6 + #9 — shared media-tile hover mechanics: border escalates
+   to accent, tile lifts 6px (no shadow), a bottom-left label chip shifts colour. The image
+   scale is opted in per-instance via .media-tile-media--scalable (JS-gated on reduced motion,
+   same convention as .case-study-media--scalable above) rather than a bare :hover rule. Shared
+   by §4.10 case-study cards and §4.15 talent tiles so both carry identical hover weight. */
+.media-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-ink-8);
+  transition-property: border-color, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.media-tile:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-6px);
+}
+
+.media-tile-media {
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.media-tile:hover .media-tile-media--scalable {
+  transform: scale(1.05);
+}
+
+.media-tile-chip {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  max-width: calc(100% - 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  transition-property: background-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.media-tile:hover .media-tile-chip {
+  background-color: var(--color-ink);
+}
+
+/* §4.2 Hero mosaic — vertical drift reuses the testimonial-track keyframes (identical
+   translateY(-50%) loop mechanic); columns differ only by duration/direction. */
+.hero-mosaic-edge-mask {
+  mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
 }
 
 /* §4.11 Comparison — horizontal swipe below lg, scroll-snap + dot indicator. */

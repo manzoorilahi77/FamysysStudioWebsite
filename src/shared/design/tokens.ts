@@ -48,14 +48,23 @@ export const type = {
   sans: "var(--font-jost)", // measured — famysys.com --font-jost, loaded via next/font/google
 } as const;
 
+// DEVIATION (fidelity-loop pass 1, gap #2): famysys.com's own display sizes read quiet next to
+// Superside's reference — its hero/section headings run dramatically larger relative to
+// viewport. displayXl and displayL's preferred-value multipliers and ceilings are raised ~30%
+// over the measured famysys.com values below; the mobile floors (the first clamp argument) are
+// untouched on purpose, per the fidelity-loop brief. See docs spec §2.8.3 for the full log.
 export const typeScale = {
   displayXl: {
-    size: "clamp(clamp(1.875rem, 9.4vw, 2.125rem), min(4.4vw, 9svh), 4.75rem)",
-    lineHeight: 1.04,
-    letterSpacing: "-0.028em",
+    size: "clamp(clamp(1.875rem, 9.4vw, 2.125rem), min(5.7vw, 11.7svh), 6.25rem)",
+    lineHeight: 1.02,
+    letterSpacing: "-0.03em",
   },
-  displayL: { size: "clamp(1.75rem, 2.95vw, 3.25rem)", lineHeight: 1.08, letterSpacing: "-0.024em" },
+  displayL: { size: "clamp(1.75rem, 3.85vw, 4.25rem)", lineHeight: 1.06, letterSpacing: "-0.026em" },
   displayM: { size: "clamp(1.5rem, 2.25vw, 2.5rem)", lineHeight: 1.18, letterSpacing: "-0.019em" },
+  // DEVIATION (fidelity-loop pass 1, gap #7): §4.7 impact-metric figures need to dominate their
+  // section the way Superside's do — roughly 3-4x displayM. No famysys.com precedent at this
+  // scale; ceiling and preferred value are both new, floor kept comfortably above displayM's.
+  metric: { size: "clamp(3.5rem, 9.5vw, 10rem)", lineHeight: 0.95, letterSpacing: "-0.032em" },
   displayS: { size: "clamp(1.1875rem, 1.45vw, 1.5rem)", lineHeight: 1.34, letterSpacing: "-0.013em" },
   lead: { size: "clamp(1.0625rem, 1.35vw, 1.3125rem)", lineHeight: 1.62, letterSpacing: "-0.008em" },
   body: { size: "1.0625rem", lineHeight: 1.62, letterSpacing: "-0.006em" },

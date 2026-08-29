@@ -24,6 +24,7 @@ import { Process } from "../presentation/sections/Process";
 import { Differentiators } from "../presentation/sections/Differentiators";
 import { Talent } from "../presentation/sections/Talent";
 import { ClosingCta } from "../presentation/sections/ClosingCta";
+import { InlineCta } from "../presentation/sections/InlineCta";
 import {
   toCaseStudyView,
   toComparisonCriterionView,
@@ -51,16 +52,18 @@ export default async function HomePage() {
     ]);
 
   const navigationView = toNavigationMenuView(navigation);
+  const heroView = toHeroContentView(homepage.hero);
 
   return (
     <>
       <Header navigation={navigationView} />
       <main id="main-content">
-        <Hero hero={toHeroContentView(homepage.hero)} />
+        <Hero hero={heroView} />
         <ClientMarquee eyebrow={homepage.marqueeEyebrow} logos={clientLogos} />
         <Manifesto manifesto={toManifestoBlockView(homepage.manifesto)} />
         <Positioning positioning={toPositioningBlockView(homepage.positioning)} />
         <Pillars intro={homepage.pillarsIntro} pillars={homepage.pillars} />
+        <InlineCta cta={heroView.primaryCta} prompt="Ready to see it in motion?" />
         <ImpactMetrics intro={homepage.metricsIntro} metrics={metrics} />
         <FeaturedStories stories={featuredWork.stories.map(toShowreelClipView)} />
         <ServicesGrid intro={homepage.servicesIntro} categories={serviceCatalog} />
@@ -68,6 +71,7 @@ export default async function HomePage() {
           work={toWorkSectionView(homepage.workSection)}
           caseStudies={featuredWork.caseStudies.map(toCaseStudyView)}
         />
+        <InlineCta cta={heroView.primaryCta} prompt="See the work, then book a call." />
         <ComparisonMatrix
           intro={homepage.comparisonIntro}
           columns={comparison.columns}
@@ -76,6 +80,7 @@ export default async function HomePage() {
         <TestimonialWall intro={homepage.testimonialsIntro} testimonials={testimonialWall} />
         <Process process={homepage.process} />
         <Differentiators intro={homepage.differentiators.intro} items={homepage.differentiators.items} />
+        <InlineCta cta={heroView.primaryCta} prompt="Talk to the team before you commit to anything." />
         <Talent talent={toTalentBlockView(homepage.talent)} />
         <ClosingCta closingCta={homepage.closingCta} />
       </main>

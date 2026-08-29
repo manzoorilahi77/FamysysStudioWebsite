@@ -59,6 +59,10 @@ const ASPECT_SIZE = {
   "3:4": [900, 1200],
 };
 
+// Fidelity-loop pass 1, gap #1: mixed aspect ratios for the hero mosaic tiles, so its
+// staggered columns don't read as one repeated tile size.
+const MOSAIC_ASPECT_RATIOS = ["3:4", "1:1", "4:3", "1:1", "3:4", "4:3", "1:1", "3:4"];
+
 function shapePath(shape, cx, cy, r) {
   switch (shape) {
     case "circle":
@@ -259,6 +263,11 @@ const IMAGE_FILES = [
     file: `talent-${String(i + 1).padStart(2, "0")}.svg`,
     aspectRatio: "1:1",
     plateIndex: 16 + i,
+  })),
+  ...MOSAIC_ASPECT_RATIOS.map((aspectRatio, i) => ({
+    file: `mosaic-${String(i + 1).padStart(2, "0")}.svg`,
+    aspectRatio,
+    plateIndex: 40 + i,
   })),
 ];
 

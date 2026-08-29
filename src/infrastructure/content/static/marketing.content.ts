@@ -1,5 +1,6 @@
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
+import type { AspectRatio } from "../../../domain/shared/value-objects/MediaRef";
 import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
 import type { FooterContent } from "../../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
@@ -13,6 +14,17 @@ import type {
   DifferentiatorsBlock,
   WorkSection,
 } from "../../../domain/marketing/repositories/MarketingContentRepository";
+
+const MOSAIC_ASPECT_RATIOS: ReadonlyArray<AspectRatio> = [
+  "3:4",
+  "1:1",
+  "4:3",
+  "1:1",
+  "3:4",
+  "4:3",
+  "1:1",
+  "3:4",
+];
 
 export const heroContent: HeroContent = {
   eyebrow: "Famysys Studio",
@@ -28,6 +40,16 @@ export const heroContent: HeroContent = {
     alt: "Looping placeholder reel for the Famysys Studio hero",
     aspectRatio: "16:9",
   }),
+  // Fidelity-loop pass 1, gap #1: the hero's drifting media mosaic. Mixed aspect ratios so the
+  // staggered columns don't read as one repeated tile size.
+  mosaicTiles: MOSAIC_ASPECT_RATIOS.map((aspectRatio, index) =>
+    MediaRef.create({
+      kind: "image",
+      src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
+      alt: `Placeholder reel still ${index + 1}`, // TODO(client): replace with real production stills/clips before publishing
+      aspectRatio,
+    }),
+  ),
 };
 
 export const manifestoBlock: ManifestoBlock = {
@@ -168,6 +190,19 @@ export const talentBlock: TalentBlock = {
       aspectRatio: "1:1",
     }),
   ),
+  // Fidelity-loop pass 1, gap #6: generic discipline labels for the tile chips — not names,
+  // see docs/content-todo.md §4.15 for why real names aren't available yet.
+  roles: [
+    "Senior Editor",
+    "Colorist",
+    "Producer",
+    "Motion Design",
+    "Sound Design",
+    "Cinematographer",
+    "VFX Artist",
+    "Creative Lead",
+    "Animator",
+  ],
 };
 
 export const closingCta: ClosingCtaBlock = {
