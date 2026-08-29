@@ -5,7 +5,6 @@ import type { HeroContentView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { HeroMosaic } from "../components/HeroMosaic";
 import { Container } from "../components/Container";
-import { Eyebrow } from "../components/Eyebrow";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface HeroProps {
@@ -30,23 +29,16 @@ export function Hero({ hero }: HeroProps) {
     >
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:items-stretch">
         <div>
-          <Eyebrow dark>{hero.eyebrow}</Eyebrow>
-          <h1 className="text-display-xl mt-4 font-semibold text-canvas">
-            {hero.headlineLines.map((line, index) => (
-              <span
-                key={line}
-                className="block overflow-hidden"
-                style={{
-                  clipPath: prefersReducedMotion || isRevealed ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
-                  transitionProperty: "clip-path",
-                  transitionDuration: prefersReducedMotion ? "120ms" : "500ms",
-                  transitionDelay: prefersReducedMotion ? "0ms" : `${index * 90}ms`,
-                  transitionTimingFunction: "var(--ease-base)",
-                }}
-              >
-                {line}
-              </span>
-            ))}
+          <h1
+            className="text-display-xl font-semibold text-canvas"
+            style={{
+              clipPath: prefersReducedMotion || isRevealed ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
+              transitionProperty: "clip-path",
+              transitionDuration: prefersReducedMotion ? "120ms" : "500ms",
+              transitionTimingFunction: "var(--ease-base)",
+            }}
+          >
+            {hero.heading}
           </h1>
           <p
             className="text-lead mt-6 text-canvas-80"
@@ -60,7 +52,7 @@ export function Hero({ hero }: HeroProps) {
               transitionTimingFunction: "var(--ease-base)",
             }}
           >
-            {hero.subhead}
+            {hero.body}
           </p>
           <div
             className="mt-8 flex flex-wrap gap-4"
@@ -76,6 +68,18 @@ export function Hero({ hero }: HeroProps) {
             <Button cta={hero.primaryCta} variant="primary" dark />
             <Button cta={hero.secondaryCta} variant="ghost" dark />
           </div>
+          <p
+            className="text-small mt-6 text-canvas-60"
+            style={{
+              opacity: isRevealed ? 1 : 0,
+              transitionProperty: "opacity",
+              transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
+              transitionDelay: prefersReducedMotion ? "0ms" : "300ms",
+              transitionTimingFunction: "var(--ease-base)",
+            }}
+          >
+            {hero.supportingLine}
+          </p>
         </div>
 
         <div

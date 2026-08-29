@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 import { createCta } from "../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import type { ClosingCtaBlock } from "../../domain/marketing/entities/ClosingCtaBlock";
+import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
+import type { FaqBlock } from "../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../domain/marketing/entities/HeroContent";
-import type { ManifestoBlock } from "../../domain/marketing/entities/ManifestoBlock";
-import type { PositioningBlock } from "../../domain/marketing/entities/PositioningBlock";
 import type { ProcessBlock } from "../../domain/marketing/entities/ProcessBlock";
 import type { SectionIntro } from "../../domain/marketing/entities/SectionIntro";
-import type { TalentBlock } from "../../domain/marketing/entities/TalentBlock";
-import type { ValuePillar } from "../../domain/marketing/entities/ValuePillar";
-import type { DifferentiatorsBlock, WorkSection } from "../../domain/marketing/repositories/MarketingContentRepository";
+import type { WaysToWorkBlock } from "../../domain/marketing/entities/EngagementTier";
+import type { WhyFamysysBlock } from "../../domain/marketing/entities/WhyFamysysBlock";
+import type { WhatWeDoIntro } from "../../domain/marketing/repositories/MarketingContentRepository";
 import {
   FakeMarketingContentRepository,
   type FakeMarketingContentFixtures,
@@ -19,143 +19,137 @@ import { GetHomepageContent } from "./GetHomepageContent";
 
 function fixtureHero(): HeroContent {
   return {
-    eyebrow: "Famysys Studio",
-    headlineLines: ["Craft that ships", "at studio pace."],
-    subhead: "Video design and creative production built for volume.",
-    primaryCta: createCta("Book a call", "/contact"),
-    secondaryCta: createCta("See the reel", "/work"),
-    media: MediaRef.create({
-      kind: "video",
-      src: "/media/hero-loop.mp4",
-      poster: "/media/hero-loop-poster.svg",
-      alt: "Looping gradient reel",
-      aspectRatio: "16:9",
-    }),
+    heading: "Creative production, without the agency overhead.",
+    body: "Design, video, AI-powered content, motion and product visuals.",
+    primaryCta: createCta("Start a Conversation", "/contact"),
+    secondaryCta: createCta("Explore Our Services", "/creative-services"),
+    supportingLine: "Project-based when you need it. Ongoing when you need more.",
     mosaicTiles: Array.from({ length: 8 }, (_, index) =>
       MediaRef.create({
         kind: "image",
         src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
-        alt: `Placeholder reel still ${index + 1}`,
+        alt: `Placeholder creative still ${index + 1}`,
         aspectRatio: "1:1",
       }),
     ),
   };
 }
 
-function fixtureManifesto(): ManifestoBlock {
-  return {
-    eyebrow: "What we believe",
-    statementLines: ["Craft is not a phase.", "It is the whole process."],
-    supportingParagraph: "Every deliverable gets the same bar, regardless of volume.",
-    cta: createCta("Read our approach", "/about"),
-  };
-}
-
-function fixturePillars(): ReadonlyArray<ValuePillar> {
-  return [
-    { title: "Studio-grade craft", description: "Senior editors on every cut." },
-    { title: "Built for volume", description: "Parallel pipelines, not a single bottleneck." },
-    { title: "One team, end to end", description: "No handoffs between strategy and delivery." },
-  ];
-}
-
 function fixtureIntro(label: string): SectionIntro {
-  return { eyebrow: label, heading: `${label} heading` };
+  return { eyebrow: label, heading: `${label} heading`, body: `${label} body` };
 }
 
-function fixturePositioning(): PositioningBlock {
+function fixtureWhatWeDo(): WhatWeDoIntro {
+  return { intro: fixtureIntro("Our capabilities"), cta: createCta("Explore All Services", "/creative-services") };
+}
+
+function fixtureDifferentiator(): DifferentiatorBlock {
   return {
-    eyebrow: "Where we sit",
-    heading: "Studio discipline, agency reach.",
-    supportingParagraph: "We run like an engineering team and pitch like a creative one.",
-    media: MediaRef.create({
-      kind: "video",
-      src: "/media/positioning.mp4",
-      poster: "/media/positioning-poster.svg",
-      alt: "Placeholder reel illustrating studio positioning",
-      aspectRatio: "3:4",
-    }),
+    heading: "The right mix of creativity, technology and people.",
+    body: "AI has changed how creative work can be produced.",
+    leadIn: "At Famysys Studio, we combine:",
+    elements: [
+      { title: "Human Creativity", description: "Ideas, storytelling, art direction." },
+      { title: "Intelligent AI Workflows", description: "AI used where it genuinely improves speed." },
+      { title: "Professional Production", description: "Design, editing, motion, compositing." },
+      { title: "Efficient Delivery", description: "Structured workflows." },
+    ],
+    closingStatement: "AI is our production advantage — not our identity.",
   };
-}
-
-function fixtureWorkSection(): WorkSection {
-  return { intro: fixtureIntro("Selected work"), exploreCta: createCta("Explore all our work", "/work") };
 }
 
 function fixtureProcessBlock(): ProcessBlock {
   return {
-    eyebrow: "How a project runs",
-    heading: "Four steps, every time.",
+    heading: "From idea to finished creative.",
     steps: [
-      { title: "Brief", description: "Scope and schedule locked before a camera is booked." },
-      { title: "Build", description: "Production runs against the locked scope." },
-      { title: "Review", description: "One structured review pass, not an open-ended thread." },
-      { title: "Deliver", description: "Final files land on the date promised at brief." },
+      { title: "Understand", description: "We understand what you're trying to communicate." },
+      { title: "Create", description: "We develop the concept." },
+      { title: "Produce", description: "Our team builds the content." },
+      { title: "Refine", description: "We incorporate feedback within the agreed scope." },
+      { title: "Deliver", description: "You receive platform-ready creative assets." },
     ],
   };
 }
 
-function fixtureDifferentiatorsBlock(): DifferentiatorsBlock {
+function fixtureWaysToWork(): WaysToWorkBlock {
   return {
-    intro: fixtureIntro("Why Famysys"),
+    heading: "Flexible ways to work with Famysys Studio.",
+    body: "Whether you need one creative asset or an ongoing production partner.",
+    tiers: [
+      {
+        name: "Launch",
+        descriptor: "Essential Content",
+        summary: "For businesses establishing regular creative output.",
+        idealFor: "Small businesses and startups.",
+        typicalWork: "Social creatives and short-form content.",
+        cta: createCta("Talk to us", "/contact"),
+      },
+    ],
+    custom: {
+      name: "Custom Creative Partnership",
+      descriptor: "Your flexible creative production team.",
+      summary: "For businesses needing ongoing creative support.",
+      invitation: "Tell us what you need.",
+      cta: createCta("Talk to us about your requirements", "/contact"),
+    },
+  };
+}
+
+function fixtureWhyFamysys(): WhyFamysysBlock {
+  return {
+    heading: "Professional creative support. Without unnecessary overhead.",
+    body: "A third option between expensive agencies and inconsistent freelancers.",
+    reasons: [
+      { title: "Flexible", description: "Start with a single project." },
+      { title: "Efficient", description: "Structured production workflows." },
+      { title: "Human-led", description: "Creative judgment stays with our team." },
+      { title: "Scalable", description: "Designed to grow into ongoing partnerships." },
+      { title: "Value-driven", description: "Better creative value for the investment." },
+    ],
+  };
+}
+
+function fixtureFaq(): FaqBlock {
+  return {
     items: [
-      { title: "One team", description: "Strategy and production sit together." },
-      { title: "Fixed scope", description: "Scope is locked before production starts." },
-      { title: "Senior editors", description: "The same editor from brief to delivery." },
-      { title: "Volume-tested", description: "Built for fifty deliverables a month." },
+      { question: "Do you work with small businesses?", answer: "Yes." },
+      {
+        question: "How much do your services cost?",
+        answer: "We currently provide custom quotations rather than public pricing.",
+        cta: createCta("Talk to us about your project", "/contact"),
+      },
     ],
-  };
-}
-
-function fixtureTalentBlock(): TalentBlock {
-  return {
-    eyebrow: "Who you'll work with",
-    heading: "A team, not a roster.",
-    supportingParagraph: "Every project runs through a small, senior team you can name.",
-    tiles: Array.from({ length: 9 }, (_, index) =>
-      MediaRef.create({
-        kind: "image",
-        src: `/media/talent-${String(index + 1).padStart(2, "0")}.svg`,
-        alt: `Placeholder portrait tile ${index + 1}`,
-        aspectRatio: "1:1",
-      }),
-    ),
-    roles: Array.from({ length: 9 }, (_, index) => `Role ${index + 1}`),
   };
 }
 
 function fixtureClosingCta(): ClosingCtaBlock {
   return {
-    headlineLines: ["Let's scope your first brief."],
-    supportingParagraph: "Tell us what you need to ship and we'll come back with a fixed plan.",
+    heading: "Have a creative requirement? Let's talk.",
+    body: "Tell us what you're trying to create.",
+    cta: createCta("Start a Conversation", "/contact"),
+    closingLine: "Project today. Creative partner tomorrow.",
   };
 }
 
 function fixtureFooterContent(): FooterContent {
   return {
-    tagline: "Video design and creative production, run like engineering.",
+    tagline: "A professional creative production partner.",
     contactEmail: "hello@famysys.com",
     legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
-    socialLinks: [createCta("Twitter", "https://twitter.com/famysysstudio")],
+    socialLinks: [],
   };
 }
 
 function fixtures(): FakeMarketingContentFixtures {
   return {
     hero: fixtureHero(),
-    manifesto: fixtureManifesto(),
-    pillars: fixturePillars(),
-    pillarsIntro: fixtureIntro("How we're built"),
-    marqueeEyebrow: "Trusted by teams shipping every week",
-    positioning: fixturePositioning(),
-    metricsIntro: fixtureIntro("Success in numbers"),
-    servicesIntro: fixtureIntro("What we make"),
-    workSection: fixtureWorkSection(),
-    comparisonIntro: fixtureIntro("How we compare"),
-    testimonialsIntro: fixtureIntro("What clients say"),
+    whatWeDo: fixtureWhatWeDo(),
+    differentiator: fixtureDifferentiator(),
     process: fixtureProcessBlock(),
-    differentiators: fixtureDifferentiatorsBlock(),
-    talent: fixtureTalentBlock(),
+    waysToWork: fixtureWaysToWork(),
+    workIntro: fixtureIntro("Selected Creative Work"),
+    whyFamysys: fixtureWhyFamysys(),
+    faq: fixtureFaq(),
     closingCta: fixtureClosingCta(),
     footer: fixtureFooterContent(),
   };
@@ -170,19 +164,13 @@ describe("GetHomepageContent", () => {
     const result = await useCase.execute();
 
     expect(result.hero).toBe(data.hero);
-    expect(result.manifesto).toBe(data.manifesto);
-    expect(result.pillars).toBe(data.pillars);
-    expect(result.pillarsIntro).toBe(data.pillarsIntro);
-    expect(result.marqueeEyebrow).toBe(data.marqueeEyebrow);
-    expect(result.positioning).toBe(data.positioning);
-    expect(result.metricsIntro).toBe(data.metricsIntro);
-    expect(result.servicesIntro).toBe(data.servicesIntro);
-    expect(result.workSection).toBe(data.workSection);
-    expect(result.comparisonIntro).toBe(data.comparisonIntro);
-    expect(result.testimonialsIntro).toBe(data.testimonialsIntro);
+    expect(result.whatWeDo).toBe(data.whatWeDo);
+    expect(result.differentiator).toBe(data.differentiator);
     expect(result.process).toBe(data.process);
-    expect(result.differentiators).toBe(data.differentiators);
-    expect(result.talent).toBe(data.talent);
+    expect(result.waysToWork).toBe(data.waysToWork);
+    expect(result.workIntro).toBe(data.workIntro);
+    expect(result.whyFamysys).toBe(data.whyFamysys);
+    expect(result.faq).toBe(data.faq);
     expect(result.closingCta).toBe(data.closingCta);
     expect(result.footer).toBe(data.footer);
 

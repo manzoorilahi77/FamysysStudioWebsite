@@ -1,20 +1,24 @@
+// Every string in this file is the client's own copy, taken verbatim from the
+// V1 Homepage Content Brief. Do not paraphrase or "improve" it here — content
+// changes come from the brief, not from the codebase. Anything the brief did
+// not supply is recorded in docs/content-todo.md rather than invented.
+
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import type { AspectRatio } from "../../../domain/shared/value-objects/MediaRef";
 import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
+import type { DifferentiatorBlock } from "../../../domain/marketing/entities/DifferentiatorBlock";
+import type { FaqBlock } from "../../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
-import type { ManifestoBlock } from "../../../domain/marketing/entities/ManifestoBlock";
-import type { PositioningBlock } from "../../../domain/marketing/entities/PositioningBlock";
 import type { ProcessBlock } from "../../../domain/marketing/entities/ProcessBlock";
 import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
-import type { TalentBlock } from "../../../domain/marketing/entities/TalentBlock";
-import type { ValuePillar } from "../../../domain/marketing/entities/ValuePillar";
-import type {
-  DifferentiatorsBlock,
-  WorkSection,
-} from "../../../domain/marketing/repositories/MarketingContentRepository";
+import type { WaysToWorkBlock } from "../../../domain/marketing/entities/EngagementTier";
+import type { WhyFamysysBlock } from "../../../domain/marketing/entities/WhyFamysysBlock";
+import type { WhatWeDoIntro } from "../../../domain/marketing/repositories/MarketingContentRepository";
 
+// Mixed aspect ratios so the hero mosaic's staggered columns don't read as one
+// repeated tile size. Eight slots, ready for real stills one-for-one.
 const MOSAIC_ASPECT_RATIOS: ReadonlyArray<AspectRatio> = [
   "3:4",
   "1:1",
@@ -27,197 +31,213 @@ const MOSAIC_ASPECT_RATIOS: ReadonlyArray<AspectRatio> = [
 ];
 
 export const heroContent: HeroContent = {
-  eyebrow: "Famysys Studio",
-  headlineLines: ["Video, produced on an engineering cadence."],
-  subhead:
-    "Fixed scope, fixed schedule, one point of accountability from brief to delivery.",
-  primaryCta: createCta("Book a call", "/contact"),
-  secondaryCta: createCta("See the reel", "/work"),
-  media: MediaRef.create({
-    kind: "video",
-    src: "/media/hero-loop.mp4",
-    poster: "/media/hero-loop-poster.svg",
-    alt: "Looping placeholder reel for the Famysys Studio hero",
-    aspectRatio: "16:9",
-  }),
-  // Fidelity-loop pass 1, gap #1: the hero's drifting media mosaic. Mixed aspect ratios so the
-  // staggered columns don't read as one repeated tile size.
+  heading: "Creative production, without the agency overhead.",
+  body: "Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.",
+  primaryCta: createCta("Start a Conversation", "/contact"),
+  secondaryCta: createCta("Explore Our Services", "/creative-services"),
+  supportingLine: "Project-based when you need it. Ongoing when you need more.",
   mosaicTiles: MOSAIC_ASPECT_RATIOS.map((aspectRatio, index) =>
     MediaRef.create({
       kind: "image",
       src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
-      alt: `Placeholder reel still ${index + 1}`, // TODO(client): replace with real production stills/clips before publishing
+      alt: `Placeholder creative still ${index + 1}`, // TODO(client): replace with real production stills
       aspectRatio,
     }),
   ),
 };
 
-export const manifestoBlock: ManifestoBlock = {
-  eyebrow: "What we believe",
-  statementLines: ["The first video is easy.", "The fortieth is the test."],
-  supportingParagraph:
-    "Any studio can produce one exceptional piece. Few can hold the same bar across fifty briefs in a quarter, on schedules they don't control. That consistency, not any single reel, is what we build for.",
-  cta: createCta("See how we work", "/how-we-work"),
-};
-
-export const valuePillars: ReadonlyArray<ValuePillar> = [
-  {
-    title: "Studio-grade craft",
-    description:
-      "Senior editors and colorists on every project, not just the pitch reel. The same eye that wins the pitch finishes the cut.",
-  },
-  {
-    title: "Built for volume",
-    description:
-      "Parallel production pipelines mean fifty deliverables in a month don't wait behind one editor's calendar.",
-  },
-  {
-    title: "One team, end to end",
-    description:
-      "Strategy, production, and delivery sit inside one team. No handoff between the people who plan the work and the people who make it.",
-  },
-];
-
-export const pillarsIntro: SectionIntro = {
-  eyebrow: "How we're built",
-  heading: "Three commitments, not a slogan.",
-};
-
-export const marqueeEyebrow = "Studios and in-house teams already shipping with us";
-
-export const positioningBlock: PositioningBlock = {
-  eyebrow: "Where we sit",
-  heading: "Studio discipline, agency reach.",
-  supportingParagraph:
-    "We run production like an engineering team runs a release: scoped, scheduled, and reviewed before it ships. Clients get agency-grade creative without the agency-grade unpredictability.",
-  media: MediaRef.create({
-    kind: "video",
-    src: "/media/positioning.mp4",
-    poster: "/media/positioning-poster.svg",
-    alt: "Looping placeholder reel illustrating the studio's positioning",
-    aspectRatio: "3:4",
-  }),
-};
-
-export const metricsIntro: SectionIntro = {
-  eyebrow: "Success in numbers",
-  heading: "What a quarter with Famysys Studio looks like.",
-};
-
-export const servicesIntro: SectionIntro = {
-  eyebrow: "What we make",
-  heading: "Every offering, one production process.",
-};
-
-export const workSection: WorkSection = {
+export const whatWeDoIntro: WhatWeDoIntro = {
   intro: {
-    eyebrow: "Selected work",
-    heading: "Different briefs, different constraints.",
+    eyebrow: "Our capabilities",
+    heading: "One creative partner for your ongoing content needs.",
+    body: "From a single promotional video to an ongoing stream of marketing content, Famysys Studio brings creative thinking, production expertise and AI-enabled workflows together under one roof.",
   },
-  exploreCta: createCta("Explore all our work", "/work"),
+  cta: createCta("Explore All Services", "/creative-services"),
 };
 
-export const comparisonIntro: SectionIntro = {
-  eyebrow: "How we compare",
-  heading: "Same question, five different answers.",
-};
-
-export const testimonialsIntro: SectionIntro = {
-  eyebrow: "What clients say",
-  heading: "Ask the people who've already shipped with us.",
+export const differentiatorBlock: DifferentiatorBlock = {
+  heading: "The right mix of creativity, technology and people.",
+  body: "AI has changed how creative work can be produced. But great creative work still requires judgment, storytelling, design sense and human quality control.",
+  leadIn: "At Famysys Studio, we combine:",
+  elements: [
+    {
+      title: "Human Creativity",
+      description: "Ideas, storytelling, art direction and creative judgment.",
+    },
+    {
+      title: "Intelligent AI Workflows",
+      description: "AI used where it genuinely improves speed, flexibility and production possibilities.",
+    },
+    {
+      title: "Professional Production",
+      description: "Design, editing, motion, compositing and finishing.",
+    },
+    {
+      title: "Efficient Delivery",
+      description: "Structured workflows designed to deliver quality without unnecessary agency overhead.",
+    },
+  ],
+  closingStatement: "AI is our production advantage — not our identity.",
 };
 
 export const processBlock: ProcessBlock = {
-  eyebrow: "How a project runs",
-  heading: "Four steps. Every project, every time.",
+  heading: "From idea to finished creative.",
   steps: [
     {
-      title: "Brief",
-      description:
-        "We turn your goal into a scoped, scheduled brief before anyone books a camera.",
+      title: "Understand",
+      description: "We understand what you're trying to communicate, who it's for and what success looks like.",
     },
     {
-      title: "Build",
-      description: "Production runs against that scope — no rediscovering requirements mid-shoot.",
+      title: "Create",
+      description: "We develop the concept, script, design direction or production approach.",
     },
     {
-      title: "Review",
-      description: "One structured review round, with feedback collected in one place, not three.",
+      title: "Produce",
+      description: "Our team combines creative tools, AI and human production expertise to build the content.",
+    },
+    {
+      title: "Refine",
+      description: "We review, refine and incorporate feedback within the agreed scope.",
     },
     {
       title: "Deliver",
-      description: "Final files land on the date set at brief, in the formats you specified.",
+      description: "You receive polished, platform-ready creative assets.",
     },
   ],
 };
 
-export const differentiatorsBlock: DifferentiatorsBlock = {
-  intro: {
-    eyebrow: "Why Famysys",
-    heading: "Four things that don't change between projects.",
+// No public pricing anywhere — every engagement is scoped around the actual
+// requirement (brief, §Ways to Work With Us).
+export const waysToWorkBlock: WaysToWorkBlock = {
+  heading: "Flexible ways to work with Famysys Studio.",
+  body: "Whether you need one creative asset or an ongoing production partner, we can adapt to your requirements.",
+  tiers: [
+    {
+      name: "Launch",
+      descriptor: "Essential Content",
+      summary: "For businesses looking to establish or refresh their regular creative output.",
+      idealFor: "Small businesses, local businesses, startups and growing brands.",
+      typicalWork: "Social creatives, short-form content, promotional assets and basic video production.",
+      cta: createCta("Talk to us", "/contact"),
+    },
+    {
+      name: "Grow",
+      descriptor: "Growth Content",
+      summary: "For businesses that need a more consistent flow of video and creative content.",
+      idealFor:
+        "Growing businesses, brands, training companies and businesses actively investing in digital marketing.",
+      typicalWork:
+        "Short-form video, UGC editing, AI-assisted video, social creatives, motion and content adaptations.",
+      cta: createCta("Talk to us", "/contact"),
+    },
+    {
+      name: "Scale",
+      descriptor: "Advanced Creative",
+      summary: "For businesses with larger or more sophisticated ongoing creative requirements.",
+      idealFor: "Established businesses, B2B companies, product brands and marketing teams.",
+      typicalWork:
+        "Advanced video, explainers, training content, motion graphics, product visuals and multi-format creative production.",
+      cta: createCta("Talk to us", "/contact"),
+    },
+  ],
+  custom: {
+    name: "Custom Creative Partnership",
+    descriptor: "Your flexible creative production team.",
+    summary: "For businesses that need ongoing creative support across multiple formats and services.",
+    invitation: "Tell us what you need. We'll help structure the right production model.",
+    cta: createCta("Talk to us about your requirements", "/contact"),
   },
+};
+
+export const workIntro: SectionIntro = {
+  eyebrow: "Selected Creative Work",
+  heading: "Selected Creative Work",
+  body: "A growing collection of work created by Famysys Studio across design, video, AI-powered production and creative content.",
+};
+
+export const whyFamysysBlock: WhyFamysysBlock = {
+  heading: "Professional creative support. Without unnecessary overhead.",
+  body: "We believe businesses shouldn't have to choose between expensive agencies and inconsistent freelancers. Famysys Studio is being built to provide a third option: a flexible, technology-enabled creative production team that can grow with your requirements.",
+  reasons: [
+    {
+      title: "Flexible",
+      description: "Start with a single project. Expand when you need more.",
+    },
+    {
+      title: "Efficient",
+      description: "AI and structured production workflows help us reduce unnecessary production overhead.",
+    },
+    {
+      title: "Human-led",
+      description: "Creative judgment, quality control and accountability remain with our team.",
+    },
+    {
+      title: "Scalable",
+      description:
+        "Our production model is designed to grow from individual projects into ongoing creative partnerships.",
+    },
+    {
+      title: "Value-driven",
+      description:
+        "Our goal is not simply to produce more cheaply — it is to deliver better creative value for the investment.",
+    },
+  ],
+};
+
+export const faqBlock: FaqBlock = {
   items: [
     {
-      title: "One review round, one turnaround window",
-      description:
-        "Feedback comes back once, against a turnaround window set at brief — not an open-ended back-and-forth that eats the schedule.",
+      question: "Do you work with small businesses?",
+      answer:
+        "Yes. We work with businesses ranging from small and growing companies to larger organizations. Our engagement can start with a single project and expand as your requirements grow.",
     },
     {
-      title: "Fixed scope, fixed price",
-      description: "The brief is the contract. Scope changes get a conversation, not a surprise invoice.",
+      question: "Do you only create AI-generated content?",
+      answer:
+        "No. AI is one of our production tools, not the entirety of our service. We combine AI with conventional design, editing, motion graphics, stock assets and human creative direction.",
     },
     {
-      title: "You own the raw footage",
-      description: "Every frame we shoot is yours after delivery — archived and handed over, not held back for a future edit fee.",
+      question: "Can I give you my own raw video footage?",
+      answer:
+        "Yes. We can transform customer-provided footage into polished social and marketing content, including editing, text overlays, animation, music, captions, intro/outro and CTAs.",
     },
     {
-      title: "Every format, delivered once",
-      description: "Vertical, square, broadcast — cut once, exported to every spec you need, not billed as separate deliverables.",
+      question: "Can you create content from our existing documents or presentations?",
+      answer:
+        "Yes. We can transform suitable documents, presentations and training material into professional video and visual content.",
     },
-  ],
-};
-
-export const talentBlock: TalentBlock = {
-  eyebrow: "Who you'll work with",
-  heading: "A team you can name, not a roster you're assigned.",
-  supportingParagraph:
-    "Every engagement runs through a small group of senior editors, colorists, and producers — the same people from the first call to the last delivery.",
-  tiles: Array.from({ length: 9 }, (_, index) =>
-    MediaRef.create({
-      kind: "image",
-      src: `/media/talent-${String(index + 1).padStart(2, "0")}.svg`,
-      alt: `Placeholder portrait tile ${index + 1}`, // TODO(client): replace with real team portraits before publishing
-      aspectRatio: "1:1",
-    }),
-  ),
-  // Fidelity-loop pass 1, gap #6: generic discipline labels for the tile chips — not names,
-  // see docs/content-todo.md §4.15 for why real names aren't available yet.
-  roles: [
-    "Senior Editor",
-    "Colorist",
-    "Producer",
-    "Motion Design",
-    "Sound Design",
-    "Cinematographer",
-    "VFX Artist",
-    "Creative Lead",
-    "Animator",
+    {
+      question: "Do you offer ongoing monthly support?",
+      answer: "Yes. We can work on individual projects or provide ongoing creative production support.",
+    },
+    {
+      question: "How much do your services cost?",
+      answer:
+        "We currently provide custom quotations rather than public pricing. Requirements vary significantly by complexity, volume and production approach.",
+      cta: createCta("Talk to us about your project", "/contact"),
+    },
+    {
+      question: "Can you do a sample before we commit?",
+      answer:
+        "For suitable opportunities, we may provide a preview or limited sample to understand expectations and demonstrate our approach before moving into a paid engagement.",
+    },
   ],
 };
 
 export const closingCta: ClosingCtaBlock = {
-  headlineLines: ["Let's put a number on your next quarter."],
-  supportingParagraph:
-    "Tell us what you need to ship. We'll come back with a scoped plan and a fixed price before we start.",
+  heading: "Have a creative requirement? Let's talk.",
+  body: "Tell us what you're trying to create. We'll help you determine the right approach, scope and production model.",
+  cta: createCta("Start a Conversation", "/contact"),
+  closingLine: "Project today. Creative partner tomorrow.",
 };
 
 export const footerContent: FooterContent = {
-  tagline: "Video design and creative production, run like an engineering team.",
-  contactEmail: "hello@famysys.com", // TODO(client): fabricated placeholder — confirm real contact address
+  // TODO(client): the brief supplies no footer tagline, contact address or social
+  // handles — see docs/content-todo.md. The tagline below is the brief's own
+  // central-idea sentence, not new copy.
+  tagline:
+    "A professional creative production partner — combining human creativity, AI and efficient production.",
+  contactEmail: "hello@famysys.com", // TODO(client): confirm the real contact address
   legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
-  socialLinks: [
-    createCta("Twitter", "https://twitter.com/famysysstudio"), // TODO(client): fabricated placeholder — confirm real handle or remove
-    createCta("LinkedIn", "https://www.linkedin.com/company/famysys-studio"), // TODO(client): fabricated placeholder — confirm real handle or remove
-    createCta("Instagram", "https://www.instagram.com/famysysstudio"), // TODO(client): fabricated placeholder — confirm real handle or remove
-  ],
+  socialLinks: [], // TODO(client): no social handles supplied in the brief
 };

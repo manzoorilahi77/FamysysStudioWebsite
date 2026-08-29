@@ -1,4 +1,8 @@
+import type { Cta } from "../../shared/value-objects/Cta";
+
 export interface ClosingCtaBlock {
-  readonly headlineLines: ReadonlyArray<string>;
-  readonly supportingParagraph: string;
+  readonly heading: string;
+  readonly body: string;
+  readonly cta: Cta;
+  readonly closingLine: string;
 }

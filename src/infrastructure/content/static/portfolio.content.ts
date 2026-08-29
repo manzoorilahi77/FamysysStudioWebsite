@@ -1,107 +1,70 @@
+// The eight planned pieces from the V1 Homepage Content Brief, §Selected Work.
+// NONE of these have been produced yet — every title and description below is
+// the client's own planned brief for a piece that does not exist. The media is
+// a generated placeholder. See docs/content-todo.md before publishing.
+
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import { Slug } from "../../../domain/shared/value-objects/Slug";
 import type { CaseStudy } from "../../../domain/portfolio/entities/CaseStudy";
-import type { ShowreelClip } from "../../../domain/portfolio/entities/ShowreelClip";
 
-// All client names and outcome claims below are fabricated placeholders — see
-// docs/content-todo.md for the full inventory the client must confirm or replace.
+interface PlannedPiece {
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string;
+}
 
-export const featuredStories: ReadonlyArray<ShowreelClip> = [
+const PLANNED_PIECES: ReadonlyArray<PlannedPiece> = [
   {
-    client: "Marchfield Logistics", // TODO(client): fabricated placeholder — confirm real client or remove
-    quote: "Forty deliverables in six weeks, one point of contact the whole way.", // TODO(client): fabricated outcome claim — confirm with real client before publishing
-    media: MediaRef.create({
-      kind: "video",
-      src: "/media/story-01.mp4",
-      poster: "/media/story-01-poster.svg",
-      alt: "Placeholder story reel for Marchfield Logistics",
-      aspectRatio: "16:9",
-    }),
+    slug: "famysys-studio-capability-film",
+    title: "Famysys Studio Capability Film",
+    description: "Show what the Studio itself can do.",
   },
   {
-    client: "Hearth & Loom", // TODO(client): fabricated placeholder — confirm real client or remove
-    quote: "The brief changed twice. The deadline didn't move.", // TODO(client): fabricated outcome claim — confirm with real client before publishing
-    media: MediaRef.create({
-      kind: "video",
-      src: "/media/story-02.mp4",
-      poster: "/media/story-02-poster.svg",
-      alt: "Placeholder story reel for Hearth & Loom",
-      aspectRatio: "16:9",
-    }),
+    slug: "famysys-it-services-portfolio-film",
+    title: "Famysys IT Services Portfolio Film",
+    description: "B2B/corporate credibility.",
+  },
+  {
+    slug: "food-restaurant-creative-campaign",
+    title: "Food / Restaurant Creative Campaign",
+    description: "Multiple AI videos + social creatives.",
+  },
+  {
+    slug: "ugc-transformation",
+    title: "UGC Transformation",
+    description: "Raw footage → finished professional content.",
+  },
+  {
+    slug: "synthesia-business-explainer",
+    title: "Synthesia Business Explainer",
+    description: "Show presenter + visual storytelling.",
+  },
+  {
+    slug: "training-video-series",
+    title: "Training Video Series",
+    description: "Show scalable training production.",
+  },
+  {
+    slug: "product-visual-campaign",
+    title: "Product Visual Campaign",
+    description: "Product imagery → lifestyle → promotional content.",
+  },
+  {
+    slug: "motion-graphics-showcase",
+    title: "Motion Graphics Showcase",
+    description: "Demonstrate progression toward premium creative.",
   },
 ];
 
-export const caseStudies: ReadonlyArray<CaseStudy> = [
-  {
-    slug: Slug.create("series-a-launch-film"),
-    client: "Solenne Health", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "A funding announcement in four days, not four weeks", // TODO(client): fabricated outcome claim — confirm timeline with real client
-    tags: [{ label: "Brand films" }, { label: "Scriptwriting" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-01.svg",
-      alt: "Placeholder case study art for Solenne Health",
-      aspectRatio: "4:3",
-    }),
-  },
-  {
-    slug: Slug.create("warehouse-safety-series"),
-    client: "Marchfield Logistics", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "Forty safety briefings, one visual system", // TODO(client): fabricated outcome claim — confirm scope with real client
-    tags: [{ label: "Motion graphics" }, { label: "Localisation" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-02.svg",
-      alt: "Placeholder case study art for Marchfield Logistics",
-      aspectRatio: "4:3",
-    }),
-  },
-  {
-    slug: Slug.create("product-launch-suite"),
-    client: "Pallidor Systems", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "One shoot day, eleven deliverables", // TODO(client): fabricated outcome claim — confirm scope with real client
-    tags: [{ label: "Product films" }, { label: "Editing" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-03.svg",
-      alt: "Placeholder case study art for Pallidor Systems",
-      aspectRatio: "4:3",
-    }),
-  },
-  {
-    slug: Slug.create("brand-anthem-film"),
-    client: "Hearth & Loom", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "A brand film that outlasted the rebrand", // TODO(client): fabricated outcome claim — confirm with real client
-    tags: [{ label: "Brand films" }, { label: "Creative direction" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-04.svg",
-      alt: "Placeholder case study art for Hearth & Loom",
-      aspectRatio: "4:3",
-    }),
-  },
-  {
-    slug: Slug.create("founder-interview-series"),
-    client: "Underline Financial", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "Eight founders, one interview format, no reshoots", // TODO(client): fabricated outcome claim — confirm with real client
-    tags: [{ label: "Testimonial films" }, { label: "Colour grade" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-05.svg",
-      alt: "Placeholder case study art for Underline Financial",
-      aspectRatio: "4:3",
-    }),
-  },
-  {
-    slug: Slug.create("conference-recap-package"),
-    client: "Kessler Outdoor", // TODO(client): fabricated placeholder — confirm real client or remove
-    title: "Three days of footage, same-day recap cuts", // TODO(client): fabricated outcome claim — confirm turnaround with real client
-    tags: [{ label: "Event coverage" }, { label: "Editing" }],
-    media: MediaRef.create({
-      kind: "image",
-      src: "/media/case-06.svg",
-      alt: "Placeholder case study art for Kessler Outdoor",
-      aspectRatio: "4:3",
-    }),
-  },
-];
+export const caseStudies: ReadonlyArray<CaseStudy> = PLANNED_PIECES.map((piece, index) => ({
+  slug: Slug.create(piece.slug),
+  reference: String(index + 1).padStart(2, "0"),
+  title: piece.title, // TODO(client): planned piece, not yet produced
+  description: piece.description,
+  media: MediaRef.create({
+    kind: "image",
+    src: `/media/case-${String(index + 1).padStart(2, "0")}.svg`,
+    alt: `Placeholder artwork for ${piece.title}`, // TODO(client): replace once the piece is produced
+    aspectRatio: "4:3",
+  }),
+}));

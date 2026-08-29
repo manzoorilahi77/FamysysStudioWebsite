@@ -1,31 +1,31 @@
 import { describe, expect, it } from "vitest";
-import type { ServiceCategory } from "../../domain/services/entities/ServiceCategory";
+import type { ServiceOffering } from "../../domain/services/entities/ServiceOffering";
 import { FakeServiceCatalogRepository } from "./__fakes__/FakeServiceCatalogRepository";
 import { GetServiceCatalog } from "./GetServiceCatalog";
 
-function fixtureCategories(): ReadonlyArray<ServiceCategory> {
+function fixtureCapabilities(): ReadonlyArray<ServiceOffering> {
   return [
     {
-      title: "Video production",
-      offerings: [{ title: "Brand films", description: "Long-form brand storytelling." }],
+      title: "Creative Design",
+      description: "Social creatives, marketing collateral, presentations, brochures, banners and digital assets.",
     },
   ];
 }
 
 describe("GetServiceCatalog", () => {
-  it("returns the categories from the repository", async () => {
-    const categories = fixtureCategories();
-    const repository = new FakeServiceCatalogRepository(categories);
+  it("returns the capabilities from the repository", async () => {
+    const capabilities = fixtureCapabilities();
+    const repository = new FakeServiceCatalogRepository(capabilities);
     const useCase = new GetServiceCatalog(repository);
 
     const result = await useCase.execute();
 
-    expect(result).toBe(categories);
+    expect(result).toBe(capabilities);
     expect(repository.calls).toBe(1);
   });
 
   it("propagates a repository failure", async () => {
-    const repository = new FakeServiceCatalogRepository(fixtureCategories());
+    const repository = new FakeServiceCatalogRepository(fixtureCapabilities());
     repository.error = new Error("catalog unavailable");
     const useCase = new GetServiceCatalog(repository);
 

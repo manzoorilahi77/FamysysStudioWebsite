@@ -1,9 +1,9 @@
-import type { ServiceCategory } from "../../../domain/services/entities/ServiceCategory";
+import type { ServiceOffering } from "../../../domain/services/entities/ServiceOffering";
 import type { ServiceCatalogRepository } from "../../../domain/services/repositories/ServiceCatalogRepository";
-import { serviceCategories } from "../static/services.content";
+import { capabilities } from "../static/services.content";
 
 export class StaticServiceCatalogRepository implements ServiceCatalogRepository {
-  async getCategories(): Promise<ReadonlyArray<ServiceCategory>> {
-    return serviceCategories;
+  async getCapabilities(): Promise<ReadonlyArray<ServiceOffering>> {
+    return capabilities;
   }
 }

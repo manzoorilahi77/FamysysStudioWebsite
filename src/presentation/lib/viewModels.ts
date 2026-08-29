@@ -1,8 +1,7 @@
 // React Server Components can only pass plain objects across the server/client
-// boundary — our domain value objects (Url, CtaLabel, MediaRef,
-// ComparisonCriterion, Slug) are class instances, so every domain entity
-// handed to a "use client" component must be flattened to a plain view model
-// first. These mappers are that seam.
+// boundary — our domain value objects (Url, CtaLabel, MediaRef, Slug) are class
+// instances, so every domain entity handed to a "use client" component must be
+// flattened to a plain view model first. These mappers are that seam.
 //
 // CONSTRAINT: this file is a pure mapping layer — field renames and
 // `.value`/`.toString()` extraction only. No conditionals, no formatting
@@ -14,17 +13,17 @@
 
 import type { Cta } from "../../domain/shared/value-objects/Cta";
 import type { AspectRatio, MediaKind, MediaRef } from "../../domain/shared/value-objects/MediaRef";
-import type { ComparisonCriterion } from "../../domain/comparison/entities/ComparisonCriterion";
+import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../domain/marketing/entities/HeroContent";
-import type { ManifestoBlock } from "../../domain/marketing/entities/ManifestoBlock";
-import type { PositioningBlock } from "../../domain/marketing/entities/PositioningBlock";
-import type { TalentBlock } from "../../domain/marketing/entities/TalentBlock";
+import type {
+  CustomPartnership,
+  EngagementTier,
+  WaysToWorkBlock,
+} from "../../domain/marketing/entities/EngagementTier";
 import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuColumn";
 import type { NavigationMenu } from "../../domain/navigation/entities/NavigationMenu";
 import type { CaseStudy } from "../../domain/portfolio/entities/CaseStudy";
-import type { ShowreelClip } from "../../domain/portfolio/entities/ShowreelClip";
-import type { WorkSection } from "../../domain/marketing/repositories/MarketingContentRepository";
 
 export interface CtaView {
   readonly label: string;
@@ -57,46 +56,59 @@ export interface NavigationMenuView {
 }
 
 export interface HeroContentView {
-  readonly eyebrow: string;
-  readonly headlineLines: ReadonlyArray<string>;
-  readonly subhead: string;
+  readonly heading: string;
+  readonly body: string;
   readonly primaryCta: CtaView;
   readonly secondaryCta: CtaView;
-  readonly media: MediaView;
+  readonly supportingLine: string;
   readonly mosaicTiles: ReadonlyArray<MediaView>;
-}
-
-export interface ManifestoBlockView {
-  readonly eyebrow: string;
-  readonly statementLines: ReadonlyArray<string>;
-  readonly supportingParagraph: string;
-  readonly cta: CtaView;
-}
-
-export interface PositioningBlockView {
-  readonly eyebrow: string;
-  readonly heading: string;
-  readonly supportingParagraph: string;
-  readonly media: MediaView;
-}
-
-export interface ShowreelClipView {
-  readonly client: string;
-  readonly quote: string;
-  readonly media: MediaView;
 }
 
 export interface CaseStudyView {
   readonly slug: string;
-  readonly client: string;
+  readonly reference: string;
   readonly title: string;
-  readonly tags: ReadonlyArray<string>;
+  readonly description: string;
   readonly media: MediaView;
 }
 
-export interface ComparisonCriterionView {
-  readonly label: string;
-  readonly valuesByColumn: ReadonlyArray<string>;
+export interface EngagementTierView {
+  readonly name: string;
+  readonly descriptor: string;
+  readonly summary: string;
+  readonly idealFor: string;
+  readonly typicalWork: string;
+  readonly cta: CtaView;
+}
+
+export interface CustomPartnershipView {
+  readonly name: string;
+  readonly descriptor: string;
+  readonly summary: string;
+  readonly invitation: string;
+  readonly cta: CtaView;
+}
+
+export interface WaysToWorkBlockView {
+  readonly heading: string;
+  readonly body: string;
+  readonly tiers: ReadonlyArray<EngagementTierView>;
+  readonly custom: CustomPartnershipView;
+}
+
+export interface FaqItemView {
+  readonly question: string;
+  readonly answer: string;
+  // Flat optional fields rather than a nested CtaView, so the mapper can use
+  // plain optional chaining (same precedent as `media.poster?.value`) and stay
+  // free of the branching this file forbids. Only one answer carries a CTA.
+  readonly ctaLabel: string | undefined;
+  readonly ctaHref: string | undefined;
+  readonly ctaIsExternal: boolean | undefined;
+}
+
+export interface FaqBlockView {
+  readonly items: ReadonlyArray<FaqItemView>;
 }
 
 export interface FooterContentView {
@@ -104,19 +116,6 @@ export interface FooterContentView {
   readonly contactEmail: string;
   readonly legalLinks: ReadonlyArray<CtaView>;
   readonly socialLinks: ReadonlyArray<CtaView>;
-}
-
-export interface TalentBlockView {
-  readonly eyebrow: string;
-  readonly heading: string;
-  readonly supportingParagraph: string;
-  readonly tiles: ReadonlyArray<MediaView>;
-  readonly roles: ReadonlyArray<string>;
-}
-
-export interface WorkSectionView {
-  readonly intro: { readonly eyebrow: string; readonly heading: string };
-  readonly exploreCta: CtaView;
 }
 
 export function toCtaView(cta: Cta): CtaView {
@@ -151,50 +150,67 @@ export function toNavigationMenuView(navigation: NavigationMenu): NavigationMenu
 
 export function toHeroContentView(hero: HeroContent): HeroContentView {
   return {
-    eyebrow: hero.eyebrow,
-    headlineLines: hero.headlineLines,
-    subhead: hero.subhead,
+    heading: hero.heading,
+    body: hero.body,
     primaryCta: toCtaView(hero.primaryCta),
     secondaryCta: toCtaView(hero.secondaryCta),
-    media: toMediaView(hero.media),
+    supportingLine: hero.supportingLine,
     mosaicTiles: hero.mosaicTiles.map(toMediaView),
   };
-}
-
-export function toManifestoBlockView(manifesto: ManifestoBlock): ManifestoBlockView {
-  return {
-    eyebrow: manifesto.eyebrow,
-    statementLines: manifesto.statementLines,
-    supportingParagraph: manifesto.supportingParagraph,
-    cta: toCtaView(manifesto.cta),
-  };
-}
-
-export function toPositioningBlockView(positioning: PositioningBlock): PositioningBlockView {
-  return {
-    eyebrow: positioning.eyebrow,
-    heading: positioning.heading,
-    supportingParagraph: positioning.supportingParagraph,
-    media: toMediaView(positioning.media),
-  };
-}
-
-export function toShowreelClipView(clip: ShowreelClip): ShowreelClipView {
-  return { client: clip.client, quote: clip.quote, media: toMediaView(clip.media) };
 }
 
 export function toCaseStudyView(caseStudy: CaseStudy): CaseStudyView {
   return {
     slug: caseStudy.slug.value,
-    client: caseStudy.client,
+    reference: caseStudy.reference,
     title: caseStudy.title,
-    tags: caseStudy.tags.map((tag) => tag.label),
+    description: caseStudy.description,
     media: toMediaView(caseStudy.media),
   };
 }
 
-export function toComparisonCriterionView(criterion: ComparisonCriterion): ComparisonCriterionView {
-  return { label: criterion.label, valuesByColumn: criterion.valuesByColumn };
+function toEngagementTierView(tier: EngagementTier): EngagementTierView {
+  return {
+    name: tier.name,
+    descriptor: tier.descriptor,
+    summary: tier.summary,
+    idealFor: tier.idealFor,
+    typicalWork: tier.typicalWork,
+    cta: toCtaView(tier.cta),
+  };
+}
+
+function toCustomPartnershipView(custom: CustomPartnership): CustomPartnershipView {
+  return {
+    name: custom.name,
+    descriptor: custom.descriptor,
+    summary: custom.summary,
+    invitation: custom.invitation,
+    cta: toCtaView(custom.cta),
+  };
+}
+
+export function toWaysToWorkBlockView(block: WaysToWorkBlock): WaysToWorkBlockView {
+  return {
+    heading: block.heading,
+    body: block.body,
+    tiers: block.tiers.map(toEngagementTierView),
+    custom: toCustomPartnershipView(block.custom),
+  };
+}
+
+function toFaqItemView(item: FaqItem): FaqItemView {
+  return {
+    question: item.question,
+    answer: item.answer,
+    ctaLabel: item.cta?.label.value,
+    ctaHref: item.cta?.href.value,
+    ctaIsExternal: item.cta?.href.isExternal,
+  };
+}
+
+export function toFaqBlockView(faq: FaqBlock): FaqBlockView {
+  return { items: faq.items.map(toFaqItemView) };
 }
 
 export function toFooterContentView(footer: FooterContent): FooterContentView {
@@ -204,18 +220,4 @@ export function toFooterContentView(footer: FooterContent): FooterContentView {
     legalLinks: footer.legalLinks.map(toCtaView),
     socialLinks: footer.socialLinks.map(toCtaView),
   };
-}
-
-export function toTalentBlockView(talent: TalentBlock): TalentBlockView {
-  return {
-    eyebrow: talent.eyebrow,
-    heading: talent.heading,
-    supportingParagraph: talent.supportingParagraph,
-    tiles: talent.tiles.map(toMediaView),
-    roles: talent.roles,
-  };
-}
-
-export function toWorkSectionView(work: WorkSection): WorkSectionView {
-  return { intro: work.intro, exploreCta: toCtaView(work.exploreCta) };
 }

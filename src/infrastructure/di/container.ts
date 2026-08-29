@@ -1,9 +1,7 @@
-import { StaticComparisonRepository } from "../content/repositories/StaticComparisonRepository";
 import { StaticMarketingContentRepository } from "../content/repositories/StaticMarketingContentRepository";
 import { StaticNavigationRepository } from "../content/repositories/StaticNavigationRepository";
 import { StaticPortfolioRepository } from "../content/repositories/StaticPortfolioRepository";
 import { StaticServiceCatalogRepository } from "../content/repositories/StaticServiceCatalogRepository";
-import { StaticSocialProofRepository } from "../content/repositories/StaticSocialProofRepository";
 import { HttpLeadRepository } from "../lead/HttpLeadRepository";
 import { StubLeadRepository } from "../lead/StubLeadRepository";
 
@@ -24,8 +22,6 @@ export const container = {
   marketingContent: new StaticMarketingContentRepository(),
   serviceCatalog: new StaticServiceCatalogRepository(),
   portfolio: new StaticPortfolioRepository(),
-  socialProof: new StaticSocialProofRepository(),
-  comparison: new StaticComparisonRepository(),
   lead: new HttpLeadRepository(),
   // Used by the /api/demo-request route itself (the server-side target the
   // client-side HttpLeadRepository above POSTs to) — see StubLeadRepository.

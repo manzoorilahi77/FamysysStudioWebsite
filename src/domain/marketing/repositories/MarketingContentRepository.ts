@@ -1,40 +1,28 @@
 import type { ClosingCtaBlock } from "../entities/ClosingCtaBlock";
-import type { Differentiator } from "../entities/Differentiator";
+import type { DifferentiatorBlock } from "../entities/DifferentiatorBlock";
+import type { FaqBlock } from "../entities/FaqBlock";
 import type { FooterContent } from "../entities/FooterContent";
 import type { HeroContent } from "../entities/HeroContent";
-import type { ManifestoBlock } from "../entities/ManifestoBlock";
-import type { PositioningBlock } from "../entities/PositioningBlock";
 import type { ProcessBlock } from "../entities/ProcessBlock";
 import type { SectionIntro } from "../entities/SectionIntro";
-import type { TalentBlock } from "../entities/TalentBlock";
-import type { ValuePillar } from "../entities/ValuePillar";
+import type { WaysToWorkBlock } from "../entities/EngagementTier";
+import type { WhyFamysysBlock } from "../entities/WhyFamysysBlock";
 import type { Cta } from "../../shared/value-objects/Cta";
 
-export interface WorkSection {
+export interface WhatWeDoIntro {
   readonly intro: SectionIntro;
-  readonly exploreCta: Cta;
-}
-
-export interface DifferentiatorsBlock {
-  readonly intro: SectionIntro;
-  readonly items: ReadonlyArray<Differentiator>;
+  readonly cta: Cta;
 }
 
 export interface MarketingContentRepository {
   getHero(): Promise<HeroContent>;
-  getManifesto(): Promise<ManifestoBlock>;
-  getValuePillars(): Promise<ReadonlyArray<ValuePillar>>;
-  getPillarsIntro(): Promise<SectionIntro>;
-  getMarqueeEyebrow(): Promise<string>;
-  getPositioning(): Promise<PositioningBlock>;
-  getMetricsIntro(): Promise<SectionIntro>;
-  getServicesIntro(): Promise<SectionIntro>;
-  getWorkSection(): Promise<WorkSection>;
-  getComparisonIntro(): Promise<SectionIntro>;
-  getTestimonialsIntro(): Promise<SectionIntro>;
+  getWhatWeDoIntro(): Promise<WhatWeDoIntro>;
+  getDifferentiatorBlock(): Promise<DifferentiatorBlock>;
   getProcessBlock(): Promise<ProcessBlock>;
-  getDifferentiatorsBlock(): Promise<DifferentiatorsBlock>;
-  getTalentBlock(): Promise<TalentBlock>;
+  getWaysToWorkBlock(): Promise<WaysToWorkBlock>;
+  getWorkIntro(): Promise<SectionIntro>;
+  getWhyFamysysBlock(): Promise<WhyFamysysBlock>;
+  getFaqBlock(): Promise<FaqBlock>;
   getClosingCta(): Promise<ClosingCtaBlock>;
   getFooterContent(): Promise<FooterContent>;
 }

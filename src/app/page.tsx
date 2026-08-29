@@ -1,88 +1,56 @@
 import { GetPrimaryNavigation } from "../application/navigation/GetPrimaryNavigation";
 import { GetHomepageContent } from "../application/marketing/GetHomepageContent";
 import { GetFeaturedWork } from "../application/portfolio/GetFeaturedWork";
-import { GetImpactMetrics } from "../application/social-proof/GetImpactMetrics";
-import { GetClientLogos } from "../application/social-proof/GetClientLogos";
 import { GetServiceCatalog } from "../application/services/GetServiceCatalog";
-import { GetComparisonMatrix } from "../application/comparison/GetComparisonMatrix";
-import { GetTestimonialWall } from "../application/social-proof/GetTestimonialWall";
 import { container } from "../infrastructure/di/container";
 import { Header } from "../presentation/layout/Header";
 import { Footer } from "../presentation/layout/Footer";
 import { Hero } from "../presentation/sections/Hero";
-import { ClientMarquee } from "../presentation/sections/ClientMarquee";
-import { Manifesto } from "../presentation/sections/Manifesto";
-import { Positioning } from "../presentation/sections/Positioning";
-import { Pillars } from "../presentation/sections/Pillars";
-import { ImpactMetrics } from "../presentation/sections/ImpactMetrics";
-import { FeaturedStories } from "../presentation/sections/FeaturedStories";
-import { ServicesGrid } from "../presentation/sections/ServicesGrid";
+import { WhatWeDo } from "../presentation/sections/WhatWeDo";
+import { Differentiator } from "../presentation/sections/Differentiator";
+import { HowWeWork } from "../presentation/sections/HowWeWork";
+import { WaysToWork } from "../presentation/sections/WaysToWork";
 import { SelectedWork } from "../presentation/sections/SelectedWork";
-import { ComparisonMatrix } from "../presentation/sections/ComparisonMatrix";
-import { TestimonialWall } from "../presentation/sections/TestimonialWall";
-import { Process } from "../presentation/sections/Process";
-import { Differentiators } from "../presentation/sections/Differentiators";
-import { Talent } from "../presentation/sections/Talent";
-import { ClosingCta } from "../presentation/sections/ClosingCta";
-import { InlineCta } from "../presentation/sections/InlineCta";
+import { WhyFamysys } from "../presentation/sections/WhyFamysys";
+import { Faq } from "../presentation/sections/Faq";
+import { FinalCta } from "../presentation/sections/FinalCta";
 import {
   toCaseStudyView,
-  toComparisonCriterionView,
+  toCtaView,
+  toFaqBlockView,
   toFooterContentView,
   toHeroContentView,
-  toManifestoBlockView,
   toNavigationMenuView,
-  toPositioningBlockView,
-  toShowreelClipView,
-  toTalentBlockView,
-  toWorkSectionView,
+  toWaysToWorkBlockView,
 } from "../presentation/lib/viewModels";
 
 export default async function HomePage() {
-  const [navigation, homepage, featuredWork, metrics, clientLogos, serviceCatalog, comparison, testimonialWall] =
-    await Promise.all([
-      new GetPrimaryNavigation(container.navigation).execute(),
-      new GetHomepageContent(container.marketingContent).execute(),
-      new GetFeaturedWork(container.portfolio).execute(),
-      new GetImpactMetrics(container.socialProof).execute(),
-      new GetClientLogos(container.socialProof).execute(),
-      new GetServiceCatalog(container.serviceCatalog).execute(),
-      new GetComparisonMatrix(container.comparison).execute(),
-      new GetTestimonialWall(container.socialProof).execute(),
-    ]);
+  const [navigation, homepage, caseStudies, capabilities] = await Promise.all([
+    new GetPrimaryNavigation(container.navigation).execute(),
+    new GetHomepageContent(container.marketingContent).execute(),
+    new GetFeaturedWork(container.portfolio).execute(),
+    new GetServiceCatalog(container.serviceCatalog).execute(),
+  ]);
 
   const navigationView = toNavigationMenuView(navigation);
-  const heroView = toHeroContentView(homepage.hero);
 
   return (
     <>
       <Header navigation={navigationView} />
       <main id="main-content">
-        <Hero hero={heroView} />
-        <ClientMarquee eyebrow={homepage.marqueeEyebrow} logos={clientLogos} />
-        <Manifesto manifesto={toManifestoBlockView(homepage.manifesto)} />
-        <Positioning positioning={toPositioningBlockView(homepage.positioning)} />
-        <Pillars intro={homepage.pillarsIntro} pillars={homepage.pillars} />
-        <InlineCta cta={heroView.primaryCta} prompt="Ready to see it in motion?" />
-        <ImpactMetrics intro={homepage.metricsIntro} metrics={metrics} />
-        <FeaturedStories stories={featuredWork.stories.map(toShowreelClipView)} />
-        <ServicesGrid intro={homepage.servicesIntro} categories={serviceCatalog} />
-        <SelectedWork
-          work={toWorkSectionView(homepage.workSection)}
-          caseStudies={featuredWork.caseStudies.map(toCaseStudyView)}
+        <Hero hero={toHeroContentView(homepage.hero)} />
+        <WhatWeDo
+          intro={homepage.whatWeDo.intro}
+          cta={toCtaView(homepage.whatWeDo.cta)}
+          capabilities={capabilities}
         />
-        <InlineCta cta={heroView.primaryCta} prompt="See the work, then book a call." />
-        <ComparisonMatrix
-          intro={homepage.comparisonIntro}
-          columns={comparison.columns}
-          criteria={comparison.criteria.map(toComparisonCriterionView)}
-        />
-        <TestimonialWall intro={homepage.testimonialsIntro} testimonials={testimonialWall} />
-        <Process process={homepage.process} />
-        <Differentiators intro={homepage.differentiators.intro} items={homepage.differentiators.items} />
-        <InlineCta cta={heroView.primaryCta} prompt="Talk to the team before you commit to anything." />
-        <Talent talent={toTalentBlockView(homepage.talent)} />
-        <ClosingCta closingCta={homepage.closingCta} />
+        <Differentiator differentiator={homepage.differentiator} />
+        <HowWeWork process={homepage.process} />
+        <WaysToWork waysToWork={toWaysToWorkBlockView(homepage.waysToWork)} />
+        <SelectedWork intro={homepage.workIntro} caseStudies={caseStudies.map(toCaseStudyView)} />
+        <WhyFamysys whyFamysys={homepage.whyFamysys} />
+        <Faq faq={toFaqBlockView(homepage.faq)} />
+        <FinalCta closingCta={homepage.closingCta} />
       </main>
       <Footer megaMenu={navigationView.megaMenu} footer={toFooterContentView(homepage.footer)} />
     </>

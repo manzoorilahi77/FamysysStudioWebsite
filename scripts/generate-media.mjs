@@ -1,19 +1,15 @@
 #!/usr/bin/env node
-// Generates every placeholder image and video referenced by
+// Generates every placeholder image referenced by
 // src/infrastructure/content/static/*.content.ts, entirely locally.
 //
-// Nothing is downloaded — images are hand-built SVG strings and videos are
-// synthesized by ffmpeg's `geq` filter from a pure X/Y/T formula (no source
-// footage, no stock assets). Every color used is one of the locked design
-// tokens from docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md.
+// Nothing is downloaded — images are hand-built SVG strings (no stock assets).
+// Every color used is one of the locked design tokens from
+// docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md.
 //
 // Deterministic by construction: no Math.random, no Date.now, no external
 // input. Re-running against a non-empty public/media/ overwrites every file
-// with byte-identical SVGs and (same ffmpeg build, -threads 1) identical MP4s.
-//
-// Requires ffmpeg on PATH. See README.md.
+// with byte-identical SVGs. No external tooling required.
 
-import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -116,174 +112,23 @@ function placeholderSvg({ aspectRatio, plate, label }) {
 }
 
 // ---------------------------------------------------------------------------
-// Client logo marks — flat monochrome shapes on a transparent field, tinted
-// canvas-60 for permanent display over the ink header/hero/marquee block
-// (§4.3). Unlike placeholderSvg's two-tone plates, these bake no background
-// rect, so they never box against the section they sit on.
-// ---------------------------------------------------------------------------
-
-const LOGO_SHAPES = ["circle", "triangle", "diamond", "ring"];
-
-function logoMarkSvg(index) {
-  const size = 900;
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size * 0.28;
-  const shapeName = LOGO_SHAPES[index % LOGO_SHAPES.length];
-  const fill = index % 2 === 0;
-  const shape = shapePath(shapeName, cx, cy, r);
-  const fillAttrs = fill
-    ? `fill="${COLOR.canvas60}"`
-    : `fill="none" stroke="${COLOR.canvas60}" stroke-width="${(r * 0.14).toFixed(1)}"`;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-  <${shape.tag} ${shape.attrs} ${fillAttrs}/>
-</svg>
-`;
-}
-
-// ---------------------------------------------------------------------------
-// Video drift patterns. Rendered with ffmpeg's native `gradients` source
-// filter (a compiled gradient generator) rather than the `geq` per-pixel
-// expression filter — geq evaluates a parsed math expression per pixel per
-// frame in an interpreter and is roughly two orders of magnitude slower;
-// `gradients` produces the same kind of animated radial glow in seconds.
-// Each pattern fixes every parameter that would otherwise default to
-// "random" (seed, start point, colors) so output stays deterministic.
-// ---------------------------------------------------------------------------
-
-const VIDEO_W = 1280;
-const VIDEO_H = 720;
-const DURATION = 8;
-const FPS = 15;
-
-const DRIFT_PATTERNS = {
-  circular: { type: "circular", x0Frac: 0.5, y0Frac: 0.5, seed: 1 },
-  diagonal: { type: "radial", x0Frac: 0.3, y0Frac: 0.7, seed: 2 },
-  vertical: { type: "spiral", x0Frac: 0.7, y0Frac: 0.3, seed: 3 },
-  ascending: { type: "radial", x0Frac: 0.5, y0Frac: 0.82, seed: 4 },
-};
-
-/** A static radial-gradient poster approximating the video's opening frame.
-    `fieldColor` is the outer gradient stop — canvas for videos that now sit
-    on a dark section (their ink-toned edge would otherwise blend into the
-    page), ink for videos that stay on a light section. */
-function posterSvg(patternName, width = VIDEO_W, height = VIDEO_H, fieldColor = COLOR.ink) {
-  const pattern = DRIFT_PATTERNS[patternName];
-  const cx = width * pattern.x0Frac;
-  const cy = height * pattern.y0Frac;
-  const r = Math.hypot(width, height) * 0.35;
-  const gradientId = `glow-${patternName}`;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
-  <defs>
-    <radialGradient id="${gradientId}" cx="${cx}" cy="${cy}" r="${r}" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="${COLOR.accent}"/>
-      <stop offset="100%" stop-color="${fieldColor}"/>
-    </radialGradient>
-  </defs>
-  <rect width="${width}" height="${height}" fill="url(#${gradientId})"/>
-</svg>
-`;
-}
-
-/** ffmpeg's lavfi color parser wants 0xRRGGBB, not the CSS-style #RRGGBB used elsewhere. */
-function toFfmpegColor(hex) {
-  return `0x${hex.slice(1)}`;
-}
-
-function generateVideo(outputPath, patternName, width = VIDEO_W, height = VIDEO_H, fieldColor = COLOR.ink) {
-  const pattern = DRIFT_PATTERNS[patternName];
-  const x0 = Math.round(width * pattern.x0Frac);
-  const y0 = Math.round(height * pattern.y0Frac);
-  const options = [
-    `size=${width}x${height}`,
-    `rate=${FPS}`,
-    `duration=${DURATION}`,
-    `type=${pattern.type}`,
-    `x0=${x0}`,
-    `y0=${y0}`,
-    `c0=${toFfmpegColor(COLOR.accent)}`,
-    `c1=${toFfmpegColor(fieldColor)}`,
-    "nb_colors=2",
-    "speed=0.03",
-    `seed=${pattern.seed}`,
-  ].join(":");
-  const source = `gradients=${options}`;
-
-  execFileSync(
-    "ffmpeg",
-    [
-      "-y",
-      "-f",
-      "lavfi",
-      "-i",
-      source,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "medium",
-      "-crf",
-      "30",
-      "-threads",
-      "1",
-      "-pix_fmt",
-      "yuv420p",
-      "-an",
-      "-movflags",
-      "+faststart",
-      "-fflags",
-      "+bitexact",
-      "-flags:v",
-      "+bitexact",
-      "-metadata",
-      "creation_time=1970-01-01T00:00:00Z",
-      outputPath,
-    ],
-    { stdio: "inherit" },
-  );
-}
-
-// ---------------------------------------------------------------------------
 // File manifest — every path referenced by the content files, in a fixed
 // order so plate-cycling is deterministic across runs.
 // ---------------------------------------------------------------------------
 
-// `plateIndex` pins each file to the plate it was already reviewed and
-// approved with — talent tiles used to fall after the 10 logo entries in
-// this same list (indices 16-24); logos moved to their own generator below,
-// but talent keeps its original plate assignment rather than reshuffling.
+// `plateIndex` pins each file to a plate explicitly, so adding or removing
+// entries never reshuffles the shapes already reviewed on the others.
 const IMAGE_FILES = [
-  ...Array.from({ length: 6 }, (_, i) => ({
+  ...Array.from({ length: 8 }, (_, i) => ({
     file: `case-${String(i + 1).padStart(2, "0")}.svg`,
     aspectRatio: "4:3",
     plateIndex: i,
-  })),
-  ...Array.from({ length: 9 }, (_, i) => ({
-    file: `talent-${String(i + 1).padStart(2, "0")}.svg`,
-    aspectRatio: "1:1",
-    plateIndex: 16 + i,
   })),
   ...MOSAIC_ASPECT_RATIOS.map((aspectRatio, i) => ({
     file: `mosaic-${String(i + 1).padStart(2, "0")}.svg`,
     aspectRatio,
     plateIndex: 40 + i,
   })),
-];
-
-const LOGO_FILES = Array.from({ length: 10 }, (_, i) => `logo-${String(i + 1).padStart(2, "0")}.svg`);
-
-const VIDEO_FILES = [
-  { file: "hero-loop.mp4", poster: "hero-loop-poster.svg", pattern: "circular", fieldColor: COLOR.canvas },
-  { file: "story-01.mp4", poster: "story-01-poster.svg", pattern: "diagonal", fieldColor: COLOR.canvas },
-  { file: "story-02.mp4", poster: "story-02-poster.svg", pattern: "vertical", fieldColor: COLOR.canvas },
-  {
-    file: "positioning.mp4",
-    poster: "positioning-poster.svg",
-    pattern: "ascending",
-    width: 960,
-    height: 1280,
-  },
 ];
 
 function main() {
@@ -296,19 +141,7 @@ function main() {
     console.log(`wrote ${file}`);
   });
 
-  LOGO_FILES.forEach((file, index) => {
-    writeFileSync(join(MEDIA_DIR, file), logoMarkSvg(index));
-    console.log(`wrote ${file}`);
-  });
-
-  for (const { file, poster, pattern, width, height, fieldColor } of VIDEO_FILES) {
-    writeFileSync(join(MEDIA_DIR, poster), posterSvg(pattern, width, height, fieldColor));
-    console.log(`wrote ${poster}`);
-    generateVideo(join(MEDIA_DIR, file), pattern, width, height, fieldColor);
-    console.log(`wrote ${file}`);
-  }
-
-  console.log(`\nDone: ${IMAGE_FILES.length + LOGO_FILES.length + VIDEO_FILES.length * 2} files in ${MEDIA_DIR}`);
+  console.log(`\nDone: ${IMAGE_FILES.length} files in ${MEDIA_DIR}`);
 }
 
 main();

@@ -1,5 +1,5 @@
-import type { ServiceCategory } from "../entities/ServiceCategory";
+import type { ServiceOffering } from "../entities/ServiceOffering";
 
 export interface ServiceCatalogRepository {
-  getCategories(): Promise<ReadonlyArray<ServiceCategory>>;
+  getCapabilities(): Promise<ReadonlyArray<ServiceOffering>>;
 }

@@ -392,6 +392,38 @@ body {
   animation-play-state: paused;
 }
 
+/* FAQ accordion — famysys.com's own pattern: plain type, hairline rules between
+   items, chevron rotating 180° on open. The panel's height animates via
+   grid-template-rows 0fr→1fr (max-height animation needs a magic-number ceiling
+   and eases wrong when the real height is far under it). The inner wrapper
+   needs min-height:0 for the 0fr row to actually collapse. */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition-property: grid-template-rows;
+  transition-duration: var(--duration-base, 320ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.faq-chevron {
+  transition-property: transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-trigger[aria-expanded="true"] .faq-chevron {
+  transform: rotate(180deg);
+}
+
 /* §4.17 Footer accordions — same disclosure pattern as the mobile drawer.
    Below md, panels collapse per the trigger's open state. At md+, every
    column is always visible and the accordion buttons become inert headings. */

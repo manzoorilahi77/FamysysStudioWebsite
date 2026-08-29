@@ -3,8 +3,24 @@
 Marketing homepage for Famysys Studio, built on Next.js 15 (App Router) with a DDD-layered
 `src/` tree (`domain/` → `application/` → `infrastructure/` → `presentation/`/`app/`). See
 `docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md` for the full design spec
-(tokens, contrast rationale, section-by-section brief) and `docs/content-todo.md` for every
-placeholder that needs client confirmation before launch.
+(tokens, contrast rationale) and `docs/content-todo.md` for every placeholder that needs client
+confirmation before launch.
+
+The page runs on the client's V1 Homepage Content Brief — all copy is theirs, verbatim. It has
+nine sections in this order:
+
+1. **Hero** — heading, body, two CTAs, supporting line, and an eight-tile drifting media mosaic
+2. **What We Do** — six capabilities in a light bento (`services.content.ts`)
+3. **The Differentiator** — four elements, closing with the page's thesis line set large and centred
+4. **How We Work** — five numbered steps, 2 + 3 across a six-column grid, on ink
+5. **Ways to Work With Us** — three engagement tiers plus a full-width Custom Partnership card
+6. **Selected Work** — the eight planned pieces (`portfolio.content.ts`)
+7. **Why Famysys** — five reasons, same 2 + 3 split as How We Work
+8. **FAQ** — seven questions, accordion, one open at a time
+9. **Final CTA** — closing heading, body, CTA, closing line, and the contact form
+
+Only the homepage exists. The header, mega menu and footer link the real 7-page site, so those
+routes 404 until their pages are built — see `docs/content-todo.md`.
 
 ## Setup
 
@@ -13,8 +29,8 @@ pnpm install
 pnpm dev
 ```
 
-Requires Node 20+ and pnpm. Regenerating placeholder media (see below) additionally requires
-`ffmpeg` on `PATH`.
+Requires Node 20+ and pnpm. No other tooling — placeholder media is generated from plain SVG
+strings (see below).
 
 ## Scripts
 
@@ -65,6 +81,11 @@ Any real decision (formatting, truncation, conditional display) belongs in a use
 
 ## How to add a new homepage section
 
+Content first: the strings live in `src/infrastructure/content/static/*.content.ts` and come from
+the client's brief verbatim. Don't write marketing copy in a component, and don't paraphrase the
+brief — if something is missing, record it in `docs/content-todo.md` rather than inventing a
+substitute.
+
 1. **Domain**: add an entity (or extend `MarketingContentRepository`) in `src/domain/marketing/`
    describing the section's content shape.
 2. **Infrastructure**: add the fixture data to `src/infrastructure/content/static/*.content.ts`
@@ -75,7 +96,7 @@ Any real decision (formatting, truncation, conditional display) belongs in a use
 4. **Presentation**: build the section component under `src/presentation/sections/`, composed
    from the shared primitives in `src/presentation/components/` (`Section`, `Container`,
    `Eyebrow`, `Button`, `Reveal`). Use `<Section dark>` for a dark-surface section — see the
-   contrast table below for which text/border colors are safe on `bg-ink` vs `bg-canvas`. If the
+   token table below for which text/border colors are safe on `bg-ink` vs `bg-canvas`. If the
    section needs a domain value object (media, a CTA) in a client component, add the matching
    mapper to `viewModels.ts` rather than passing the domain object through directly.
 5. **Wire it up**: import and render the section in `src/app/page.tsx`, in scroll order.
@@ -129,7 +150,7 @@ contrast-ratio table backing every color decision above.
 
 ## Documented deviations from famysys.com
 
-The build intentionally departs from the live site in two places:
+The build intentionally departs from the live site in three places:
 
 1. **`.label` (eyebrow) color is asymmetric between surfaces.** Light surfaces use the real,
    measured `ink-70`. Dark surfaces use full `canvas` rather than the closest real precedent
@@ -137,38 +158,43 @@ The build intentionally departs from the live site in two places:
    color and would make eyebrows recede under the text they're supposed to introduce — confirmed
    by render, not just computed. See design spec §2.1c for the full reasoning.
 2. **`meta theme-color` is `#0F2A4A` (ink), not `#F7F5F2` (canvas) like the live site.** The
-   homepage's light/dark section rhythm was reworked to open on a dark hero (header, hero, and
-   logo marquee form one continuous ink block), so the mobile browser chrome color was changed to
-   match rather than clash with it. Set via Next's `viewport` export in `src/app/layout.tsx`.
+   page opens on a dark hero that forms one continuous ink block with the header, so the mobile
+   browser chrome color was changed to match rather than clash with it. Set via Next's `viewport`
+   export in `src/app/layout.tsx`.
+3. **`display-xl` and `display-l` run roughly 30% larger than famysys.com's measured values**
+   (mobile floors unchanged). famysys.com is a quieter site; the studio page wants the bigger
+   display type. Recorded in `tokens.ts` and `globals.css` at the point of definition.
 
-Both are called out again, with full context, in design spec §2.8.3.
+The first two are called out again, with full context, in design spec §2.8.3.
+
+## Layout conventions worth knowing
+
+- **Odd-numbered card rows resolve as 2 + 3** over a six-column grid — the first two cards take
+  three columns, the last three take two. How We Work (5 steps) and Why Famysys (5 reasons) both
+  use it, so the two odd sections resolve the same way instead of each inventing something.
+- **What We Do's bento fills both rows exactly**: six tiles over four columns, with the tile that
+  opens each row spanning two. Asymmetric without leaving a hole.
+- **The inline nav needs `xl`, not `lg`.** The real page names ("Ways to Work With Us", "Creative
+  Services") are long enough that the header collapses to the mobile drawer below 1280px.
 
 ## Placeholder media
 
-`scripts/generate-media.mjs` regenerates every placeholder image and video referenced by
-`src/infrastructure/content/static/*.content.ts`, entirely locally — nothing is downloaded.
-Images are hand-built SVGs; videos are synthesized with ffmpeg's `gradients` source filter (no
-source footage). Client-logo marks and the hero/story-card video gradients are tinted for
-whichever section background they now sit on (light or dark) — see the script's own comments for
-which videos use which field color.
-
-**Requires `ffmpeg` on `PATH`.** Install it via your platform's package manager (e.g.
-`winget install Gyan.FFmpeg`, `brew install ffmpeg`, `apt install ffmpeg`) and confirm with
-`ffmpeg -version` before running the script.
+`scripts/generate-media.mjs` regenerates every placeholder image referenced by
+`src/infrastructure/content/static/*.content.ts`, entirely locally — nothing is downloaded and no
+external tooling is needed. Images are hand-built SVG strings using only the locked design tokens.
 
 ```bash
 pnpm generate:media
 ```
 
-The script is deterministic — no randomness, no timestamps in its own logic — so re-running
-against a non-empty `public/media/` overwrites every file with the same content. Regenerate it
-any time the content files' media filenames change.
+It writes 16 files: eight 4:3 tiles for Selected Work and eight mixed-ratio tiles for the hero
+mosaic. The script is deterministic — no randomness, no timestamps — so re-running against a
+non-empty `public/media/` overwrites every file with byte-identical content. Regenerate any time
+the content files' media filenames change.
 
-**Every placeholder is inventoried in `docs/content-todo.md`** — client logos, testimonials, case
-studies, impact-metric figures, talent-tile portraits, footer contact/social links — with its
-exact file location and what needs to happen before launch. That file is the single source for
-"is this real or a placeholder"; don't go hunting for `TODO(client)` comments in the content
-files themselves.
+**Every placeholder is inventoried in `docs/content-todo.md`**, with its file location and what
+needs to happen before launch. That file is the single source for "is this real or a
+placeholder"; don't go hunting for `TODO(client)` comments in the content files themselves.
 
 ## Testing and quality gates
 
@@ -176,34 +202,36 @@ files themselves.
   infrastructure repositories all have dedicated test files alongside the code they test.
 - **Boundary enforcement**: `pnpm lint` fails the build on any cross-layer import that violates
   the rule above — this is not just a review checklist, it's load-bearing CI.
-- **Accessibility**: axe-core (`@axe-core/playwright`) reports zero violations against
-  `wcag2a`/`wcag2aa`/`wcag22aa` on a full page sweep (all `Reveal`-gated content scrolled into
-  view first). Lighthouse accessibility scores 100/100 on both mobile and desktop emulation.
-- **Performance**: Lighthouse desktop scores 100/100 (LCP 0.6s, TBT 0ms, CLS 0). Mobile
-  (throttled 4x CPU) fluctuated 79–100 across repeated runs on this development machine due to
-  shared local CPU contention with other tooling running at the same time — LCP held steady at
-  1.9s and CLS at 0 across every run, which are the numbers that don't depend on machine load.
-  Re-run `pnpm build && pnpm start` plus a Lighthouse pass on a quiet machine (or in CI) before
-  treating the mobile performance score as final.
-- **Reduced motion**: every animation (marquee, testimonial drift, counters, card hover lift,
-  parallax, Lenis) is built to collapse to an instant, opacity-only 120ms transition when
-  `prefers-reduced-motion: reduce` is set — verified by actually setting the OS/browser
-  preference and re-checking each section, not by reading the code.
-- **Responsive**: no horizontal overflow at 360, 390, 430, 768, 1024 (portrait and landscape),
-  1280, 1440, or 1920px, nor at 200% browser zoom. Breakpoint collapses (mega menu → drawer,
-  comparison table → swipe cards, services grid 4/3/2/1 columns) all land exactly at `lg`
-  (1024px).
+- **Structure**: exactly one `<h1>`, no skipped heading levels, nine `<section>` elements in
+  `<main>`, and no price-shaped string anywhere in the rendered page (the brief forbids public
+  pricing, so it is asserted rather than assumed).
+- **Reduced motion**: every animation is built to collapse to an instant, opacity-only 120ms
+  transition when `prefers-reduced-motion: reduce` is set — verified by actually setting the
+  browser preference and re-checking, not by reading the code. The FAQ still opens and closes
+  with motion reduced.
+- **Keyboard**: full tab pass over the page. All four "Talk to us" links in Ways to Work With Us
+  are reachable; all seven FAQ triggers are reachable and operate on Enter and Space; a collapsed
+  answer's inline link is kept out of the tab order by `inert` and enters it when the answer
+  opens; every focused element shows a visible focus ring.
+- **FAQ disclosure ARIA**: every trigger has an id, `aria-expanded`, and an `aria-controls` that
+  resolves to a real element which points back via `aria-labelledby`. Asserted, because both
+  earlier accordions in this project shipped with this wrong.
+- **Responsive**: no horizontal overflow at 360, 390, 430, 768, 1024, 1280, 1440, or 1920px.
+
+**Not re-measured since the content rebuild:** the Lighthouse and axe-core numbers previously
+recorded here were measured against the earlier version of this page, which no longer exists.
+They have been removed rather than carried forward. Re-run both against the current build before
+treating either as known.
 
 ## What's left
 
-- Every fabricated placeholder in `docs/content-todo.md` needs a real client-supplied
-  replacement (or explicit removal) before launch — this is the biggest remaining gap.
-- Mobile Lighthouse performance should be re-measured on a dedicated/CI machine rather than a
-  shared dev machine, per the note above.
-- `TestimonialCard.tsx` uses a semantic `<footer>` for the attribution line inside each
-  `<blockquote>`, which is valid HTML but means the page has many `<footer>` elements alongside
-  the real site footer — worth a second look at whether `<cite>`/`<figcaption>` reads better,
-  though it doesn't trip any of the WCAG rules checked here.
-- The demo-request success message's "within one business day" reply commitment (flagged in
-  `docs/content-todo.md`) needs the studio's sign-off before launch, since it's an operational
-  promise, not placeholder copy.
+- **The eight Selected Work pieces do not exist yet.** The section presents eight planned pieces
+  with placeholder artwork — the largest gap between this page and a publishable one. See
+  `docs/content-todo.md`.
+- **Real hero stills.** The mosaic holds eight slots at fixed aspect ratios so real stills drop in
+  one-for-one; it currently shows generated geometric placeholders.
+- **Re-run Lighthouse and axe-core** against the rebuilt page, per the note above.
+- **The six inner pages.** Every nav and CTA route except `/` 404s today; `/contact` is the most
+  urgent, since it is the destination of nearly every CTA on the page.
+- **Copy the brief doesn't supply** — FAQ section heading, footer tagline, contact address, social
+  handles, and confirmation of the contact form's fields. All listed in `docs/content-todo.md`.

@@ -43,12 +43,15 @@ export function Header({ navigation }: HeaderProps) {
         transitionDuration: "240ms",
       }}
     >
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
+      {/* The real site's page names ("Ways to Work With Us", "Creative Services")
+          are long enough that the inline nav needs the full container width and
+          only fits from xl up — below that it collapses to the drawer. */}
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <Link href="/" className={`text-display-s font-medium ${textClass}`} style={{ transitionDuration: "240ms" }}>
           Famysys Studio
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
+        <nav aria-label="Main" className="hidden items-center gap-6 xl:flex">
           {servicesLink ? (
             <div
               ref={megaWrapperRef}
@@ -88,7 +91,7 @@ export function Header({ navigation }: HeaderProps) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden shrink-0 items-center gap-4 xl:flex">
           <Button cta={navigation.signIn} variant="ghost" dark={isDark} />
           <Button cta={navigation.primaryCta} variant="primary" dark={isDark} />
         </div>
@@ -97,7 +100,7 @@ export function Header({ navigation }: HeaderProps) {
           ref={drawerTriggerRef}
           id="mobile-drawer-trigger"
           type="button"
-          className={`label lg:hidden ${textClass}`}
+          className={`label xl:hidden ${textClass}`}
           style={{ transitionDuration: "240ms" }}
           aria-expanded={isDrawerOpen}
           aria-controls="mobile-drawer"
