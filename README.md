@@ -103,6 +103,48 @@ substitute.
    production build (`pnpm build && pnpm start`) for reduced motion, keyboard reachability, and
    no horizontal overflow at 360–1920px.
 
+## Creative Services (`/creative-services`)
+
+The first inner page. It follows the same layers as the homepage, with its own repository
+method (`ServiceCatalogRepository.getCreativeServicesPage`), use case
+(`GetCreativeServicesPage`) and content file, wired through the same container.
+
+**`CapabilityDetail` extends `ServiceOffering` rather than replacing it.** The page needs an
+expanded paragraph, a deliverables list, an image and a CTA per capability, but the six
+**names and descriptors are approved client copy** and must not be retyped beside drafted
+text. The content file therefore spreads each catalog entry — `{ ...offering, slug, ... }` —
+so those two strings keep exactly one definition, and a test fails if the page's copy ever
+diverges from the catalog's. The same applies to the five process steps, the four tier names
+and three of the four FAQ entries: all imported, none restated.
+
+Everything else on the page is **drafted, not supplied**. Every drafted string is marked
+`TODO(client): expanded copy — draft, pending approval` at its definition and listed in full
+in `docs/content-todo.md` for review.
+
+Block shapes, following the homepage's rule that no two sections repeat one:
+
+| Section | Shape |
+|---|---|
+| Page hero | ~60svh, not a full viewport. Eyebrow, two-line heading, intro, one CTA, then a short wide image band |
+| Capability index | Six anchors, sticky under the header from `md`; a horizontally scrolling strip below it |
+| Six capability blocks | Asymmetric 5/12 image against 6/12 copy with a column of gap, the image dropped a step. Side **and** surface alternate — the left/right flip alone still left six panels of one tone |
+| How this works | The homepage's `HowWeWork`, reused with a page-specific heading and a trailing link |
+| Ways to engage | Four hairline rows, name and one line each — a pointer, not a second copy of the tier content |
+| FAQ | The homepage accordion, with a real heading rather than its `TODO(client)` placeholder |
+| Closing CTA | The homepage's `FinalCta`, with page copy and its own accent phrase |
+
+Two things worth knowing before editing it:
+
+- **Anchor offsets are measured, not written down.** `CapabilityIndex` measures the header and
+  itself, sets its own sticky `top`, and publishes the sum as `--services-anchor-offset` for
+  `scroll-margin-top`. The header changes height at `xl`, and a stale constant here shows up as
+  an anchor jump landing with the heading hidden behind the bar — a bug nobody would attribute
+  to this file.
+- **`scroll-behavior: smooth` is global**, added for these anchors and already covered by the
+  reduced-motion block. It also means any programmatic `window.scrollTo` animates: automation
+  that scrolls a page in steps must pass `behavior: "instant"` or it will crawl a few hundred
+  pixels and leave everything below unrevealed.
+
 ## Swapping static content for a CMS
 
 Every `Static*Repository` in `src/infrastructure/content/repositories/` implements a domain
@@ -260,7 +302,11 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 | Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
 | Step numerals | How We Work | `ClipNumber` — each numeral clips up on its own observer as its step enters |
 | Card hover | All cards | Accent border, 6px lift, no shadow; media tiles add a 1.05 scale |
-| Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1 |
+| Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1. Opt out with `fade={false}` where the section carries **accent-on-dark** text — that colour is derived against full ink (5.015:1) and measures 3.79:1 against the fade's start value, ink-90 over canvas (#22405D). The failure is intermittent, since it depends on how far the section has entered when anything looks |
+| Split-block entry | Creative Services | Image then copy, 120ms apart; the image is the half that establishes which side of the split the block is on |
+| Image settle | Creative Services | The block image scales 1.0 → 1.03 as it arrives and stops. It settles; it does not loop |
+| Deliverable stagger | Creative Services | 50ms per row, fired from the list's own observer rather than one per row — the rows are close enough together that per-row observers would fire at once and collapse the stagger |
+| Sticky index active state | Creative Services | Colour and underline transition over 200ms as sections pass. The active section is the last one whose top has crossed the reading line, not whichever is intersecting — the sections are taller than the viewport, so "is intersecting" is true for two of them at a time |
 
 ## Placeholder media
 
@@ -316,7 +362,12 @@ treating either as known.
 - **Real hero stills.** The mosaic holds eight slots at fixed aspect ratios so real stills drop in
   one-for-one; it currently shows generated geometric placeholders.
 - **Re-run Lighthouse and axe-core** against the rebuilt page, per the note above.
-- **The six inner pages.** Every nav and CTA route except `/` 404s today; `/contact` is the most
-  urgent, since it is the destination of nearly every CTA on the page.
+- **The five remaining inner pages.** `/` and `/creative-services` are built; every other nav and
+  CTA route 404s. `/contact` is the most urgent, since it is the destination of nearly every CTA
+  on both pages, followed by `/how-we-work` and `/ways-to-work-with-us`, which Creative Services
+  links out to from its two pointer blocks.
+- **Approval on the Creative Services draft copy.** Everything on that page except the six
+  capability names and descriptors, the process steps, the tier names and three FAQ entries was
+  written to fill the page, and is listed for review in `docs/content-todo.md`.
 - **Copy the brief doesn't supply** — FAQ section heading, footer tagline, contact address, social
   handles, and confirmation of the contact form's fields. All listed in `docs/content-todo.md`.

@@ -8,9 +8,15 @@ import { Section } from "../components/Section";
 
 interface FinalCtaProps {
   readonly closingCta: ClosingCtaBlock;
+  /**
+   * Which words take the display accent. It has to travel with the heading: a phrase that
+   * is not in the heading simply does not match, so a page with its own closing copy would
+   * silently lose the accent if this stayed hard-coded to the homepage's wording.
+   */
+  readonly accent?: ReadonlyArray<string>;
 }
 
-export function FinalCta({ closingCta }: FinalCtaProps) {
+export function FinalCta({ closingCta, accent = ["creative requirement?"] }: FinalCtaProps) {
   return (
     <Section dark statement ariaLabel={closingCta.heading}>
       <Container>
@@ -23,7 +29,7 @@ export function FinalCta({ closingCta }: FinalCtaProps) {
         <RevealHeading
           as="h2"
           className="text-display-xl mx-auto max-w-[15ch] text-center font-semibold text-balance text-canvas"
-          accent={["creative requirement?"]}
+          accent={accent}
         >
           {closingCta.heading}
         </RevealHeading>

@@ -12,6 +12,16 @@ interface SectionProps {
   readonly statement?: boolean;
   readonly ariaLabel?: string;
   readonly className?: string;
+  /**
+   * Dark sections settle their background from ink-90 to ink as they enter. Opt out where
+   * the section carries accent-on-dark text: that colour is derived against full ink
+   * (5.015:1) and measures only 3.79:1 against the fade's start value, ink-90 composited
+   * over canvas (#22405D). Canvas text survives the start state at 9.616:1, which is why
+   * the fade was safe until something other than canvas sat on it. The failure is also
+   * intermittent — it depends on how far a section has entered when anything looks — so
+   * the fade is switched off rather than the colour worked around.
+   */
+  readonly fade?: boolean;
 }
 
 function paddingFor(dark: boolean, statement: boolean): string {
@@ -37,6 +47,7 @@ export function Section({
   statement = false,
   ariaLabel,
   className = "",
+  fade = true,
 }: SectionProps) {
   const [ref, isInView] = useInView<HTMLElement>({ threshold: 0.05, once: true });
 
@@ -45,10 +56,14 @@ export function Section({
       ref={ref}
       id={id}
       aria-label={ariaLabel}
-      className={`${dark ? "surface-dark section-fade bg-ink text-canvas" : "bg-canvas text-ink"} ${className}`}
+      className={`${dark ? "surface-dark bg-ink text-canvas" : "bg-canvas text-ink"} ${
+        dark && fade ? "section-fade" : ""
+      } ${className}`}
       style={{
         paddingBlock: paddingFor(dark, statement),
-        ...(dark ? { backgroundColor: isInView ? "var(--color-ink)" : "var(--color-ink-90)" } : {}),
+        ...(dark && fade
+          ? { backgroundColor: isInView ? "var(--color-ink)" : "var(--color-ink-90)" }
+          : {}),
       }}
     >
       {children}

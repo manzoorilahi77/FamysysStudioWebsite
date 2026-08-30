@@ -9,6 +9,13 @@ import { SectionHeader } from "../components/SectionHeader";
 
 interface FaqProps {
   readonly faq: FaqBlockView;
+  /**
+   * Defaults reproduce the homepage's deliberately conspicuous placeholder. An inner page
+   * that has a heading passes one; it does not inherit the homepage's unfilled gap.
+   */
+  readonly eyebrow?: string;
+  readonly heading?: string;
+  readonly ariaLabel?: string;
 }
 
 interface FaqRowProps {
@@ -80,17 +87,22 @@ function FaqRow({ item, index, isOpen, onToggle }: FaqRowProps) {
   );
 }
 
-export function Faq({ faq }: FaqProps) {
+export function Faq({
+  faq,
+  eyebrow = "Questions",
+  heading = "TODO(client)",
+  ariaLabel = "Frequently asked questions",
+}: FaqProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <Section ariaLabel="Frequently asked questions">
+    <Section ariaLabel={ariaLabel}>
       <Container>
         {/* TODO(client): the brief supplies seven Q&As but no heading or eyebrow for
             the section. The placeholder below keeps the structure right — every other
             section opens with a SectionHeader — and is deliberately conspicuous so it
             cannot ship unnoticed. See docs/content-todo.md. */}
-        <SectionHeader eyebrow="Questions" heading="TODO(client)" />
+        <SectionHeader eyebrow={eyebrow} heading={heading} />
         <div className="mt-14 max-w-[72ch]">
           {faq.items.map((item, index) => (
             <FaqRow

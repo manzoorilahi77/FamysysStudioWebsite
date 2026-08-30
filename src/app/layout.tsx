@@ -10,9 +10,14 @@ const jost = Jost({
 
 // DEVIATION (brand deviation 5, PENDING MANAGER APPROVAL): the brand rules specify
 // Jost with a fallback stack and no second typeface. Instrument Serif Italic is added
-// as a display accent only — see docs spec §2.8.3 and README.md. It is scoped to the
-// `Accent` component and must never reach body copy, card titles, eyebrows, nav or
-// buttons; a test fails the build if it appears more than five times on the page.
+// as a display accent only — see docs spec §2.8.3 and README.md. It is scoped to
+// RevealHeading's `accent` prop and must never reach body copy, card titles, eyebrows, nav
+// or buttons. The budget is at most five accented words per page: the homepage renders 4
+// and /creative-services renders 4. NOTE: this is checked by counting rendered
+// `.text-display-accent` spans during the verification pass, NOT by a build-failing test —
+// an earlier version of this comment claimed a test enforced it, and none does. A unit test
+// cannot count them, because the budget is a property of the rendered page rather than of
+// any one module.
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",

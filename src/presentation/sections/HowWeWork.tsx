@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { ProcessBlock } from "../../domain/marketing/entities/ProcessBlock";
 import { motion } from "../../shared/design/tokens";
@@ -10,9 +11,13 @@ import { SectionHeader } from "../components/SectionHeader";
 import { useActiveStep } from "../hooks/useActiveStep";
 import { useInView } from "../hooks/useInView";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import type { CtaView } from "../lib/viewModels";
 
 interface HowWeWorkProps {
   readonly process: ProcessBlock;
+  /** Both optional and both unused on the homepage, where this section IS the process. */
+  readonly eyebrow?: string | undefined;
+  readonly cta?: CtaView | undefined;
 }
 
 /** Each segment gets an equal share of the 900ms draw, so the line arrives at one step at a time. */
@@ -37,7 +42,7 @@ function segmentDelayMs(index: number, stepCount: number): number {
  * The section is light. Its numerals go from `ink-20` to `accent`, and accent is 2.458:1 on
  * ink — it only reads as an active-state signal on canvas. §3 takes the dark beat instead.
  */
-export function HowWeWork({ process }: HowWeWorkProps) {
+export function HowWeWork({ process, eyebrow, cta }: HowWeWorkProps) {
   const stepCount = process.steps.length;
   const [scrollRef, scrolledStep] = useActiveStep<HTMLOListElement>(stepCount);
   const [drawRef, hasEntered] = useInView<HTMLDivElement>({ threshold: 0.2, once: true });
@@ -49,7 +54,7 @@ export function HowWeWork({ process }: HowWeWorkProps) {
   return (
     <Section ariaLabel={process.heading}>
       <Container>
-        <SectionHeader heading={process.heading} />
+        <SectionHeader eyebrow={eyebrow} heading={process.heading} />
         <div ref={drawRef}>
           <ol ref={scrollRef} className="mt-14 grid list-none gap-0 lg:grid-cols-5 lg:gap-6">
             {process.steps.map((step, index) => {
@@ -99,6 +104,11 @@ export function HowWeWork({ process }: HowWeWorkProps) {
             })}
           </ol>
         </div>
+        {cta ? (
+          <Link href={cta.href} className="text-small mt-12 inline-block font-medium text-accent">
+            {cta.label} &rarr;
+          </Link>
+        ) : null}
       </Container>
     </Section>
   );

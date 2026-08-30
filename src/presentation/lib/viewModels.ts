@@ -27,6 +27,8 @@ import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuCo
 import type { NavEntry, NavPanel, NavPanelFeature } from "../../domain/navigation/entities/NavPanel";
 import type { NavigationMenu } from "../../domain/navigation/entities/NavigationMenu";
 import type { CaseStudy } from "../../domain/portfolio/entities/CaseStudy";
+import type { CapabilityDetail } from "../../domain/services/entities/CapabilityDetail";
+import type { ServicesHero } from "../../domain/services/entities/CreativeServicesPage";
 
 export interface CtaView {
   readonly label: string;
@@ -143,6 +145,24 @@ export interface FaqItemView {
 
 export interface FaqBlockView {
   readonly items: ReadonlyArray<FaqItemView>;
+}
+
+export interface CapabilityDetailView {
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string;
+  readonly expandedCopy: string;
+  readonly deliverables: ReadonlyArray<string>;
+  readonly media: MediaView;
+  readonly cta: CtaView;
+}
+
+export interface ServicesHeroView {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly body: string;
+  readonly cta: CtaView;
+  readonly media: MediaView;
 }
 
 export interface FooterContentView {
@@ -279,6 +299,28 @@ function toFaqItemView(item: FaqItem): FaqItemView {
 
 export function toFaqBlockView(faq: FaqBlock): FaqBlockView {
   return { items: faq.items.map(toFaqItemView) };
+}
+
+export function toCapabilityDetailView(detail: CapabilityDetail): CapabilityDetailView {
+  return {
+    slug: detail.slug.value,
+    title: detail.title,
+    description: detail.description,
+    expandedCopy: detail.expandedCopy,
+    deliverables: detail.deliverables,
+    media: toMediaView(detail.media),
+    cta: toCtaView(detail.cta),
+  };
+}
+
+export function toServicesHeroView(hero: ServicesHero): ServicesHeroView {
+  return {
+    eyebrow: hero.eyebrow,
+    heading: hero.heading,
+    body: hero.body,
+    cta: toCtaView(hero.cta),
+    media: toMediaView(hero.media),
+  };
 }
 
 export function toFooterContentView(footer: FooterContent): FooterContentView {

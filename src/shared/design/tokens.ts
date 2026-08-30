@@ -143,6 +143,10 @@ export const motion = {
     diagonalStepMs: 70,
     rowStepMs: 80,
     numeralStepMs: 140,
+    // /creative-services: the two halves of a capability block's asymmetric split arrive
+    // one after the other, and its deliverable rows run down the list.
+    splitStepMs: 120,
+    listStepMs: 50,
   },
   parallax: {
     positioning: 24, // px — §4.5, scaled down from Superside's 40px per 2.7

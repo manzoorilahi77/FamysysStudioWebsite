@@ -1165,3 +1165,138 @@ body {
 .decorative-numeral::before {
   content: attr(data-numeral);
 }
+
+/* ============================================================================
+   Creative Services (/creative-services)
+   ============================================================================ */
+
+/* Anchor jumps have to clear both fixed things above them — the header and the sticky
+   capability index. The offset is published by CapabilityIndex from its own measurement
+   of those two elements, so it cannot drift when the header changes height; the fallback
+   is the desktop sum, used for the moment before the first measurement lands. */
+html {
+  scroll-behavior: smooth;
+}
+
+.scroll-anchor {
+  scroll-margin-top: var(--services-anchor-offset, 9rem);
+}
+
+/* The hero's one image. Short on purpose: the hero holds about 60svh, and a tall band
+   here would push the first capability off the fold and turn a section page into a
+   splash screen. */
+.services-hero-band {
+  height: clamp(6rem, 12svh, 10rem);
+  overflow: hidden;
+}
+
+/* The capability index. Below md it is a horizontally scrolling strip — six long service
+   names cannot wrap into anything readable on a phone, and a strip at least shows that
+   there is more to the right. From md up it sticks under the header. */
+.capability-index {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.capability-index::-webkit-scrollbar {
+  display: none;
+}
+
+.capability-index-list {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  width: max-content;
+  min-width: 100%;
+  padding-inline: var(--spacing-gutter);
+}
+
+@media (min-width: 1024px) {
+  .capability-index-list {
+    width: auto;
+    gap: 0.5rem;
+  }
+}
+
+.capability-index-link {
+  display: block;
+  white-space: nowrap;
+  padding: 1rem 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-ink-70);
+  border-bottom: 2px solid transparent;
+  transition-property: color, border-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-index-link:hover {
+  color: var(--color-ink);
+}
+
+/* Active state carries BOTH colour and a rule. Colour alone would be the only signal
+   distinguishing the current service, and colour alone is not a signal for everyone —
+   the underline is what makes it legible without seeing the hue. */
+.capability-index-link[data-active="true"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  font-weight: 500;
+}
+
+/* The block image settles into a 3% scale as it arrives and stops there. It is the image
+   landing, not an idle loop — nothing on this page moves once the reader stops scrolling. */
+.capability-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 4 / 3;
+}
+
+.capability-media img {
+  transform: scale(1);
+  transition-property: transform;
+  transition-duration: 900ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-media[data-settled="true"] img {
+  transform: scale(1.03);
+}
+
+.deliverable-row {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  align-items: baseline;
+  gap: 0.25rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.deliverable-row[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.deliverable-marker {
+  display: block;
+  width: 0.5rem;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.5;
+  transform: translateY(-0.35em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-media img,
+  .capability-media[data-settled="true"] img {
+    transform: none;
+  }
+
+  .deliverable-row,
+  .deliverable-row[data-visible="true"] {
+    transform: none;
+  }
+}
