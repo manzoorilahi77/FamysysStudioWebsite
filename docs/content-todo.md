@@ -38,6 +38,26 @@ file and rewrite the `alt`, which currently describes the stock frame.
 | `mosaic-07.jpg` | 1:1 | Mirrorless camera beside a laptop | `photo-1621600411688-4be93cd68504` |
 | `mosaic-08.jpg` | 3:4 | Compact camera lit in blue and magenta | `photo-1516724562728-afc824a36e84` |
 
+### The Differentiator (§3)
+
+File: `src/infrastructure/content/static/marketing.content.ts` (`differentiatorImage`)
+
+The four elements now render as a card row with an image filling the upper part of each card, so
+every element needs a frame. Each stock photograph was chosen against its specific element and
+checked against it before wiring — a replacement has to carry the same subject or the card stops
+matching its own title. Rewrite the `alt` alongside the file.
+
+| Element | Frame shows | Unsplash id |
+|---|---|---|
+| Human Creativity | Hand with a stylus over a tablet, on printed digital-painting artwork | `photo-1558655146-9f40138edfeb` |
+| Intelligent AI Workflows | Ultrawide monitor on a studio desk, design tool full of artboards | `photo-1621111848501-8d3634f82336` |
+| Professional Production | Overhead of an editor at a three-screen workstation, darkened room | `photo-1550439062-609e1531270e` |
+| Efficient Delivery | Tidy daylit desk, laptop and monitor showing content dashboards | `photo-1499951360447-b19be8fe80f5` |
+
+Two of these carry incidental third-party marks at full size — a monitor bezel logo on
+`element-02`, another studio's page design on the `element-04` screens. Both are small enough to be
+unreadable at the rendered card size, but they are one more reason these are placeholders.
+
 ### Selected Work (§6)
 
 File: `src/infrastructure/content/static/portfolio.content.ts`
@@ -60,6 +80,14 @@ photograph chosen to suggest the subject.
 This remains the single largest gap: the section presents eight pieces of work that do not exist,
 now illustrated with photography that is not the studio's. Either the pieces get produced, or the
 section ships with fewer entries, or it waits.
+
+### Hero subhead runs three lines, not two-and-a-half
+
+The hero detail brief asked for a subhead of two to two-and-a-half lines **and** a measure capped
+at 46–52ch. Those cannot both hold: the client's body copy is 180 characters, so at 52ch it is
+3.5 lines by arithmetic, and reaching 2.5 lines would need a ~72ch measure. The measure cap was
+followed (52ch, landing on three lines at 1440). Shortening the copy would need the client, since
+every string on the page is theirs verbatim.
 
 ### Video — not delivered, and why
 
@@ -98,6 +126,7 @@ client holds is off-palette and should be reissued.
 | Item | Where | What is needed |
 |---|---|---|
 | FAQ section heading | `src/presentation/sections/Faq.tsx` | The brief gives seven Q&As but no heading for the section. It now renders a deliberately conspicuous placeholder — eyebrow "Questions", heading `TODO(client)` — so the section has the same shape as every other one and the gap cannot ship unnoticed. **This string is visible on the page.** |
+| The Differentiator eyebrow | `marketing.content.ts` (`differentiatorBlock`) | Every other section opens eyebrow-heading-body; this one has no eyebrow string in the brief, so it opens on the heading instead. `leadIn` is not a substitute — it is a sentence ending in a colon that introduces the four cards, and it is set as one above them. Supply an eyebrow or confirm the section opens without one. |
 | Footer tagline | `marketing.content.ts` (`footerContent.tagline`) | Currently reuses the brief's own central-idea sentence. Not new copy, but not written for the footer either — confirm or replace. |
 | Contact email | `marketing.content.ts` (`footerContent.contactEmail`) | `hello@famysys.com` is a placeholder. Confirm the real address. |
 | Social links | `marketing.content.ts` (`footerContent.socialLinks`) | The brief supplies no handles, so the list is empty and no social row renders. Supply handles or confirm there are none. |

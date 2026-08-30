@@ -42,6 +42,23 @@ describe("StaticMarketingContentRepository", () => {
     expect(differentiator.closingStatement).toBe("AI is our production advantage — not our identity.");
   });
 
+  it("gives every differentiator element its own image, in element order", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const differentiator = await repository.getDifferentiatorBlock();
+
+    expect(differentiator.elements.map((element) => element.media.src.value)).toEqual([
+      "/media/element-01.jpg",
+      "/media/element-02.jpg",
+      "/media/element-03.jpg",
+      "/media/element-04.jpg",
+    ]);
+    for (const element of differentiator.elements) {
+      expect(element.media.kind).toBe("image");
+      expect(element.media.alt.length).toBeGreaterThan(0);
+    }
+  });
+
   it("returns exactly 5 process steps in the brief's order", async () => {
     const repository = new StaticMarketingContentRepository();
 

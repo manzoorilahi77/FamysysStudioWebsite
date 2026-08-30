@@ -21,69 +21,33 @@ export function Hero({ hero }: HeroProps) {
   }, []);
 
   const isRevealed = isMounted || prefersReducedMotion;
+  const fadeIn = (delayMs: number) => ({
+    opacity: isRevealed ? 1 : 0,
+    transform: prefersReducedMotion || isRevealed ? "translateY(0)" : "translateY(12px)",
+    transitionProperty: "opacity, transform",
+    transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
+    transitionDelay: prefersReducedMotion ? "0ms" : `${delayMs}ms`,
+    transitionTimingFunction: "var(--ease-base)",
+  });
 
   return (
+    // Exactly one viewport tall, header included — the header is fixed and overlays this
+    // section, so `pt-24` is what keeps the copy clear of it rather than the section
+    // being shortened by the header's height. Everything inside has to fit; the type
+    // scale came down for it, the section height did not go up.
     <section
       aria-label="Introduction"
-      className="surface-dark flex items-center bg-ink pt-24"
-      style={{ minHeight: "calc(100svh - 5rem)" }}
+      className="surface-dark relative flex items-center overflow-hidden bg-ink pt-24"
+      style={{ height: "100svh" }}
     >
-      <Container className="grid items-center gap-10 lg:grid-cols-2 lg:items-stretch">
-        <div>
-          {/* The h1 uses the same line-by-line reveal as every other display heading
-              on the page; it just fires on mount rather than on scroll, because it is
-              already in view. */}
-          <RevealHeading
-            as="h1"
-            className="text-display-xl font-semibold text-canvas"
-            accent={["the agency overhead."]}
-          >
-            {hero.heading}
-          </RevealHeading>
-          <p
-            className="text-lead mt-6 text-canvas-80"
-            style={{
-              maxWidth: "60ch",
-              opacity: isRevealed ? 1 : 0,
-              transform: prefersReducedMotion || isRevealed ? "translateY(0)" : "translateY(12px)",
-              transitionProperty: "opacity, transform",
-              transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
-              transitionDelay: prefersReducedMotion ? "0ms" : "200ms",
-              transitionTimingFunction: "var(--ease-base)",
-            }}
-          >
-            {hero.body}
-          </p>
-          <div
-            className="mt-8 flex flex-wrap gap-4"
-            style={{
-              opacity: isRevealed ? 1 : 0,
-              transform: prefersReducedMotion || isRevealed ? "translateY(0)" : "translateY(12px)",
-              transitionProperty: "opacity, transform",
-              transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
-              transitionDelay: prefersReducedMotion ? "0ms" : "200ms",
-              transitionTimingFunction: "var(--ease-base)",
-            }}
-          >
-            <Button cta={hero.primaryCta} variant="primary" dark />
-            <Button cta={hero.secondaryCta} variant="ghost" dark />
-          </div>
-          <p
-            className="text-small mt-6 text-canvas-60"
-            style={{
-              opacity: isRevealed ? 1 : 0,
-              transitionProperty: "opacity",
-              transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
-              transitionDelay: prefersReducedMotion ? "0ms" : "300ms",
-              transitionTimingFunction: "var(--ease-base)",
-            }}
-          >
-            {hero.supportingLine}
-          </p>
-        </div>
-
+      {/* Full-bleed vertically and to the right edge: the mosaic starts at the very top
+          of the section, so tiles pass behind the transparent header, and finishes flush
+          with the section's bottom edge. It is positioned against the section rather than
+          placed in the container grid, which is what lets its right column reach the
+          viewport edge instead of stopping at the container gutter. */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
         <div
-          className="h-[380px] sm:h-[460px] lg:h-full"
+          className="hero-mosaic-frame pointer-events-auto h-full"
           style={{
             transform: prefersReducedMotion || isRevealed ? "scale(1)" : "scale(1.04)",
             transitionProperty: "transform",
@@ -92,6 +56,36 @@ export function Hero({ hero }: HeroProps) {
           }}
         >
           <HeroMosaic tiles={hero.mosaicTiles} />
+        </div>
+      </div>
+
+      <div
+        className="hero-top-scrim pointer-events-none absolute inset-x-0 top-0 z-[5]"
+        aria-hidden="true"
+      />
+
+      <Container className="relative z-10">
+        <div className="lg:max-w-[46%]">
+          {/* The h1 uses the same line-by-line reveal as every other display heading
+              on the page; it just fires on mount rather than on scroll, because it is
+              already in view. */}
+          <RevealHeading
+            as="h1"
+            className="text-hero font-semibold text-canvas"
+            accent={["the agency overhead."]}
+          >
+            {hero.heading}
+          </RevealHeading>
+          <p className="text-lead mt-6 text-canvas-80" style={{ maxWidth: "52ch", ...fadeIn(200) }}>
+            {hero.body}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4" style={fadeIn(200)}>
+            <Button cta={hero.primaryCta} variant="primary" dark />
+            <Button cta={hero.secondaryCta} variant="ghost" dark />
+          </div>
+          <p className="text-small mt-6 text-canvas-60" style={fadeIn(300)}>
+            {hero.supportingLine}
+          </p>
         </div>
       </Container>
     </section>

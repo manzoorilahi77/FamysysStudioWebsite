@@ -43,16 +43,33 @@ function fixtureWhatWeDo(): WhatWeDoIntro {
   return { intro: fixtureIntro("Our capabilities"), cta: createCta("Explore All Services", "/creative-services") };
 }
 
+function fixtureMedia(): MediaRef {
+  return MediaRef.create({
+    kind: "image",
+    src: "/media/element-01.jpg",
+    alt: "An element image.",
+    aspectRatio: "4:3",
+  });
+}
+
 function fixtureDifferentiator(): DifferentiatorBlock {
   return {
     heading: "The right mix of creativity, technology and people.",
     body: "AI has changed how creative work can be produced.",
     leadIn: "At Famysys Studio, we combine:",
     elements: [
-      { title: "Human Creativity", description: "Ideas, storytelling, art direction." },
-      { title: "Intelligent AI Workflows", description: "AI used where it genuinely improves speed." },
-      { title: "Professional Production", description: "Design, editing, motion, compositing." },
-      { title: "Efficient Delivery", description: "Structured workflows." },
+      { title: "Human Creativity", description: "Ideas, storytelling, art direction.", media: fixtureMedia() },
+      {
+        title: "Intelligent AI Workflows",
+        description: "AI used where it genuinely improves speed.",
+        media: fixtureMedia(),
+      },
+      {
+        title: "Professional Production",
+        description: "Design, editing, motion, compositing.",
+        media: fixtureMedia(),
+      },
+      { title: "Efficient Delivery", description: "Structured workflows.", media: fixtureMedia() },
     ],
     closingStatement: "AI is our production advantage — not our identity.",
   };

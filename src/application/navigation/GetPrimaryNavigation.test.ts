@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createCta } from "../../domain/shared/value-objects/Cta";
+import { EMPTY_NAV_PANEL } from "../../domain/navigation/entities/NavPanel";
 import type { NavigationMenu } from "../../domain/navigation/entities/NavigationMenu";
 import { FakeNavigationRepository } from "./__fakes__/FakeNavigationRepository";
 import { GetPrimaryNavigation } from "./GetPrimaryNavigation";
 
 function fixtureMenu(): NavigationMenu {
-  const link = createCta("Services", "/services");
   return {
-    primaryLinks: [link],
-    megaMenu: [],
+    primaryLinks: [{ link: createCta("Services", "/services"), panel: EMPTY_NAV_PANEL }],
     signIn: createCta("Sign in", "/sign-in"),
     primaryCta: createCta("Book a call", "/contact"),
   };

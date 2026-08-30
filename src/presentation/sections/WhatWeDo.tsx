@@ -1,11 +1,15 @@
+"use client";
+
 import type { ServiceOffering } from "../../domain/services/entities/ServiceOffering";
+import { motion } from "../../shared/design/tokens";
 import type { CtaView } from "../lib/viewModels";
 import type { SectionIntro } from "../../domain/marketing/entities/SectionIntro";
 import { Button } from "../components/Button";
+import { CapabilityCard } from "../components/CapabilityCard";
 import { Container } from "../components/Container";
-import { Reveal } from "../components/Reveal";
 import { Section } from "../components/Section";
 import { SectionHeader } from "../components/SectionHeader";
+import { useGridColumns } from "../hooks/useGridColumns";
 
 interface WhatWeDoProps {
   readonly intro: SectionIntro;
@@ -13,10 +17,23 @@ interface WhatWeDoProps {
   readonly capabilities: ReadonlyArray<ServiceOffering>;
 }
 
-// Six text-only tiles of equal weight, so this is an even 3 x 2 grid, not a bento.
-// Uneven spans only earn their keep when the tiles differ in importance or carry
-// media; here they just produced mismatched heights and a hole to design around.
+/**
+ * Six text-only tiles of equal weight, so this is an even 3 x 2 grid, not a bento.
+ * Uneven spans only earn their keep when the tiles differ in importance or carry media;
+ * here they just produced mismatched heights and a hole to design around.
+ *
+ * The reference's services block is 20 tiles with a photograph on each — that shape does
+ * not survive being handed six lines of text, so the tiles carry a numeral instead and
+ * the section earns its place on motion rather than on imagery.
+ *
+ * Entry is a diagonal: `(row + column)` steps, so the wave crosses the grid corner to
+ * corner instead of sweeping row by row. The column count comes from the same breakpoints
+ * the grid uses, so at one column the formula collapses to a plain sequential stagger,
+ * which is the right reading of a diagonal when there is only one of them.
+ */
 export function WhatWeDo({ intro, cta, capabilities }: WhatWeDoProps) {
+  const columns = useGridColumns();
+
   return (
     <Section ariaLabel={intro.heading}>
       <Container>
@@ -24,17 +41,14 @@ export function WhatWeDo({ intro, cta, capabilities }: WhatWeDoProps) {
 
         <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-3">
           {capabilities.map((capability, index) => (
-            <Reveal key={capability.title} index={index} staggerStepMs={60}>
-              <div className="card-surface flex h-full flex-col justify-between p-8">
-                <div>
-                  <p className="text-display-s font-medium text-ink">{capability.title}</p>
-                  <p className="text-body mt-3 text-ink-70">{capability.description}</p>
-                </div>
-                <span className="service-tile-arrow mt-6 text-accent" aria-hidden="true">
-                  &rarr;
-                </span>
-              </div>
-            </Reveal>
+            <CapabilityCard
+              key={capability.title}
+              capability={capability}
+              numeral={String(index + 1).padStart(2, "0")}
+              delayMs={
+                (Math.floor(index / columns) + (index % columns)) * motion.stagger.diagonalStepMs
+              }
+            />
           ))}
         </div>
 

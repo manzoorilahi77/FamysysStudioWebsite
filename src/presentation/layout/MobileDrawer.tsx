@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { CtaView, MegaMenuColumnView } from "../lib/viewModels";
+import type { CtaView, NavEntryView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useScrollLock } from "../hooks/useScrollLock";
@@ -11,8 +11,7 @@ import { staggerDelay } from "../motion/variants";
 interface MobileDrawerProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly primaryLinks: ReadonlyArray<CtaView>;
-  readonly megaMenuColumns: ReadonlyArray<MegaMenuColumnView>;
+  readonly entries: ReadonlyArray<NavEntryView>;
   readonly signIn: CtaView;
   readonly primaryCta: CtaView;
   readonly panelId: string;
@@ -20,11 +19,19 @@ interface MobileDrawerProps {
   readonly triggerRef: React.RefObject<HTMLElement | null>;
 }
 
+function hasPanel(entry: NavEntryView): boolean {
+  return entry.panel.columns.length > 0 || entry.panel.features.length > 0;
+}
+
+/** Every panel item, flattened — the drawer lists them, it does not lay them out. */
+function panelLinks(entry: NavEntryView): ReadonlyArray<CtaView> {
+  return [...entry.panel.columns.flatMap((column) => column.items), ...entry.panel.features];
+}
+
 export function MobileDrawer({
   isOpen,
   onClose,
-  primaryLinks,
-  megaMenuColumns,
+  entries,
   signIn,
   primaryCta,
   panelId,
@@ -59,9 +66,6 @@ export function MobileDrawer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const [servicesLink, ...restLinks] = primaryLinks;
-  const staggerItems = [servicesLink, ...restLinks].filter((link): link is CtaView => Boolean(link));
-
   return (
     <div
       ref={panelRef}
@@ -70,7 +74,7 @@ export function MobileDrawer({
       aria-modal="true"
       aria-labelledby={triggerId}
       tabIndex={-1}
-      className="surface-light transition-base fixed inset-0 z-50 bg-canvas"
+      className="surface-light transition-base fixed inset-0 z-50 overflow-y-auto bg-canvas"
       style={{
         opacity: isOpen ? 1 : 0,
         visibility: isOpen ? "visible" : "hidden",
@@ -83,69 +87,83 @@ export function MobileDrawer({
           Close
         </button>
       </div>
+      {/* The three panels collapse into accordion groups here — same content, same
+          disclosure ARIA, one open at a time. Items without a panel stay plain links. */}
       <nav aria-label="Mobile" className="flex flex-col gap-2 px-6">
-        {staggerItems.map((link, index) => {
-          const isServices = index === 0;
-          const isGroupOpen = openGroup === link.label;
+        {entries.map((entry, index) => {
+          const isGroupOpen = openGroup === entry.href;
+          const groupTriggerId = `drawer-trigger-${index}`;
+          const groupPanelId = `drawer-panel-${index}`;
+          const revealStyle = {
+            transitionProperty: "opacity, transform",
+            transitionDuration: "220ms",
+            transitionDelay: isOpen ? `${staggerDelay(index, 30)}ms` : "0ms",
+            opacity: isOpen ? 1 : 0,
+            transform: isOpen ? "translateY(0)" : "translateY(8px)",
+          };
+
           return (
-            <div key={link.href} className="border-b border-ink-8 py-3">
-              {isServices ? (
+            <div key={entry.href} className="border-b border-ink-8 py-3">
+              {hasPanel(entry) ? (
                 <>
                   <button
+                    id={groupTriggerId}
                     type="button"
                     className="text-display-s w-full text-left font-medium text-ink"
                     aria-expanded={isGroupOpen}
-                    onClick={() => setOpenGroup(isGroupOpen ? null : link.label)}
-                    style={{
-                      transitionProperty: "opacity, transform",
-                      transitionDuration: "220ms",
-                      transitionDelay: isOpen ? `${staggerDelay(index, 30)}ms` : "0ms",
-                      opacity: isOpen ? 1 : 0,
-                      transform: isOpen ? "translateY(0)" : "translateY(8px)",
-                    }}
+                    aria-controls={groupPanelId}
+                    onClick={() => setOpenGroup(isGroupOpen ? null : entry.href)}
+                    style={revealStyle}
                   >
-                    {link.label}
+                    {entry.label}
                   </button>
-                  {isGroupOpen ? (
-                    <div className="mt-3 space-y-4 pl-2">
-                      {megaMenuColumns.map((column) => (
-                        <div key={column.title}>
-                          <p className="label text-ink-70">{column.title}</p>
-                          <ul className="mt-2 space-y-2">
-                            {column.items.map((item) => (
-                              <li key={item.href}>
-                                <Link href={item.href} className="text-body text-ink" onClick={onClose}>
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                  <div
+                    id={groupPanelId}
+                    role="region"
+                    aria-labelledby={groupTriggerId}
+                    data-open={isGroupOpen}
+                    inert={!isGroupOpen}
+                    className="faq-panel"
+                  >
+                    <div className="faq-panel-inner">
+                      <ul className="mt-3 space-y-2 pb-3 pl-2">
+                        {panelLinks(entry).map((item) => (
+                          <li key={`${item.href}-${item.label}`}>
+                            <Link href={item.href} className="text-body text-ink" onClick={onClose}>
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                        {entry.panel.footerHref && entry.panel.footerLabel ? (
+                          <li>
+                            <Link
+                              href={entry.panel.footerHref}
+                              className="text-small font-medium text-accent"
+                              onClick={onClose}
+                            >
+                              {entry.panel.footerLabel} &rarr;
+                            </Link>
+                          </li>
+                        ) : null}
+                      </ul>
                     </div>
-                  ) : null}
+                  </div>
                 </>
               ) : (
                 <Link
-                  href={link.href}
+                  href={entry.href}
                   onClick={onClose}
                   className="text-display-s block font-medium text-ink"
-                  style={{
-                    transitionProperty: "opacity, transform",
-                    transitionDuration: "220ms",
-                    transitionDelay: isOpen ? `${staggerDelay(index, 30)}ms` : "0ms",
-                    opacity: isOpen ? 1 : 0,
-                    transform: isOpen ? "translateY(0)" : "translateY(8px)",
-                  }}
+                  style={revealStyle}
                 >
-                  {link.label}
+                  {entry.label}
                 </Link>
               )}
             </div>
           );
         })}
       </nav>
-      <div className="mt-6 flex flex-col gap-3 px-6">
+      <div className="mt-6 flex flex-col gap-3 px-6 pb-10">
         <Button cta={signIn} variant="ghost" />
         <Button cta={primaryCta} variant="primary" />
       </div>

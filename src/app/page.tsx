@@ -17,6 +17,7 @@ import { FinalCta } from "../presentation/sections/FinalCta";
 import {
   toCaseStudyView,
   toCtaView,
+  toDifferentiatorBlockView,
   toFaqBlockView,
   toFooterContentView,
   toHeroContentView,
@@ -44,7 +45,7 @@ export default async function HomePage() {
           cta={toCtaView(homepage.whatWeDo.cta)}
           capabilities={capabilities}
         />
-        <Differentiator differentiator={homepage.differentiator} />
+        <Differentiator differentiator={toDifferentiatorBlockView(homepage.differentiator)} />
         <HowWeWork process={homepage.process} />
         <WaysToWork waysToWork={toWaysToWorkBlockView(homepage.waysToWork)} />
         <SelectedWork intro={homepage.workIntro} caseStudies={caseStudies.map(toCaseStudyView)} />
@@ -52,7 +53,7 @@ export default async function HomePage() {
         <Faq faq={toFaqBlockView(homepage.faq)} />
         <FinalCta closingCta={homepage.closingCta} />
       </main>
-      <Footer megaMenu={navigationView.megaMenu} footer={toFooterContentView(homepage.footer)} />
+      <Footer entries={navigationView.primaryLinks} footer={toFooterContentView(homepage.footer)} />
     </>
   );
 }

@@ -16,8 +16,10 @@ describe("StaticNavigationRepository", () => {
 
     const menu = await repository.getPrimaryMenu();
     const allHrefs = new Set([
-      ...menu.primaryLinks.map((link) => link.href.value),
-      ...menu.megaMenu.flatMap((column) => column.items.map((item) => item.href.value)),
+      ...menu.primaryLinks.map((entry) => entry.link.href.value),
+      ...menu.primaryLinks.flatMap((entry) =>
+        entry.panel.columns.flatMap((column) => column.items.map((item) => item.href.value)),
+      ),
       menu.signIn.href.value,
       menu.primaryCta.href.value,
     ]);
@@ -36,11 +38,31 @@ describe("StaticNavigationRepository", () => {
     }
   });
 
-  it("surfaces all 6 capabilities across the mega menu", async () => {
+  it("gives exactly three items a panel, and leaves the rest plain links", async () => {
     const repository = new StaticNavigationRepository();
 
     const menu = await repository.getPrimaryMenu();
-    const allLabels = menu.megaMenu.flatMap((column) => column.items.map((item) => item.label.value));
+    const withPanels = menu.primaryLinks.filter(
+      (entry) => entry.panel.columns.length > 0 || entry.panel.features.length > 0,
+    );
+
+    expect(withPanels.map((entry) => entry.link.label.value)).toEqual([
+      "Creative Services",
+      "Ways to Work With Us",
+      "Selected Work",
+    ]);
+  });
+
+  it("surfaces all 6 capabilities in the Creative Services panel", async () => {
+    const repository = new StaticNavigationRepository();
+
+    const menu = await repository.getPrimaryMenu();
+    const services = menu.primaryLinks.find(
+      (entry) => entry.link.label.value === "Creative Services",
+    );
+    const labels = (services?.panel.columns ?? []).flatMap((column) =>
+      column.items.map((item) => item.label.value),
+    );
 
     for (const capability of [
       "Creative Design",
@@ -50,16 +72,45 @@ describe("StaticNavigationRepository", () => {
       "Motion Graphics & Advanced Creative",
       "Product & Brand Visuals",
     ]) {
-      expect(allLabels).toContain(capability);
+      expect(labels).toContain(capability);
     }
   });
 
-  it("gives every mega menu item a non-empty description", async () => {
+  it("lists every engagement tier, including the custom partnership", async () => {
     const repository = new StaticNavigationRepository();
 
     const menu = await repository.getPrimaryMenu();
-    const allItems = menu.megaMenu.flatMap((column) => column.items);
+    const ways = menu.primaryLinks.find(
+      (entry) => entry.link.label.value === "Ways to Work With Us",
+    );
+    const labels = (ways?.panel.columns ?? []).flatMap((column) =>
+      column.items.map((item) => item.label.value),
+    );
 
-    expect(allItems.every((item) => item.description.trim().length > 0)).toBe(true);
+    expect(labels).toEqual(["Launch", "Grow", "Scale", "Custom Creative Partnership"]);
+  });
+
+  it("shows work covers, not link text, in the Selected Work panel", async () => {
+    const repository = new StaticNavigationRepository();
+
+    const menu = await repository.getPrimaryMenu();
+    const work = menu.primaryLinks.find((entry) => entry.link.label.value === "Selected Work");
+
+    expect(work?.panel.columns).toHaveLength(0);
+    expect(work?.panel.features).toHaveLength(4);
+    expect(work?.panel.features.every((feature) => feature.media.src.value.length > 0)).toBe(true);
+  });
+
+  it("gives every panel a footer link and every link item a description", async () => {
+    const repository = new StaticNavigationRepository();
+
+    const menu = await repository.getPrimaryMenu();
+    const panels = menu.primaryLinks
+      .map((entry) => entry.panel)
+      .filter((panel) => panel.columns.length > 0 || panel.features.length > 0);
+    const items = panels.flatMap((panel) => panel.columns.flatMap((column) => column.items));
+
+    expect(panels.every((panel) => panel.footerLink !== undefined)).toBe(true);
+    expect(items.every((item) => item.description.trim().length > 0)).toBe(true);
   });
 });

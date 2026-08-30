@@ -66,6 +66,16 @@ export const whatWeDoIntro: WhatWeDoIntro = {
   cta: createCta("Explore All Services", "/creative-services"),
 };
 
+// TODO(client): the four element images are Unsplash stock, standing in until the studio
+// has its own frames for each. Source ids are listed in docs/content-todo.md. Each was
+// picked against its element specifically — a stylus over artwork for Human Creativity, a
+// design tool on screen for Intelligent AI Workflows, an edit workstation for Professional
+// Production, an organised desk for Efficient Delivery — so a replacement has to match the
+// same subject, and the `alt` has to be rewritten with it.
+function differentiatorImage(file: string, alt: string): MediaRef {
+  return MediaRef.create({ kind: "image", src: `/media/${file}.jpg`, alt, aspectRatio: "4:3" });
+}
+
 export const differentiatorBlock: DifferentiatorBlock = {
   heading: "The right mix of creativity, technology and people.",
   body: "AI has changed how creative work can be produced. But great creative work still requires judgment, storytelling, design sense and human quality control.",
@@ -74,18 +84,34 @@ export const differentiatorBlock: DifferentiatorBlock = {
     {
       title: "Human Creativity",
       description: "Ideas, storytelling, art direction and creative judgment.",
+      media: differentiatorImage(
+        "element-01",
+        "A hand holding a stylus over a tablet, resting on printed digital-painting artwork.",
+      ),
     },
     {
       title: "Intelligent AI Workflows",
       description: "AI used where it genuinely improves speed, flexibility and production possibilities.",
+      media: differentiatorImage(
+        "element-02",
+        "An ultrawide monitor on a studio desk showing a design tool full of layout artboards.",
+      ),
     },
     {
       title: "Professional Production",
       description: "Design, editing, motion, compositing and finishing.",
+      media: differentiatorImage(
+        "element-03",
+        "Overhead view of an editor working at a three-screen workstation in a darkened room.",
+      ),
     },
     {
       title: "Efficient Delivery",
       description: "Structured workflows designed to deliver quality without unnecessary agency overhead.",
+      media: differentiatorImage(
+        "element-04",
+        "A tidy desk with a laptop and monitor, both showing content dashboards, in daylight.",
+      ),
     },
   ],
   closingStatement: "AI is our production advantage — not our identity.",

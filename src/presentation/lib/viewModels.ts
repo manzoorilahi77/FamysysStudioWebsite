@@ -13,6 +13,8 @@
 
 import type { Cta } from "../../domain/shared/value-objects/Cta";
 import type { AspectRatio, MediaKind, MediaRef } from "../../domain/shared/value-objects/MediaRef";
+import type { Differentiator } from "../../domain/marketing/entities/Differentiator";
+import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
 import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../domain/marketing/entities/HeroContent";
@@ -22,6 +24,7 @@ import type {
   WaysToWorkBlock,
 } from "../../domain/marketing/entities/EngagementTier";
 import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuColumn";
+import type { NavEntry, NavPanel, NavPanelFeature } from "../../domain/navigation/entities/NavPanel";
 import type { NavigationMenu } from "../../domain/navigation/entities/NavigationMenu";
 import type { CaseStudy } from "../../domain/portfolio/entities/CaseStudy";
 
@@ -48,9 +51,26 @@ export interface MegaMenuColumnView {
   readonly items: ReadonlyArray<MegaMenuLinkView>;
 }
 
+export interface NavPanelFeatureView extends CtaView {
+  readonly media: MediaView;
+}
+
+export interface NavPanelView {
+  readonly columns: ReadonlyArray<MegaMenuColumnView>;
+  readonly features: ReadonlyArray<NavPanelFeatureView>;
+  // Flat optional fields rather than a nested CtaView, so the mapper can reach them with
+  // plain optional chaining (same precedent as `media.poster?.value`) and stay free of
+  // the branching this file forbids. Only the three items with panels carry a footer.
+  readonly footerLabel: string | undefined;
+  readonly footerHref: string | undefined;
+}
+
+export interface NavEntryView extends CtaView {
+  readonly panel: NavPanelView;
+}
+
 export interface NavigationMenuView {
-  readonly primaryLinks: ReadonlyArray<CtaView>;
-  readonly megaMenu: ReadonlyArray<MegaMenuColumnView>;
+  readonly primaryLinks: ReadonlyArray<NavEntryView>;
   readonly signIn: CtaView;
   readonly primaryCta: CtaView;
 }
@@ -70,6 +90,20 @@ export interface CaseStudyView {
   readonly title: string;
   readonly description: string;
   readonly media: MediaView;
+}
+
+export interface DifferentiatorView {
+  readonly title: string;
+  readonly description: string;
+  readonly media: MediaView;
+}
+
+export interface DifferentiatorBlockView {
+  readonly heading: string;
+  readonly body: string;
+  readonly leadIn: string;
+  readonly elements: ReadonlyArray<DifferentiatorView>;
+  readonly closingStatement: string;
 }
 
 export interface EngagementTierView {
@@ -139,10 +173,26 @@ function toMegaMenuColumnView(column: MegaMenuColumn): MegaMenuColumnView {
   };
 }
 
+function toNavPanelFeatureView(feature: NavPanelFeature): NavPanelFeatureView {
+  return { ...toCtaView(feature), media: toMediaView(feature.media) };
+}
+
+function toNavPanelView(panel: NavPanel): NavPanelView {
+  return {
+    columns: panel.columns.map(toMegaMenuColumnView),
+    features: panel.features.map(toNavPanelFeatureView),
+    footerLabel: panel.footerLink?.label.value,
+    footerHref: panel.footerLink?.href.value,
+  };
+}
+
+function toNavEntryView(entry: NavEntry): NavEntryView {
+  return { ...toCtaView(entry.link), panel: toNavPanelView(entry.panel) };
+}
+
 export function toNavigationMenuView(navigation: NavigationMenu): NavigationMenuView {
   return {
-    primaryLinks: navigation.primaryLinks.map(toCtaView),
-    megaMenu: navigation.megaMenu.map(toMegaMenuColumnView),
+    primaryLinks: navigation.primaryLinks.map(toNavEntryView),
     signIn: toCtaView(navigation.signIn),
     primaryCta: toCtaView(navigation.primaryCta),
   };
@@ -166,6 +216,24 @@ export function toCaseStudyView(caseStudy: CaseStudy): CaseStudyView {
     title: caseStudy.title,
     description: caseStudy.description,
     media: toMediaView(caseStudy.media),
+  };
+}
+
+function toDifferentiatorView(element: Differentiator): DifferentiatorView {
+  return {
+    title: element.title,
+    description: element.description,
+    media: toMediaView(element.media),
+  };
+}
+
+export function toDifferentiatorBlockView(block: DifferentiatorBlock): DifferentiatorBlockView {
+  return {
+    heading: block.heading,
+    body: block.body,
+    leadIn: block.leadIn,
+    elements: block.elements.map(toDifferentiatorView),
+    closingStatement: block.closingStatement,
   };
 }
 

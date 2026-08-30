@@ -62,6 +62,16 @@ body {
   line-height: 1.02;
   letter-spacing: -0.03em;
 }
+/* The hero headline sits in a 46%-wide column and has to hold two lines there, so it
+   takes its own step rather than display-xl, which broke it onto five. The column is
+   ~522px at every width from 1280 up, because the container caps at 80rem, so the line
+   count is set by the font size alone: this resolves to ~40px at 1440, about 24
+   characters a line, which is two lines for the client's 48-character headline. */
+.text-hero {
+  font-size: clamp(1.9rem, 2.8vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.026em;
+}
 .text-display-l {
   font-size: clamp(1.75rem, 3.85vw, 4.25rem);
   line-height: 1.06;
@@ -141,6 +151,9 @@ body {
   --ease-base: cubic-bezier(0.22, 1, 0.36, 1);
   --duration-fast: 180ms;
   --duration-reduced: 120ms;
+  --duration-hover: 200ms;
+  --duration-base: 320ms;
+  --duration-draw: 900ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,6 +231,100 @@ body {
   transition-property: background-color;
   transition-duration: 900ms;
   transition-timing-function: var(--ease-base);
+}
+
+/* Nav links — resting colour is slightly muted and lifts to full on hover, with an
+   underline that wipes in from the left. The wipe is a scaleX on a pseudo-element with
+   a left transform-origin, so it animates on the compositor rather than by growing a
+   box. Both tones exist because the bar is transparent over the ink hero and canvas
+   once it fills. */
+.nav-link {
+  position: relative;
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition-property: color;
+  transition-duration: 240ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-link-label {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-link-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.25rem;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-link:hover .nav-link-label::after,
+.nav-link:focus-visible .nav-link-label::after,
+.nav-link[aria-expanded="true"] .nav-link-label::after {
+  transform: scaleX(1);
+}
+
+.nav-link--dark {
+  color: var(--color-canvas-80);
+}
+
+.nav-link--dark:hover,
+.nav-link--dark:focus-visible,
+.nav-link--dark[aria-expanded="true"] {
+  color: var(--color-canvas);
+}
+
+.nav-link--light {
+  color: var(--color-ink-70);
+}
+
+.nav-link--light:hover,
+.nav-link--light:focus-visible,
+.nav-link--light[aria-expanded="true"] {
+  color: var(--color-ink);
+}
+
+/* Panel rows get the same wipe treatment, on the title line only. */
+.nav-panel-link .media-tile {
+  transition-property: border-color, transform;
+  transition-duration: var(--duration-fast);
+}
+
+.nav-panel-link:hover .media-tile,
+.nav-panel-link:focus-visible .media-tile {
+  border-color: var(--color-accent);
+  transform: translateY(-4px);
+}
+
+/* Buttons lift as well as fill — colour alone read as a state change, not a response. */
+.button-motion {
+  transition-property: color, background-color, border-color, transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.button-motion:hover {
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button-motion:hover {
+    transform: none;
+  }
+  .nav-link-label::after {
+    transition-duration: var(--duration-reduced);
+  }
 }
 
 /* Marquee — CSS-driven, no JS per-frame loop. */
@@ -429,11 +536,112 @@ body {
   background-color: var(--color-ink);
 }
 
-/* §4.2 Hero mosaic — vertical drift reuses the testimonial-track keyframes (identical
-   translateY(-50%) loop mechanic); columns differ only by duration/direction. */
-.hero-mosaic-edge-mask {
-  mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+/* Hero mosaic. The drift is driven from JS rather than CSS keyframes: it has to reverse
+   on scroll direction and accelerate with scroll velocity, and a keyframe animation can
+   do neither. The transform is the only thing JS touches per frame, so it stays on the
+   compositor.
+
+   The bottom mask is the only fade. The top is deliberately open so tiles are seen
+   passing behind the transparent header, and the last 15% dissolves into the ink so the
+   columns do not cut off hard at the section edge. */
+.hero-mosaic-frame {
+  mask-image: linear-gradient(to bottom, black 0%, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 85%, transparent 100%);
+}
+
+/* The mosaic runs behind the header, which means the nav sits over whatever photograph
+   happens to be passing. A gradient of the section's own ink holds the top of it back far
+   enough for the nav to read, while leaving the tiles visible moving underneath — which
+   is the point of running the mosaic up there in the first place. Automated contrast
+   checks cannot see this: axe skips any text over an image, so it is verified by
+   sampling the rendered pixels behind each nav link. */
+.hero-top-scrim {
+  height: 9rem;
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-ink) 94%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 74%, transparent) 55%,
+    transparent 100%
+  );
+}
+
+.hero-mosaic {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .hero-mosaic {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.hero-mosaic-column {
+  overflow: hidden;
+}
+
+.hero-mosaic-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  will-change: transform;
+}
+
+.hero-mosaic-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition-property: transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.hero-mosaic-tile:hover,
+.hero-mosaic-tile:focus-visible {
+  transform: scale(1.03);
+}
+
+/* A scrim under the icon, so the corner arrows read over a bright frame as well as a
+   dark one. Both it and the icon are hidden until the tile is hovered or focused. */
+.hero-mosaic-scrim,
+.hero-mosaic-expand {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.hero-mosaic-scrim {
+  background-color: var(--color-ink-60);
+}
+
+.hero-mosaic-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-canvas);
+}
+
+.hero-mosaic-tile:hover .hero-mosaic-scrim,
+.hero-mosaic-tile:focus-visible .hero-mosaic-scrim,
+.hero-mosaic-tile:hover .hero-mosaic-expand,
+.hero-mosaic-tile:focus-visible .hero-mosaic-expand {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mosaic-tile:hover,
+  .hero-mosaic-tile:focus-visible {
+    transform: none;
+  }
 }
 
 /* How We Work — a sequence, not tiles. Each step contributes a numeral and a hairline
@@ -612,4 +820,348 @@ body {
   .footer-accordion-panel[data-open="false"] {
     display: block;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   §2 What We Do — six capability cards
+   ------------------------------------------------------------------------ */
+
+/* Entry is a clip curtain plus a 24px rise, not a fade: six tiles fading in together
+   read as one block arriving, and the diagonal stagger is only legible if each tile
+   has a hard edge you can watch move.
+
+   Every inset is bled 16px past the border box, so once the reveal has finished the
+   clip region is strictly larger than the card on all four sides. Without the bleed
+   this wrapper would keep clipping for the life of the page and shave the top off the
+   card's own 6px hover lift. */
+.capability-reveal {
+  clip-path: inset(-16px -16px calc(100% + 16px) -16px);
+  transform: translateY(24px);
+  transition-property: clip-path, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-reveal[data-visible="true"] {
+  clip-path: inset(-16px -16px -16px -16px);
+  transform: translateY(0);
+}
+
+/* `overflow: hidden` keeps the cursor glow inside the card's rounded corners. It does
+   not clip the hover lift, because the lift moves the whole card, glow included. */
+.capability-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The numeral is the card's anchor. It is large enough to be the first thing the eye
+   lands on and muted enough not to compete with the title for meaning. Scaling from the
+   left keeps it pinned to the card's left edge as it grows. */
+.capability-numeral {
+  display: block;
+  /* Positioned so it paints above .capability-glow, which is the card's first child and
+     absolutely positioned: two positioned boxes with auto z-index paint in DOM order. */
+  position: relative;
+  transform-origin: left center;
+  transition-property: color, transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-card:hover .capability-numeral {
+  color: var(--color-accent);
+  transform: scale(1.06);
+}
+
+/* The arrow lives in the card's own left padding rather than in the text column, so it
+   can appear beside the title without the title moving to make room. Nothing here
+   animates but opacity and transform. */
+.capability-arrow {
+  position: absolute;
+  left: -1.4rem;
+  top: 0.15em;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-card:hover .capability-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* One restrained cursor effect: an accent glow at 8% that tracks the pointer inside the
+   hovered card. Only `opacity` transitions — the position must not ease, or the glow
+   lags the cursor instead of following it. */
+.capability-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    18rem circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    var(--color-accent-8),
+    transparent 70%
+  );
+  transition-property: opacity;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-card:hover .capability-glow {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state, regardless of whether the card has been scrolled to yet. */
+  .capability-reveal,
+  .capability-reveal[data-visible="true"] {
+    clip-path: none;
+    transform: none;
+  }
+  .capability-card:hover .capability-numeral,
+  .capability-card:hover .capability-arrow {
+    transform: none;
+  }
+  .capability-card:hover .capability-glow {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   §3 The Differentiator — image over a coloured panel
+   ------------------------------------------------------------------------ */
+
+.element-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.element-media {
+  position: absolute;
+  inset: 0;
+}
+
+/* The panel's height is a percentage of the card, so the card needs a definite height for
+   the split to resolve — `auto-rows-fr` alone leaves it dependent on content. A floor here
+   fixes the geometry and is what makes the four cards equal-height at every width. */
+@media (min-width: 768px) {
+  .element-card {
+    min-height: 24rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .element-card {
+    min-height: 26rem;
+  }
+}
+
+/* The panel is 65% of the card tall and sits 25% of the card below the bottom edge at
+   rest, so 40% of the card shows; on hover it slides flush and 65% shows. The image
+   behind it is uncovered from 60% down to 35%.
+   Doing it by occlusion rather than by shrinking the image's box means the whole hover
+   is one transform on one element: the card's outer box cannot change size, so a row of
+   four stays flush by construction rather than by four heights agreeing. 25/65 = 38.46%
+   of the panel's own height, which is what a percentage translateY resolves against. */
+.element-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 65%;
+  transform: translateY(38.46%);
+  transition-property: transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.element-card:hover .element-panel,
+.element-card:focus-within .element-panel {
+  transform: translateY(0);
+}
+
+/* Charcoal on ink measures 1.047:1 and would have been an invisible card. Both fills
+   below are brand colours carrying text that clears the 4.5:1 floor: ink on canvas is
+   12.553:1, canvas on accent is 5.107:1. See the note in Differentiator.tsx on how the
+   accent panel itself separates from the ink ground. */
+.element-panel--canvas {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.element-panel--accent {
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+}
+
+.element-description {
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.element-card:hover .element-description,
+.element-card:focus-within .element-description {
+  opacity: 1;
+}
+
+/* Below md the hover is gone, so the split cannot carry the descriptor: the card
+   becomes a plain image-over-panel stack with everything visible at once. */
+@media (max-width: 767px) {
+  .element-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .element-media {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .element-panel {
+    position: relative;
+    height: auto;
+    transform: none;
+  }
+  .element-description {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .element-card:hover .element-panel,
+  .element-card:focus-within .element-panel {
+    transform: translateY(38.46%);
+  }
+  .element-description {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   §4 How We Work — the rule draws itself, then the steps activate on scroll
+   ------------------------------------------------------------------------ */
+
+/* Section 4 is a light surface. §2 and §4 both key their numerals off the ink ramp
+   (ink-12 and ink-20) going to accent, which only reads on canvas — accent is 2.458:1
+   on ink. §3 takes the page's one mid-page dark beat instead. */
+.process-rail {
+  position: relative;
+}
+
+.process-rule {
+  background-color: var(--color-ink-12);
+  transform: scaleX(0);
+  transform-origin: left center;
+  /* 180ms a segment across five segments is the 900ms draw, and giving each segment its
+     own delay is what makes it read as one line travelling rather than five lines
+     growing at once. */
+  transition-property: transform;
+  transition-duration: 180ms;
+  transition-timing-function: linear;
+}
+
+.process-step[data-drawn="true"] .process-rule {
+  transform: scaleX(1);
+}
+
+/* Always occupies its 6px of the rail, in both states, so activating a step cannot
+   nudge the rule sideways. */
+.process-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: var(--color-accent);
+  opacity: 0;
+  transform: scale(0.4);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-step[data-active="true"] .process-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.process-numeral {
+  color: var(--color-ink-20);
+  transition-property: color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-step[data-active="true"] .process-numeral {
+  color: var(--color-accent);
+}
+
+/* The resting state is muted, not faint: 0.75 keeps the step title at 6.056:1 and the
+   description (ink-90) at 4.822:1 on canvas, so the four inactive steps stay readable
+   rather than decorative. */
+.process-content {
+  opacity: 0.75;
+  transition-property: opacity;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-step[data-active="true"] .process-content {
+  opacity: 1;
+}
+
+@media (max-width: 1023px) {
+  .process-rule {
+    transform: scaleY(0);
+    transform-origin: center top;
+  }
+  .process-step[data-drawn="true"] .process-rule {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state: the rule is fully drawn and every step is active. */
+  .process-rule,
+  .process-step[data-drawn="true"] .process-rule {
+    transform: none;
+  }
+  .process-dot {
+    opacity: 1;
+    transform: none;
+  }
+  .process-numeral {
+    color: var(--color-accent);
+  }
+  .process-content {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Decorative numerals (§2 01-06, §4 01-05)
+   ------------------------------------------------------------------------ */
+
+/* These numerals are pure decoration in the WCAG 1.4.3 sense, and the contrast minimum
+   does not apply to them: §2's index a set of six capabilities that has no order, and
+   §4's repeat an ordinal the surrounding <ol> already carries. Nothing is lost by not
+   being able to read one. That is exactly why they are allowed to sit at ink-12 and
+   ink-20 — the design wants a quiet structural mark, not a second line of text.
+
+   axe cannot tell decoration from content, so it measures them as text and fails them at
+   1.24:1 and 1.47:1 against a 3:1 large-text floor. `aria-hidden` does not settle it,
+   correctly: hiding a thing from a screen reader says nothing about whether a sighted
+   reader needs it. Rendering the digits as generated content does settle it, because
+   generated content is the mechanism CSS has for marks that are presentational by
+   construction — the glyphs live in the stylesheet, not the document.
+
+   The alternative, if these should be treated as text after all, is to darken them to
+   about ink-55 on the §2 card fill and ink-50 on canvas, which clear 3:1 at 3.27:1 and
+   3.19:1 — and which make the numeral a mid-tone that competes with the title. */
+.decorative-numeral::before {
+  content: attr(data-numeral);
 }

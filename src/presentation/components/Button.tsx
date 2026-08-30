@@ -16,17 +16,17 @@ interface ButtonProps {
 // only 2.457:1, so the button would barely read as a shape.
 const LIGHT_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-canvas hover:bg-primary-button-hover",
-  ghost: "border border-ink-20 text-ink hover:border-accent",
+  ghost: "border border-ink-20 text-ink hover:border-accent hover:bg-ink-4",
 };
 
 const DARK_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-canvas text-ink hover:bg-primary-button-hover-on-dark",
-  ghost: "border border-canvas-40 text-canvas hover:border-accent-on-dark",
+  ghost: "border border-canvas-40 text-canvas hover:border-canvas hover:bg-canvas-10",
 };
 
 export function Button({ cta, variant = "primary", dark = false, className = "" }: ButtonProps) {
   const variantClasses = dark ? DARK_VARIANT_CLASSES[variant] : LIGHT_VARIANT_CLASSES[variant];
-  const classes = `transition-base inline-flex items-center justify-center rounded-sm px-6 py-3 text-small font-medium ${variantClasses} ${className}`;
+  const classes = `button-motion inline-flex items-center justify-center rounded-sm px-6 py-3 text-small font-medium ${variantClasses} ${className}`;
 
   if (cta.isExternal) {
     return (

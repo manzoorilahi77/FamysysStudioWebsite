@@ -2,12 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { FooterContentView, MegaMenuColumnView } from "../lib/viewModels";
+import type { FooterContentView, MegaMenuColumnView, NavEntryView } from "../lib/viewModels";
 import { Wordmark } from "../components/Wordmark";
 
 interface FooterProps {
-  readonly megaMenu: ReadonlyArray<MegaMenuColumnView>;
+  readonly entries: ReadonlyArray<NavEntryView>;
   readonly footer: FooterContentView;
+}
+
+/**
+ * The footer's columns are the navigation's own panels, re-titled with the nav item they
+ * hang off. Deriving them here rather than storing a second copy is what stops the footer
+ * drifting away from the menu — there is only one source for both.
+ */
+function footerColumns(entries: ReadonlyArray<NavEntryView>): ReadonlyArray<MegaMenuColumnView> {
+  return entries
+    .filter((entry) => entry.panel.columns.length > 0 || entry.panel.features.length > 0)
+    .map((entry) => ({
+      title: entry.label,
+      items: [
+        ...entry.panel.columns.flatMap((column) => column.items),
+        ...entry.panel.features.map((feature) => ({ ...feature, description: "" })),
+      ],
+    }));
 }
 
 interface FooterColumnProps {
@@ -45,8 +62,9 @@ function FooterColumn({ column, isOpen, onToggle }: FooterColumnProps) {
   );
 }
 
-export function Footer({ megaMenu, footer }: FooterProps) {
+export function Footer({ entries, footer }: FooterProps) {
   const [openColumn, setOpenColumn] = useState<string | null>(null);
+  const columns = footerColumns(entries);
 
   return (
     <footer className="surface-dark bg-ink">
@@ -59,8 +77,8 @@ export function Footer({ megaMenu, footer }: FooterProps) {
               {footer.contactEmail}
             </a>
           </div>
-          <div className="grid gap-4 md:col-span-4 md:grid-cols-4">
-            {megaMenu.map((column) => (
+          <div className="grid gap-4 md:col-span-4 md:grid-cols-3">
+            {columns.map((column) => (
               <FooterColumn
                 key={column.title}
                 column={column}

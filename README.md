@@ -9,18 +9,18 @@ confirmation before launch.
 The page runs on the client's V1 Homepage Content Brief — all copy is theirs, verbatim. It has
 nine sections in this order:
 
-1. **Hero** — heading, body, two CTAs, supporting line, and an eight-tile drifting media mosaic
+1. **Hero** — one viewport tall: heading, body, two CTAs, supporting line, and an eight-tile media mosaic drifting full-bleed down the right
 2. **What We Do** — six capabilities in a light bento (`services.content.ts`)
-3. **The Differentiator** — four elements, closing with the page's thesis line set large and centred
-4. **How We Work** — five numbered steps, 2 + 3 across a six-column grid, on ink
+3. **The Differentiator** — asymmetric split, closing with the page's thesis line set large and centred
+4. **How We Work** — five numbered steps along one hairline, as a sequence, on ink
 5. **Ways to Work With Us** — three engagement tiers plus a full-width Custom Partnership card
 6. **Selected Work** — the eight planned pieces (`portfolio.content.ts`)
-7. **Why Famysys** — five reasons, same 2 + 3 split as How We Work
+7. **Why Famysys** — five alternating full-width rows on hairlines
 8. **FAQ** — seven questions, accordion, one open at a time
 9. **Final CTA** — closing heading, body, CTA, closing line, and the contact form
 
-Only the homepage exists. The header, mega menu and footer link the real 7-page site, so those
-routes 404 until their pages are built — see `docs/content-todo.md`.
+Only the homepage exists. The header, its navigation panels and the footer link the real 7-page
+site, so those routes 404 until their pages are built — see `docs/content-todo.md`.
 
 ## Setup
 
@@ -29,8 +29,8 @@ pnpm install
 pnpm dev
 ```
 
-Requires Node 20+ and pnpm. No other tooling — placeholder media is generated from plain SVG
-strings (see below).
+Requires Node 20+ and pnpm. No other tooling. Placeholder media is committed under
+`public/media/` — see `docs/content-todo.md` for every file's source.
 
 ## Scripts
 
@@ -42,7 +42,6 @@ strings (see below).
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm lint` | ESLint, including the layer-boundary rules in `eslint.config.mjs` |
 | `pnpm test` | Vitest unit tests |
-| `pnpm generate:media` | Regenerates every file in `public/media/` — see below |
 
 ## Architecture: the layer dependency rule
 
@@ -95,7 +94,7 @@ substitute.
    `GetHomepageContent.test.ts` to cover it.
 4. **Presentation**: build the section component under `src/presentation/sections/`, composed
    from the shared primitives in `src/presentation/components/` (`Section`, `Container`,
-   `Eyebrow`, `Button`, `Reveal`). Use `<Section dark>` for a dark-surface section — see the
+   `SectionHeader`, `Button`, `Reveal`). Use `<Section dark>` for a dark-surface section — see the
    token table below for which text/border colors are safe on `bg-ink` vs `bg-canvas`. If the
    section needs a domain value object (media, a CTA) in a client component, add the matching
    mapper to `viewModels.ts` rather than passing the domain object through directly.
@@ -232,6 +231,16 @@ The first two are called out again, with full context, in design spec §2.8.3.
 - **Card fill is `ink-06`, not `ink-08`.** The limiting factor is not body copy — graphite-70
   stays above 4.5:1 as far as ink-12 — but the accent `text-small` on the engagement-tier cards,
   which reads 4.570:1 on ink-06 and fails at ink-07 (4.485:1). Border is `ink-12`.
+- **The hero is exactly one viewport tall**, header included — `height: 100svh` with the fixed
+  header overlaying it. The headline takes its own `text-hero` step rather than `display-xl`,
+  which broke the client's 48-character headline onto five lines in a 46%-wide column; at 1440 it
+  resolves to ~40px and holds two lines. The subhead is capped at 52ch and lands on three lines,
+  not the two-and-a-half the brief asked for — see the note below.
+- **The hero mosaic is positioned against the section, not placed in the container grid.** That is
+  what lets it start at the very top (tiles pass behind the transparent header) and finish flush
+  with both the section's bottom edge and the viewport's right edge. A gradient of the section's
+  own ink holds the top back far enough for the nav to read over whatever photograph is passing;
+  the bottom 15% dissolves into the ink.
 - **The inline nav needs `xl`, not `lg`.** The real page names ("Ways to Work With Us", "Creative
   Services") are long enough that the header collapses to the mobile drawer below 1280px.
 - **Vertical rhythm is deliberately uneven** — `spacing.section` for light sections,
@@ -243,7 +252,10 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 
 | Effect | Where | Mechanism |
 |---|---|---|
-| Continuous mosaic drift | Hero | Three CSS-animated columns, 11–19s, alternating direction — never at rest. Each loop copy repeats until it is taller than the column, or a gap scrolls into view at the bottom |
+| Continuous mosaic drift | Hero | Three JS-driven columns at 22–30px/s — outer up, middle down, never at rest. Driven from `requestAnimationFrame` rather than CSS keyframes because it has to **reverse** on scroll direction and **accelerate** with scroll velocity, neither of which a keyframe animation can do. Both eased exponentially, so the reversal passes through zero rather than snapping. Each loop copy repeats until it is taller than the column, or a gap scrolls into view at the bottom |
+| Hero lightbox | Hero | Tiles are buttons: a scrim and corner-arrow icon fade in, the tile scales 1.03, and a click opens a portalled dialog with focus trap, Escape, backdrop click, arrow-key navigation and focus return |
+| Nav panels | Header | Three items open a panel on a 120ms hover intent, fading and sliding 8px over 220ms with columns staggered 40ms; a 160ms grace period on the way out keeps the diagonal from trigger to panel alive |
+| Nav link underline | Header | `scaleX` on a pseudo-element with a left origin — a compositor wipe, not a growing box — over 200ms, with the resting colour lifting from 80% to full |
 | Line-by-line heading reveal | Every display heading | `RevealHeading` measures which rendered line each word landed on and gives that line an 80ms-stepped delay; words clip up from their own baseline. Tops are clustered with a tolerance rather than compared exactly, because an accented word is 5% larger and so sits in a taller box on the same baseline |
 | Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
 | Step numerals | How We Work | `ClipNumber` — each numeral clips up on its own observer as its step enters |

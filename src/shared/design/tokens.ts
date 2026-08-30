@@ -77,6 +77,10 @@ export const typeScale = {
     lineHeight: 1.02,
     letterSpacing: "-0.03em",
   },
+  // The hero headline takes its own step rather than displayXl: in a 46%-wide column
+  // displayXl broke the client's 48-character headline onto five lines. This resolves to
+  // ~52px at 1440, about 23 characters a line, so it holds two. See globals.css.
+  hero: { size: "clamp(1.9rem, 2.8vw, 2.6rem)", lineHeight: 1.08, letterSpacing: "-0.026em" },
   displayL: { size: "clamp(1.75rem, 3.85vw, 4.25rem)", lineHeight: 1.06, letterSpacing: "-0.026em" },
   displayM: { size: "clamp(1.5rem, 2.25vw, 2.5rem)", lineHeight: 1.18, letterSpacing: "-0.019em" },
   // DEVIATION (fidelity-loop pass 1, gap #7): §4.7 impact-metric figures need to dominate their
@@ -128,7 +132,17 @@ export const motion = {
   duration: {
     reduced: 120, // ms — reduced-motion collapses every transition to opacity-only at this duration
     fast: 180, // ms — card hover lift/border escalation (2.1d)
-    base: 320,
+    hover: 200, // ms — signals layered ON TOP of the locked 180ms card base (§2 numeral, arrow)
+    base: 320, // ms — §3's image/panel split change, and the standard reveal
+    draw: 900, // ms — §4's hairline drawing itself left to right as the section enters
+  },
+  // Entry sequencing. Each section staggers on a different axis, so the steps are named
+  // for the axis rather than shared: §2 reveals on the diagonal (row + column), §3 left to
+  // right across the card row, §4 numeral after numeral as the drawn rule reaches each.
+  stagger: {
+    diagonalStepMs: 70,
+    rowStepMs: 80,
+    numeralStepMs: 140,
   },
   parallax: {
     positioning: 24, // px — §4.5, scaled down from Superside's 40px per 2.7
