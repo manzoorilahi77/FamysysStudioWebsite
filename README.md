@@ -349,6 +349,26 @@ placeholder"; don't go hunting for `TODO(client)` comments in the content files 
   earlier accordions in this project shipped with this wrong.
 - **Responsive**: no horizontal overflow at 360, 390, 430, 768, 1024, 1280, 1440, or 1920px.
 
+**Before verifying anything against a production build, stop every other node process.**
+`next dev` and `next start` share this directory's `.next`, and dev mode rewrites it. A dev
+server left running on port 3000 — hand-started in a VS Code terminal, which has happened
+repeatedly — means `pnpm build && next start` serves a build dev mode has clobbered: the HTML
+asks for `main-app.js` and `app-pages-internals.js`, both 404, and nothing hydrates. The page
+then looks broken in ways that read as real regressions. It has produced motion checks
+measuring zero, `aria-expanded` that never flips, and a phantom CSS regression, in two separate
+sessions on one day.
+
+So: check with `Get-CimInstance Win32_Process -Filter "Name='node.exe'"`, stop what you find,
+confirm the port is actually free rather than trusting the kill, and only then build. Cheapest
+insurance is a gate at the top of any verification script that asserts the page hydrates —
+click something with `aria-expanded` and check it flips. If it does not, every later result is
+meaningless and the script should say so and stop rather than report a page full of failures.
+
+Related: `scroll-behavior: smooth` is set globally, so any automation that scrolls a page in
+steps must pass `behavior: "instant"`. Without it each step restarts an unfinished smooth
+scroll, the page crawls a few hundred pixels, and everything below stays unrevealed — which
+looks like broken sections in a full-page screenshot.
+
 **Not re-measured since the content rebuild:** the Lighthouse and axe-core numbers previously
 recorded here were measured against the earlier version of this page, which no longer exists.
 They have been removed rather than carried forward. Re-run both against the current build before
