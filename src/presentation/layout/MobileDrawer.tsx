@@ -106,17 +106,46 @@ export function MobileDrawer({
             <div key={entry.href} className="border-b border-ink-8 py-3">
               {hasPanel(entry) ? (
                 <>
-                  <button
-                    id={groupTriggerId}
-                    type="button"
-                    className="text-display-s w-full text-left font-medium text-ink"
-                    aria-expanded={isGroupOpen}
-                    aria-controls={groupPanelId}
-                    onClick={() => setOpenGroup(isGroupOpen ? null : entry.href)}
-                    style={revealStyle}
-                  >
-                    {entry.label}
-                  </button>
+                  {/* Split row: the name goes to the page, the chevron opens the group.
+                      One control cannot do both — tapping "Creative Services" has to reach
+                      Creative Services, and the group still has to expand. The chevron
+                      carries the disclosure ARIA and its own name, because on its own it
+                      would announce as an unlabelled button. */}
+                  <div className="flex items-center justify-between gap-4" style={revealStyle}>
+                    <Link
+                      href={entry.href}
+                      onClick={onClose}
+                      className="text-display-s font-medium text-ink"
+                    >
+                      {entry.label}
+                    </Link>
+                    <button
+                      id={groupTriggerId}
+                      type="button"
+                      className="shrink-0 p-2 text-ink-70"
+                      aria-expanded={isGroupOpen}
+                      aria-controls={groupPanelId}
+                      aria-label={`Show ${entry.label} links`}
+                      onClick={() => setOpenGroup(isGroupOpen ? null : entry.href)}
+                    >
+                      <svg
+                        className="faq-chevron"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M5 7.5L10 12.5L15 7.5"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                   <div
                     id={groupPanelId}
                     role="region"

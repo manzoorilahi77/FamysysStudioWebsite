@@ -75,7 +75,7 @@ export function Header({ navigation }: HeaderProps) {
       if (event.key !== "Escape") {
         return;
       }
-      const trigger = navRef.current?.querySelector<HTMLButtonElement>("[aria-expanded=true]");
+      const trigger = navRef.current?.querySelector<HTMLElement>("[aria-expanded=true]");
       closeNow();
       trigger?.focus();
     }
@@ -147,13 +147,23 @@ export function Header({ navigation }: HeaderProps) {
                 onMouseEnter={() => scheduleOpen(entry.href)}
                 onMouseLeave={scheduleClose}
               >
-                <button
+                {/* A link, not a button. These five items are the site's five pages, and a
+                    top-level nav item that cannot be clicked through to its own page is a
+                    dead end — the page was reachable only via "View all services" inside
+                    the panel. So: hover opens the panel, click goes to the page.
+
+                    ARIA 1.2 supports aria-expanded on role="link", so the disclosure
+                    relationship survives the change. Enter navigates, which is a link's
+                    native behaviour; ArrowDown is what opens the panel from the keyboard,
+                    and the panel closes on navigation because the header stays mounted
+                    across a client-side route change. */}
+                <Link
                   id={triggerId}
-                  type="button"
+                  href={entry.href}
                   className={`nav-link ${surfaceToneClass}`}
                   aria-expanded={isOpen}
                   aria-controls={panelId}
-                  onClick={() => (isOpen ? closeNow() : setOpenHref(entry.href))}
+                  onClick={closeNow}
                   onKeyDown={(event) => {
                     if (event.key !== "ArrowDown") {
                       return;
@@ -167,7 +177,7 @@ export function Header({ navigation }: HeaderProps) {
                   }}
                 >
                   <span className="nav-link-label">{entry.label}</span>
-                </button>
+                </Link>
                 <NavPanel
                   panel={entry.panel}
                   isOpen={isOpen}

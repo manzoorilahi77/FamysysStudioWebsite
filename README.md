@@ -285,6 +285,13 @@ The first two are called out again, with full context, in design spec §2.8.3.
   the bottom 15% dissolves into the ink.
 - **The inline nav needs `xl`, not `lg`.** The real page names ("Ways to Work With Us", "Creative
   Services") are long enough that the header collapses to the mobile drawer below 1280px.
+- **The three panelled nav items are links, not buttons.** They are pages as well as menus, so
+  hover opens the panel and click goes to the page; ArrowDown is what opens it from the keyboard,
+  since Enter navigates. They were buttons that only toggled, which made every one of them a dead
+  end — the page behind it was reachable only through "View all services" inside the panel.
+  ARIA 1.2 supports `aria-expanded` on `role="link"`, so the disclosure survives being a link. In
+  the mobile drawer the same row is split: the name is a link, and a separate chevron button
+  carries the disclosure ARIA and its own accessible name.
 - **Vertical rhythm is deliberately uneven** — `spacing.section` for light sections,
   `spacing.sectionDark` for dark ones, `spacing.statement` for the final CTA.
 

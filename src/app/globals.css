@@ -805,7 +805,10 @@ body {
   transition-timing-function: var(--ease-base);
 }
 
-.faq-trigger[aria-expanded="true"] .faq-chevron {
+/* Any expanded disclosure that owns a chevron flips it — the FAQ rows and the mobile
+   drawer's group toggles. Keyed on the state rather than on .faq-trigger, so a second
+   disclosure does not silently render a chevron that never moves. */
+[aria-expanded="true"] .faq-chevron {
   transform: rotate(180deg);
 }
 
