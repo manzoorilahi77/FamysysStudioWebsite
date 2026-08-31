@@ -50,8 +50,13 @@ function FooterColumn({ column, isOpen, onToggle }: FooterColumnProps) {
         {column.title}
       </button>
       <ul id={panelId} data-open={isOpen} className="footer-accordion-panel mt-4 space-y-3">
+        {/* Keyed on href AND label, because an href alone is not unique here. The Ways to
+            Work panel is four tiers that all live on one page, so its four items share
+            `/ways-to-work-with-us` — and this column is derived from that panel. Keying on
+            href alone gave React four children with the same key, on every page, since the
+            footer is on all of them. NavPanel and MobileDrawer already key this way. */}
         {column.items.map((item) => (
-          <li key={item.href}>
+          <li key={`${item.href}-${item.label}`}>
             <Link href={item.href} className="text-small text-canvas-80">
               {item.label}
             </Link>

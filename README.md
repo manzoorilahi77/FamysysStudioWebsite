@@ -852,7 +852,22 @@ ls .next/static/       # a `development/` directory here means the same
 ```
 
 A production build has a non-empty `BUILD_ID` and `static/{chunks,css,media}` with no
-`development/`. If a verification result looks catastrophic rather than wrong, check these
+`development/`.
+
+**It also happens in the other direction, and that one has its own symptom.** Leaving a
+production build in `.next` and then starting `pnpm dev` on top of it makes dev mode
+rewrite part of the directory, so webpack's manifest names chunk modules that are no
+longer there. The browser throws:
+
+```
+Runtime TypeError: Cannot read properties of undefined (reading 'call')
+```
+
+That is `__webpack_require__` calling `.call` on a module that resolved to `undefined`.
+It reads like a code bug in whatever component happens to be rendering, and it is not one
+— run the same two checks. The fix is `rm -rf .next` and restart; nothing in `src/` needs
+touching. A verification session that ends by leaving a production build behind sets this
+trap for the next `pnpm dev`. If a verification result looks catastrophic rather than wrong, check these
 two before believing any of it. Cheapest
 insurance is a gate at the top of any verification script that asserts the page hydrates —
 click something with `aria-expanded` and check it flips. If it does not, every later result is
