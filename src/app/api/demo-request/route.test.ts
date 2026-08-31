@@ -16,7 +16,7 @@ describe("POST /api/demo-request", () => {
         fullName: "Jane Doe",
         email: "jane@acme.com",
         companyName: "Acme Inc.",
-        companySize: "11-50",
+        companySize: "50–200",
       }),
     );
 
@@ -53,7 +53,7 @@ describe("POST /api/demo-request", () => {
         fullName: "Jane Doe",
         email: "jane@gmail.com",
         companyName: "Acme Inc.",
-        companySize: "11-50",
+        companySize: "50–200",
       }),
     );
     const body = (await response.json()) as { errors?: { email?: string } };
@@ -68,7 +68,7 @@ describe("POST /api/demo-request", () => {
         fullName: "Jane",
         email: "jane@acme.com",
         companyName: "Acme Inc.",
-        companySize: "11-50",
+        companySize: "50–200",
       }),
     );
     const body = (await response.json()) as { errors?: { fullName?: string } };

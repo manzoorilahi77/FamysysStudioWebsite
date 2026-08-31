@@ -96,8 +96,15 @@ export function DemoForm() {
     );
   }
 
+  // canvas-40, not canvas-10. These inputs have a transparent fill, so the border is the
+  // only thing identifying the control — a user-interface component boundary, with a 3:1
+  // floor under WCAG 1.4.11. canvas-10 reads 1.317:1 on ink and 1.317:1 against the
+  // fading section's start value; canvas-40 reads 3.231:1 and 2.887:1. The second number
+  // is why this form should not sit in a fading section, and FinalCta's does — see
+  // docs/content-todo.md. Found by the measured contrast pass built for /contact, which
+  // holds its own underlines to the same value.
   const borderStyle = (hasError: boolean): React.CSSProperties => ({
-    borderColor: hasError ? "var(--color-accent-on-dark)" : "var(--color-canvas-10)",
+    borderColor: hasError ? "var(--color-accent-on-dark)" : "var(--color-canvas-40)",
   });
 
   return (

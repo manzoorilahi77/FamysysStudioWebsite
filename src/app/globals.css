@@ -2080,3 +2080,108 @@ html {
     border-left: 1px solid var(--color-ink-8);
   }
 }
+
+/* ============================================================================
+   Contact (/contact)
+   ============================================================================ */
+
+/* Underlined fields on ink — no boxes, matching famysys.com's own contact form.
+
+   The underline is canvas-40, not the canvas-10 the boxed form on the homepage uses.
+   When a rule IS the field — the only thing telling a reader where to type — it is a
+   user-interface component boundary and WCAG 1.4.11 puts a 3:1 floor on it. canvas-10
+   reads 1.325:1 on ink and canvas-16 reads 1.582:1; canvas-40 reads 3.231:1 and is the
+   first step on the ramp that clears it.
+
+   Placeholder-coloured text is the usual casualty of a form like this, so the value and
+   the label are canvas-80 (8.530:1) and canvas-60 (5.450:1) respectively — both measured
+   on ink rather than assumed. This section does not fade, so ink is the real backdrop
+   throughout and those numbers hold from the first frame. */
+.contact-field {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-canvas-40);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--color-canvas);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  letter-spacing: -0.006em;
+  padding: 0.25rem 0 0.625rem;
+  transition-property: border-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.contact-field::placeholder {
+  color: var(--color-canvas-60);
+}
+
+.contact-field:hover {
+  border-bottom-color: var(--color-canvas-60);
+}
+
+/* The errored underline is accent-on-dark, the same value the message beside it uses.
+   The palette has no dedicated error colour and inventing one would mean a sixth hex
+   outside the brand set, derived and audited for one state. The message, the triangle
+   and aria-invalid all carry the meaning; the underline only has to agree with them. */
+.contact-field[aria-invalid="true"] {
+  border-bottom-color: var(--color-accent-on-dark);
+}
+
+/* The chevron is a background image rather than an element, so the select keeps its
+   native keyboard behaviour intact — appearance: none changes how it is painted, not
+   what it is. The options are given explicit ink-on-canvas, because the popup inherits
+   the control's colours and canvas text would otherwise land on the platform's own
+   white. */
+.contact-field--select {
+  appearance: none;
+  padding-right: 1.75rem;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23F4F1E8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.125rem center;
+  background-size: 0.75rem 0.5rem;
+}
+
+.contact-field--select option {
+  color: var(--color-ink);
+  background-color: var(--color-canvas);
+}
+
+.contact-field--textarea {
+  resize: vertical;
+  min-height: 6.5rem;
+}
+
+/* One error row shape for the summary and for all eight fields, so the triangle and the
+   message sit in the same place every time. No transition: an error that fades in is
+   slower to read and slower to act on than one that is simply there. */
+.contact-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  color: var(--color-accent-on-dark);
+}
+
+.contact-error svg {
+  flex: none;
+  margin-top: 0.28em;
+}
+
+/* The live region holds no space while it is empty, so an unsubmitted form is not
+   carrying a blank row above its first field — and once it has something to say, it is
+   separated from the first label rather than crowding it. */
+.contact-summary:empty {
+  display: none;
+}
+
+.contact-summary:not(:empty) {
+  margin-bottom: 1.75rem;
+}
+
+/* The summary's own message needs no top margin: nothing sits above it. */
+.contact-summary > .contact-error:first-child {
+  margin-top: 0;
+}

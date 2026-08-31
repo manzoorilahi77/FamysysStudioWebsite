@@ -16,13 +16,24 @@ const CLOSE_GRACE_MS = 160;
 
 interface HeaderProps {
   readonly navigation: NavigationMenuView;
+  /**
+   * Set by a page whose first section is LIGHT.
+   *
+   * The bar is transparent until the page scrolls, so its resting tone assumes an ink
+   * hero underneath — canvas wordmark, canvas nav links, canvas-outlined ghost button.
+   * /contact is the one page that opens on canvas, and there the same treatment would
+   * put canvas text on a canvas ground at 1:1. This flips the bar to its light tone from
+   * the start; everything below that point is unchanged, since the scrolled state was
+   * already light.
+   */
+  readonly opensOnLight?: boolean;
 }
 
 function hasPanel(entry: NavEntryView): boolean {
   return entry.panel.columns.length > 0 || entry.panel.features.length > 0;
 }
 
-export function Header({ navigation }: HeaderProps) {
+export function Header({ navigation, opensOnLight = false }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [openHref, setOpenHref] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -83,7 +94,7 @@ export function Header({ navigation }: HeaderProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [openHref, closeNow]);
 
-  const isDark = !isScrolled;
+  const isDark = !isScrolled && !opensOnLight;
   const surfaceToneClass = isDark ? "nav-link--dark" : "nav-link--light";
   // While unscrolled the bar is transparent over the ink hero, so its focus rings need the
   // dark-surface ring colour; once it fills with canvas they go back to the raw accent. The

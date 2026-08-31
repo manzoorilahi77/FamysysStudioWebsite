@@ -19,8 +19,11 @@ nine sections in this order:
 8. **FAQ** — seven questions, accordion, one open at a time
 9. **Final CTA** — closing heading, body, CTA, closing line, and the contact form
 
-Only the homepage exists. The header, its navigation panels and the footer link the real 7-page
-site, so those routes 404 until their pages are built — see `docs/content-todo.md`.
+**All seven pages of the site now exist** — the homepage plus Creative Services, How We Work,
+Ways to Work With Us, Selected Work, About and Contact — and every navigation and footer
+destination resolves. `/privacy` and `/terms` do not exist and are no longer linked; see
+`docs/content-todo.md`, which also opens with the one launch blocker: **the contact forms deliver
+nowhere until `container.demoRequestIntake` is wired to something real.**
 
 ## Setup
 
@@ -388,6 +391,156 @@ Five things worth knowing before editing it:
   reads as *our team* — see `docs/content-todo.md` for the three candidates rejected at
   crop check.
 
+## Contact (`/contact`)
+
+The seventh and last page, and **the only one whose reference is famysys.com's own contact page**
+rather than the design language the other six share. The client asked for it, and that page
+already solves this problem.
+
+> ### Submissions currently go nowhere
+>
+> Both forms — the closing "Start a Conversation" form on every page and the eight-field form
+> here — POST to `/api/demo-request`, backed by `StubLeadRepository`. That repository validates
+> the request, resolves, and **does nothing with it**: no email, no CRM, no queue, no database,
+> no file. A sender sees a confirmation and the inquiry is discarded.
+>
+> **This must be wired to email or the company backend before launch.** It is a one-line change
+> at the composition root — `container.demoRequestIntake` in `src/infrastructure/di/container.ts`
+> — behind the existing `LeadRepository` interface, so nothing else moves. It is the first item
+> in `docs/content-todo.md`.
+
+**Two sections**, where the other inner pages have six to ten. Someone arriving here has already
+decided to get in touch; making them read four more blocks before reaching the form would be
+arguing a case that has already been won. There is no `FinalCta` either — the closing CTA on
+every other page points *at* this one, and the form is the ask.
+
+| Section | Shape |
+|---|---|
+| Page hero | **Light** — the only light hero on the site. Square accent bullet, `CONTACT` eyebrow, a two-line display heading, an intro at a 52ch measure. Left-aligned, and nothing at all on the right half |
+| Form | Dark, two columns: the form in 7 of 12, a raised panel in 5. `fade={false}` |
+
+It extends the existing **`lead`** context rather than adding one — `DemoRequest`, `BusinessEmail`,
+`FullName` and `CompanySize` were already there and this is their natural home. Three value objects
+are new (`ContactRole`, `ProjectBrief`, `CompanyWebsite`), the entity's three extra fields are
+optional so the four-field closing form still validates through the same use case, and the page's
+own copy lives in its own bounded context (`src/domain/contact/`, `GetContactPage`,
+`contact.content.ts`, `container.contact`) for the same reason `about` and `process` do.
+
+### What was deliberately not carried over from the parent's page
+
+Four things, and the first is not a copy decision:
+
+- **The trust badges.** "SOC2 Type II Compliant", "Strict Commercial NDA" and "Zero Lock-In
+  Guarantee" are the parent company's certification and commitments. The Studio is a new arm, the
+  brief says nothing about any of them, and a certification claimed by a business that does not
+  hold it is a false statement about an audit rather than unapproved copy. The space is empty.
+  A unit test fails if `soc2`, `iso`, `certifi`, `compliant`, `nda`, `guarantee` or `lock-in`
+  appears anywhere in the page's content.
+- **The contact details.** `hello@famysys.com` and the phone number on that page are the
+  *parent's*. `panel.direct` is `{}`, and while both fields are absent the "Or reach us directly"
+  block does not render at all, so the page never shows a heading with nothing under it. The
+  footer still carries the parent's address from before this page existed — same decision, listed
+  in `docs/content-todo.md`.
+- **The QR business card.** A digital business card belongs to a person. Whose it would be here
+  is a question, not an asset to copy.
+- **The hero copy and the role options.** Both are engineering-shaped on the parent's page. See
+  below, and `ContactRole`'s own header comment.
+
+### The role options are not the parent's
+
+famysys.com asks CEO / COO / CFO / CIO-CTO / VP / Other — shaped for an enterprise IT buyer
+approving an engineering engagement. The Studio sells creative production to marketing, brand and
+content owners, often at companies with no C-suite to route through, so reusing that list would
+have made two thirds of it unanswerable and pushed most real senders into "Other", which is the
+same as not asking. The six are Founder / Owner · Marketing Lead · Brand or Creative Lead ·
+Content or Social Lead · Agency or Partner · Other.
+
+**`CompanySize`'s bands changed for the whole site**, from a five-band set the previous build
+invented to famysys.com's four (1–50 · 50–200 · 200–1,000 · 1,000+). Both forms read
+`CompanySize.options()`, so the closing form's dropdown changed with it. Keeping two overlapping
+vocabularies, where "1-10" and "1–50" were each valid, would have made the answers un-comparable
+between the two forms for the sake of a set nobody had confirmed. Nothing persists a submitted
+band, so there was no stored data to migrate.
+
+### Validation
+
+Two passes over the same value objects, and they agree on wording where they overlap:
+
+- **`validateContactRequest`** (application layer) runs in the browser and collects **all eight
+  fields at once**. `SubmitDemoRequest` builds its value objects one after another and throws on
+  the first failure, which is right for a use case and wrong for a form: someone who submits an
+  empty one has to see seven errors, not discover them one submit at a time.
+- **The route** still runs `SubmitDemoRequest` and stays the authority. The client pass exists so
+  the reader gets their errors without a round trip, not so the server can trust the browser.
+
+| Case | Message |
+|---|---|
+| Empty required field | `Required` |
+| Malformed email | `That does not look like an email address` — the address is not repeated back |
+| Free-mail address | `BusinessEmail`'s own actionable message, naming the domain |
+| Malformed website | `That does not look like a website address`. Empty passes; the field is optional |
+
+**Validate on submit, then re-validate on change once a field has errored.** Not on blur: telling
+someone their email is malformed while they are still typing the domain is the form arguing with
+them mid-sentence.
+
+Accessibility, each verified in the browser rather than assumed: `aria-invalid` on every failed
+field, `aria-describedby` pointing at the error element, focus moved to the **first invalid field
+in page order** (which is why `CONTACT_FIELD_ORDER` exists — object key order is not page order),
+and a summary announcing the count. The warning triangle is `aria-hidden`; the message carries the
+meaning.
+
+**`role="alert"` sits on the summary region, not on the eight field messages.** Eight assertive
+live regions firing for one keypress is eight interruptions; the field messages are reached
+through `aria-describedby` when focus lands on the field, which is the moment they are needed —
+and focus is moved there immediately after the summary is read.
+
+### Contrast: the numbers this page turns on
+
+The form section is dark and does not fade, so ink is the real backdrop from the first frame.
+
+| Role | Token | On ink |
+|---|---|---|
+| Input value | `canvas` | 12.549:1 |
+| Label | `canvas-80` | 8.530:1 |
+| Placeholder / muted | `canvas-60` | 5.450:1 |
+| **Input underline** | **`canvas-40`** | **3.231:1** |
+| Error message and errored underline | `accentOnDark` | 5.015:1 |
+| Panel numerals (on the panel's canvas-4 ground) | `accentOnDark` | 4.515:1 |
+
+**The underline is `canvas-40`, not the `canvas-10` the boxed form used.** When a rule *is* the
+field — the only thing telling a reader where to type — it is a user-interface component boundary
+and WCAG 1.4.11 puts a 3:1 floor on it. `canvas-10` reads 1.325:1 and `canvas-16` reads 1.582:1;
+`canvas-40` is the first step on the ramp that clears it. The same fix was applied to `DemoForm`,
+whose transparent-filled inputs had the same problem on six pages.
+
+There is **no dedicated error colour in the palette**, and none was invented — a sixth hex outside
+the brand set, derived and audited for one state, is a bigger change than this page should make.
+The errored underline is `accentOnDark`, agreeing with the message beside it; the message, the
+triangle and `aria-invalid` carry the meaning.
+
+### `opensOnLight` — why the header needed a prop
+
+`Header` renders its **dark-surface tone while the page is unscrolled**, because it sits
+transparent over an ink hero on all six other pages. This page opens on canvas, where that
+treatment would put canvas nav links on a canvas ground at 1:1. `Header` now takes
+`opensOnLight`, and `/contact` is the one route that passes it — `isDark` becomes
+`!isScrolled && !opensOnLight`. Everything from the scroll threshold down is unchanged, since the
+scrolled state was already light.
+
+### Motion: as little as the page can have
+
+The form's rows arrive on a 50ms stagger and **nothing else moves**. Errors appear with no
+transition at all — an error that fades in is slower to read and slower to act on than one that is
+simply there.
+
+The rows use a local `RevealOnLoad`, not the shared `Reveal`, and the difference matters: `Reveal`
+fires from an IntersectionObserver, and at 1440×900 the lower half of this form starts below the
+fold, so those fields would sit at `opacity: 0` — invisible, and still in the tab order. Someone
+tabbing down from the hero would land on a field they could not see. Triggering from mount paints
+every field within about 500ms of load however the page is entered. The effect itself is the
+site's existing `revealStyle`, including its collapse to opacity-only under reduced motion.
+
 ## Swapping static content for a CMS
 
 Every `Static*Repository` in `src/infrastructure/content/repositories/` implements a domain
@@ -487,6 +640,18 @@ menu, mobile drawer) that hang off the dark header.
    than five accent phrases appear or if one lands anywhere it shouldn't. Set 5% up on the
    surrounding Jost, because serif italic reads optically smaller at the same px.
 
+6. **`/contact` opens on a LIGHT hero — the only page that does.** Every other hero is ink, and
+   `Header` renders its dark-surface tone while the page is unscrolled because it assumes one
+   underneath. The `opensOnLight` prop exists for this single route; without it the nav would be
+   canvas text on a canvas ground at 1:1. See the Contact section above.
+7. **`FinalCta` no longer fades its background.** It carries a form, and by this project's own
+   rule any colour derived against full ink is wrong for the first 900ms of a fading section: the
+   form's error messages are `accentOnDark` (5.015:1 on ink, 3.792:1 at the fade's start) and its
+   input borders are `canvas-40` (3.231:1 on ink, 2.887:1 at the start, against a 3:1
+   UI-boundary floor). Both were true before `/contact` existed; the measured contrast pass built
+   for that page is what surfaced them. The section keeps its `statement` rhythm and loses only
+   the settle. `/contact`'s own form section is `fade={false}` for the same reason.
+
 The first two are called out again, with full context, in design spec §2.8.3.
 
 ## Layout conventions worth knowing
@@ -552,7 +717,7 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 | Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
 | Step numerals | Homepage §4 | `ClipNumber` — each numeral clips up on its own observer as its step enters |
 | Card hover | All cards | Accent border, 6px lift, no shadow; media tiles add a 1.05 scale |
-| Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1. Opt out with `fade={false}` where the section carries **accent-on-dark** text — that colour is derived against full ink (5.015:1) and measures 3.79:1 against the fade's start value, ink-90 over canvas (#22405D). The failure is intermittent, since it depends on how far the section has entered when anything looks. **The general rule: any colour whose ratio was derived against `ink` is wrong for the first 900ms of a fading section.** Canvas and canvas-80 are the only text colours safe throughout. The other live instance is §3's accent panel on the homepage — a *fill*, not text or a UI boundary, so no criterion applies, but its already-soft 2.458:1 edge against the ground gets softer mid-entry before settling |
+| Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1. Opt out with `fade={false}` where the section carries **accent-on-dark** text or a form — that colour is derived against full ink (5.015:1) and measures 3.79:1 against the fade's start value, ink-90 over canvas (#22405D). The failure is intermittent, since it depends on how far the section has entered when anything looks. **The general rule: any colour whose ratio was derived against `ink` is wrong for the first 900ms of a fading section.** Canvas and canvas-80 are the only text colours safe throughout. Two sections opt out: `/contact`'s form section, and `FinalCta` on every page (deviation 7). The remaining live instance is §3's accent panel on the homepage — a *fill*, not text or a UI boundary, so no criterion applies, but its already-soft 2.458:1 edge against the ground gets softer mid-entry before settling |
 | Split-block entry | Creative Services | Image then copy, 120ms apart; the image is the half that establishes which side of the split the block is on |
 | Image settle | Creative Services | The block image scales 1.0 → 1.03 as it arrives and stops. It settles; it does not loop |
 | Deliverable stagger | Creative Services | 50ms per row, fired from the list's own observer rather than one per row — the rows are close enough together that per-row observers would fire at once and collapse the stagger |
@@ -570,6 +735,8 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 | Overview active step | How We Work | Colour and underline over 200ms as each detail block passes the reading line — `useActiveAnchor`, the same hook and the same reason as the services index |
 | List stagger | How We Work | Both per-step lists reuse `DeliverableList` at 50ms per row |
 | Image settle | How We Work | `.step-media`, the same 3% settle as `.capability-media` |
+| Form row entry | Contact | A 50ms stagger on the five field rows and the submit button, fired from MOUNT rather than an observer. `Reveal`'s IntersectionObserver would leave the rows below the fold at `opacity: 0` — invisible and still tabbable — so this one is a local `RevealOnLoad` using the same `revealStyle`. It is the only motion on the page |
+| Error entry | Contact | None, deliberately. Errors are rendered with no transition: an error that fades in is slower to read and slower to act on than one that is simply there |
 | Sticky index active state | Creative Services | Colour and underline transition over 200ms as sections pass. The active section is the last one whose top has crossed the reading line, not whichever is intersecting — the sections are taller than the viewport, so "is intersecting" is true for two of them at a time |
 
 ## Placeholder media
@@ -636,6 +803,22 @@ placeholder"; don't go hunting for `TODO(client)` comments in the content files 
 
   Both pages pass both, on three consecutive runs.
 
+- **The contact form, checked as behaviour rather than markup.** Submit empty and confirm an
+  inline error under every required field and none under the optional one; submit a malformed
+  email, a free-mail address and a malformed website and confirm each gets its own message;
+  confirm focus lands on the first invalid field *in page order*; confirm the summary announces
+  the count; confirm the error sits the same distance under all eight fields; confirm a
+  half-typed email is NOT errored on blur before the first submit, and that an errored field
+  clears as it is corrected; tab from the first field through to the submit button; operate both
+  selects from the keyboard and read their options' computed colours, because a select popup
+  inherits the control's colours and canvas-on-white is the failure that looks fine in a
+  screenshot. 53 assertions, all passing.
+- **Site-wide link resolution.** Every `<a href>` on all seven pages — 468 of them, mega-menu
+  panels and mobile drawer included, since a link that only appears on hover is still a link —
+  collected and requested against the running build. Seven distinct internal targets, all 200.
+  `internalLinks.test.ts` asserts the same thing in the unit suite by reading the routes off
+  disk, so a page deleted later fails the build rather than the browser.
+
 **Before verifying anything against a production build, stop every other node process.**
 `next dev` and `next start` share this directory's `.next`, and dev mode rewrites it. A dev
 server left running on port 3000 — hand-started in a VS Code terminal, which has happened
@@ -696,12 +879,22 @@ treating either as known.
 - **Real hero stills.** The mosaic holds eight slots at fixed aspect ratios so real stills drop in
   one-for-one; it currently shows generated geometric placeholders.
 - **Re-run Lighthouse and axe-core** against the rebuilt page, per the note above.
-- **`/contact`.** `/`, `/creative-services`, `/how-we-work`, `/ways-to-work-with-us`,
-  `/selected-work` and `/about` are built. `/contact` is the last content page, and **the only
-  404 any call to action points at** — it is the destination of nearly every one on all six built
-  pages. `/privacy` and `/terms` are linked from the footer and also do not exist. Every other
-  navigation destination now resolves, including the work menu's `/selected-work#<slug>`
-  fragments, which open each piece's detail.
+- **Wiring the contact forms to something real.** This is the one launch blocker. Both forms
+  validate and then discard the submission — see the box in the Contact section above and the top
+  of `docs/content-todo.md`. Everything else on this list is content or polish; this one loses
+  inquiries.
+- **`/privacy` and `/terms`.** Neither page nor its text exists. Both links have been removed
+  from the footer rather than left pointing at a 404 — a broken "Privacy policy" is the wrong
+  thing to be broken on a site whose form asks for a name, a company and an email. Supply the
+  documents and the links go back. **All seven content pages are now built and every navigation
+  destination resolves**, including the work menu's `/selected-work#<slug>` fragments.
+- **What Famysys Studio can genuinely claim.** The parent's contact page carries a SOC2 Type II
+  badge, an NDA commitment and a lock-in guarantee. None were reproduced, because a certification
+  claimed by a business that does not hold it is a false statement about an audit rather than
+  unapproved copy. The manager needs to say what is true in the Studio's own name.
+- **The Studio's own contact details.** `hello@famysys.com` and the phone number on the parent's
+  page are the parent's. `/contact` publishes neither, so the form is currently the only way to
+  reach the Studio from that page. The footer still shows the parent's address.
 - **Approval on the five inner pages' draft copy.** Everything on them except the client's own
   names, descriptors, process steps, tier content, piece titles and reused FAQ entries was
   written to fill them, and is listed for review in `docs/content-todo.md`. How We Work's

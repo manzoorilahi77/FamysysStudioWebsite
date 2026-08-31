@@ -39,6 +39,7 @@ export class BusinessEmail {
     if (FREE_MAIL_DOMAINS.has(domain)) {
       throw new InvalidBusinessEmailError(
         `Please use your work email address instead of a personal ${domain} address.`,
+        "free-mail",
       );
     }
     return new BusinessEmail(trimmed, domain);

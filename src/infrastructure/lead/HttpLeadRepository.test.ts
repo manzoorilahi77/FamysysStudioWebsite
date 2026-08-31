@@ -10,7 +10,7 @@ function fixtureRequest(): DemoRequest {
     fullName: FullName.create("Jane Doe"),
     email: BusinessEmail.create("jane@acme.com"),
     companyName: "Acme Inc.",
-    companySize: CompanySize.create("11-50"),
+    companySize: CompanySize.create("50–200"),
   });
 }
 
@@ -35,7 +35,7 @@ describe("HttpLeadRepository", () => {
           fullName: "Jane Doe",
           email: "jane@acme.com",
           companyName: "Acme Inc.",
-          companySize: "11-50",
+          companySize: "50–200",
         }),
       }),
     );

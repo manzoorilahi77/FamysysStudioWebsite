@@ -18,7 +18,14 @@ interface FinalCtaProps {
 
 export function FinalCta({ closingCta, accent = ["creative requirement?"] }: FinalCtaProps) {
   return (
-    <Section dark statement ariaLabel={closingCta.heading}>
+    // fade={false}, by the project's own rule: any colour derived against full ink is
+    // wrong for the first 900ms of a fading section, and this one carries a form. The
+    // error messages are accent-on-dark (5.015:1 on ink, 3.792:1 at the fade's start) and
+    // the input borders are canvas-40 (3.231:1 on ink, 2.887:1 at the start, against a
+    // 3:1 UI-boundary floor). Both were already true before /contact existed; the
+    // measured contrast pass built for that page is what surfaced them. A form is also
+    // not a moment for a background transition — /contact's form section does the same.
+    <Section dark statement fade={false} ariaLabel={closingCta.heading}>
       <Container>
         {/* The page's second and last centred moment. The heading stands alone at
             display size; everything under it goes back to flush left, which is what

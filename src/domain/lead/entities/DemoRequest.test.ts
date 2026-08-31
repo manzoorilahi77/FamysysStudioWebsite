@@ -10,7 +10,7 @@ function validProps(overrides: Partial<{ companyName: string }> = {}) {
     fullName: FullName.create("Jane Doe"),
     email: BusinessEmail.create("jane@acme.com"),
     companyName: overrides.companyName ?? "Acme Inc.",
-    companySize: CompanySize.create("11-50"),
+    companySize: CompanySize.create("50–200"),
   };
 }
 
@@ -21,7 +21,7 @@ describe("DemoRequest", () => {
     expect(request.companyName).toBe("Acme Inc.");
     expect(request.fullName.value).toBe("Jane Doe");
     expect(request.email.value).toBe("jane@acme.com");
-    expect(request.companySize.band).toBe("11-50");
+    expect(request.companySize.band).toBe("50–200");
   });
 
   it("throws InvalidDemoRequestError when companyName is empty", () => {

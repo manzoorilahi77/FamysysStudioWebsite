@@ -1,5 +1,18 @@
 # Content To Confirm Before Launch
 
+> ## Launch blocker: the contact form delivers nowhere
+>
+> Both forms on this site — the closing "Start a Conversation" form on every page, and the
+> eight-field form on `/contact` — POST to `/api/demo-request`, which is backed by
+> `StubLeadRepository`. That repository validates the request, resolves, and **does nothing
+> with it**. There is no email, no CRM, no queue, no database and no file. A submission
+> shows the sender a confirmation and is then discarded.
+>
+> **This must be wired to email or the company backend before launch.** It is a one-line
+> change at the composition root — `container.demoRequestIntake` in
+> `src/infrastructure/di/container.ts` — behind the existing `LeadRepository` interface, so
+> nothing else has to move. Until it is done, every inquiry the site collects is lost.
+
 The homepage now runs on the client's real V1 Homepage Content Brief. Every heading, body
 paragraph, capability, process step, tier, reason and FAQ answer on the page is the client's own
 copy, used verbatim. This file lists only what the brief did **not** supply, plus the placeholder
@@ -884,6 +897,164 @@ content modules and therefore not up for review here. Regenerate with
 
 <!-- /generated -->
 
+## Drafted copy pending approval — Contact (`/contact`)
+
+**The one page whose reference is the parent site.** Every other page here is shaped
+against the design language the six share; this one follows famysys.com's own contact page
+— light hero, dark two-column form section, "What happens next" panel on the right —
+because the client asked for it and that page already solves this problem.
+
+Which makes what was *not* carried over from it the most important thing in this section.
+
+### Not carried over: the trust badges. Read this one first
+
+famysys.com's contact panel carries three badges:
+
+- **SOC2 Type II Compliant**
+- **Strict Commercial NDA**
+- **Zero Lock-In Guarantee**
+
+**None of them appear on this page, and none should be added without a decision from the
+manager.** The first is a certification an external auditor issues to a specific named
+legal entity after an observation period. The other two are contractual commitments. The
+Studio is a new arm of the business, the brief says nothing about any of them, and a
+certification claimed by a business that does not hold it is a different order of problem
+from unapproved copy — it is a false statement about an audit.
+
+The space where they would sit is simply empty. A unit test asserts that no string on the
+page matches `soc2`, `iso`, `certifi`, `compliant`, `nda`, `guarantee` or `lock-in`.
+
+**What is needed:** the manager to say what Famysys Studio can *genuinely* claim in its own
+name. If the Studio is covered by the parent entity's SOC2 report, that is a real answer
+and the badge can go back with the right wording. If it is not, it cannot.
+
+### Not carried over: the contact details
+
+famysys.com publishes `hello@famysys.com` and a phone number on that page. **Both are the
+parent's.** The Studio may share them, may have its own, or may not want a phone number on
+a page at all — the brief says nothing.
+
+`contactPage.panel.direct` is therefore `{}`, and while both fields are absent the "Or
+reach us directly" block does not render at all, so the page never shows a heading with
+nothing beneath it. **The only way to reach the Studio from this page right now is the
+form** — which, per the warning at the top of this file, delivers nowhere.
+
+Note the inconsistency this leaves: the **footer** still shows `hello@famysys.com` on every
+page, including this one, from before `/contact` existed. Whatever is decided should be
+applied to both.
+
+**What is needed:** the Studio's own email address, and a phone number or a decision not to
+publish one.
+
+### Not carried over: the QR business card
+
+The parent's panel ends with a QR code labelled "Scan to Connect — Instant digital business
+card". A digital business card belongs to a **person**, not a company, and whose it would
+be on the Studio's page is a question rather than an asset to reproduce.
+
+**What is needed:** a decision — whose card, or none.
+
+### The hero copy is new, and here is the reasoning
+
+The parent's hero is:
+
+> **Start with the problem, not the pitch.**
+> Tell us what is not working and what it is costing you. If it is work we should take, you
+> will hear back from the engineer who would scope it — not a sales sequence.
+
+That is written for someone buying engineering, and neither sentence survives the move to a
+creative production studio: a client with a film to make does not have something that is
+not working and costing them money, they have something they want made. What was kept is
+the *shape* — a short declarative heading built on a contrast, and an intro that says what
+to send and who reads it.
+
+| Version | Copy |
+|---|---|
+| **On the page** | **Start with what you want made, not how to make it.** / Tell us what you are trying to create, who it is for and roughly when you need it. If it is work we should take, you will hear back from the person who would direct it — not a sales sequence. |
+| **Approved fallback** | Have a creative requirement? Let's talk. / Tell us what you're trying to create. We'll help you determine the right approach, scope and production model. |
+
+The fallback is the brief's own final-CTA copy and is already approved — but it is also
+already on the homepage and on five other pages as the closing CTA, which is the argument
+against making it this page's headline too. Either is fine; the second needs no approval.
+
+A unit test asserts none of the parent's engineering framing (`engineer`, "what it is
+costing", "what is not working", "not the pitch") appears anywhere on the page.
+
+### Commitments — confirm these first
+
+Everything below promises the sender something the studio then has to do. These are not
+copy preferences.
+
+| Commitment | Where | Note |
+|---|---|---|
+| "you will hear back from **the person who would direct it** — not a sales sequence" | Hero body | A commitment about *who* replies, exactly as the parent's "the engineer who would scope it" is. It implies a named person reads inbound work and that no automated nurture sequence runs. |
+| **01 — "Your brief goes to the person who would direct it, not a routing queue."** | Panel step 01 | Same commitment restated. If briefs will in fact go to a shared inbox first, this is wrong. |
+| **02 — "A short call."** | Panel step 02 | The studio will get on a call before deciding. **No duration is stated** — the parent says "Thirty minutes" and the brief gives the Studio no number, so one is not invented here. If a length should be stated, supply it. |
+| **03 — "you get the approach we would take, the scope it implies and the production model that suits it — before any commitment."** | Panel step 03 | The strongest of the three: a written document, unpaid, before anything is agreed. Confirm the studio will actually produce one for every fitting inquiry. |
+| Confirmation message | `contact.content.ts` (`confirmationBody`) | "We read every one. If it is work we should take, you will hear back from the person who would direct it." Deliberately carries **no turnaround** — unlike the closing form's own confirmation, which still says "within one business day" and is listed separately below. |
+
+**No timing appears anywhere on this page.** A test asserts the content module contains no
+`minutes`, `hours`, `business day`, `within <n>`, `twenty`/`thirty`/`forty`/`sixty` or
+`24 hours`. The parent's thirty minutes was not inherited.
+
+### The form's fields
+
+Eight fields, in famysys.com's own order, with its labels — except the last, which asks
+what you are trying to **create** where the parent asks what you are trying to **fix**.
+
+| Field | Required | Note |
+|---|---|---|
+| First name | yes | |
+| Last name | yes | |
+| Work email | yes | Free-mail addresses (gmail, outlook, …) are refused with an actionable message naming the domain |
+| Company | yes | |
+| Company website | **no** | Labelled "(optional)". A scheme is optional — "acme.com" is accepted |
+| Your role | yes | Options are NOT the parent's — see the row in "Copy the brief does not supply" |
+| Company size | yes | The parent's four bands — see the same table |
+| What are you trying to create? | yes | |
+
+Submit button reads **"Send inquiry"**, as the parent's does.
+
+### Every drafted string
+
+<!-- generated: contact drafted copy — do not edit by hand, run `pnpm docs:content-todo` -->
+
+**27 drafted strings**, against 5 read from the client's own
+content modules and therefore not up for review here. Regenerate with
+`pnpm docs:content-todo` after any edit to `contact.content.ts`.
+
+| Where | Drafted string |
+|---|---|
+| hero › eyebrow | Contact |
+| hero › heading | Start with what you want made, not how to make it. |
+| hero › body | Tell us what you are trying to create, who it is for and roughly when you need it. If it is work we should take, you will hear back from the person who would direct it — not a sales sequence. |
+| form › heading | Tell us about the work |
+| form › labels › firstName | First name |
+| form › labels › lastName | Last name |
+| form › labels › email | Work email |
+| form › labels › companyName | Company |
+| form › labels › companyWebsite | Company website |
+| form › labels › role | Your role |
+| form › labels › companySize | Company size |
+| form › labels › brief | What are you trying to create? |
+| form › optionalSuffix | (optional) |
+| form › selectPlaceholder | Select one |
+| form › submitLabel | Send inquiry |
+| form › submittingLabel | Sending… |
+| form › confirmationHeading | Thanks — your brief is with us. |
+| form › confirmationBody | We read every one. If it is work we should take, you will hear back from the person who would direct it. |
+| form › submitErrorMessage | Something went wrong sending that. Please try again. |
+| panel › heading | What happens next |
+| panel › steps › 0 › heading | Someone who makes the work reads it |
+| panel › steps › 0 › body | Your brief goes to the person who would direct it, not a routing queue. |
+| panel › steps › 1 › heading | A short call |
+| panel › steps › 1 › body | Enough to establish what you are making, who it is for, and whether this is work we should be taking on at all. |
+| panel › steps › 2 › heading | A written approach |
+| panel › steps › 2 › body | If it fits, you get the approach we would take, the scope it implies and the production model that suits it — before any commitment. |
+| panel › directEyebrow | Or reach us directly |
+
+<!-- /generated -->
+
 ## Copy the brief does not supply
 
 | Item | Where | What is needed |
@@ -893,29 +1064,31 @@ content modules and therefore not up for review here. Regenerate with
 | Footer tagline | `marketing.content.ts` (`footerContent.tagline`) | Currently reuses the brief's own central-idea sentence. Not new copy, but not written for the footer either — confirm or replace. |
 | Contact email | `marketing.content.ts` (`footerContent.contactEmail`) | `hello@famysys.com` is a placeholder. Confirm the real address. |
 | Social links | `marketing.content.ts` (`footerContent.socialLinks`) | The brief supplies no handles, so the list is empty and no social row renders. Supply handles or confirm there are none. |
-| Legal pages | `marketing.content.ts` (`footerContent.legalLinks`) | Privacy policy and Terms of use are linked but neither page nor its text exists. |
+| Legal pages | `marketing.content.ts` (`footerContent.legalLinks`) | Privacy policy and Terms of use **are no longer linked**. Neither page nor its text exists, and once `/contact` completed the site they were the last two dead links on it — a 404 behind "Privacy policy" is the wrong thing to be broken on a site whose form asks for a name, a company and an email. `legalLinks` is now an empty array and the footer renders no legal row. Supply the two documents and both links go back. |
 | Tier field labels duplicated | `WaysToWork.tsx` (homepage) | "Ideal for" and "Typical work includes" are now exported from `marketing.content.ts` as `TIER_FIELD_LABELS`, and `/ways-to-work-with-us` reads them from there. The homepage section still carries them as component literals: `presentation/` may not import `infrastructure/` under the boundary rules, so removing that duplication means threading them through as props from `app/page.tsx`. A homepage change, deliberately not made while building an inner page. |
-| Demo form fields | `src/presentation/components/DemoForm.tsx` | The form still asks for full name, business email, company name and company size — carried over from the previous build, not specified in the brief. Confirm these are the right fields for "Start a Conversation". |
+| Two forms, two field sets | `DemoForm.tsx` and `ContactForm.tsx` | The closing form on every page asks four questions (full name, work email, company, company size); `/contact` asks eight, matching famysys.com's own contact form. Both were drafted, neither is in the brief. Confirm both, or decide the short form should ask the same eight. |
+| Company-size bands | `CompanySize.ts` | Now the four famysys.com uses — **1–50 · 50–200 · 200–1,000 · 1,000+**. They REPLACED a five-band set (1-10 / 11-50 / 51-200 / 201-500 / 500+) that the previous build invented, so the closing form's dropdown changed too. Two overlapping vocabularies would have made the answers un-comparable between the two forms, and neither set was ever confirmed. Confirm the four. |
+| "Your role" options | `ContactRole.ts` | **Founder / Owner · Marketing Lead · Brand or Creative Lead · Content or Social Lead · Agency or Partner · Other.** NOT the parent's list, which is CEO / COO / CFO / CIO-CTO / VP / Other and is shaped for an enterprise IT buyer approving an engineering engagement. The Studio sells creative production to marketing and brand owners, often at companies with no C-suite to route through; reusing the parent's would have pushed most real senders into "Other". This is a read of who the Studio expects to hear from, and needs confirming. |
 | Demo form reply commitment | `DemoForm.tsx` (success message) | "Someone from Famysys Studio will reply **within one business day**" is an operational promise, not placeholder copy. Confirm the studio can hold that turnaround, or loosen the wording. |
 
-## Routes that do not exist yet
+## Routes — all seven content pages now exist
 
-The header, mega menu and footer link the real 7-page site from the brief. The homepage,
-Creative Services, How We Work, Ways to Work With Us, Selected Work and About are built;
-every other route 404s until its page lands:
+`/` · `/creative-services` · `/how-we-work` · `/ways-to-work-with-us` · `/selected-work` ·
+`/about` · `/contact`
 
-`/contact` · `/privacy` · `/terms`
+**Every navigation destination on the site now resolves.** `/contact` was the last one, and
+it was the destination of nearly every call to action: the header's "Contact" and "Start a
+Conversation" buttons, the primary CTA in four of the five section-page heroes, the What We
+Do CTA, all four "Talk to us" links in Ways to Work With Us, all six "Talk to us about
+this" links on Creative Services, the FAQ's pricing answer, and every closing CTA.
 
-**`/contact` is the only 404 any call to action points at**, and it is the destination of
-nearly every one: the primary CTA in four of the five section-page heroes (About's hero
-deliberately carries none), the What We Do CTA, all four "Talk to us" links in Ways to
-Work With Us, all six "Talk to us about this" links on Creative Services, the FAQ's
-pricing answer, and every closing CTA. Every navigation destination except `/contact` and
-the two legal pages now resolves.
+`internalLinks.test.ts` reads the routes off disk and checks every internal href in every
+content module against them, so the next dead link fails the test suite rather than waiting
+to be clicked. The browser pass re-checks the same thing against the running build: 468
+links across the seven pages, every internal target resolving 200.
 
-The navigation's work menu — which has linked `/selected-work#<slug>` at four of the eight
-pieces since the homepage was built — now resolves, and each of those fragments opens that
-piece's detail.
+`/privacy` and `/terms` still do not exist and are **no longer linked** — see the legal-pages
+row above.
 
 ## Deliberately absent
 

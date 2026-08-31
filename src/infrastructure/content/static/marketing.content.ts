@@ -325,7 +325,14 @@ export const footerContent: FooterContent = {
   tagline:
     "A professional creative production partner — combining human creativity, AI and efficient production.",
   contactEmail: "hello@famysys.com", // TODO(client): confirm the real contact address
-  legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
+  // TODO(client): NO LEGAL LINKS UNTIL THE DOCUMENTS EXIST. These were
+  // createCta("Privacy policy", "/privacy") and createCta("Terms of use", "/terms"),
+  // and both 404ed from every page on the site. /contact completes the seven content
+  // pages, so these were the last dead links left, and a link to a policy that does not
+  // exist is worse than no link — on a page that asks for someone's name, company and
+  // email, a broken "Privacy policy" is the wrong thing to be broken. Restore both the
+  // moment the client supplies the text. See docs/content-todo.md.
+  legalLinks: [],
   socialLinks: [], // TODO(client): no social handles supplied in the brief
 };
 

@@ -154,12 +154,19 @@ describe("StaticMarketingContentRepository", () => {
     expect(cta.closingLine).toBe("Project today. Creative partner tomorrow.");
   });
 
-  it("returns footer content with legal links", async () => {
+  /**
+   * The footer linked "Privacy policy" at /privacy and "Terms of use" at /terms, and
+   * neither page exists. They were the last two dead links on the site once /contact
+   * completed the seven content pages, and a link to a privacy policy that 404s is the
+   * wrong thing to be broken on a site whose form asks for a name, a company and an
+   * email. The links come back when the documents do — see docs/content-todo.md.
+   */
+  it("links to no legal page until the documents exist", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const footer = await repository.getFooterContent();
 
-    expect(footer.legalLinks.length).toBeGreaterThanOrEqual(2);
+    expect(footer.legalLinks).toEqual([]);
     expect(footer.contactEmail.length).toBeGreaterThan(0);
   });
 });

@@ -13,7 +13,7 @@ function validInput(overrides: Partial<SubmitDemoRequestInput> = {}): SubmitDemo
     fullName: "Jane Doe",
     email: "jane@acme.com",
     companyName: "Acme Inc.",
-    companySize: "11-50",
+    companySize: "50–200",
     ...overrides,
   };
 }
@@ -29,7 +29,7 @@ describe("SubmitDemoRequest", () => {
     expect(repository.received?.fullName.value).toBe("Jane Doe");
     expect(repository.received?.email.value).toBe("jane@acme.com");
     expect(repository.received?.companyName).toBe("Acme Inc.");
-    expect(repository.received?.companySize.band).toBe("11-50");
+    expect(repository.received?.companySize.band).toBe("50–200");
   });
 
   it("propagates a repository failure", async () => {

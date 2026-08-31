@@ -56,6 +56,12 @@ const PAGES = [
     module: "infrastructure/content/static/about.content.js",
     exportName: "aboutPage",
   },
+  {
+    slug: "contact",
+    entry: "src/infrastructure/content/static/contact.content.ts",
+    module: "infrastructure/content/static/contact.content.js",
+    exportName: "contactPage",
+  },
 ];
 
 /**
