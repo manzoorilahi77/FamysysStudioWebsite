@@ -50,6 +50,12 @@ const PAGES = [
     module: "infrastructure/content/static/selected-work.content.js",
     exportName: "selectedWorkPage",
   },
+  {
+    slug: "about",
+    entry: "src/infrastructure/content/static/about.content.ts",
+    module: "infrastructure/content/static/about.content.js",
+    exportName: "aboutPage",
+  },
 ];
 
 /**

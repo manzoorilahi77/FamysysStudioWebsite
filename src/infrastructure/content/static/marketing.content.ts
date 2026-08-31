@@ -1,7 +1,13 @@
-// Every string in this file is the client's own copy, taken verbatim from the
-// V1 Homepage Content Brief. Do not paraphrase or "improve" it here — content
-// changes come from the brief, not from the codebase. Anything the brief did
-// not supply is recorded in docs/content-todo.md rather than invented.
+// Every string in this file is the client's own copy, taken verbatim from their
+// briefs — the V1 Homepage Content Brief, and (in `aboutBlock` at the foot of the
+// file) the About brief. Do not paraphrase or "improve" it here — content changes
+// come from the brief, not from the codebase. Anything the brief did not supply is
+// recorded in docs/content-todo.md rather than invented.
+//
+// This file is the ONE place the client's own words live. Page content modules
+// (creative-services, how-we-work, ways-to-work, selected-work, about) import from
+// here rather than retyping, so an approved string has exactly one definition and
+// the pages cannot drift from each other.
 
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
@@ -322,3 +328,40 @@ export const footerContent: FooterContent = {
   legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
   socialLinks: [], // TODO(client): no social handles supplied in the brief
 };
+
+/**
+ * The client's own copy from the About brief.
+ *
+ * VERBATIM, quoted directly in the brief:
+ *   - `heading`
+ *   - `belief` — the studio's central statement, and the About page's thesis
+ *
+ * COMPLETED FROM THE BRIEF'S OWN PHRASES. The brief gives each of these as a phrase
+ * inside a longer sentence rather than as a standalone one, and the surrounding words
+ * below were added only to make each a sentence. The phrases themselves are the
+ * client's:
+ *   - `approach` — "combining creative talent, emerging AI technologies and structured
+ *     production workflows"
+ *   - `ecosystem` — "part of the Famysys ecosystem"
+ *   - `ambition` — "a scalable professional creative production company serving
+ *     businesses in India and global markets"
+ *   - `startingDeliberately` — "starting deliberately — building our capabilities,
+ *     refining our processes and investing heavily in our team and production systems"
+ *
+ * Those four are listed in docs/content-todo.md so the client can replace each with the
+ * brief's own full sentence. Nothing here was invented: the About page states no
+ * headcount, founding date, office, client count or award, because the brief supplies
+ * none and the studio is, in its own words, still starting.
+ */
+export const aboutBlock = {
+  heading: "Building the next generation of creative production.",
+  belief:
+    "Modern creative production should be more flexible, efficient and accessible without compromising professional quality.",
+  approach:
+    "Famysys Studio combines creative talent, emerging AI technologies and structured production workflows.",
+  ecosystem: "Famysys Studio is part of the Famysys ecosystem.",
+  ambition:
+    "Our ambition is to build a scalable professional creative production company serving businesses in India and global markets.",
+  startingDeliberately:
+    "We are starting deliberately — building our capabilities, refining our processes and investing heavily in our team and production systems.",
+} as const;

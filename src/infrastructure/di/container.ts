@@ -1,3 +1,4 @@
+import { StaticAboutRepository } from "../content/repositories/StaticAboutRepository";
 import { StaticEngagementRepository } from "../content/repositories/StaticEngagementRepository";
 import { StaticMarketingContentRepository } from "../content/repositories/StaticMarketingContentRepository";
 import { StaticNavigationRepository } from "../content/repositories/StaticNavigationRepository";
@@ -26,6 +27,7 @@ export const container = {
   process: new StaticProcessRepository(),
   engagement: new StaticEngagementRepository(),
   portfolio: new StaticPortfolioRepository(),
+  about: new StaticAboutRepository(),
   lead: new HttpLeadRepository(),
   // Used by the /api/demo-request route itself (the server-side target the
   // client-side HttpLeadRepository above POSTs to) — see StubLeadRepository.

@@ -2044,3 +2044,39 @@ html {
     transform: none;
   }
 }
+
+/* ============================================================================
+   About (/about)
+   ============================================================================ */
+
+/* The whole page's stylesheet is these two rules, which is the point: About reuses the
+   split, the section header and the reveal that every other page already has, and adds
+   nothing of its own beyond the frame around its one image and the hairline that pairs
+   the ambition with the present tense.
+
+   Note what is NOT here — no settle on the image, no draw-on, no stagger of its own.
+   The page's motion brief is standard scroll reveals and the heading clip reveal only,
+   so `.about-media` is a frame rather than an animation. */
+.about-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-canvas-16);
+  aspect-ratio: 4 / 3;
+}
+
+/* The current position sits under a hairline beside the ambition, so the pairing is
+   structural. Reading the ambition without this line beside it would turn a statement of
+   intent into a claim about today. */
+.direction-present {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-ink-8);
+}
+
+@media (min-width: 1024px) {
+  .direction-present {
+    padding-top: 0;
+    padding-left: 2rem;
+    border-top: none;
+    border-left: 1px solid var(--color-ink-8);
+  }
+}

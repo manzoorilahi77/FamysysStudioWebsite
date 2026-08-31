@@ -323,6 +323,71 @@ Five things worth knowing before editing it:
   three are two ends of the same link and three private copies were three chances for one
   to drift.
 
+## About (`/about`)
+
+The fifth and **shortest** page on the site. Six sections where the other inner pages
+have eight or ten, less copy in each, a hero at ~50svh rather than ~60, no call to action
+in that hero, and a stylesheet of two rules. All of that is deliberate: the brief asks
+for About to stay relatively short initially, and the page is built to read as quiet by
+design rather than thin by accident. **If it looks short, that is the specification.**
+
+Its own bounded context — `src/domain/about/` with `AboutRepository`, `GetAboutPage`,
+`about.content.ts` and `container.about` — for the same reason `process` and `engagement`
+are separate: `GetHomepageContent` awaits every method on `MarketingContentRepository`.
+
+The client's own About copy lives in **`aboutBlock` in `marketing.content.ts`**, not in
+the page module. That file is the one place the client's words live, and `about.content.ts`
+reads from it. Two of those six strings are verbatim from the brief; the other four are
+the brief's own phrases completed into sentences, and `docs/content-todo.md` says which is
+which so the client can replace each with their full version.
+
+Block shapes:
+
+| Section | Shape |
+|---|---|
+| Page hero | ~50svh, dark, no image, **no CTA**. Every other hero carries one; this page's argument is "here is who this is", and the ask belongs at the foot |
+| The belief | The client's central sentence, centred at display size, standing completely alone with the `statement` measure of space around it |
+| What we do, and why | The shared asymmetric split, 5/12 image against 6/12 copy. Dark, and it keeps the entry fade — every colour in it is canvas or canvas-80 |
+| Part of Famysys | Light. Three short paragraphs and one external link |
+| Where we're going | Light. The ambition and the current position, side by side on a hairline |
+| Closing CTA | The shared `FinalCta` |
+
+Five things worth knowing before editing it:
+
+- **The belief statement is the site's third and last centred moment.** The homepage has
+  the other two — the thesis line in The Differentiator and the closing CTA heading — and
+  everything else on every page is flush left. That rarity is the entire effect. The
+  statement therefore carries no eyebrow, no rule and no supporting line: its section
+  label is an accessible name, not rendered copy, because a centred eyebrow above it
+  would have been a second centred element. The verification counts them and asserts the
+  page authors exactly one.
+- **Nothing is invented.** No team member, name, headcount, founding date, office
+  location, client count, revenue figure, award, partnership or certification appears
+  anywhere. The studio is, in the brief's own words, still starting — a page implying an
+  established agency would contradict its own copy two sections further down. A unit test
+  asserts the content module contains no digit at all and no founding, premises, award or
+  scale vocabulary; the browser check asserts the same against the rendered page.
+  **"India" is the one deliberate exception**: it is in the client's own ambition
+  sentence describing a market, so the location check targets premises language
+  ("headquartered", "based in", "our offices") rather than the word.
+- **The ambition and the present tense are one block and never separate.** The client
+  supplies both — what the studio intends to become, and that it is starting
+  deliberately. Rendering the first alone would turn a plan into a claim about today,
+  which is the single easiest way for this page to become false. A test asserts both are
+  present.
+- **The motion is the site's existing vocabulary and nothing else** — standard scroll
+  reveals plus the heading clip reveal. No cursor tracking, no draw-on, no staggered
+  grids, no parallax, and no image settle, which is why `AboutApproach` is a plain server
+  component where its siblings on the other pages are client components. The one
+  deviation is the belief statement's entry at 520ms rather than 320ms: a different
+  duration is emphasis, a different effect would have been a new effect.
+- **One image, with no people in it.** The brief allowed two. The second was left out
+  because the "Where we're going" block is two sentences whose whole effect is the
+  pairing, and a photograph beside them would compete with it. The one that ships shows a
+  grading interface rather than a person, because on an About page a stranger's face
+  reads as *our team* — see `docs/content-todo.md` for the three candidates rejected at
+  crop check.
+
 ## Swapping static content for a CMS
 
 Every `Static*Repository` in `src/infrastructure/content/repositories/` implements a domain
@@ -491,6 +556,7 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 | Split-block entry | Creative Services | Image then copy, 120ms apart; the image is the half that establishes which side of the split the block is on |
 | Image settle | Creative Services | The block image scales 1.0 → 1.03 as it arrives and stops. It settles; it does not loop |
 | Deliverable stagger | Creative Services | 50ms per row, fired from the list's own observer rather than one per row — the rows are close enough together that per-row observers would fire at once and collapse the stagger |
+| Belief statement entry | About | The standard reveal at 520ms rather than 320ms, and it is the page's only motion beyond the shared reveals. The rest of About deliberately adds nothing — no settle, no stagger, no draw-on |
 | Filter transition | Selected Work | The grid fades to zero over 180ms, the set is swapped, and the new tiles stagger in at 60ms. The controls report the new state immediately; only the DOM lags |
 | Tile hover | Selected Work | The locked treatment, fired from the WHOLE card rather than from the media: accent border, 6px lift, media 1.05, chip colour shift. `:focus-within` gets the same escalation, and the focus ring moves onto the media so a keyboard user sees the tile take focus rather than four words of a title |
 | Tile image settle | Selected Work | 1.03 → 1.0 on entry, then hover takes it to 1.05. The settled selector carries the `data-settled` attribute on both sides so it does not out-specify the hover rule and freeze the media under the cursor |
@@ -630,13 +696,13 @@ treating either as known.
 - **Real hero stills.** The mosaic holds eight slots at fixed aspect ratios so real stills drop in
   one-for-one; it currently shows generated geometric placeholders.
 - **Re-run Lighthouse and axe-core** against the rebuilt page, per the note above.
-- **The two remaining inner pages.** `/`, `/creative-services`, `/how-we-work`,
-  `/ways-to-work-with-us` and `/selected-work` are built; `/about` and `/contact` still 404, as do
-  `/privacy` and `/terms`. **`/contact` is the only 404 any call to action points at**, and it is
-  the destination of nearly every one on all five built pages. The navigation's work menu, which
-  has linked `/selected-work#<slug>` at four of the eight pieces since the homepage was built,
-  now resolves — and each fragment opens that piece's detail.
-- **Approval on the four inner pages' draft copy.** Everything on them except the client's own
+- **`/contact`.** `/`, `/creative-services`, `/how-we-work`, `/ways-to-work-with-us`,
+  `/selected-work` and `/about` are built. `/contact` is the last content page, and **the only
+  404 any call to action points at** — it is the destination of nearly every one on all six built
+  pages. `/privacy` and `/terms` are linked from the footer and also do not exist. Every other
+  navigation destination now resolves, including the work menu's `/selected-work#<slug>`
+  fragments, which open each piece's detail.
+- **Approval on the five inner pages' draft copy.** Everything on them except the client's own
   names, descriptors, process steps, tier content, piece titles and reused FAQ entries was
   written to fill them, and is listed for review in `docs/content-todo.md`. How We Work's
   **operational commitments** — revision rounds, turnaround times, file-retention windows — are

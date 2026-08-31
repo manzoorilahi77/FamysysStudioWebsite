@@ -209,6 +209,43 @@ later cut somewhere else. Five candidates were rejected during that check:
 The alt text describes what each stock frame actually shows — not what the finished piece
 will show — so it has to be rewritten the day the real cover lands.
 
+### About page (§/about)
+
+File: `src/infrastructure/content/static/about.content.ts`
+
+**One image on the whole page**, and it has no people in it.
+
+| Slot | Section | Ratio | Shows | Unsplash id |
+|---|---|---|---|---|
+| `about-approach.jpg` | What we do, and why | 4:3 | A colour-grading interface on a monitor, shot at an angle: two colour wheels beside a hue curve over a spectrum | `photo-1741517389370-740b5bdf0d96` |
+
+**Two decisions worth recording.**
+
+*Why only one, when the brief allowed two.* The second slot was offered for "Where we're
+going". It was left out. That block is two sentences — the client's ambition and the
+client's own statement that the studio is starting deliberately — and its whole effect is
+the pairing. A stock photograph beside them would be decoration competing with the one
+thing the section is for.
+
+*Why this frame has no people in it.* The brief warns that stock photography of unrelated
+people is weaker on this page than anywhere else on the site, and that is right: on an
+About page a stranger's face reads as *our team*. This studio has no team page, no
+headcount and, in the brief's own words, is still starting — so a photograph implying
+staff would be the exact false note the rest of the page is written to avoid. A grading
+interface shows the work instead of implying the people.
+
+Three candidates were rejected during the crop check: a switcher desk with a legible
+Blackmagic Design wordmark and a Dell monitor; one person editing at a monitor (no brand
+marks, but a face); and an earlier crop of the chosen frame that included a dock of
+third-party application icons along the bottom edge. The shipped crop is pulled up above
+that dock — the only text left in frame is interface labelling ("Curves - Hue Vs Hue",
+"H.265 Main 10 L5.2"), which is a codec name, not a brand.
+
+Same terms as everything above: Unsplash License, downloaded into `public/media/`, served
+locally, no attribution required to ship and no hotlinking. Checked at its final crop
+before wiring, and the alt text describes the stock frame rather than anything the studio
+made — so it has to be rewritten if a real image replaces it.
+
 ### Hero subhead runs three lines, not two-and-a-half
 
 The hero detail brief asked for a subhead of two to two-and-a-half lines **and** a measure capped
@@ -746,6 +783,107 @@ content modules and therefore not up for review here. Regenerate with
 
 <!-- /generated -->
 
+## Drafted copy pending approval — About (`/about`)
+
+**The shortest page on the site, deliberately.** The brief says to keep About relatively
+short initially, so it has six sections where the other inner pages have eight or ten,
+and less copy in each. It should read as quiet by design rather than thin by accident,
+which is why the expansion below is modest and stops rather than filling space.
+
+**What is NOT drafted, and must not be edited here.** Six strings are the client's own,
+and they live in `aboutBlock` in `marketing.content.ts` — the one module that holds the
+client's words — with the page reading them from there rather than retyping them:
+
+| String | Status |
+|---|---|
+| "Building the next generation of creative production." | **Verbatim** from the brief |
+| "Modern creative production should be more flexible, efficient and accessible without compromising professional quality." | **Verbatim** from the brief. The page's thesis |
+| "Famysys Studio combines creative talent, emerging AI technologies and structured production workflows." | The brief's own phrase, **completed into a sentence** |
+| "Famysys Studio is part of the Famysys ecosystem." | The brief's own phrase, **completed into a sentence** |
+| "Our ambition is to build a scalable professional creative production company serving businesses in India and global markets." | The brief's own phrase, **completed into a sentence** |
+| "We are starting deliberately — building our capabilities, refining our processes and investing heavily in our team and production systems." | The brief's own phrase, **completed into a sentence** |
+
+**The four "completed" rows want checking against the brief's full sentences.** In each
+case the phrase inside is the client's; only the words joining it into a sentence are
+ours. If the brief has a fuller version of any of them, replace the whole string with it
+— the page reads them from one place, so a single edit updates every use.
+
+The closing CTA's label and closing line are also the client's own, reused from the
+homepage.
+
+### Nothing is invented
+
+No team member, name, headcount, founding date, office location, client count, revenue
+figure, award, partnership or certification appears anywhere on the page. That is not
+restraint for its own sake: the brief says the studio is *starting deliberately*, so a
+page implying an established agency would contradict the studio's own sentence two
+sections further down and be visibly false to anyone who checks.
+
+Two checks hold it. A unit test asserts the whole content module contains no digit at all
+and no founding, premises, award, certification or scale vocabulary. The browser
+verification asserts the same against the **rendered** page.
+
+One deliberate exception is worth naming: **"India" stays.** It appears in the client's
+own ambition sentence, describing the market the studio intends to serve. It is not an
+office or headquarters claim, and the location check targets premises language
+("headquartered", "based in", "our offices") rather than the word itself. Removing it
+would have meant dropping the brief's own wording.
+
+### Commitments — there are none
+
+Checked, and the table is empty by design. No drafted string on this page makes a claim
+about size, history, turnaround, capacity or capability the studio has not established.
+The two sentences that come closest are both the client's own and both describe intent:
+the ambition, and the statement about starting deliberately. They are rendered as one
+block precisely so neither can be read without the other — an ambition on its own reads
+as a description of today.
+
+### Sections that were deliberately not built
+
+The brief rules these out and the content supports none of them. Listed so the absence
+reads as a decision:
+
+no team grid · no stats or numbers block · no timeline or milestones · no values grid ·
+no office photo · no founder's letter · no client logo strip
+
+### The page's one centred moment
+
+The belief statement is centred at display size with the statement measure of space
+around it. It is the **site's third and last** centred moment — the homepage has the
+thesis line and the closing CTA heading, and everything else on every page is flush left.
+Nothing else on this page is centred, including the statement's own section label, which
+is why that label is an accessible name rather than a rendered eyebrow.
+
+### Every drafted string
+
+<!-- generated: about drafted copy — do not edit by hand, run `pnpm docs:content-todo` -->
+
+**17 drafted strings**, against 8 read from the client's own
+content modules and therefore not up for review here. Regenerate with
+`pnpm docs:content-todo` after any edit to `about.content.ts`.
+
+| Where | Drafted string |
+|---|---|
+| hero › eyebrow | About Famysys Studio |
+| hero › body | A creative production studio, built to make professional creative work easier to commission and easier to keep producing. |
+| belief › label | What we believe |
+| approach › eyebrow | What we do, and why |
+| approach › heading | Creative judgment, with production built around it. |
+| approach › paragraphs › 1 | The three are not interchangeable. Creative direction decides what a piece should be. The workflow decides whether it can be made again, to the same standard, without a scramble. AI is used where it removes production overhead, and left out where it would cost quality. |
+| approach › paragraphs › 2 | It is not a complicated method. Most of the difference is in applying it the same way every time. |
+| approach › media › alt | A colour-grading interface on a monitor, photographed at an angle: two colour wheels beside a hue curve drawn over a spectrum. |
+| ecosystem › eyebrow | Part of Famysys |
+| ecosystem › heading | Where the Studio sits. |
+| ecosystem › paragraphs › 1 | So the Studio is not finding its feet alone. It is being built inside an existing business, with creative production as its own focus rather than a side of something else. |
+| ecosystem › paragraphs › 2 | What the wider group does is its own work, and this page does not claim it as the Studio's. The link below goes to Famysys itself. |
+| ecosystem › link › label | Visit famysys.com |
+| direction › eyebrow | Where we're going |
+| direction › heading | What we are building toward. |
+| closingCta › heading | Bring us something to make. |
+| closingCta › body | Tell us what you are trying to produce and who it is for. We will tell you plainly whether it is something we can make well. |
+
+<!-- /generated -->
+
 ## Copy the brief does not supply
 
 | Item | Where | What is needed |
@@ -763,15 +901,17 @@ content modules and therefore not up for review here. Regenerate with
 ## Routes that do not exist yet
 
 The header, mega menu and footer link the real 7-page site from the brief. The homepage,
-Creative Services, How We Work, Ways to Work With Us and Selected Work are built; every
-other route 404s until its page lands:
+Creative Services, How We Work, Ways to Work With Us, Selected Work and About are built;
+every other route 404s until its page lands:
 
-`/about` · `/contact` · `/privacy` · `/terms`
+`/contact` · `/privacy` · `/terms`
 
 **`/contact` is the only 404 any call to action points at**, and it is the destination of
-nearly every one: the primary CTA in all five heroes, the What We Do CTA, all four "Talk
-to us" links in Ways to Work With Us, all six "Talk to us about this" links on Creative
-Services, the FAQ's pricing answer, and every closing CTA.
+nearly every one: the primary CTA in four of the five section-page heroes (About's hero
+deliberately carries none), the What We Do CTA, all four "Talk to us" links in Ways to
+Work With Us, all six "Talk to us about this" links on Creative Services, the FAQ's
+pricing answer, and every closing CTA. Every navigation destination except `/contact` and
+the two legal pages now resolves.
 
 The navigation's work menu — which has linked `/selected-work#<slug>` at four of the eight
 pieces since the homepage was built — now resolves, and each of those fragments opens that
