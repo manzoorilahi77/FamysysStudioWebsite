@@ -1303,3 +1303,744 @@ html {
     transform: none;
   }
 }
+
+/* ============================================================================
+   How We Work (/how-we-work)
+   ============================================================================ */
+
+/* Same measured-offset arrangement as the Creative Services index: ProcessOverview
+   measures the header and itself and publishes the sum, so an anchor jump lands with the
+   step heading clear of both fixed bars. Its own variable rather than the services one —
+   the two bars are different heights, and sharing a name would make one page's
+   measurement leak into the other's fallback. */
+.process-anchor {
+  scroll-margin-top: var(--process-anchor-offset, 11rem);
+}
+
+/* The step overview. Below md it is a horizontally scrolling strip; from md up it sticks
+   under the header. Its `top` is set inline from the measured header height, so it cannot
+   overlap the bar when the header changes height at xl. */
+.process-overview {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.process-overview::-webkit-scrollbar {
+  display: none;
+}
+
+.process-overview-list {
+  display: flex;
+  align-items: stretch;
+  list-style: none;
+  width: max-content;
+  min-width: 100%;
+  padding-inline: var(--spacing-gutter);
+}
+
+@media (min-width: 768px) {
+  .process-overview-list {
+    width: auto;
+  }
+}
+
+/* Each item contributes its own link and the rule segment that reaches the next one, so
+   the five segments join into a single line running through the numerals — the homepage's
+   §4 arrangement, compressed into a bar. The last segment is dropped rather than left
+   dangling past the final step. */
+.process-overview-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 768px) {
+  .process-overview-item {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  /* The last step has nothing to reach, so it neither stretches nor trails a rule. */
+  .process-overview-item:last-child {
+    flex: 0 0 auto;
+  }
+}
+
+.process-overview-item:last-child .process-overview-rule {
+  display: none;
+}
+
+.process-overview-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  padding: 0.875rem 0;
+  color: var(--color-ink-70);
+  border-bottom: 2px solid transparent;
+  transition-property: color, border-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-overview-link:hover {
+  color: var(--color-ink);
+}
+
+/* Both colour and a rule, for the same reason the services index carries both: colour
+   alone is not a signal for every reader. */
+.process-overview-link[data-active="true"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  font-weight: 500;
+}
+
+.process-overview-numeral {
+  color: var(--color-ink-20);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  transition-property: color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-overview-link[data-active="true"] .process-overview-numeral {
+  color: var(--color-accent);
+}
+
+.process-overview-name {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* Drawn a segment at a time as the bar enters, the delays supplied per segment so the
+   line reads as one rule travelling rather than five growing at once. */
+.process-overview-rule {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  height: 1px;
+  background-color: var(--color-ink-12);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 180ms;
+  transition-timing-function: linear;
+}
+
+.process-overview-item[data-drawn="true"] .process-overview-rule {
+  transform: scaleX(1);
+}
+
+/* The block numeral. Decoration in the same sense as §2's and §4's on the homepage — the
+   ordinal is already carried by the step's position in the list and repeated in the
+   overview — so it is generated content and the contrast minimum does not apply. See
+   `.decorative-numeral` above for why that distinction has to be made in CSS. */
+.step-numeral {
+  color: var(--color-ink-12);
+}
+
+.surface-dark .step-numeral {
+  color: var(--color-canvas-16);
+}
+
+/* Same settle as the capability blocks': the image scales 3% as it arrives and stops.
+   Nothing on this page moves once the reader stops scrolling. */
+.step-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 4 / 3;
+}
+
+.step-media img {
+  transform: scale(1);
+  transition-property: transform;
+  transition-duration: 900ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.step-media[data-settled="true"] img {
+  transform: scale(1.03);
+}
+
+/* The worked example re-walks the same five steps, so it takes the vertical rail the
+   homepage's process uses below `lg` rather than another split — the numeral and step
+   name in a fixed left column, the narrative beside it. */
+.example-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-block: 1.75rem;
+  border-top: 1px solid var(--color-canvas-16);
+}
+
+.example-stage:last-child {
+  border-bottom: 1px solid var(--color-canvas-16);
+}
+
+@media (min-width: 768px) {
+  .example-stage {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+.example-stage-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+}
+
+.example-stage-numeral {
+  color: var(--color-canvas-40);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* Four scope topics on hairlines rather than in cards. Cards would have said "four
+   features"; the rules say "four parts of one answer", which is what this section is. */
+.scope-topic {
+  padding-block: 2rem;
+  border-top: 1px solid var(--color-ink-8);
+}
+
+@media (min-width: 768px) {
+  .scope-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state: the rule is fully drawn, and the image sits at its settled size. The
+     overview keeps its active state, its colours and its scrolling — only the draw-on
+     goes. */
+  .process-overview-rule,
+  .process-overview-item[data-drawn="true"] .process-overview-rule {
+    transform: none;
+  }
+
+  .step-media img,
+  .step-media[data-settled="true"] img {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   Ways to Work With Us (/ways-to-work-with-us)
+   ============================================================================ */
+
+/* A single fixed bar above these anchors — the header — not the header plus a sticky
+   index, so a constant is honest here where /creative-services and /how-we-work had to
+   measure. 7rem clears the header at both of its heights (68px below xl, 83px at and
+   above it) with room to spare. */
+.tier-anchor {
+  scroll-margin-top: 7rem;
+}
+
+/* Same settle as .capability-media and .step-media: the image scales 3% as it arrives
+   and stops there. Nothing on this page moves once the reader stops scrolling. */
+.tier-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 4 / 3;
+}
+
+.custom-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 16 / 9;
+}
+
+.tier-media img,
+.custom-media img {
+  transform: scale(1);
+  transition-property: transform;
+  transition-duration: 900ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.tier-media[data-settled="true"] img,
+.custom-media[data-settled="true"] img {
+  transform: scale(1.03);
+}
+
+/* The comparison. A fit-finder, so every cell says what a tier IS — there are no ticks,
+   no crosses and no withheld rows. A feature-gated grid implies a price ladder even with
+   no figures on it, and the brief forbids public pricing. */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 1.25rem 1.5rem 1.25rem 0;
+  vertical-align: top;
+  border-top: 1px solid var(--color-ink-8);
+}
+
+.comparison-table thead th {
+  border-top: 0;
+  padding-bottom: 1.5rem;
+}
+
+.comparison-table tbody th {
+  width: 14rem;
+}
+
+/* Rows arrive top to bottom as the table enters, 60ms apart — the same rate every card
+   grid on the site staggers at. One observer on the table rather than one per row: the
+   rows are a few lines apart, so per-row observers would fire together and collapse it. */
+.comparison-row {
+  opacity: 0;
+  transform: translateY(12px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.comparison-row[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The swipe track and its items are §4.11's, reused unchanged — see .comparison-swipe
+   above. Only the dots are new here, and they are buttons at a 44px target with a
+   visible focus ring, because a dot that can only be reached by dragging is not a
+   control. */
+.comparison-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.comparison-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.comparison-dot-mark {
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-ink-20);
+  transition-property: background-color, transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.comparison-dot[aria-current="true"] .comparison-dot-mark {
+  background-color: var(--color-accent);
+  transform: scale(1.25);
+}
+
+/* How to choose — questions on hairlines, the answer and its destination beside each.
+   Rows, not cards: this is one argument in four parts, not four offers. */
+.choice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  padding-block: 2rem;
+  border-top: 1px solid var(--color-ink-8);
+}
+
+.choice-row:last-child {
+  border-bottom: 1px solid var(--color-ink-8);
+}
+
+@media (min-width: 768px) {
+  .choice-row {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 3rem;
+  }
+}
+
+/* Scoping — four steps in a 2x2 grid on hairlines, the same treatment the scope block on
+   /how-we-work uses, because they are answering adjacent questions. */
+.scoping-step {
+  padding-block: 2rem;
+  border-top: 1px solid var(--color-canvas-16);
+}
+
+@media (min-width: 768px) {
+  .scoping-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state everywhere. The comparison keeps both renderings, the swipe still
+     scrolls and snaps, and the dots still work — only the entry motion goes. */
+  .tier-media img,
+  .tier-media[data-settled="true"] img,
+  .custom-media img,
+  .custom-media[data-settled="true"] img {
+    transform: none;
+  }
+
+  .comparison-row,
+  .comparison-row[data-visible="true"] {
+    transform: none;
+  }
+
+  .comparison-dot[aria-current="true"] .comparison-dot-mark {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   Selected Work (/selected-work)
+   ============================================================================ */
+
+/* Anchor jumps land a tile clear of the fixed header. The navigation has been linking
+   `/selected-work#<slug>` at these ids since before this page existed, and the
+   progression block links to them too. */
+.work-anchor {
+  scroll-margin-top: 7rem;
+}
+
+/* The tile's hover treatment is the locked one — accent border, 6px lift, media scale,
+   chip colour shift — but it fires from the WHOLE card rather than from the media alone,
+   because the card's trigger is a stretched pseudo-element covering all of it. Keyboard
+   users get the same escalation through :focus-within. */
+.work-tile {
+  position: relative;
+}
+
+.work-tile:hover .media-tile,
+.work-tile:focus-within .media-tile {
+  border-color: var(--color-accent);
+  transform: translateY(-6px);
+}
+
+.work-tile:hover .media-tile-chip,
+.work-tile:focus-within .media-tile-chip {
+  background-color: var(--color-ink);
+}
+
+/* The image settles from 1.03 as the tile arrives, and stops there. Hover then takes it
+   to 1.05. The settled state has to out-specify the hover rule, hence the attribute on
+   both selectors — without it the settle would win under the cursor and the media would
+   sit still on hover. */
+.work-tile .media-tile img {
+  transform: scale(1.03);
+  transition-property: transform;
+  transition-duration: 640ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.work-tile[data-settled="true"] .media-tile img {
+  transform: scale(1);
+}
+
+.work-tile[data-settled="true"]:hover .media-tile-media--scalable,
+.work-tile[data-settled="true"]:focus-within .media-tile-media--scalable {
+  transform: scale(1.05);
+}
+
+/* The trigger lives inside the heading — a button may only contain phrasing content, so
+   the card cannot be wrapped in one without losing the heading. The pseudo-element is
+   what makes the rest of the card clickable, and the focus ring is moved onto the media
+   so a keyboard user sees the whole tile take focus rather than four words of a title. */
+.work-tile-trigger {
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.work-tile-trigger::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.work-tile-trigger:focus-visible {
+  outline: none;
+}
+
+.work-tile:focus-within .media-tile {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+/* The status marker. The homepage's reference chip with its truncation taken off: an
+   ellipsised status marker is worse than none, because it reads as a design flourish
+   rather than as a fact about the work. The fill is what its colour is measured
+   against — canvas on accent at rest, canvas on ink on hover — because axe cannot
+   evaluate text sitting on a photograph, and neither can a person. */
+.media-tile-chip--wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+/* Category chips sit on the section's own background, never on the photograph. */
+.work-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.work-chip {
+  display: inline-block;
+  border: 1px solid var(--color-ink-20);
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--color-ink-70);
+}
+
+.work-reference {
+  letter-spacing: 0.16em;
+}
+
+/* The filter. Real buttons carrying aria-pressed, at a 44px target, because a chip that
+   only answers a pointer is not a control. */
+.work-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.work-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-ink-20);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  color: var(--color-ink);
+  transition-property: background-color, border-color, color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-filter-chip:hover {
+  border-color: var(--color-accent);
+}
+
+.work-filter-chip[aria-pressed="true"] {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-canvas);
+}
+
+.work-filter-count {
+  color: var(--color-ink-70);
+}
+
+.work-filter-chip[aria-pressed="true"] .work-filter-count {
+  color: var(--color-canvas-80);
+}
+
+/* Progression — rows on hairlines rather than cards: one argument in three parts, not
+   three offers. */
+.progression-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 2.5rem;
+  border-top: 1px solid var(--color-canvas-16);
+}
+
+.progression-stage:last-child {
+  border-bottom: 1px solid var(--color-canvas-16);
+}
+
+@media (min-width: 768px) {
+  .progression-stage {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.progression-numeral {
+  color: var(--color-canvas-16);
+}
+
+.progression-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+.progression-pieces a {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: var(--color-canvas-40);
+}
+
+.progression-pieces a:hover {
+  text-decoration-color: var(--color-canvas);
+}
+
+/* Capability cross-link — one row per capability, on hairlines. */
+.capability-links {
+  border-top: 1px solid var(--color-ink-8);
+}
+
+.capability-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--color-ink-8);
+  transition-property: padding-inline;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-link:hover {
+  padding-inline: 0.75rem 0;
+}
+
+.capability-link-arrow {
+  transition-property: transform, color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-link:hover .capability-link-arrow {
+  transform: translateX(6px);
+  color: var(--color-accent);
+}
+
+/* The piece detail. A native dialog, so the focus trap, the inert background, Escape and
+   focus restoration are the platform's rather than ours. Only the transition is added:
+   data-visible is set a frame after showModal() and cleared before close(), which is
+   what animates both the backdrop and the panel without needing @starting-style. */
+.work-dialog {
+  border: none;
+  padding: 0;
+  margin: auto;
+  background: transparent;
+  width: min(52rem, calc(100vw - 2rem));
+  max-width: none;
+  max-height: calc(100svh - 3rem);
+  overflow: visible;
+}
+
+.work-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--work-dialog-ms, 320ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-dialog[data-visible="true"]::backdrop {
+  opacity: 1;
+}
+
+.work-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100svh - 3rem);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: scale(0.96);
+  transition-property: opacity, transform;
+  transition-duration: var(--work-dialog-ms, 320ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-dialog[data-visible="true"] .work-dialog-panel {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.work-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem clamp(1.25rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--color-ink-8);
+}
+
+.work-dialog-close {
+  flex: none;
+  min-height: 44px;
+  padding-inline: 1rem;
+  border: 1px solid var(--color-ink-20);
+  border-radius: 9999px;
+  transition-property: border-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-dialog-close:hover {
+  border-color: var(--color-accent);
+}
+
+.work-dialog-body {
+  overflow-y: auto;
+  padding: 1.75rem clamp(1.25rem, 4vw, 2.5rem) 2.5rem;
+}
+
+/* The slot the finished piece will occupy, at the ratio real footage arrives in. */
+.work-dialog-figure {
+  margin: 0;
+}
+
+.work-dialog-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-ink-8);
+}
+
+.work-dialog-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state everywhere. The filter still filters and the detail still opens, closes
+     and traps focus — only the movement goes. */
+  .work-tile .media-tile img,
+  .work-tile[data-settled="true"] .media-tile img,
+  .work-tile[data-settled="true"]:hover .media-tile-media--scalable,
+  .work-tile[data-settled="true"]:focus-within .media-tile-media--scalable {
+    transform: none;
+  }
+
+  .work-tile:hover .media-tile,
+  .work-tile:focus-within .media-tile {
+    transform: none;
+  }
+
+  .capability-link:hover {
+    padding-inline: 0;
+  }
+
+  .capability-link:hover .capability-link-arrow {
+    transform: none;
+  }
+
+  .work-dialog-panel,
+  .work-dialog[data-visible="true"] .work-dialog-panel {
+    transform: none;
+  }
+}

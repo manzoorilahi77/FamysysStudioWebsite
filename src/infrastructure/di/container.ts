@@ -1,6 +1,8 @@
+import { StaticEngagementRepository } from "../content/repositories/StaticEngagementRepository";
 import { StaticMarketingContentRepository } from "../content/repositories/StaticMarketingContentRepository";
 import { StaticNavigationRepository } from "../content/repositories/StaticNavigationRepository";
 import { StaticPortfolioRepository } from "../content/repositories/StaticPortfolioRepository";
+import { StaticProcessRepository } from "../content/repositories/StaticProcessRepository";
 import { StaticServiceCatalogRepository } from "../content/repositories/StaticServiceCatalogRepository";
 import { HttpLeadRepository } from "../lead/HttpLeadRepository";
 import { StubLeadRepository } from "../lead/StubLeadRepository";
@@ -21,6 +23,8 @@ export const container = {
   navigation: new StaticNavigationRepository(),
   marketingContent: new StaticMarketingContentRepository(),
   serviceCatalog: new StaticServiceCatalogRepository(),
+  process: new StaticProcessRepository(),
+  engagement: new StaticEngagementRepository(),
   portfolio: new StaticPortfolioRepository(),
   lead: new HttpLeadRepository(),
   // Used by the /api/demo-request route itself (the server-side target the

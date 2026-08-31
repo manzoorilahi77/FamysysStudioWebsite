@@ -24,9 +24,22 @@ import type {
   WaysToWorkBlock,
 } from "../../domain/marketing/entities/EngagementTier";
 import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuColumn";
-import type { NavEntry, NavPanel, NavPanelFeature } from "../../domain/navigation/entities/NavPanel";
+import type {
+  NavEntry,
+  NavPanel,
+  NavPanelFeature,
+} from "../../domain/navigation/entities/NavPanel";
 import type { NavigationMenu } from "../../domain/navigation/entities/NavigationMenu";
+import type {
+  CustomPartnershipDetail,
+  EngagementTierDetail,
+} from "../../domain/engagement/entities/EngagementTierDetail";
 import type { CaseStudy } from "../../domain/portfolio/entities/CaseStudy";
+import type {
+  CaseStudyDetail,
+  WorkCapabilityRef,
+} from "../../domain/portfolio/entities/CaseStudyDetail";
+import type { ProcessStepDetail } from "../../domain/process/entities/ProcessStepDetail";
 import type { CapabilityDetail } from "../../domain/services/entities/CapabilityDetail";
 import type { ServicesHero } from "../../domain/services/entities/CreativeServicesPage";
 
@@ -94,6 +107,17 @@ export interface CaseStudyView {
   readonly media: MediaView;
 }
 
+export interface WorkCapabilityRefView {
+  readonly title: string;
+  readonly href: string;
+}
+
+export interface CaseStudyDetailView extends CaseStudyView {
+  readonly demonstrates: string;
+  readonly whyThisPiece: string;
+  readonly capabilities: ReadonlyArray<WorkCapabilityRefView>;
+}
+
 export interface DifferentiatorView {
   readonly title: string;
   readonly description: string;
@@ -155,6 +179,45 @@ export interface CapabilityDetailView {
   readonly deliverables: ReadonlyArray<string>;
   readonly media: MediaView;
   readonly cta: CtaView;
+}
+
+export interface EngagementTierDetailView {
+  readonly slug: string;
+  readonly name: string;
+  readonly descriptor: string;
+  readonly summary: string;
+  readonly expandedCopy: string;
+  readonly idealFor: string;
+  readonly typicalWork: string;
+  readonly idealForItems: ReadonlyArray<string>;
+  readonly typicalWorkItems: ReadonlyArray<string>;
+  readonly bestWhen: string;
+  readonly engagementShape: string;
+  readonly media: MediaView;
+  readonly cta: CtaView;
+}
+
+export interface CustomPartnershipDetailView {
+  readonly slug: string;
+  readonly name: string;
+  readonly descriptor: string;
+  readonly summary: string;
+  readonly invitation: string;
+  readonly expandedCopy: string;
+  readonly coversLabel: string;
+  readonly covers: ReadonlyArray<string>;
+  readonly media: MediaView;
+  readonly cta: CtaView;
+}
+
+export interface ProcessStepDetailView {
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string;
+  readonly expandedCopy: string;
+  readonly whatWeNeed: ReadonlyArray<string>;
+  readonly whatYouGet: ReadonlyArray<string>;
+  readonly media: MediaView;
 }
 
 export interface ServicesHeroView {
@@ -239,6 +302,19 @@ export function toCaseStudyView(caseStudy: CaseStudy): CaseStudyView {
   };
 }
 
+function toWorkCapabilityRefView(reference: WorkCapabilityRef): WorkCapabilityRefView {
+  return { title: reference.title, href: reference.href };
+}
+
+export function toCaseStudyDetailView(detail: CaseStudyDetail): CaseStudyDetailView {
+  return {
+    ...toCaseStudyView(detail),
+    demonstrates: detail.demonstrates,
+    whyThisPiece: detail.whyThisPiece,
+    capabilities: detail.capabilities.map(toWorkCapabilityRefView),
+  };
+}
+
 function toDifferentiatorView(element: Differentiator): DifferentiatorView {
   return {
     title: element.title,
@@ -310,6 +386,53 @@ export function toCapabilityDetailView(detail: CapabilityDetail): CapabilityDeta
     deliverables: detail.deliverables,
     media: toMediaView(detail.media),
     cta: toCtaView(detail.cta),
+  };
+}
+
+export function toEngagementTierDetailView(tier: EngagementTierDetail): EngagementTierDetailView {
+  return {
+    slug: tier.slug.value,
+    name: tier.name,
+    descriptor: tier.descriptor,
+    summary: tier.summary,
+    expandedCopy: tier.expandedCopy,
+    idealFor: tier.idealFor,
+    typicalWork: tier.typicalWork,
+    idealForItems: tier.idealForItems,
+    typicalWorkItems: tier.typicalWorkItems,
+    bestWhen: tier.bestWhen,
+    engagementShape: tier.engagementShape,
+    media: toMediaView(tier.media),
+    cta: toCtaView(tier.cta),
+  };
+}
+
+export function toCustomPartnershipDetailView(
+  custom: CustomPartnershipDetail,
+): CustomPartnershipDetailView {
+  return {
+    slug: custom.slug.value,
+    name: custom.name,
+    descriptor: custom.descriptor,
+    summary: custom.summary,
+    invitation: custom.invitation,
+    expandedCopy: custom.expandedCopy,
+    coversLabel: custom.coversLabel,
+    covers: custom.covers,
+    media: toMediaView(custom.media),
+    cta: toCtaView(custom.cta),
+  };
+}
+
+export function toProcessStepDetailView(detail: ProcessStepDetail): ProcessStepDetailView {
+  return {
+    slug: detail.slug.value,
+    title: detail.title,
+    description: detail.description,
+    expandedCopy: detail.expandedCopy,
+    whatWeNeed: detail.whatWeNeed,
+    whatYouGet: detail.whatYouGet,
+    media: toMediaView(detail.media),
   };
 }
 
