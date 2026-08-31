@@ -28,6 +28,7 @@ import type {
 import type { ServiceOffering } from "../../../domain/services/entities/ServiceOffering";
 import { faqBlock, processBlock, waysToWorkBlock } from "./marketing.content";
 import { capabilities } from "./services.content";
+import { slugifyTitle } from "./slugify";
 
 // TODO(client): every image below is stock photography from Unsplash, standing in until
 // the studio's own work exists. Source ids are listed in docs/content-todo.md. The alt
@@ -37,15 +38,9 @@ function servicesImage(file: string, alt: string, aspectRatio: AspectRatio): Med
   return MediaRef.create({ kind: "image", src: `/media/${file}.jpg`, alt, aspectRatio });
 }
 
-/** Mirrors `slugify` in navigation.content.ts — the nav already links these fragments. */
+/** The nav already links these fragments — see slugify.ts for why it is shared. */
 function capabilitySlug(title: string): Slug {
-  return Slug.create(
-    title
-      .toLowerCase()
-      .replace(/&/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, ""),
-  );
+  return Slug.create(slugifyTitle(title));
 }
 
 interface DraftDetail {
@@ -89,7 +84,8 @@ const DRAFT_DETAILS: Readonly<Record<string, DraftDetail>> = {
       "Delivery in platform-ready aspect ratios, with separate caption files",
     ],
     imageFile: "service-video-production",
-    imageAlt: "An interview set: a single chair on a lit backdrop, with a boom microphone overhead.",
+    imageAlt:
+      "An interview set: a single chair on a lit backdrop, with a boom microphone overhead.",
   },
   "AI Video & Virtual Presenters": {
     expandedCopy:

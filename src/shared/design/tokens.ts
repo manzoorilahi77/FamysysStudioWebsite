@@ -81,14 +81,26 @@ export const typeScale = {
   // displayXl broke the client's 48-character headline onto five lines. This resolves to
   // ~52px at 1440, about 23 characters a line, so it holds two. See globals.css.
   hero: { size: "clamp(1.9rem, 2.8vw, 2.6rem)", lineHeight: 1.08, letterSpacing: "-0.026em" },
-  displayL: { size: "clamp(1.75rem, 3.85vw, 4.25rem)", lineHeight: 1.06, letterSpacing: "-0.026em" },
+  displayL: {
+    size: "clamp(1.75rem, 3.85vw, 4.25rem)",
+    lineHeight: 1.06,
+    letterSpacing: "-0.026em",
+  },
   displayM: { size: "clamp(1.5rem, 2.25vw, 2.5rem)", lineHeight: 1.18, letterSpacing: "-0.019em" },
   // DEVIATION (fidelity-loop pass 1, gap #7): §4.7 impact-metric figures need to dominate their
   // section the way Superside's do — roughly 3-4x displayM. No famysys.com precedent at this
   // scale; ceiling and preferred value are both new, floor kept comfortably above displayM's.
   metric: { size: "clamp(3.5rem, 9.5vw, 10rem)", lineHeight: 0.95, letterSpacing: "-0.032em" },
-  displayS: { size: "clamp(1.1875rem, 1.45vw, 1.5rem)", lineHeight: 1.34, letterSpacing: "-0.013em" },
-  lead: { size: "clamp(1.0625rem, 1.35vw, 1.3125rem)", lineHeight: 1.62, letterSpacing: "-0.008em" },
+  displayS: {
+    size: "clamp(1.1875rem, 1.45vw, 1.5rem)",
+    lineHeight: 1.34,
+    letterSpacing: "-0.013em",
+  },
+  lead: {
+    size: "clamp(1.0625rem, 1.35vw, 1.3125rem)",
+    lineHeight: 1.62,
+    letterSpacing: "-0.008em",
+  },
   body: { size: "1.0625rem", lineHeight: 1.62, letterSpacing: "-0.006em" },
   small: { size: "0.9375rem", lineHeight: 1.6 },
   eyebrow: { size: "0.6875rem", lineHeight: 1, letterSpacing: "0.2em", transform: "uppercase" },
@@ -147,6 +159,18 @@ export const motion = {
     // one after the other, and its deliverable rows run down the list.
     splitStepMs: 120,
     listStepMs: 50,
+    // /how-we-work: a step block arrives in three parts — numeral, heading, then the
+    // rest of the copy. Tighter than the split step, because these are three parts of
+    // one column rather than the two halves of a split, and a 120ms gap between a
+    // numeral and the heading directly under it reads as a stall.
+    blockStepMs: 100,
+  },
+  emphasis: {
+    // /ways-to-work-with-us: the Custom Creative Partnership block is the page's
+    // destination, not its fourth option, so it arrives slower than the three tiers
+    // above it — the same reveal, given longer to land. A different effect would have
+    // been a new effect; a different duration is emphasis.
+    entryMs: 520,
   },
   parallax: {
     positioning: 24, // px — §4.5, scaled down from Superside's 40px per 2.7

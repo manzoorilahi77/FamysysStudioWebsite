@@ -21,17 +21,10 @@ import type { NavigationMenu } from "../../../domain/navigation/entities/Navigat
 import { capabilities } from "./services.content";
 import { waysToWorkBlock } from "./marketing.content";
 import { caseStudies } from "./portfolio.content";
+import { slugifyTitle } from "./slugify";
 
 function megaLink(label: string, href: string, description: string): MegaMenuLink {
   return { ...createCta(label, href), description };
-}
-
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/&/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 /** Two capabilities per column, three columns — the six from §What We Do, in order. */
@@ -51,7 +44,7 @@ const capabilityColumns: ReadonlyArray<NavPanelColumn> = Array.from(
       items: slice.map((offering) =>
         megaLink(
           offering.title,
-          `/creative-services#${slugify(offering.title)}`,
+          `/creative-services#${slugifyTitle(offering.title)}`,
           offering.description,
         ),
       ),

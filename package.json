@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "docs:content-todo": "node scripts/generate-content-todo.mjs"
   },
   "dependencies": {
     "next": "^15.1.0",

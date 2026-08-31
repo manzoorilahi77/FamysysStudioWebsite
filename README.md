@@ -42,6 +42,7 @@ Requires Node 20+ and pnpm. No other tooling. Placeholder media is committed und
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm lint` | ESLint, including the layer-boundary rules in `eslint.config.mjs` |
 | `pnpm test` | Vitest unit tests |
+| `pnpm docs:content-todo` | Regenerates the How We Work drafted-copy inventory in `docs/content-todo.md` from the content module |
 
 ## Architecture: the layer dependency rule
 
@@ -144,6 +145,183 @@ Two things worth knowing before editing it:
   reduced-motion block. It also means any programmatic `window.scrollTo` animates: automation
   that scrolls a page in steps must pass `behavior: "instant"` or it will crawl a few hundred
   pixels and leave everything below unrevealed.
+
+## How We Work (`/how-we-work`)
+
+The second inner page, and the one the Creative Services process pointer links out to. Its
+own bounded context — `src/domain/process/` — with `ProcessRepository`,
+`GetHowWeWorkPage`, `how-we-work.content.ts` and a `container.process` entry.
+
+**Why a separate repository rather than an eleventh method on `MarketingContentRepository`.**
+That interface is the homepage's aggregate and `GetHomepageContent` awaits every method on
+it; hanging an inner page off it would make the homepage's test fixture grow a field it
+never reads. The entities still extend the marketing ones, which is where the guarantee
+actually lives.
+
+**`ProcessStepDetail` extends `ProcessStep` rather than replacing it**, exactly as
+`CapabilityDetail` extends `ServiceOffering`. The page needs an expanded paragraph, two
+lists and an image per step, but the five **names and one-line descriptions are approved
+client copy**. The content file spreads each entry from `processBlock.steps` — the same
+array the homepage renders — so those strings keep one definition and a test fails if they
+diverge. The hero heading is `processBlock.heading` for the same reason; two FAQ entries
+come from the brief's FAQ block, and the worked example's subject from the portfolio.
+
+Everything else is **drafted, not supplied**, marked
+`TODO(client): expanded copy — draft, pending approval`, and listed in
+`docs/content-todo.md` — where the table is **generated from the content module**
+(`pnpm docs:content-todo`) rather than kept by hand. A string counts as drafted when it
+does not appear verbatim in the client's own content modules, so inlining an approved
+string removes it from the review list automatically and inventing one adds it.
+
+Block shapes, following the rule that no two sections repeat one:
+
+| Section | Shape |
+|---|---|
+| Page hero | ~60svh, dark, no image. Eyebrow, heading, intro, one CTA. Takes the `hero` type step, not `display-l` — sibling to the Creative Services hero |
+| Step overview | Five numerals on one drawn hairline, sticky under the header from `md`; a horizontally scrolling strip below it. Summary and jump-link index in one bar |
+| Five step blocks | The Creative Services split — 5/12 image against 6/12 copy — plus a display-size numeral as the structural anchor. Side **and** surface alternate |
+| In practice | A worked example on a vertical rail: step name in a fixed left column, narrative beside it. Labelled illustrative **in rendered copy**, because the piece has not been produced |
+| Scope and revisions | Four topics in a 2×2 grid on hairlines, not cards |
+| FAQ | The shared accordion, with a real heading |
+| Closing CTA | The shared `FinalCta`, with page copy and its own accent phrase |
+
+Three things worth knowing before editing it:
+
+- **The overview's offsets are measured, not written down** — same arrangement as
+  `CapabilityIndex`, but publishing `--process-anchor-offset`, its own variable. Sharing
+  the services one would leak one page's measurement into the other's fallback.
+- **Every dark step block sets `fade={false}`.** The approved description under each step
+  name is accent-on-dark, which fails against the entry fade's start value. The worked
+  example keeps the fade, because it carries no accent text.
+- **The "What we need from you" list is the most useful thing on the page** and is not in
+  the brief. So are the durations, the two included revision rounds and the file-retention
+  windows — all invented, all commitments a prospect could hold the studio to, and all
+  called out separately at the top of the drafted-copy section in `docs/content-todo.md`.
+
+## Ways to Work With Us (`/ways-to-work-with-us`)
+
+The third inner page, and the destination of both inner pages' engagement pointers. Its own
+bounded context — `src/domain/engagement/` — with `EngagementRepository`,
+`GetWaysToWorkPage`, `ways-to-work.content.ts` and a `container.engagement` entry, for the
+same reason `src/domain/process/` is separate: `MarketingContentRepository` is the
+homepage's aggregate and `GetHomepageContent` awaits every method on it.
+
+`EngagementTierDetail extends EngagementTier` and `CustomPartnershipDetail extends
+CustomPartnership`, so the four tier **names, labels, summaries and both of the brief's
+per-tier lists** keep one definition. The content file spreads each tier from
+`waysToWorkBlock`; the hero takes that block's heading and intro; the two list labels come
+from the new `TIER_FIELD_LABELS` export; two of four FAQ entries are imported. Tests fail
+if any of them diverges.
+
+**The two lists are split, not rewritten.** The brief gives "Ideal for" and "Typical work
+includes" as sentences — "A, B, C and D." — and the page renders them as lists.
+`splitListSentence` breaks the approved sentence up, `joinListSentence` puts it back, and a
+test round-trips every list and asserts the client's string returns character for
+character. A splitter that ever reflowed the client's words fails the build.
+
+Block shapes:
+
+| Section | Shape |
+|---|---|
+| Page hero | ~60svh, dark, no image. A plain `<section>`, so no entry fade to reason about |
+| Tier comparison | A real `<table>` at `lg`+ — `<caption>`, `<th scope="col">` on tiers, `<th scope="row">` on the four criteria. Below `lg`, a scroll-snap swipe of column cards with a dot indicator |
+| Three tier blocks | The shared asymmetric split, 5/12 image against 6/12 copy. Side and surface alternate. The brief's label takes the eyebrow slot; its summary sits under the name in accent |
+| Custom partnership | Full width, accent border at rest, a wide 16:9 band, and the brief's invitation set at display size. Enters at 520ms against the tiers' 320ms |
+| How to choose | Four self-selection questions on hairlines, each resolving to one tier and linking to its anchor |
+| Scoping | Four steps in a 2x2 grid on hairlines. Dark, no accent text, so it keeps the entry fade |
+| FAQ | The shared accordion |
+| Closing CTA | The shared `FinalCta` |
+
+Three things worth knowing before editing it:
+
+- **The comparison is one DOM tree, not two.** The breakpoint is a `matchMedia` gate
+  driving a conditional render — recovered from the homepage's old `ComparisonMatrix`
+  (commit `39705d5`). Two trees hidden from each other with CSS would put every cell in
+  the accessibility tree twice. `rowsFor` is the single definition both renderings read,
+  and the verification asserts exactly one table and zero swipe tracks at `lg`+, and the
+  inverse below it.
+- **It is a fit-finder, not a pricing table.** No ticks, no crosses, no withheld rows:
+  every cell says what a tier is, none says what it lacks. A feature-gated grid implies a
+  cost ladder even with no figures on it, and the brief forbids public pricing. Three
+  tests hold the line — no drafted string may mention price, pricing or cost; the page may
+  carry no figure, range or rate; and the scoping block may state no duration or minimum
+  term.
+- **Nothing on this page is an operational commitment**, deliberately. The brief supplies
+  no turnaround, revision count, minimum term or capacity guarantee, and this is the page
+  a prospect would quote back. What was *not* promised is listed in `docs/content-todo.md`
+  so the omissions are visible rather than accidental.
+
+## Selected Work (`/selected-work`)
+
+The fourth inner page, and the only one that did **not** get a new bounded context —
+`src/domain/portfolio/` already existed and this page is its natural home. It adds
+`CaseStudyDetail extends CaseStudy`, a second method on `PortfolioRepository`, a
+`GetSelectedWorkPage` use case and `selected-work.content.ts`. The two reads stay separate
+methods on purpose: the homepage wants the eight summaries and nothing else, and folding
+them together would make it await copy it never renders.
+
+**Read this before editing anything on the page.** The brief lists eight planned portfolio
+pieces and **none of them has been produced.** A grid of stock covers under real titles is
+defensible as a homepage summary; at page scale, with a filter and a detail view over it,
+the same grid reads as a body of finished work. So the page is written as a deliberate
+"what we are building" page, and the block immediately under the hero says so in visible
+copy before a reader has seen a single cover. That block is not decorative — it is what
+makes the rest of the page honest. Do not move it below the grid and do not cut it.
+
+`CaseStudyDetail extends CaseStudy`, so the eight **titles**, their one-line **intents**
+and their **references** keep one definition and cannot drift from the homepage. The hero
+reads `workIntro`; every capability reference is looked up in `capabilities` and throws if
+the name has changed. Tests fail if any of them diverges.
+
+Block shapes:
+
+| Section | Shape |
+|---|---|
+| Page hero | ~60svh, dark, no image. The framing block below it is what has to be on the fold, not a hero band |
+| The honest framing | Light. Heading left, three short paragraphs right. Sits on the same continuous light surface as the grid — a dark band between them would separate the statement from the work it is a statement about |
+| Filter + grid | One section, not two. The chips are real `<button>`s with `aria-pressed` and `aria-controls`, at a 44px target; the grid is the homepage's Selected Work treatment at page scale — two per row, ratios varied, first tile bleeding to the viewport edge |
+| Piece detail | A native `<dialog>` opened by the tile, bound to the URL fragment |
+| The order | Dark, three stages on hairlines, each resolving its pieces by slug and linking back to their tiles. **Keeps the entry fade** — every colour in it is canvas or canvas-80 |
+| Capabilities | Light, one row per capability on hairlines, each linking to its `/creative-services` anchor |
+| Closing CTA | The shared `FinalCta` |
+
+Five things worth knowing before editing it:
+
+- **Nothing is invented.** No client name, no brand, no outcome, no metric, no view count,
+  no testimonial, no date, no duration, no budget, no team credit and no award appears
+  anywhere. Two checks hold it: a unit test asserts no drafted string contains a digit at
+  all, or any results, attribution or audience vocabulary; and the browser verification
+  asserts the same against the **rendered** page, walking text nodes rather than one
+  `innerText` blob so a failure names the offending string. Four things are excluded from
+  that sweep and only four — the piece references, the filter counts, the shared demo
+  form's company-size options, and `.work-intent`, which is the client's own approved
+  brief for each piece (one of the eight reads "B2B/corporate credibility.").
+- **The status marker is "Planned — not yet produced".** One wording, defined once as
+  `statusLabel`, rendered on every tile and again in the detail view — a chip on the media
+  rather than a hover state or a footnote. Because it is text on a photograph, which axe
+  cannot evaluate, it carries its own opaque fill and its contrast is measured against
+  that fill: canvas on accent at rest (5.107:1), canvas on ink on hover (12.549:1), and
+  the verification measures it explicitly rather than trusting axe to. The category chips
+  sit BELOW the media on the section's own background for the same reason.
+- **The detail is a panel, not eight routes** — and it is still linkable. Eight routes
+  would be eight indexable pages whose entire content is one approved intent line and two
+  drafted paragraphs about work that does not exist. The panel is bound to the URL
+  fragment instead, so `/selected-work#ugc-transformation` scrolls to the tile and opens
+  its detail — which is exactly what the navigation's work menu has been linking at since
+  before this page existed. When the pieces are produced, routes become the right answer
+  and these fragments can redirect into them.
+- **Filtering changes the rendered set**, it does not hide tiles with CSS. A screen reader
+  and a crawler see the same three that a sighted reader does. `activeCategory` is what
+  the controls report immediately; `renderedCategory` is what the DOM holds and lags it by
+  one 180ms fade, which is what makes the swap a transition rather than a snap. Under
+  reduced motion the two are the same value and the change is instant. The verification
+  presses every chip and asserts the grid rendered exactly the count the chip claims.
+- **The taxonomy is not invented.** The filter chips ARE the six capability names, looked
+  up in `capabilities`, and their counts are derived from which pieces exercise them. A
+  category with nothing behind it cannot exist. `slugifyTitle` is now shared
+  (`static/slugify.ts`) by the navigation, Creative Services and this page, because the
+  three are two ends of the same link and three private copies were three chances for one
+  to drift.
 
 ## Swapping static content for a CMS
 
@@ -307,12 +485,25 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 | Nav link underline | Header | `scaleX` on a pseudo-element with a left origin — a compositor wipe, not a growing box — over 200ms, with the resting colour lifting from 80% to full |
 | Line-by-line heading reveal | Every display heading | `RevealHeading` measures which rendered line each word landed on and gives that line an 80ms-stepped delay; words clip up from their own baseline. Tops are clustered with a tolerance rather than compared exactly, because an accented word is 5% larger and so sits in a taller box on the same baseline |
 | Staggered grid entry | Every card grid | `Reveal` at 60ms per tile |
-| Step numerals | How We Work | `ClipNumber` — each numeral clips up on its own observer as its step enters |
+| Step numerals | Homepage §4 | `ClipNumber` — each numeral clips up on its own observer as its step enters |
 | Card hover | All cards | Accent border, 6px lift, no shadow; media tiles add a 1.05 scale |
 | Background settle | Dark sections | `Section` fades ink-90 → ink on entry; the start state still holds canvas text at 9.616:1. Opt out with `fade={false}` where the section carries **accent-on-dark** text — that colour is derived against full ink (5.015:1) and measures 3.79:1 against the fade's start value, ink-90 over canvas (#22405D). The failure is intermittent, since it depends on how far the section has entered when anything looks. **The general rule: any colour whose ratio was derived against `ink` is wrong for the first 900ms of a fading section.** Canvas and canvas-80 are the only text colours safe throughout. The other live instance is §3's accent panel on the homepage — a *fill*, not text or a UI boundary, so no criterion applies, but its already-soft 2.458:1 edge against the ground gets softer mid-entry before settling |
 | Split-block entry | Creative Services | Image then copy, 120ms apart; the image is the half that establishes which side of the split the block is on |
 | Image settle | Creative Services | The block image scales 1.0 → 1.03 as it arrives and stops. It settles; it does not loop |
 | Deliverable stagger | Creative Services | 50ms per row, fired from the list's own observer rather than one per row — the rows are close enough together that per-row observers would fire at once and collapse the stagger |
+| Filter transition | Selected Work | The grid fades to zero over 180ms, the set is swapped, and the new tiles stagger in at 60ms. The controls report the new state immediately; only the DOM lags |
+| Tile hover | Selected Work | The locked treatment, fired from the WHOLE card rather than from the media: accent border, 6px lift, media 1.05, chip colour shift. `:focus-within` gets the same escalation, and the focus ring moves onto the media so a keyboard user sees the tile take focus rather than four words of a title |
+| Tile image settle | Selected Work | 1.03 → 1.0 on entry, then hover takes it to 1.05. The settled selector carries the `data-settled` attribute on both sides so it does not out-specify the hover rule and freeze the media under the cursor |
+| Detail panel | Selected Work | Backdrop fade and a 0.96 → 1 panel scale, driven by a `data-visible` attribute set a frame after `showModal()` and cleared before `close()` — which animates the exit too, without needing `@starting-style`. `cancel` is intercepted so Escape animates out rather than vanishing |
+| Comparison row entry | Ways to Work | Four rows top to bottom at 60ms from one observer on the table, not one per row |
+| Tier block entry | Ways to Work | Image then copy, 120ms apart, as on Creative Services |
+| Custom block entry | Ways to Work | The same reveal at 520ms rather than 320ms. A different effect would have been a new effect; a different duration is emphasis |
+| Swipe dots | Ways to Work | Real `<button>`s at a 44px target with `aria-current`, so the track is operable from the keyboard and not only by dragging |
+| Overview rule draw | How We Work | The bar's hairline draws left to right across the 900ms budget, a segment per step, with the numerals clipping in 140ms apart as the line reaches each |
+| Step block entry | How We Work | Numeral, then heading, then the rest of the copy, 100ms apart — tighter than the Creative Services split step, because these are three parts of one column and a 120ms gap between a numeral and the heading under it reads as a stall |
+| Overview active step | How We Work | Colour and underline over 200ms as each detail block passes the reading line — `useActiveAnchor`, the same hook and the same reason as the services index |
+| List stagger | How We Work | Both per-step lists reuse `DeliverableList` at 50ms per row |
+| Image settle | How We Work | `.step-media`, the same 3% settle as `.capability-media` |
 | Sticky index active state | Creative Services | Colour and underline transition over 200ms as sections pass. The active section is the last one whose top has crossed the reading line, not whichever is intersecting — the sections are taller than the viewport, so "is intersecting" is true for two of them at a time |
 
 ## Placeholder media
@@ -355,6 +546,29 @@ placeholder"; don't go hunting for `TODO(client)` comments in the content files 
   resolves to a real element which points back via `aria-labelledby`. Asserted, because both
   earlier accordions in this project shipped with this wrong.
 - **Responsive**: no horizontal overflow at 360, 390, 430, 768, 1024, 1280, 1440, or 1920px.
+- **axe, sampled settled — plus a separate, timing-free fade check.** Dark sections fade
+  their background over 900ms, so a colour can pass once the page has settled and fail
+  while a section is entering. The obvious check — run axe a moment after each scroll —
+  turns out to be **unsound**, and the note that used to sit here recommending it was
+  wrong. Sampling mid-scroll also catches every element part-way through its own
+  `opacity` 0→1 entry reveal, which axe correctly reports as low-contrast and which no
+  colour choice can fix. Whether it fires depends on where the sample lands in the
+  transition: `/ways-to-work-with-us` reported 1, 2, 2 violations across three identical
+  runs, and `/how-we-work` — which had "passed" this check — produces 8 under a slightly
+  different rhythm. That was luck, not a result.
+
+  The two hazards are now separated:
+
+  1. **axe at seven scroll fractions, sampled after transitions settle**, at 390 and 1440,
+     in both motion modes, three runs each. Deterministic; the run-to-run counts are part
+     of the assertion.
+  2. **The fade-start rule, measured rather than sampled.** Every text colour inside a
+     `.section-fade` section is composited over `#22405D` — the background that section
+     shows for its first 900ms — and checked there. It reads colours, not timing, so it
+     cannot be lucky. It skips text painted on its own opaque fill (the canvas-filled
+     primary button, a card), which is what every real contrast tool does.
+
+  Both pages pass both, on three consecutive runs.
 
 **Before verifying anything against a production build, stop every other node process.**
 `next dev` and `next start` share this directory's `.next`, and dev mode rewrites it. A dev
@@ -366,7 +580,31 @@ measuring zero, `aria-expanded` that never flips, and a phantom CSS regression, 
 sessions on one day.
 
 So: check with `Get-CimInstance Win32_Process -Filter "Name='node.exe'"`, stop what you find,
-confirm the port is actually free rather than trusting the kill, and only then build. Cheapest
+confirm the port is actually free rather than trusting the kill, and only then build.
+
+**A dev server can also appear *after* you build.** It happened again while verifying
+`/ways-to-work-with-us`: `npm run dev` started five minutes into a verification run, from
+outside the session, and rewrote `.next` underneath a live `next start`. The run reported a
+wall of contrast failures in which every colour was a UA default — `rgb(0, 0, 0)` text and
+`rgb(0, 0, 238)` links — because the stylesheet 400s once the production CSS is gone.
+
+It has now happened six times, and it is **always a hand-started `pnpm dev` / `npm run dev`
+in a VS Code terminal** rather than anything this repo's own scripts do. The most recent was
+`pnpm dev --port 1234`, which the port number makes obvious in the process list — check the
+full command line, not just whether something called `node` is running. Its three processes
+(the pnpm wrapper, the `next dev` bin, and `start-server.js`) have to be stopped together,
+and the last of them can survive one `Stop-Process` sweep, so re-check before building.
+
+That signature is worth knowing, because it is decisive and takes two seconds to check:
+
+```bash
+cat .next/BUILD_ID     # empty  -> dev mode has clobbered the build
+ls .next/static/       # a `development/` directory here means the same
+```
+
+A production build has a non-empty `BUILD_ID` and `static/{chunks,css,media}` with no
+`development/`. If a verification result looks catastrophic rather than wrong, check these
+two before believing any of it. Cheapest
 insurance is a gate at the top of any verification script that asserts the page hydrates —
 click something with `aria-expanded` and check it flips. If it does not, every later result is
 meaningless and the script should say so and stop rather than report a page full of failures.
@@ -383,18 +621,29 @@ treating either as known.
 
 ## What's left
 
-- **The eight Selected Work pieces do not exist yet.** The section presents eight planned pieces
-  with placeholder artwork — the largest gap between this page and a publishable one. See
-  `docs/content-todo.md`.
+- **The eight Selected Work pieces do not exist yet.** This is still the largest gap between the
+  site and a publishable one, but it is now a stated position rather than an unmarked one:
+  `/selected-work` is written as a "what we are building" page, every tile carries "Planned — not
+  yet produced", and the block under its hero says so in visible copy. See `docs/content-todo.md`.
+  When the pieces are produced, the covers, the alt text and the panel-versus-route decision all
+  want revisiting together.
 - **Real hero stills.** The mosaic holds eight slots at fixed aspect ratios so real stills drop in
   one-for-one; it currently shows generated geometric placeholders.
 - **Re-run Lighthouse and axe-core** against the rebuilt page, per the note above.
-- **The five remaining inner pages.** `/` and `/creative-services` are built; every other nav and
-  CTA route 404s. `/contact` is the most urgent, since it is the destination of nearly every CTA
-  on both pages, followed by `/how-we-work` and `/ways-to-work-with-us`, which Creative Services
-  links out to from its two pointer blocks.
-- **Approval on the Creative Services draft copy.** Everything on that page except the six
-  capability names and descriptors, the process steps, the tier names and three FAQ entries was
-  written to fill the page, and is listed for review in `docs/content-todo.md`.
+- **The two remaining inner pages.** `/`, `/creative-services`, `/how-we-work`,
+  `/ways-to-work-with-us` and `/selected-work` are built; `/about` and `/contact` still 404, as do
+  `/privacy` and `/terms`. **`/contact` is the only 404 any call to action points at**, and it is
+  the destination of nearly every one on all five built pages. The navigation's work menu, which
+  has linked `/selected-work#<slug>` at four of the eight pieces since the homepage was built,
+  now resolves — and each fragment opens that piece's detail.
+- **Approval on the four inner pages' draft copy.** Everything on them except the client's own
+  names, descriptors, process steps, tier content, piece titles and reused FAQ entries was
+  written to fill them, and is listed for review in `docs/content-todo.md`. How We Work's
+  **operational commitments** — revision rounds, turnaround times, file-retention windows — are
+  the highest-risk of these and are called out separately. Ways to Work With Us and Selected
+  Work deliberately make none, and each lists what it declined to promise for the same reason.
+- **The capability mapping on Selected Work is a judgement, not a fact.** The brief says what
+  each piece is for but not which of the six services it exercises, and that mapping drives the
+  filter chips and their counts, so it is visible on the page. It needs confirming.
 - **Copy the brief doesn't supply** — FAQ section heading, footer tagline, contact address, social
   handles, and confirmation of the contact form's fields. All listed in `docs/content-todo.md`.

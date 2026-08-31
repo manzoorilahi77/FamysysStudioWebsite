@@ -33,11 +33,31 @@ interface MosaicTile {
 const MOSAIC_TILES: ReadonlyArray<MosaicTile> = [
   { file: "mosaic-01", alt: "A clapperboard held up at the start of a take.", aspectRatio: "3:4" },
   { file: "mosaic-02", alt: "A video edit timeline filling a monitor.", aspectRatio: "1:1" },
-  { file: "mosaic-03", alt: "A camera body and two lenses laid out on a dark surface.", aspectRatio: "4:3" },
-  { file: "mosaic-04", alt: "Footage open in an editing application on a desktop display.", aspectRatio: "1:1" },
-  { file: "mosaic-05", alt: "A camera rig filming a performer under coloured light.", aspectRatio: "3:4" },
-  { file: "mosaic-06", alt: "A designer's desk with creative-suite app icons on a tablet.", aspectRatio: "4:3" },
-  { file: "mosaic-07", alt: "A mirrorless camera beside a laptop showing a photo library.", aspectRatio: "1:1" },
+  {
+    file: "mosaic-03",
+    alt: "A camera body and two lenses laid out on a dark surface.",
+    aspectRatio: "4:3",
+  },
+  {
+    file: "mosaic-04",
+    alt: "Footage open in an editing application on a desktop display.",
+    aspectRatio: "1:1",
+  },
+  {
+    file: "mosaic-05",
+    alt: "A camera rig filming a performer under coloured light.",
+    aspectRatio: "3:4",
+  },
+  {
+    file: "mosaic-06",
+    alt: "A designer's desk with creative-suite app icons on a tablet.",
+    aspectRatio: "4:3",
+  },
+  {
+    file: "mosaic-07",
+    alt: "A mirrorless camera beside a laptop showing a photo library.",
+    aspectRatio: "1:1",
+  },
   { file: "mosaic-08", alt: "A compact camera lit in blue and magenta.", aspectRatio: "3:4" },
 ];
 
@@ -91,7 +111,8 @@ export const differentiatorBlock: DifferentiatorBlock = {
     },
     {
       title: "Intelligent AI Workflows",
-      description: "AI used where it genuinely improves speed, flexibility and production possibilities.",
+      description:
+        "AI used where it genuinely improves speed, flexibility and production possibilities.",
       media: differentiatorImage(
         "element-02",
         "An ultrawide monitor on a studio desk showing a design tool full of layout artboards.",
@@ -107,7 +128,8 @@ export const differentiatorBlock: DifferentiatorBlock = {
     },
     {
       title: "Efficient Delivery",
-      description: "Structured workflows designed to deliver quality without unnecessary agency overhead.",
+      description:
+        "Structured workflows designed to deliver quality without unnecessary agency overhead.",
       media: differentiatorImage(
         "element-04",
         "A tidy desk with a laptop and monitor, both showing content dashboards, in daylight.",
@@ -122,7 +144,8 @@ export const processBlock: ProcessBlock = {
   steps: [
     {
       title: "Understand",
-      description: "We understand what you're trying to communicate, who it's for and what success looks like.",
+      description:
+        "We understand what you're trying to communicate, who it's for and what success looks like.",
     },
     {
       title: "Create",
@@ -130,7 +153,8 @@ export const processBlock: ProcessBlock = {
     },
     {
       title: "Produce",
-      description: "Our team combines creative tools, AI and human production expertise to build the content.",
+      description:
+        "Our team combines creative tools, AI and human production expertise to build the content.",
     },
     {
       title: "Refine",
@@ -154,7 +178,8 @@ export const waysToWorkBlock: WaysToWorkBlock = {
       descriptor: "Essential Content",
       summary: "For businesses looking to establish or refresh their regular creative output.",
       idealFor: "Small businesses, local businesses, startups and growing brands.",
-      typicalWork: "Social creatives, short-form content, promotional assets and basic video production.",
+      typicalWork:
+        "Social creatives, short-form content, promotional assets and basic video production.",
       cta: createCta("Talk to us", "/contact"),
     },
     {
@@ -180,11 +205,28 @@ export const waysToWorkBlock: WaysToWorkBlock = {
   custom: {
     name: "Custom Creative Partnership",
     descriptor: "Your flexible creative production team.",
-    summary: "For businesses that need ongoing creative support across multiple formats and services.",
+    summary:
+      "For businesses that need ongoing creative support across multiple formats and services.",
     invitation: "Tell us what you need. We'll help structure the right production model.",
     cta: createCta("Talk to us about your requirements", "/contact"),
   },
 };
+
+/**
+ * The brief's own field names for the two facts it gives about every tier. The Ways to
+ * Work With Us page labels the same two rows in its comparison and reads them from here
+ * rather than restating them.
+ *
+ * `WaysToWork.tsx` on the homepage still carries these two as component literals. It
+ * cannot import this module — presentation/ may not reach infrastructure/ (see the
+ * boundary rules) — so removing that duplication means threading them through as props
+ * from `app/page.tsx`, which is a homepage change and not this page's to make. Logged in
+ * docs/content-todo.md.
+ */
+export const TIER_FIELD_LABELS = {
+  idealFor: "Ideal for",
+  typicalWork: "Typical work includes",
+} as const;
 
 export const workIntro: SectionIntro = {
   eyebrow: "Selected Creative Work",
@@ -202,7 +244,8 @@ export const whyFamysysBlock: WhyFamysysBlock = {
     },
     {
       title: "Efficient",
-      description: "AI and structured production workflows help us reduce unnecessary production overhead.",
+      description:
+        "AI and structured production workflows help us reduce unnecessary production overhead.",
     },
     {
       title: "Human-led",
@@ -245,7 +288,8 @@ export const faqBlock: FaqBlock = {
     },
     {
       question: "Do you offer ongoing monthly support?",
-      answer: "Yes. We can work on individual projects or provide ongoing creative production support.",
+      answer:
+        "Yes. We can work on individual projects or provide ongoing creative production support.",
     },
     {
       question: "How much do your services cost?",
