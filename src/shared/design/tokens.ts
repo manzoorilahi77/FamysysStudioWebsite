@@ -1,87 +1,97 @@
-// The four base colours below are the client's official brand palette, issued by the
-// manager. They supersede the values previously measured off the live famysys.com CSS
-// bundle. Everything else in this block is derived from them: the opacity ramps are the
-// same alpha steps applied to the new bases, and each entry in `colorDerived` records the
-// contrast ratio that justifies it. See
-// docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md §2 for the full audit.
-// Mirror any change here into the matching CSS variable in src/app/globals.css.
+// COLOUR STARTS IN ./colors.ts. Nothing here names a colour; everything here is that
+// file's fourteen bases put through ./colorMath. Change a base there and every tint,
+// hover fill, hairline and CSS variable below moves with it — including the `@theme`
+// block in src/app/globals.css, which scripts/generate-color-css.mjs writes from this
+// module rather than anyone maintaining a second copy by hand.
+//
+// Run `npm run check-colours` after any change: it prints the contrast ratio of every
+// pairing the site actually renders, with a pass/fail against the WCAG floor each one
+// has to clear. See docs/changing-colours.md.
 
+// The `.ts` extensions are load-bearing: scripts/generate-color-css.mjs imports this
+// module with plain `node`, which resolves ESM specifiers literally and will not guess an
+// extension. `allowImportingTsExtensions` in tsconfig.json permits it on the TypeScript
+// side, and webpack resolves an exact filename first, so the app build is unaffected.
+import { colors } from "./colors.ts";
+import { mix, withAlpha } from "./colorMath.ts";
+
+/** Alpha steps, as percentages. Two ramps share them so the ladder reads the same on both grounds. */
+const INK_STEPS = [4, 6, 8, 12, 20, 40, 60, 70, 90] as const;
+const CANVAS_STEPS = [4, 10, 16, 40, 60, 80] as const;
+
+/** How far the accent moves toward the dark ground on a primary button's hover. */
+const BUTTON_HOVER_SHIFT = 0.14;
+/** How far the cream deepens toward graphite for the same button on a dark section. */
+const BUTTON_HOVER_ON_DARK_SHIFT = 0.07;
+
+// The three light navies, as distances from `darkBackground` toward `cardBackground`.
+// Mixing toward WHITE rather than toward the cream is the whole reason they exist as
+// their own values: the cream is warm (B is its LOWEST channel), so blending the navy
+// into it cannot produce a blue-leaning tint until roughly 21% — and by then the mix has
+// gone dark and desaturated. Mixed toward white, each keeps B > G > R.
+const CARD_TINT_SHIFT = 0.87; // hover fill, the flat lift across the whole cell
+const CARD_TINT_DEEP_SHIFT = 0.82; // hover fill, the radial peak at the top-left corner
+const SERVICE_NUMERAL_SHIFT = 0.755; // the watermark numeral, one step deeper again
+
+type Ramp<Steps extends readonly number[]> = { readonly [K in Steps[number]]: string };
+
+const ramp = <const Steps extends readonly number[]>(base: string, steps: Steps): Ramp<Steps> =>
+  Object.fromEntries(steps.map((step) => [step, withAlpha(base, step)])) as Ramp<Steps>;
+
+/** The palette as the site names it. Every value is a base from colors.ts or a tint of one. */
 export const color = {
-  canvas: "#F4F1E8", // brand — Warm White
-  ink: "#0B2C4D", // brand — Deep Enterprise Blue. Headings and dark surfaces, never body copy (2.1a)
-  graphite: "#24282C", // brand — Graphite Charcoal. Used through its opacity ramp, not flat (2.1a)
-  accent: "#1C50FF", // brand — Electric Blue. 5.107:1 on canvas, so now valid as text and as a fill (2.1b)
-  hairline: "#0B2C4D14", // ink-08, light-surface border color
-  hairlineOnDark: "#F4F1E81A", // canvas-10, dark-surface border color
+  canvas: colors.pageBackground,
+  ink: colors.darkBackground,
+  card: colors.cardBackground,
+  graphite: colors.textMuted,
+  accent: colors.accentPrimary,
+  accentOnDark: colors.accentOnDark,
+  accentWarm: colors.accentWarm,
+  accentHighlight: colors.accentHighlight,
+  sectionAlt: colors.sectionAlt,
+  sectionWarm: colors.sectionWarm,
+  textOnLight: colors.textOnLight,
+  textOnDark: colors.textOnDark,
+  hairline: withAlpha(colors.darkBackground, 8),
+  hairlineOnDark: withAlpha(colors.pageBackground, 10),
 } as const;
 
-// Opacity ramps — the alpha steps are unchanged; only the base colour moved.
-export const inkOpacity = {
-  4: "#0B2C4D0A",
-  6: "#0B2C4D0F", // added for the card resting fill — see .card-surface in globals.css
-  8: "#0B2C4D14",
-  12: "#0B2C4D1F",
-  20: "#0B2C4D33",
-  40: "#0B2C4D66",
-  60: "#0B2C4D99",
-  70: "#0B2C4DB3",
-  90: "#0B2C4DE6",
-} as const;
+/** The navy at each alpha step — borders, washes and muted text on light grounds. */
+export const inkOpacity = ramp(colors.darkBackground, INK_STEPS);
 
-export const canvasOpacity = {
-  4: "#F4F1E80A",
-  10: "#F4F1E81A",
-  16: "#F4F1E829",
-  40: "#F4F1E866",
-  60: "#F4F1E899",
-  80: "#F4F1E8CC",
-} as const;
+/** The cream at each alpha step — the same ladder, for dark grounds. */
+export const canvasOpacity = ramp(colors.pageBackground, CANVAS_STEPS);
 
 export const colorDerived = {
-  eyebrowOnLight: color.accent, // 5.107:1 on canvas — the old accent failed at 4.043:1 and forced
-  // eyebrows onto ink-70; the brand accent clears the 4.5:1 text floor, so they are accent again (2.1c)
-  eyebrowOnDark: color.canvas, // 12.549:1 on ink — confirmed by render, deliberately asymmetric (2.1c)
-  // The brand accent is DARKER than the one it replaced, so it reads worse on ink, not better:
-  // 2.457:1, down from 3.291:1, which now fails even the 3:1 non-text floor. An opacity ramp
-  // cannot fix this — accent over ink only ever moves toward ink. So the lightened variant is
-  // still required, and is re-derived from the new accent (mixed 43% toward canvas) rather than
-  // carried over. Used for every accent role on a dark surface: text, borders, focus rings.
-  accentOnDark: "#7995F5", // derived — 5.015:1 on ink (2.1c)
-  bodyOnLight: "#24282CB3", // graphite at 70% opacity, 5.273:1 on canvas — running body/lead color (2.1a).
-  // Mirrored as --color-graphite-70 in globals.css; the nav panel descriptors use it directly.
-  bodyOnDark: canvasOpacity[80], // 8.548:1 on ink — running body/lead color on dark surfaces (2.1a)
-  // The light primary button is accent-filled now that canvas text on accent clears 4.5:1
-  // (5.107:1). Its hover darkens the accent 14% toward ink and holds 5.823:1.
-  primaryButtonHover: "#1A4BE6", // derived — accent-filled primary button's hover fill
-  primaryButtonHoverOnDark: "#E4E3DD", // derived — deepened cream, hover fill for the canvas-surface primary button on dark sections
-  // §2's three light navies. All three are mixed from `ink` toward WHITE rather than
-  // toward canvas, and that is the whole reason they exist as colours instead of ink-ramp
-  // steps: canvas is warm (#F4F1E8, B is its LOWEST channel), so blending ink into it
-  // cannot produce a blue-leaning tint until roughly 21% — and by the time the mix is blue
-  // it has gone dark and desaturated (ink at 25% is #BAC0C1). No opacity of ink on this
-  // canvas reads as light navy. Mixed toward white, each keeps B > G > R.
-  //
-  // cardTint      — the hover fill's flat lift, the whole cell. 1.135:1 on canvas, the same
-  //                 order as `.card-surface`'s established 1.118:1 "this is a card" step.
-  //                 Text on it holds: full ink 11.71:1, ink-70 body 4.857:1.
-  // cardTintDeep  — the hover fill's radial peak, top-left corner only. Full ink 9.90:1,
-  //                 ink-70 body 4.559:1 — the worst case anywhere in the cell, and still
-  //                 over the 4.5 floor.
-  // numeral       — the watermark. Deliberately one step deeper than cardTintDeep so it
-  //                 survives being lit: 1.405:1 on bare canvas at rest, and still 1.226:1
-  //                 against the flat hover lift it sits on when the cell fills. Decorative
-  //                 by a wide margin either way — see `.decorative-numeral`.
-  // The site's second light ground. Six of nine homepage sections are cream and five of
-  // them run consecutively, so the page needed a way to say "new section" without a third
-  // colour in the palette: this is canvas taken one step down, warm-neutral like its
-  // parent, and it is the only value the alternation uses. Everything that sits on canvas
-  // clears its floor on this too — ink 11.882:1, ink-70 body 5.081:1, graphite-70 body
-  // 5.137:1, accent 4.842:1, and ink-70 on a .card-surface over it 4.753:1, the worst case
-  // on the ground and still over 4.5. Mirrored as --color-canvas-raised in globals.css.
-  canvasRaised: "#EFEBE0", // derived — alternating section ground (2.1a)
-  cardTintOnCanvas: "#DCE4EE", // derived — §2 cell hover fill, flat lift (2.1a)
-  cardTintDeepOnCanvas: "#CBD9EA", // derived — §2 cell hover fill, radial peak (2.1a)
-  serviceNumeralOnCanvas: "#BFCFE4", // derived — §2 watermark numeral (2.1a)
+  // Eyebrows are asymmetric on purpose: the accent clears the 4.5:1 text floor on cream
+  // (measured by check-colours), but on navy it fails even the 3:1 non-text floor, so the
+  // dark side uses the cream text colour and the lightened accent covers accent ROLES —
+  // borders, focus rings — rather than accent-coloured words.
+  eyebrowOnLight: colors.accentPrimary,
+  eyebrowOnDark: colors.textOnDark,
+  accentOnDark: colors.accentOnDark,
+
+  /** Running body and lead copy. Graphite at 70% on light, cream at 80% on dark. */
+  bodyOnLight: withAlpha(colors.textMuted, 70),
+  bodyOnDark: withAlpha(colors.textOnDark, 80),
+
+  primaryButtonHover: mix(colors.accentPrimary, colors.darkBackground, BUTTON_HOVER_SHIFT),
+  primaryButtonHoverOnDark: mix(
+    colors.pageBackground,
+    colors.textMuted,
+    BUTTON_HOVER_ON_DARK_SHIFT,
+  ),
+
+  cardTintOnCanvas: mix(colors.darkBackground, colors.cardBackground, CARD_TINT_SHIFT),
+  cardTintDeepOnCanvas: mix(colors.darkBackground, colors.cardBackground, CARD_TINT_DEEP_SHIFT),
+  serviceNumeralOnCanvas: mix(colors.darkBackground, colors.cardBackground, SERVICE_NUMERAL_SHIFT),
+
+  /** An 8% accent wash — the resting fill of an accent-tinted chip on a light ground. */
+  accentWash: withAlpha(colors.accentPrimary, 8),
+  /** The same wash in the warm accent, for the secondary chip family. */
+  accentWarmWash: withAlpha(colors.accentWarm, 12),
+  /** Hairline on the alternate navy — the cream ramp again, since the ground is still dark. */
+  hairlineOnSectionAlt: withAlpha(colors.pageBackground, 16),
 } as const;
 
 export const type = {

@@ -13,6 +13,9 @@
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    // Lets src/shared/design/*.ts import each other with explicit .ts extensions, which is
+    // what makes scripts/generate-color-css.mjs able to read the palette with plain node.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Jost } from "next/font/google";
 import "./globals.css";
+import { colors } from "../shared/design/colors.ts";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -40,15 +41,13 @@ export const metadata: Metadata = {
 
 // Deviation from famysys.com: the live site's theme-color matches its canvas
 // background. This page opens on a dark hero, so mobile browser chrome is set to
-// match ink instead — see README.md. Kept as a literal because Next reads this at
-// build time from a static export, so it cannot import the token module.
+// match the dark background instead — see README.md. Read from the palette rather
+// than written out, so a change in colors.ts reaches the browser chrome too.
 export const viewport: Viewport = {
-  themeColor: "#0B2C4D",
+  themeColor: colors.darkBackground,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${jost.variable} ${instrumentSerif.variable}`}>
       <body>

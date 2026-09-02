@@ -7,13 +7,15 @@
     "node": ">=20"
   },
   "scripts": {
-    "predev": "node scripts/clean-stale-next.mjs dev",
+    "predev": "node scripts/clean-stale-next.mjs dev && node scripts/generate-color-css.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/clean-stale-next.mjs build",
+    "prebuild": "node scripts/clean-stale-next.mjs build && node scripts/generate-color-css.mjs",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/generate-color-css.mjs --check",
+    "colours": "node scripts/generate-color-css.mjs",
+    "check-colours": "node scripts/check-colours.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "node scripts/format-changed.mjs",

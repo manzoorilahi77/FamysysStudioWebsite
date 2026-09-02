@@ -1,53 +1,16 @@
 @import "tailwindcss";
+/* EVERY COLOUR ON THE SITE COMES FROM HERE.
+   colors.generated.css is written by scripts/generate-color-css.mjs from
+   src/shared/design/colors.ts — that file is the one to edit, and it is the only
+   place in the repository allowed to contain a hex value. This file holds the rest
+   of the theme: type, spacing and the rules that use the colours. */
+@import "./colors.generated.css";
 
-/* Design tokens — mirrors src/shared/design/tokens.ts. Keep both in sync. */
+/* Design tokens — type, spacing and layout. Mirrors the non-colour half of
+   src/shared/design/tokens.ts. Keep both in sync. */
 @theme {
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
   --font-display-accent: var(--font-instrument-serif), ui-serif, Georgia, serif;
-
-  --color-canvas: #f4f1e8;
-  --color-ink: #0b2c4d;
-  --color-graphite: #24282c;
-  /* graphite at 70% — `colorDerived.bodyOnLight` in tokens.ts, 5.273:1 on canvas. It had
-     no CSS mirror until the nav panels needed it for their item descriptors. */
-  --color-graphite-70: #24282cb3;
-  --color-accent: #1c50ff;
-  --color-accent-on-dark: #7995f5;
-  --color-hairline: #0b2c4d14;
-  --color-hairline-on-dark: #f4f1e81a;
-
-  --color-ink-4: #0b2c4d0a;
-  --color-ink-6: #0b2c4d0f;
-  --color-ink-8: #0b2c4d14;
-  --color-ink-12: #0b2c4d1f;
-  --color-ink-20: #0b2c4d33;
-  --color-ink-40: #0b2c4d66;
-  --color-ink-60: #0b2c4d99;
-  --color-ink-70: #0b2c4db3;
-  --color-ink-90: #0b2c4de6;
-
-  --color-canvas-4: #f4f1e80a;
-  --color-canvas-10: #f4f1e81a;
-  --color-canvas-16: #f4f1e829;
-  --color-canvas-40: #f4f1e866;
-  --color-canvas-60: #f4f1e899;
-  --color-canvas-80: #f4f1e8cc;
-
-  /* §2's three light navies — hover fill (flat), hover fill (radial peak) and the
-     watermark numeral. Mixed from ink toward WHITE, because ink over the warm canvas goes
-     grey rather than blue. See `colorDerived` in tokens.ts for the measured ratios. */
-  --color-card-tint: #dce4ee;
-  --color-card-tint-deep: #cbd9ea;
-  --color-service-numeral: #bfcfe4;
-
-  /* The second light ground. Consecutive cream sections alternate on to it so a run of
-     them reads as separate panels rather than one sheet — see THE SECTION SEAM below for
-     the measured contrast on it. Mirrored as `colorDerived.canvasRaised` in tokens.ts. */
-  --color-canvas-raised: #efebe0;
-
-  --color-primary-button-hover: #1a4be6;
-  --color-primary-button-hover-on-dark: #e4e3dd;
-  --color-accent-8: #1c50ff14;
 
   --radius-sm: 0.25rem;
 
@@ -332,7 +295,7 @@ main > section.bg-canvas {
 }
 
 main > section.bg-canvas + section.bg-canvas {
-  --section-ground: var(--color-canvas-raised);
+  --section-ground: var(--color-section-warm);
   --card-ground: var(--color-canvas);
 }
 main > section.bg-canvas + section.bg-canvas + section.bg-canvas {
@@ -340,7 +303,7 @@ main > section.bg-canvas + section.bg-canvas + section.bg-canvas {
   --card-ground: var(--color-ink-6);
 }
 main > section.bg-canvas + section.bg-canvas + section.bg-canvas + section.bg-canvas {
-  --section-ground: var(--color-canvas-raised);
+  --section-ground: var(--color-section-warm);
   --card-ground: var(--color-canvas);
 }
 main
@@ -359,7 +322,7 @@ main
   + section.bg-canvas
   + section.bg-canvas
   + section.bg-canvas {
-  --section-ground: var(--color-canvas-raised);
+  --section-ground: var(--color-section-warm);
   --card-ground: var(--color-canvas);
 }
 
