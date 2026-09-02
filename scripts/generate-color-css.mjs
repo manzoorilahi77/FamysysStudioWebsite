@@ -84,8 +84,9 @@ const groups = [
       "primary-button-hover": colorDerived.primaryButtonHover,
       "primary-button-hover-on-dark": colorDerived.primaryButtonHoverOnDark,
       "accent-8": colorDerived.accentWash,
-      "accent-warm-12": colorDerived.accentWarmWash,
+      "accent-warm-wash": colorDerived.accentWarmWash,
       "hairline-on-section-alt": colorDerived.hairlineOnSectionAlt,
+      "section-alt-entering": colorDerived.sectionAltEntering,
     },
   },
 ];

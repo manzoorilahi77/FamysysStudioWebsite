@@ -32,6 +32,10 @@ const GROUNDS = {
   "accent primary fill": colors.accentPrimary,
   "accent warm fill": colors.accentWarm,
   "accent highlight fill": colors.accentHighlight,
+  // Two composited grounds. The chip wash and the entry state of the alternate navy are
+  // both transparent, so what sits on them is measured against what they resolve to.
+  "warm chip wash on cream": flatten(colorDerived.accentWarmWash, colors.pageBackground),
+  "alternate ground, entering": flatten(colorDerived.sectionAltEntering, colors.pageBackground),
 };
 
 /** [ground, foreground, role, what it is] — the pairings the markup actually produces. */
@@ -44,7 +48,8 @@ const IN_USE = [
   // The warm accent is a FILL on light grounds, never a line or a word: measured against
   // cream it is 2.495:1, under even the 3:1 non-text floor. Filled, with navy on it, it
   // clears the text floor comfortably — see "accent warm fill" below.
-  ["page background (cream)", colorDerived.accentWarmWash, "decor", "warm chip resting wash"],
+  ["page background (cream)", colorDerived.accentWarmWash, "decor", "category chip wash"],
+  ["page background (cream)", colors.sectionWarm, "decor", "the alternate light ground"],
   ["page background (cream)", inkOpacity[12], "decor", "seam hairline"],
   ["page background (cream)", colorDerived.cardTintOnCanvas, "decor", "cell hover, flat lift"],
   ["page background (cream)", colorDerived.serviceNumeralOnCanvas, "decor", "watermark numeral"],
@@ -54,6 +59,7 @@ const IN_USE = [
   ["section warm (deeper cream)", colors.accentPrimary, "text", "links and eyebrows"],
   ["section warm (deeper cream)", inkOpacity[70], "text", "muted list and FAQ copy"],
   ["section warm (deeper cream)", colors.cardBackground, "decor", "card lifted off the ground"],
+  ["section warm (deeper cream)", colorDerived.accentWarmWash, "decor", "category chip wash"],
   ["section warm (deeper cream)", inkOpacity[12], "decor", "seam hairline"],
 
   // --- white cards, which sit on both light grounds
@@ -69,6 +75,14 @@ const IN_USE = [
   ["dark background (navy)", colors.accentHighlight, "text", "the one highlight moment"],
   ["dark background (navy)", colors.accentWarm, "large", "process numerals and status"],
   ["dark background (navy)", canvasOpacity[16], "decor", "hairline"],
+  ["dark background (navy)", colors.sectionAlt, "decor", "the alternate dark ground"],
+  ["dark background (navy)", colors.cardBackground, "ui", "Differentiator card panel edge"],
+  [
+    "dark background (navy)",
+    colorDerived.sectionAltEntering,
+    "decor",
+    "alternate ground, entering",
+  ],
 
   ["section alt (lighter navy)", colors.textOnDark, "text", "headings and eyebrows"],
   ["section alt (lighter navy)", canvasOpacity[80], "text", "running body and lead"],
@@ -79,12 +93,17 @@ const IN_USE = [
   ["section alt (lighter navy)", colors.accentHighlight, "text", "the one highlight moment"],
   ["section alt (lighter navy)", colors.accentWarm, "large", "process numerals and status"],
   ["section alt (lighter navy)", colorDerived.hairlineOnSectionAlt, "decor", "hairline"],
+  ["section alt (lighter navy)", colors.cardBackground, "ui", "card panel edge"],
 
   // --- accent fills, where the accent is the ground and something has to read on it
   ["accent primary fill", colors.pageBackground, "text", "primary button label"],
-  ["accent primary fill", colors.cardBackground, "text", "accent panel copy"],
-  ["accent highlight fill", colors.darkBackground, "text", "highlight chip label"],
-  ["accent warm fill", colors.darkBackground, "text", "warm panel and chip label"],
+  ["accent primary fill", colors.cardBackground, "text", "Differentiator accent panel copy"],
+  ["accent highlight fill", colors.darkBackground, "text", "closing CTA label, hovered"],
+  ["accent warm fill", colors.darkBackground, "text", "warm panel, status marker label"],
+  ["warm chip wash on cream", inkOpacity[70], "text", "category chip label"],
+  ["warm chip wash on cream", color.textOnLight, "text", "category chip, full ink"],
+  ["alternate ground, entering", colors.textOnDark, "text", "headings mid-fade"],
+  ["alternate ground, entering", canvasOpacity[80], "text", "body copy mid-fade"],
 ];
 
 /** Pairings deliberately not used. Shown so the number is on record, not the assertion. */
@@ -96,6 +115,13 @@ const AVOIDED = [
   ["accent highlight fill", colors.pageBackground, "text", "cream label on the highlight"],
   ["accent warm fill", colors.cardBackground, "text", "white label on the warm accent"],
   ["section alt (lighter navy)", colors.accentOnDark, "text", "accent COPY on the lighter navy"],
+  [
+    "alternate ground, entering",
+    colors.accentOnDark,
+    "text",
+    "accent copy mid-fade — why a dark section carrying accent words sets fade={false}",
+  ],
+  ["dark background (navy)", colors.accentPrimary, "ui", "Differentiator accent panel edge"],
 ];
 
 const COLUMN = { ground: 28, on: 11, role: 6, ratio: 9, floor: 7, verdict: 6 };

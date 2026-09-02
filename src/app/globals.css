@@ -265,13 +265,23 @@ body {
    Two cues, both derived from the sections' own tone classes, so no page or section
    component has to remember to ask for either.
 
-   1. TONE. Consecutive light sections alternate between canvas and canvas-raised. The
-      chained sibling selectors are run-position counters: `.bg-canvas + .bg-canvas` matches
-      the SECOND light section of a run, the three-term chain the third, and so on, each
-      longer chain outranking the shorter ones on specificity so the deepest match wins.
-      A run therefore alternates canvas / raised / canvas / raised wherever in the page it
-      begins, and a lone light section between two dark ones stays canvas. Written out to
-      six because the homepage's longest run is five.
+   1. TONE. Sections of the same family alternate their ground — light between canvas and
+      section-warm, dark between ink and section-alt. Both halves use chained sibling
+      selectors as run-position counters, each longer chain outranking the shorter ones on
+      specificity so the deepest match wins, but they count different things:
+
+      - LIGHT counts a RUN, with `+`. `.bg-canvas + .bg-canvas` matches the second light
+        section of an unbroken run, the three-term chain the third, and so on. A lone light
+        section between two dark ones stays canvas, because it already has a boundary on
+        both sides. Written out to six: the homepage's longest light run is five.
+
+      - DARK counts the PAGE, with `~`. No route puts two dark sections next to each other,
+        so a run counter would never match; what the dark sections are is repeated, six of
+        them down /creative-services alone. The second dark section of a page takes the
+        alternate navy whatever sits between it and the first. Written out to seven.
+
+      1.100:1 separates the two creams and 1.217:1 the two navies — enough to say "new
+      section" without either ground stopping being cream or navy.
 
    2. LINE. A hairline at the boundary, held to the container line rather than bled to the
       viewport edge, with a short accent segment at its left end — the same three-part
@@ -292,6 +302,72 @@ main > section {
    value each and the utility class stays the fallback for the first section of a run. */
 main > section.bg-canvas {
   background-color: var(--section-ground, var(--color-canvas));
+}
+
+/* The dark half, and it counts differently from the light one on purpose.
+
+   No route on this site puts two dark sections next to each other — every one of them is
+   separated by a cream section — so an adjacent-sibling chain like the light half's would
+   never match anything. What the dark sections actually are is REPEATED: /creative-services
+   runs six of them down one page, /how-we-work and /ways-to-work-with-us four and five,
+   each identical to the last, which reads as the same section returning rather than as a
+   sequence going somewhere.
+
+   So these count every preceding dark section rather than only an immediately preceding
+   one — `~` instead of `+`. The second dark section of a page takes the alternate navy,
+   the third comes back to the base, and so on, whatever sits between them. Longer chains
+   outrank shorter ones on specificity, so the deepest match wins and the page alternates.
+   Written out to seven because /creative-services has six.
+
+   `--section-ground-entering` is the 90% step the entry fade starts from; Section.tsx
+   reads both variables rather than naming ink directly, so a section on the alternate
+   ground fades from its OWN start value instead of flashing the base navy first. */
+main > section.bg-ink {
+  background-color: var(--section-ground, var(--color-ink));
+}
+
+main > section.bg-ink ~ section.bg-ink {
+  --section-ground: var(--color-section-alt);
+  --section-ground-entering: var(--color-section-alt-entering);
+  --color-hairline-on-dark: var(--color-hairline-on-section-alt);
+}
+main > section.bg-ink ~ section.bg-ink ~ section.bg-ink {
+  --section-ground: var(--color-ink);
+  --section-ground-entering: var(--color-ink-90);
+  --color-hairline-on-dark: var(--color-canvas-10);
+}
+main > section.bg-ink ~ section.bg-ink ~ section.bg-ink ~ section.bg-ink {
+  --section-ground: var(--color-section-alt);
+  --section-ground-entering: var(--color-section-alt-entering);
+  --color-hairline-on-dark: var(--color-hairline-on-section-alt);
+}
+main > section.bg-ink ~ section.bg-ink ~ section.bg-ink ~ section.bg-ink ~ section.bg-ink {
+  --section-ground: var(--color-ink);
+  --section-ground-entering: var(--color-ink-90);
+  --color-hairline-on-dark: var(--color-canvas-10);
+}
+main
+  > section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink {
+  --section-ground: var(--color-section-alt);
+  --section-ground-entering: var(--color-section-alt-entering);
+  --color-hairline-on-dark: var(--color-hairline-on-section-alt);
+}
+main
+  > section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink
+  ~ section.bg-ink {
+  --section-ground: var(--color-ink);
+  --section-ground-entering: var(--color-ink-90);
+  --color-hairline-on-dark: var(--color-canvas-10);
 }
 
 main > section.bg-canvas + section.bg-canvas {
@@ -661,6 +737,25 @@ main > section.bg-ink + section.bg-ink::after {
 }
 
 /* Buttons lift as well as fill — colour alone read as a state change, not a response. */
+/* THE PAGE'S ONE HIGHLIGHT MOMENT.
+   ---------------------------------------------------------------------------
+   `accent-highlight` is the loudest colour in the palette and is rationed to a single use
+   per page. This is it: the closing call to action's primary button, which appears exactly
+   once on every route that has one, on a dark ground, and only while it is pointed at.
+
+   A hover rather than a resting state on purpose — the colour is loud enough that a
+   resting lime button would be the first thing on the page instead of the last, and the
+   closing CTA is meant to be found at the end of a read, not shouted at the start of one.
+
+   Ink on the highlight is 10.995:1 and the fill separates from the navy section at
+   10.995:1 too, so both the label and the button's own shape read better in this state
+   than in its resting one. Unlayered, so it wins over the Tailwind hover utility the
+   dark primary variant carries. */
+.cta-highlight:hover {
+  background-color: var(--color-accent-highlight);
+  color: var(--color-ink);
+}
+
 .button-motion {
   transition-property: color, background-color, border-color, transform;
   transition-duration: 180ms;
@@ -952,17 +1047,25 @@ main > section.bg-ink + section.bg-ink::after {
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: 0.04em;
-  background-color: var(--color-accent);
-  color: var(--color-canvas);
+  /* THE STATUS MARKER IS WARM, NOT ACCENT. It is the one thing on a tile that is not
+     about the work itself, and it used to be the brand blue — the same fill as a primary
+     button, on a card that is also a link, which made a label look like a control. The
+     warm accent is the palette's secondary emphasis and says "status" without claiming
+     the primary role. Ink on it measures 5.031:1, over the cream's 2.495:1 on the same
+     fill, so the label reads better than it did on the accent. Hover still goes to ink,
+     where the label has to flip back to cream. */
+  background-color: var(--color-accent-warm);
+  color: var(--color-ink);
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
-  transition-property: background-color;
+  transition-property: background-color, color;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--ease-base);
 }
 
 .media-tile:hover .media-tile-chip {
   background-color: var(--color-ink);
+  color: var(--color-canvas);
 }
 
 /* Hero mosaic. The drift is driven from JS rather than CSS keyframes: it has to reverse
@@ -2515,18 +2618,27 @@ main > section.bg-ink + section.bg-ink::after {
   }
 }
 
-/* Charcoal on ink measures 1.047:1 and would have been an invisible card. Both fills
-   below are brand colours carrying text that clears the 4.5:1 floor: ink on canvas is
-   12.553:1, canvas on accent is 5.107:1. See the note in Differentiator.tsx on how the
-   accent panel itself separates from the ink ground. */
-.element-panel--canvas {
-  background-color: var(--color-canvas);
+/* The row's three fills — accent, card, warm — in the order ElementCard documents.
+   Charcoal on ink measures 1.047:1 and would have been an invisible card; each of these
+   separates from the ink ground and carries its text over the 4.5:1 floor. Ratios are in
+   ElementCard.tsx and enforced by `npm run check-colours`.
+
+   White text on the accent panel rather than cream: on this fill it is 5.768:1 against
+   the cream's 5.107:1, and the card family is now white, so the panel text matching the
+   card fill is what makes the four read as one set. */
+.element-panel--accent {
+  background-color: var(--color-accent);
+  color: var(--color-card);
+}
+
+.element-panel--card {
+  background-color: var(--color-card);
   color: var(--color-ink);
 }
 
-.element-panel--accent {
-  background-color: var(--color-accent);
-  color: var(--color-canvas);
+.element-panel--warm {
+  background-color: var(--color-accent-warm);
+  color: var(--color-ink);
 }
 
 /* The one animated property in the card. A grid track interpolating `0fr -> 1fr` is how
@@ -3112,8 +3224,14 @@ html {
   color: var(--color-ink-12);
 }
 
+/* On a dark ground the numeral is warm rather than a cream watermark — the dark process
+   sections get one colour moment each, and the ordinal is the right thing to spend it on
+   because it is the only element in the block that is purely structural. Still decorative
+   in the WCAG sense (the ordinal is carried by list position and repeated in the
+   overview), but at 5.031:1 on the navy it is a mark you can actually see, where
+   canvas-16 was 1.587:1. */
 .surface-dark .step-numeral {
-  color: var(--color-canvas-16);
+  color: var(--color-accent-warm);
 }
 
 /* Same settle as the capability blocks': the image scales 3% as it arrives and stops.
@@ -3623,8 +3741,18 @@ html {
   gap: 0.5rem;
 }
 
+/* Filled with the warm wash rather than left as bare outlines. Five of these sit under
+   every tile, so the colour has to be quiet — this is the warm accent at 22%, which
+   separates from the cream by 1.228:1, the same order as the section seam's hairline. It
+   reads as a family of labels rather than as five orange badges, and it is the second
+   half of the warm pairing the status marker above opens.
+
+   The border stays on the ink ramp. The warm accent is 2.495:1 against the cream, under
+   the 3:1 a boundary would need, and a chip whose only edge is the wash would have none
+   worth the name. Muted ink on the wash is 4.748:1, still over the text floor. */
 .work-chip {
   display: inline-block;
+  background-color: var(--color-accent-warm-wash);
   border: 1px solid var(--color-ink-20);
   border-radius: 9999px;
   padding: 0.25rem 0.625rem;

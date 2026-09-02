@@ -61,8 +61,17 @@ export function Section({
       } ${className}`}
       style={{
         paddingBlock: paddingFor(dark, statement),
+        // Both ends of the fade come from the section-ground variables rather than from
+        // `ink` directly, so a dark section that the seam rules have moved onto the
+        // alternate navy fades from its OWN 90% step to its own ground. Naming ink here
+        // would make every alternate section flash the base navy before settling.
+        // The fallbacks are what a dark section outside a run resolves to.
         ...(dark && fade
-          ? { backgroundColor: isInView ? "var(--color-ink)" : "var(--color-ink-90)" }
+          ? {
+              backgroundColor: isInView
+                ? "var(--section-ground, var(--color-ink))"
+                : "var(--section-ground-entering, var(--color-ink-90))",
+            }
           : {}),
       }}
     >

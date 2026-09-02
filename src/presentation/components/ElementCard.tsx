@@ -4,13 +4,25 @@ import Image from "next/image";
 import type { DifferentiatorView } from "../lib/viewModels";
 
 /**
- * Alternating panel fills. Not the charcoal the brief first asked for: `graphite` on `ink`
- * measures 1.047:1, so those cards would have been very nearly invisible against the
- * section. Canvas and accent both separate from the ink ground and both carry text well
- * above the 4.5:1 floor — ink on canvas is 12.553:1, canvas on accent is 5.107:1 — and
- * both are brand colours, so the alternation survives without a fifth colour.
+ * The four panel fills, in the order the row runs: accent, card, warm, card. Three
+ * colours across four cards rather than two across four, so the row reads as a
+ * deliberate sequence instead of a stripe — and the two white cards are what keep it
+ * from reading as a paint chart.
+ *
+ * Every one carries its text well over the 4.5:1 floor and every one separates from the
+ * ink ground, which is what the earlier charcoal proposal could not do (`graphite` on
+ * `ink` is 1.047:1, an invisible card). Measured by `npm run check-colours`:
+ *
+ *   accent  fill, white text   5.768:1 text   2.457:1 against the section  (see below)
+ *   card    fill, ink text    14.173:1 text  14.173:1 against the section
+ *   warm    fill, ink text     5.031:1 text   5.031:1 against the section
+ *
+ * The accent panel's own EDGE against the ink section is soft at 2.457:1 — the two are
+ * close in luminance even though they read as different colours. It was the only fill on
+ * the row before, so the softness was the row's; with two white cards and a warm one
+ * beside it the sequence carries the edge and the single accent panel does not have to.
  */
-export type ElementTone = "canvas" | "accent";
+export type ElementTone = "accent" | "card" | "warm";
 
 interface ElementCardProps {
   readonly element: DifferentiatorView;

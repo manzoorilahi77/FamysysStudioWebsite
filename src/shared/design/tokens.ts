@@ -23,6 +23,8 @@ const CANVAS_STEPS = [4, 10, 16, 40, 60, 80] as const;
 const BUTTON_HOVER_SHIFT = 0.14;
 /** How far the cream deepens toward graphite for the same button on a dark section. */
 const BUTTON_HOVER_ON_DARK_SHIFT = 0.07;
+/** Opacity of the warm accent's wash. See `accentWarmWash` for why it is this high. */
+const WARM_WASH_ALPHA = 22;
 
 // The three light navies, as distances from `darkBackground` toward `cardBackground`.
 // Mixing toward WHITE rather than toward the cream is the whole reason they exist as
@@ -88,10 +90,25 @@ export const colorDerived = {
 
   /** An 8% accent wash — the resting fill of an accent-tinted chip on a light ground. */
   accentWash: withAlpha(colors.accentPrimary, 8),
-  /** The same wash in the warm accent, for the secondary chip family. */
-  accentWarmWash: withAlpha(colors.accentWarm, 12),
+  /**
+   * The warm accent as a wash, for the category chips. 22% rather than the accent's 8%
+   * because the warm accent is close to the cream in luminance and a lighter wash simply
+   * does not appear: at 12% it separates from the ground by 1.141:1, at 22% by 1.228:1,
+   * which is the same order as the section seam's own hairline. Muted list copy still
+   * clears the text floor on it at 4.748:1.
+   */
+  accentWarmWash: withAlpha(colors.accentWarm, WARM_WASH_ALPHA),
   /** Hairline on the alternate navy — the cream ramp again, since the ground is still dark. */
   hairlineOnSectionAlt: withAlpha(colors.pageBackground, 16),
+  /**
+   * The alternate navy's entry state. A dark section settles its background as it comes
+   * into view, from 90% of its own ground to the full value; the navy has `ink-90` for
+   * that and the alternate ground needs the same step of its own. Cream text holds at
+   * 7.879:1 over it and the running body at 5.722:1, so nothing is unreadable part-way
+   * through. Accent copy is NOT safe on it (3.145:1) — which is the existing rule that a
+   * dark section carrying accent words switches the fade off rather than working around it.
+   */
+  sectionAltEntering: withAlpha(colors.sectionAlt, 90),
 } as const;
 
 export const type = {

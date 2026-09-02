@@ -70,8 +70,19 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
             <p className="text-body mt-10 text-canvas-80" style={{ maxWidth: "44ch" }}>
               {closingCta.body}
             </p>
+            {/* `cta-highlight` spends the page's one use of the bright highlight, on
+                hover only. It is scoped to this button rather than to the dark primary
+                variant because every route renders exactly one closing CTA and several
+                other dark primary buttons — putting it on the variant would have made the
+                colour appear three or four times a page, which is the one thing it must
+                not do. See the rule in globals.css. */}
             <div className="mt-8">
-              <Button cta={toCtaView(closingCta.cta)} variant="primary" dark />
+              <Button
+                cta={toCtaView(closingCta.cta)}
+                variant="primary"
+                dark
+                className="cta-highlight"
+              />
             </div>
             {/* The column's foot, not a fourth item in a stack: `mt-auto` puts it on the
                 panel's bottom edge, and the `pt-12` is the floor under how close it may

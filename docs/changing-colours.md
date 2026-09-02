@@ -87,7 +87,7 @@ ground                       on          role   ratio     floor          what it
 page background (cream)      #0B2C4D     text   12.549:1  4.5:1   PASS   headings and full-ink copy
 page background (cream)      #1C50FF     text   5.107:1   4.5:1   PASS   links and eyebrows
 ...
-All 25 enforced pairings pass.
+All 31 enforced pairings pass.
 ```
 
 - **PASS** — fine, nothing to do.
@@ -155,3 +155,15 @@ line you changed with the ones around it.
   fails on drift, and also rejects a hex written by hand into `globals.css`.
 - `scripts/check-colours.mjs` — the contrast table. Add a row to `IN_USE` whenever the
   markup starts rendering a pairing that is not already listed.
+- `docs/colour-proof/` — screenshots showing a palette change reaching the built site, and
+  the expanded palette in place.
+
+### Where the five new colours are used
+
+| Colour            | Where                                                                                                                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cardBackground`  | Differentiator cards 2 and 4 (`.element-panel--card`).                                                                                                                                   |
+| `accentWarm`      | Differentiator card 3; the work tiles' status marker (`.media-tile-chip`); the category chips' wash (`.work-chip`); the process numeral on dark grounds (`.surface-dark .step-numeral`). |
+| `accentHighlight` | The closing CTA's primary button on hover (`.cta-highlight`), once per page and nowhere else.                                                                                            |
+| `sectionAlt`      | Every second dark section of a page, via `main > section.bg-ink ~ section.bg-ink` in globals.css.                                                                                        |
+| `sectionWarm`     | Every second light section of a run, via `main > section.bg-canvas + section.bg-canvas`.                                                                                                 |

@@ -13,12 +13,16 @@ interface DifferentiatorProps {
 }
 
 /**
- * Cards 1 and 3 take the canvas panel, 2 and 4 the accent one. Alternating by index rather
- * than by content, because the alternation is rhythm — the four elements are peers and
- * nothing about "Professional Production" makes it the canvas one.
+ * accent, card, warm, card — assigned by index rather than by content, because the
+ * sequence is rhythm. The four elements are peers and nothing about "Professional
+ * Production" makes it the warm one. The two white cards sit between the two coloured
+ * ones so neither colour has to hold the row on its own; see ElementCard for the
+ * measured contrast of each fill.
  */
+const TONE_SEQUENCE: readonly ElementTone[] = ["accent", "card", "warm", "card"];
+
 function toneFor(index: number): ElementTone {
-  return index % 2 === 0 ? "canvas" : "accent";
+  return TONE_SEQUENCE[index % TONE_SEQUENCE.length] ?? "card";
 }
 
 /**
@@ -26,14 +30,10 @@ function toneFor(index: number): ElementTone {
  * the ink ramp, which only works on a light ground; putting the dark section here also
  * breaks up what had become five consecutive canvas sections.
  *
- * NOTE on the accent panel: canvas separates from the ink ground at 12.553:1, but accent
- * manages only 2.458:1 against it — the two are close in luminance even though they read
- * as different colours. The cards are never ambiguous, because each is anchored by a
- * photograph that separates fully and the panel text itself is 5.107:1, but the accent
- * panel's own *edge* against the section is soft. If that reads as weak in review, the fix
- * is `accent-on-dark` (#7995F5) with ink text, which measures 5.015:1 both for the panel
- * against the ground and for the text on the panel — strictly better on both axes, at the
- * cost of a lighter, less saturated blue.
+ * The four cards run accent, card, warm, card — one accent moment and one warm one,
+ * separated by white. See ElementCard for the measured contrast of each fill and for why
+ * the accent panel's soft edge against the ink ground stops mattering once it is not the
+ * only coloured panel in the row.
  *
  * `fade={false}` for the locked reason: this section's three accented display words are
  * now set in accent-on-dark, which is derived against full ink at 5.015:1 and measures
