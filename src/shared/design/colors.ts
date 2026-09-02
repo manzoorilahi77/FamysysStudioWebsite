@@ -25,23 +25,23 @@
 // before any of this. Kept so it can be put side by side with the rest.
 // ---------------------------------------------------------------------------
 
-export const colors = {
-  pageBackground: "#F4F1E8",
-  darkBackground: "#0B2C4D",
-  cardBackground: "#FFFFFF",
+// export const colors = {
+//   pageBackground: "#F4F1E8",
+//   darkBackground: "#0B2C4D",
+//   cardBackground: "#FFFFFF",
 
-  textOnLight: "#0B2C4D",
-  textOnDark: "#F4F1EA",
-  textMuted: "#24282C",
+//   textOnLight: "#0B2C4D",
+//   textOnDark: "#F4F1EA",
+//   textMuted: "#24282C",
 
-  accentPrimary: "#1C50FF",
-  accentOnDark: "#7995F5",
-  accentWarm: "#5C7A99",
-  accentHighlight: "#8FB4FF",
+//   accentPrimary: "#1C50FF",
+//   accentOnDark: "#7995F5",
+//   accentWarm: "#5C7A99",
+//   accentHighlight: "#8FB4FF",
 
-  sectionAlt: "#123A63",
-  sectionWarm: "#E7E2D4",
-} as const;
+//   sectionAlt: "#123A63",
+//   sectionWarm: "#E7E2D4",
+// } as const;
 
 // ---------------------------------------------------------------------------
 // 2 — KILN  (the forest one, rejected — kept for reference)
@@ -49,23 +49,23 @@ export const colors = {
 // Superside's green.
 // ---------------------------------------------------------------------------
 
-// export const colors = {
-//   pageBackground: "#F2EDE1",
-//   darkBackground: "#12251F",
-//   cardBackground: "#FCF8EE",
-//
-//   textOnLight: "#16241E",
-//   textOnDark: "#F1EBDD",
-//   textMuted: "#212B25",
-//
-//   accentPrimary: "#A6381D",
-//   accentOnDark: "#E5906A",
-//   accentWarm: "#D6A03C",
-//   accentHighlight: "#66E0B0",
-//
-//   sectionAlt: "#1E3A31",
-//   sectionWarm: "#E5DCCA",
-// } as const;
+export const colors = {
+  pageBackground: "#F2EDE1",
+  darkBackground: "#12251F",
+  cardBackground: "#FCF8EE",
+
+  textOnLight: "#16241E",
+  textOnDark: "#F1EBDD",
+  textMuted: "#212B25",
+
+  accentPrimary: "#A6381D",
+  accentOnDark: "#E5906A",
+  accentWarm: "#D6A03C",
+  accentHighlight: "#66E0B0",
+
+  sectionAlt: "#1E3A31",
+  sectionWarm: "#E5DCCA",
+} as const;
 
 // ---------------------------------------------------------------------------
 // 3 — MIDNIGHT PLUM

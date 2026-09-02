@@ -11,61 +11,61 @@
 
 @theme {
   /* Grounds and text. Bases from colors.ts; everything under them is a tint of one. */
-  --color-canvas: #f4f1e8;
-  --color-ink: #0b2c4d;
-  --color-card: #ffffff;
-  --color-graphite: #24282c;
-  --color-text-on-dark: #f4f1ea;
+  --color-canvas: #f2ede1;
+  --color-ink: #12251f;
+  --color-card: #fcf8ee;
+  --color-graphite: #212b25;
+  --color-text-on-dark: #f1ebdd;
 
   /* Section grounds. Consecutive sections of the same family alternate onto these,
    so a run of five cream or three navy sections reads as separate panels rather
    than one sheet. See THE SECTION SEAM in globals.css. */
-  --color-section-alt: #123a63;
-  --color-section-warm: #e7e2d4;
-  --color-header-ground: #071a2e;
+  --color-section-alt: #1e3a31;
+  --color-section-warm: #e5dcca;
+  --color-header-ground: #0b1613;
 
   /* Accents. `accent` is the brand blue and carries the primary role everywhere.
    `accent-on-dark` is the lightened blue navy needs. `accent-warm` is secondary
    emphasis — chips, status markers, process numerals. `accent-highlight` is loud
    and rationed to one use per page. */
-  --color-accent: #1c50ff;
-  --color-accent-on-dark: #7995f5;
-  --color-accent-warm: #5c7a99;
-  --color-accent-highlight: #8fb4ff;
+  --color-accent: #a6381d;
+  --color-accent-on-dark: #e5906a;
+  --color-accent-warm: #d6a03c;
+  --color-accent-highlight: #66e0b0;
 
   /* Borders. */
-  --color-hairline: #0b2c4d14;
-  --color-hairline-on-dark: #f4f1e81a;
+  --color-hairline: #12251f14;
+  --color-hairline-on-dark: #f2ede11a;
 
   /* The dark ground at each alpha step — borders, washes and muted text on light grounds. */
-  --color-ink-4: #0b2c4d0a;
-  --color-ink-6: #0b2c4d0f;
-  --color-ink-8: #0b2c4d14;
-  --color-ink-12: #0b2c4d1f;
-  --color-ink-20: #0b2c4d33;
-  --color-ink-40: #0b2c4d66;
-  --color-ink-60: #0b2c4d99;
-  --color-ink-70: #0b2c4db3;
-  --color-ink-90: #0b2c4de6;
+  --color-ink-4: #12251f0a;
+  --color-ink-6: #12251f0f;
+  --color-ink-8: #12251f14;
+  --color-ink-12: #12251f1f;
+  --color-ink-20: #12251f33;
+  --color-ink-40: #12251f66;
+  --color-ink-60: #12251f99;
+  --color-ink-70: #12251fb3;
+  --color-ink-90: #12251fe6;
 
   /* The light ground at the same steps, for dark surfaces. */
-  --color-canvas-4: #f4f1e80a;
-  --color-canvas-10: #f4f1e81a;
-  --color-canvas-16: #f4f1e829;
-  --color-canvas-40: #f4f1e866;
-  --color-canvas-60: #f4f1e899;
-  --color-canvas-80: #f4f1e8cc;
+  --color-canvas-4: #f2ede10a;
+  --color-canvas-10: #f2ede11a;
+  --color-canvas-16: #f2ede129;
+  --color-canvas-40: #f2ede166;
+  --color-canvas-60: #f2ede199;
+  --color-canvas-80: #f2ede1cc;
 
   /* Derived roles. Each is a base put through colorMath — see `colorDerived` in
    tokens.ts for what the shift means and why it is that size. */
-  --color-graphite-70: #24282cb3;
-  --color-card-tint: #dfe4e8;
-  --color-card-tint-deep: #d3d9df;
-  --color-service-numeral: #c3cbd3;
-  --color-primary-button-hover: #1a4be6;
-  --color-primary-button-hover-on-dark: #6784da;
-  --color-accent-8: #1c50ff14;
-  --color-accent-warm-wash: #5c7a9938;
-  --color-hairline-on-section-alt: #f4f1e829;
-  --color-section-alt-entering: #123a63e6;
+  --color-graphite-70: #212b25b3;
+  --color-card-tint: #deddd3;
+  --color-card-tint-deep: #d2d2c9;
+  --color-service-numeral: #c3c4bb;
+  --color-primary-button-hover: #91351d;
+  --color-primary-button-hover-on-dark: #c37f5e;
+  --color-accent-8: #a6381d14;
+  --color-accent-warm-wash: #d6a03c38;
+  --color-hairline-on-section-alt: #f2ede129;
+  --color-section-alt-entering: #1e3a31e6;
 }
