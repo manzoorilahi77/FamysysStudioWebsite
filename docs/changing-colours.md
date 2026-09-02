@@ -38,11 +38,11 @@ read once when the site starts.
 
 ### Backgrounds
 
-| Name             | What it is                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| `pageBackground` | The warm cream most of the site sits on. Change this and the whole site's mood changes. |
-| `darkBackground` | The deep navy used for the hero and the other dark sections.                            |
-| `cardBackground` | White. The fill of a raised card sitting on a cream section.                            |
+| Name             | What it is                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| `pageBackground` | The light ground most of the site sits on. Change this and the whole site's mood changes. |
+| `darkBackground` | The deep navy used for the hero and the other dark sections.                              |
+| `cardBackground` | White. The fill of a raised card sitting on a cream section.                              |
 
 ### Text
 
@@ -87,7 +87,7 @@ ground                       on          role   ratio     floor          what it
 page background (cream)      #0B2C4D     text   12.549:1  4.5:1   PASS   headings and full-ink copy
 page background (cream)      #1C50FF     text   5.107:1   4.5:1   PASS   links and eyebrows
 ...
-All 31 enforced pairings pass.
+All 41 enforced pairings pass.
 ```
 
 - **PASS** — fine, nothing to do.
@@ -105,21 +105,28 @@ invisible.
 
 ## What to watch for
 
-**The bright lime (`accentHighlight`) only works on navy.** On cream it measures 1.141:1
-— which is to say, you cannot see it. If you want it on a light section, it has to be a
-_fill_ with dark text on it, not coloured text.
+**`accentHighlight` only works on the dark ground.** On the light one it is barely
+visible — `pnpm check-colours` prints the number in its AVOIDED table. If you want it on
+a light section, it has to be a _fill_ with dark text on it, not coloured text.
 
-**The warm orange (`accentWarm`) is a fill, not a line or a word.** Against cream it
-measures 2.495:1, under the floor even for a border. Filled, with the navy on top of it,
-it measures 5.031:1 and is fine. The site already uses it this way; keep it that way.
+**`accentWarm` is a fill, not a line or a word.** It is too light to be text on the light
+ground and too light to carry the 3:1 a border needs there. Filled, with the dark ground
+on top of it, it clears the text floor comfortably. The site already uses it this way;
+keep it that way.
 
-**Making the cream darker eats into everything.** Every text colour on the site is
+**`accentPrimary` has to be dark.** It is the only accent that appears as TEXT on the
+light grounds, and contrast is symmetric, so the same value also decides whether a button
+label reads on it. A pale accent — coral, cyan, lime — cannot take this slot however good
+it looks. Put those in `accentWarm` or `accentHighlight`, where they are fills.
+
+**Making the light ground darker eats into everything.** Every text colour on the site is
 measured against it. `pnpm check-colours` will tell you immediately if you have gone too
 far.
 
-**The two blues have to stay a pair.** `accentPrimary` is for light sections and
-`accentOnDark` is for dark ones. If you change one, change the other to match, or the
-dark sections will stop looking like the same brand.
+**The two accents have to stay a pair.** `accentPrimary` is for light sections and
+`accentOnDark` is for dark ones, and they should read as the same colour at two
+lightnesses. If you change one, change the other to match, or the dark sections will stop
+looking like the same brand.
 
 **Do not put a colour anywhere else.** If you find yourself wanting to write a hex value
 into a component or a stylesheet, add it to `colors.ts` instead and ask a developer to

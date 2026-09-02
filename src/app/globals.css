@@ -1,5 +1,13 @@
 @import "tailwindcss";
 /* EVERY COLOUR ON THE SITE COMES FROM HERE.
+
+   A NOTE ON THE RATIOS QUOTED IN THE COMMENTS BELOW. Many of them were measured against
+   the palette this file shipped with and record WHY a decision was taken — why a border
+   sits on the ink ramp rather than on an accent, why one fill needs a hairline and
+   another does not. The reasoning still holds; the numbers move with colors.ts. The live
+   figures are whatever `npm run check-colours` prints, and that command, not a comment,
+   is what fails a build.
+
    colors.generated.css is written by scripts/generate-color-css.mjs from
    src/shared/design/colors.ts — that file is the one to edit, and it is the only
    place in the repository allowed to contain a hex value. This file holds the rest
@@ -953,6 +961,31 @@ main > section.bg-ink + section.bg-ink::after {
    the same order as the light card's new 1.152:1. Going to canvas-10 would drop the
    step numbers (accentOnDark) on the card from 4.515:1 to 3.785:1. Only the border
    steps up, mirroring the light card. */
+/* CARDS IN A ROW DO NOT ALL TAKE THE SAME FILL.
+   ---------------------------------------------------------------------------
+   Three tier cards side by side in one fill read as one long band with rules through it.
+   Every second card in a grid takes the raised card fill instead of the section's card
+   ground, so the row has a rhythm of its own — the same idea the Differentiator's four
+   panels use, at a much quieter amplitude, because these cards carry running copy rather
+   than a title on a photograph.
+
+   Both fills are near-invisible steps off the ground by design (1.130:1 and 1.072:1 on
+   the page ground, 1.311:1 for the raised fill on the deeper sand): the point is that
+   they differ from EACH OTHER, not that either shouts. Every text role on the section
+   ground clears its floor on both, because both sit between the ground and white.
+
+   Keyed on grid position rather than on a class, so no card component has to be told
+   which one it is, and a row of three alternates the same way a row of four does. */
+div.grid > *:nth-child(even) > .card-surface,
+div.grid > *:nth-child(even).card-surface {
+  background-color: var(--color-card);
+}
+
+div.grid > *:nth-child(even) > .card-surface-dark,
+div.grid > *:nth-child(even).card-surface-dark {
+  background-color: var(--color-canvas-10);
+}
+
 .card-surface-dark {
   background-color: var(--color-canvas-4);
   border: 1px solid var(--color-canvas-16);

@@ -76,6 +76,18 @@ export function mix(from: string, to: string, amount: number): string {
 }
 
 /**
+ * `from` moved `amount` (0-1) of the way toward black. A separate function from `mix`
+ * rather than `mix(colour, "#000000", amount)`, because naming black here would put a hex
+ * literal in a file that is not colors.ts — and scaling the channels is what "darken"
+ * means anyway.
+ */
+export function darken(from: string, amount: number): string {
+  const { r, g, b } = parseHex(from);
+  const keep = 1 - amount;
+  return toHex({ r: r * keep, g: g * keep, b: b * keep });
+}
+
+/**
  * An alpha colour composited over an opaque ground, so it can be measured. Contrast is a
  * property of what the eye actually receives, and `ink-70` on cream is not `ink`.
  */

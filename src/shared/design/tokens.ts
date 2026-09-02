@@ -13,7 +13,7 @@
 // extension. `allowImportingTsExtensions` in tsconfig.json permits it on the TypeScript
 // side, and webpack resolves an exact filename first, so the app build is unaffected.
 import { colors } from "./colors.ts";
-import { mix, withAlpha } from "./colorMath.ts";
+import { darken, mix, withAlpha } from "./colorMath.ts";
 
 /** Alpha steps, as percentages. Two ramps share them so the ladder reads the same on both grounds. */
 const INK_STEPS = [4, 6, 8, 12, 20, 40, 60, 70, 90] as const;
@@ -21,8 +21,15 @@ const CANVAS_STEPS = [4, 10, 16, 40, 60, 80] as const;
 
 /** How far the accent moves toward the dark ground on a primary button's hover. */
 const BUTTON_HOVER_SHIFT = 0.14;
-/** How far the cream deepens toward graphite for the same button on a dark section. */
-const BUTTON_HOVER_ON_DARK_SHIFT = 0.07;
+/** How far the lightened accent deepens toward the dark ground on that button's hover. */
+const BUTTON_HOVER_ON_DARK_SHIFT = 0.16;
+/**
+ * How far the dark ground goes toward black for the fixed header bar. The bar is not a
+ * section and should not share a section's colour: it is the frame the sections pass
+ * behind. Small on purpose — it has to read as the same family, and over the hero, where
+ * the bar is transparent until the reader scrolls, it is not meant to read at all.
+ */
+const HEADER_GROUND_SHIFT = 0.4;
 /** Opacity of the warm accent's wash. See `accentWarmWash` for why it is this high. */
 const WARM_WASH_ALPHA = 22;
 
@@ -78,11 +85,21 @@ export const colorDerived = {
   bodyOnDark: withAlpha(colors.textOnDark, 80),
 
   primaryButtonHover: mix(colors.accentPrimary, colors.darkBackground, BUTTON_HOVER_SHIFT),
+  /**
+   * The primary button on a dark section is filled with the lightened accent now, not with
+   * the page ground — the brief asks the loud colour to carry the primary control, and on
+   * the plum it can: the fill separates from its section at 8.318:1 and holds the dark
+   * text at 8.215:1, both far past their floors. Its hover is that fill taken back toward
+   * the ground, which keeps the button legible while it is being pressed.
+   */
   primaryButtonHoverOnDark: mix(
-    colors.pageBackground,
-    colors.textMuted,
+    colors.accentOnDark,
+    colors.darkBackground,
     BUTTON_HOVER_ON_DARK_SHIFT,
   ),
+
+  /** The fixed header bar's ground. See HEADER_GROUND_SHIFT for why it is not the section navy. */
+  headerGround: darken(colors.darkBackground, HEADER_GROUND_SHIFT),
 
   cardTintOnCanvas: mix(colors.darkBackground, colors.cardBackground, CARD_TINT_SHIFT),
   cardTintDeepOnCanvas: mix(colors.darkBackground, colors.cardBackground, CARD_TINT_DEEP_SHIFT),

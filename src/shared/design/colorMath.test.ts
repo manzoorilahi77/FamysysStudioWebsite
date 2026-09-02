@@ -4,6 +4,7 @@ import { colors } from "./colors.ts";
 import {
   contrastOn,
   contrastRatio,
+  darken,
   flatten,
   mix,
   parseHex,
@@ -15,10 +16,16 @@ import {
 const BLACK = "#000000";
 const WHITE = "#FFFFFF";
 const MID = "#808080";
+/**
+ * A fixture, not a palette value. These tests are about the arithmetic, so they use fixed
+ * inputs with known answers — reading them out of colors.ts would make the suite fail
+ * every time the site is recoloured, which is the opposite of what it is for.
+ */
+const SAMPLE = "#0B2C4D";
 
 describe("parseHex", () => {
   it("reads a six-digit value into channels", () => {
-    expect(parseHex(colors.darkBackground)).toEqual({ r: 11, g: 44, b: 77 });
+    expect(parseHex(SAMPLE)).toEqual({ r: 11, g: 44, b: 77 });
   });
 
   it("expands a three-digit shorthand", () => {
@@ -26,7 +33,7 @@ describe("parseHex", () => {
   });
 
   it("ignores the alpha of an eight-digit value", () => {
-    expect(parseHex("#0B2C4DB3")).toEqual(parseHex(colors.darkBackground));
+    expect(parseHex("#0B2C4DB3")).toEqual(parseHex(SAMPLE));
   });
 });
 
@@ -42,12 +49,17 @@ describe("toHex", () => {
 
 describe("withAlpha", () => {
   it("appends the alpha step and leaves the channels alone", () => {
-    expect(withAlpha(colors.darkBackground, 70)).toBe("#0B2C4DB3");
+    expect(withAlpha(SAMPLE, 70)).toBe("#0B2C4DB3");
   });
 
-  it("reproduces the ramp steps the site has always shipped", () => {
-    expect(withAlpha(colors.darkBackground, 8)).toBe("#0B2C4D14");
-    expect(withAlpha(colors.pageBackground, 80)).toBe("#F4F1E8CC");
+  it("maps each ramp step onto the right alpha byte", () => {
+    expect(withAlpha(SAMPLE, 8)).toBe("#0B2C4D14");
+    expect(withAlpha(SAMPLE, 100)).toBe("#0B2C4DFF");
+    expect(withAlpha(SAMPLE, 0)).toBe("#0B2C4D00");
+  });
+
+  it("keeps the ramp in step with whatever base it is given", () => {
+    expect(withAlpha(colors.darkBackground, 70).slice(0, 7)).toBe(colors.darkBackground);
   });
 });
 
@@ -61,10 +73,37 @@ describe("mix", () => {
     expect(mix(BLACK, WHITE, 0.5)).toBe(MID);
   });
 
-  it("keeps the navy's blue lean when mixed toward white", () => {
-    const tint = parseHex(mix(colors.darkBackground, colors.cardBackground, 0.87));
-    expect(tint.b).toBeGreaterThan(tint.g);
-    expect(tint.g).toBeGreaterThan(tint.r);
+  it("preserves the order of the channels when mixed toward pure white", () => {
+    const base = parseHex(colors.darkBackground);
+    const tint = parseHex(mix(colors.darkBackground, WHITE, 0.87));
+    const order = (c: { r: number; g: number; b: number }) =>
+      [c.r, c.g, c.b]
+        .map((value, index) => [value, index] as const)
+        .sort((a, b) => a[0] - b[0])
+        .map(([, index]) => index);
+    expect(order(tint)).toEqual(order(base));
+  });
+
+  it("lands every channel between the two endpoints", () => {
+    const from = parseHex(colors.darkBackground);
+    const to = parseHex(colors.cardBackground);
+    const blend = parseHex(mix(colors.darkBackground, colors.cardBackground, 0.4));
+    for (const channel of ["r", "g", "b"] as const) {
+      expect(blend[channel]).toBeGreaterThanOrEqual(Math.min(from[channel], to[channel]));
+      expect(blend[channel]).toBeLessThanOrEqual(Math.max(from[channel], to[channel]));
+    }
+  });
+});
+
+describe("darken", () => {
+  it("returns the colour unchanged at 0 and black at 1", () => {
+    expect(darken(colors.darkBackground, 0)).toBe(colors.darkBackground.toUpperCase());
+    expect(darken(colors.accentWarm, 1)).toBe(BLACK);
+  });
+
+  it("lowers every channel and therefore the luminance", () => {
+    const darker = darken(colors.darkBackground, 0.4);
+    expect(relativeLuminance(darker)).toBeLessThan(relativeLuminance(colors.darkBackground));
   });
 });
 

@@ -27,7 +27,7 @@ export const OUTPUT_PATH = path.join(ROOT, "src", "app", "colors.generated.css")
  */
 const groups = [
   {
-    title: "Grounds and text. These four are the bases; everything under them is a tint.",
+    title: "Grounds and text. Bases from colors.ts; everything under them is a tint of one.",
     vars: {
       canvas: color.canvas,
       ink: color.ink,
@@ -42,6 +42,7 @@ const groups = [
     vars: {
       "section-alt": color.sectionAlt,
       "section-warm": color.sectionWarm,
+      "header-ground": colorDerived.headerGround,
     },
   },
   {
@@ -62,13 +63,13 @@ const groups = [
     },
   },
   {
-    title: "The navy at each alpha step — borders, washes and muted text on light grounds.",
+    title: "The dark ground at each alpha step — borders, washes and muted text on light grounds.",
     vars: Object.fromEntries(
       Object.entries(inkOpacity).map(([step, value]) => [`ink-${step}`, value]),
     ),
   },
   {
-    title: "The cream at the same steps, for dark grounds.",
+    title: "The light ground at the same steps, for dark surfaces.",
     vars: Object.fromEntries(
       Object.entries(canvasOpacity).map(([step, value]) => [`canvas-${step}`, value]),
     ),

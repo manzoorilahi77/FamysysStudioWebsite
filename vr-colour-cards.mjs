@@ -1,0 +1,12 @@
+import { chromium } from "@playwright/test";
+const OUT = process.argv[3] ?? "shots-A";
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+await p.goto("http://127.0.0.1:3100/", { waitUntil: "networkidle" });
+await p.evaluate(async () => { const s = innerHeight*0.6; for (let y=0;y<document.body.scrollHeight;y+=s){scrollTo(0,y);await new Promise(r=>setTimeout(r,200));} });
+const grid = p.locator("div.grid:has(.card-surface)").first();
+await grid.scrollIntoViewIfNeeded(); await p.waitForTimeout(800);
+const bx = await grid.boundingBox();
+await p.screenshot({ path: `${OUT}/detail-tier-cards.png`, clip: { x: bx.x-20, y: Math.max(0,bx.y-20), width: Math.min(1440-bx.x+20, bx.width+40), height: Math.min(900-Math.max(0,bx.y-20), bx.height+40) } });
+console.log("fills:", await p.evaluate(() => [...document.querySelectorAll("div.grid .card-surface")].slice(0,4).map(e=>getComputedStyle(e).backgroundColor)));
+await b.close();

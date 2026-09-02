@@ -17,20 +17,26 @@ interface ButtonProps {
   readonly rollOnHover?: boolean;
 }
 
-// The light primary button is accent-filled: canvas text on the brand accent is 5.107:1,
-// where the previous accent managed only 4.043:1 and forced an ink fill instead. On dark
-// sections it stays canvas-filled — an accent fill on ink separates from its ground by
-// only 2.457:1, so the button would barely read as a shape.
+// A PRIMARY BUTTON IS THE LOUD COLOUR ON BOTH GROUNDS.
 //
-// The header is the one place that takes the accent-filled variant onto ink anyway, at
-// the brief's direction. It compensates with a hairline: see `.header-cta-primary`.
+// On light it is the primary accent, with the page ground as its label. On dark it is the
+// lightened accent, with the dark ground as its label — not the page ground as a fill,
+// which is what it used to be and which made the most important control on a dark section
+// the quietest thing on it. The primary accent cannot do that job on the dark ground
+// (2.957:1 against it, under the 3:1 a control's boundary needs); the lightened one is
+// 8.318:1 against the ground and 8.215:1 for its label. Both numbers are in
+// `npm run check-colours`.
+//
+// The header is the one place that takes the LIGHT variant onto a dark bar, at the
+// brief's direction, so the bar's call to action is the primary accent rather than its
+// lightened twin. It carries a hairline for the boundary: see `.header-cta-primary`.
 const LIGHT_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-canvas hover:bg-primary-button-hover",
   ghost: "border border-ink-20 text-ink hover:border-accent hover:bg-ink-4",
 };
 
 const DARK_VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-canvas text-ink hover:bg-primary-button-hover-on-dark",
+  primary: "bg-accent-on-dark text-ink hover:bg-primary-button-hover-on-dark",
   ghost: "border border-canvas-40 text-canvas hover:border-canvas hover:bg-canvas-10",
 };
 

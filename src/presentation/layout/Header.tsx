@@ -174,7 +174,10 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
       ref={headerRef}
       className="surface-dark fixed inset-x-0 top-0 z-40 border-b"
       style={{
-        backgroundColor: isScrolled || solidAtTop ? "var(--color-ink)" : "transparent",
+        // The bar takes its OWN ground, not a section's. It is the frame the sections
+        // pass behind, and giving it the dark section colour made it read as a section
+        // that happened to be stuck to the top. See `headerGround` in tokens.ts.
+        backgroundColor: isScrolled || solidAtTop ? "var(--color-header-ground)" : "transparent",
         borderColor: isScrolled ? "var(--color-canvas-10)" : "transparent",
         transitionProperty: "background-color, border-color",
         transitionDuration: "240ms",
