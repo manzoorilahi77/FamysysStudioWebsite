@@ -345,6 +345,13 @@ export const spacing = {
 export const container = { maxWidth: '80rem' }; // measured — 1280px, literally present in the famysys.com bundle
 ```
 
+> SUPERSEDED, gutter only. The measured 5.5rem ceiling did not survive contact with our own
+> header: the bar's contents need 1128px at their tightest, and an 80rem shell with 5.5rem
+> gutters leaves 1104px. The header therefore ran on a flat 1.5rem while sections ran on the
+> clamp, so section copy sat inset from the wordmark it was meant to line up under — 4px at
+> 390 and 64px at 1920. The shipped value is `clamp(1.5rem, 4vw, 3rem)`, taken by the header,
+> every section and the footer from one exported `shellStyle`. `maxWidth` is unchanged.
+
 ### 2.5 Measured — focus ring
 
 ```css

@@ -15,7 +15,7 @@ nine sections in this order:
 4. **How We Work** — five numbered steps along one hairline, as a sequence, on ink
 5. **Ways to Work With Us** — three engagement tiers plus a full-width Custom Partnership card
 6. **Selected Work** — the eight planned pieces (`portfolio.content.ts`)
-7. **Why Famysys** — five alternating full-width rows on hairlines
+7. **Why Famysys** — five cards in a 3 + 2 grid, each with a numeral, a drawn mark and a one-line claim
 8. **FAQ** — seven questions, accordion, one open at a time
 9. **Final CTA** — closing heading, body, CTA, closing line, and the contact form
 
@@ -281,10 +281,10 @@ Block shapes:
 | Section | Shape |
 |---|---|
 | Page hero | ~60svh, dark, no image. The framing block below it is what has to be on the fold, not a hero band |
-| The honest framing | Light. Heading left, three short paragraphs right. Sits on the same continuous light surface as the grid — a dark band between them would separate the statement from the work it is a statement about |
-| Filter + grid | One section, not two. The chips are real `<button>`s with `aria-pressed` and `aria-controls`, at a 44px target; the grid is the homepage's Selected Work treatment at page scale — two per row, ratios varied, first tile bleeding to the viewport edge |
+| The honest framing | Light. Heading left, one two-sentence paragraph right. Sits on the same continuous light surface as the grid — a dark band between them would separate the statement from the work it is a statement about |
+| Filter + grid | One section, not two. The chips are real `<button>`s with `aria-pressed` and `aria-controls`, at a 44px target and an `ink-60` border, which is the lightest step on the ramp that clears 1.4.11's 3:1 for a control boundary; the grid is `.work-grid`, shared with the homepage — equal columns in multi-column flow, both starting at the container, nothing bleeding out of it |
 | Piece detail | A native `<dialog>` opened by the tile, bound to the URL fragment |
-| The order | Dark, three stages on hairlines, each resolving its pieces by slug and linking back to their tiles. **Keeps the entry fade** — every colour in it is canvas or canvas-80 |
+| The order | Dark, three cards, each resolving its pieces by slug and linking back to their tiles. **Drops the entry fade** — its numerals and marks are accent-on-dark |
 | Capabilities | Light, one row per capability on hairlines, each linking to its `/creative-services` anchor |
 | Closing CTA | The shared `FinalCta` |
 
@@ -519,14 +519,18 @@ the brand set, derived and audited for one state, is a bigger change than this p
 The errored underline is `accentOnDark`, agreeing with the message beside it; the message, the
 triangle and `aria-invalid` carry the meaning.
 
-### `opensOnLight` — why the header needed a prop
+### `solidAtTop` — why the header needed a prop
 
-`Header` renders its **dark-surface tone while the page is unscrolled**, because it sits
-transparent over an ink hero on all six other pages. This page opens on canvas, where that
-treatment would put canvas nav links on a canvas ground at 1:1. `Header` now takes
-`opensOnLight`, and `/contact` is the one route that passes it — `isDark` becomes
-`!isScrolled && !opensOnLight`. Everything from the scroll threshold down is unchanged, since the
-scrolled state was already light.
+`Header` is **transparent while the page is unscrolled**, because on all six other pages it sits
+over an ink hero and the mosaic behind it is the point. This page opens on canvas, where that
+treatment would put canvas nav links on a canvas ground at 1:1. `Header` takes `solidAtTop`, and
+`/contact` is the one route that passes it: the bar starts filled with ink instead of transparent.
+Everything from the scroll threshold down is unchanged, since the scrolled state was already ink.
+
+The prop has been removed and restored once. It went away when the bar was made permanently ink
+and there was no transparent state left to except; it is back because the transparent state is.
+The underlying fact is the one that has never changed — this page's first section is canvas, and
+canvas nav links need something behind them.
 
 ### Motion: as little as the page can have
 
@@ -632,18 +636,27 @@ menu, mobile drawer) that hang off the dark header.
    `#1C50FF` can be made legible on `#0B2C4D`. Removing it would mean dropping accent from every
    dark surface in favour of cream.
 5. **A second typeface — Instrument Serif Italic — is used as a display accent. PENDING MANAGER
-   APPROVAL.** The brand rules specify Jost with a fallback stack and nothing else. The serif
-   appears in exactly four places, all display-size: the last three words of the hero headline,
-   one word in The Differentiator's heading, two words in the thesis line, and two in the final CTA
-   heading. It is reachable only through `RevealHeading`'s `accent` prop and is banned from body
-   copy, card titles, eyebrows, nav and buttons — a check in the verification pass fails if more
-   than five accent phrases appear or if one lands anywhere it shouldn't. Set 5% up on the
+   APPROVAL.** The brand rules specify Jost with a fallback stack and nothing else. On the homepage
+   the serif appears in five phrases across eight words, all display-size: the last three words of
+   the hero headline, one word in The Differentiator's heading, two separate words in the thesis
+   line, and two in the final CTA heading. That is **exactly at the five-phrase cap** — every other
+   page renders two phrases, `/contact` one — so anything added to a homepage heading breaks it. It
+   is reachable only through `RevealHeading`'s `accent` prop and is banned from body copy, card
+   titles, eyebrows, nav and buttons; a check in the verification pass fails if more than five
+   accent phrases appear on a page or if one lands anywhere it shouldn't. Set 5% up on the
    surrounding Jost, because serif italic reads optically smaller at the same px.
 
+   **These words now carry the accent COLOUR as well as the face** — `accent` on light surfaces
+   (5.107:1 on canvas) and `accentOnDark` on dark ones (5.015:1 on ink), rather than inheriting the
+   heading's colour. The consequence is that a `<Section dark>` carrying an accented heading can no
+   longer run the entry fade, since `accentOnDark` falls to 3.79:1 against the fade's start value.
+   The Differentiator is the only such section on the site and takes `fade={false}`; every other
+   accented heading sits on canvas or in a hero that never faded.
+
 6. **`/contact` opens on a LIGHT hero — the only page that does.** Every other hero is ink, and
-   `Header` renders its dark-surface tone while the page is unscrolled because it assumes one
-   underneath. The `opensOnLight` prop exists for this single route; without it the nav would be
-   canvas text on a canvas ground at 1:1. See the Contact section above.
+   `Header` is transparent while the page is unscrolled because it assumes one underneath. The
+   `solidAtTop` prop exists for this single route and starts the bar filled; without it the nav
+   would be canvas text on a canvas ground at 1:1. See the Contact section above.
 7. **`FinalCta` no longer fades its background.** It carries a form, and by this project's own
    rule any colour derived against full ink is wrong for the first 900ms of a fading section: the
    form's error messages are `accentOnDark` (5.015:1 on ink, 3.792:1 at the fade's start) and its
@@ -672,8 +685,8 @@ The first two are called out again, with full context, in design spec §2.8.3.
   | The Differentiator | Asymmetric split — header in 5 of 12 columns, elements stacked in 6, offset one |
   | How We Work | Horizontal sequence: five numerals on one hairline, copy beneath; the rule runs down the left below `lg` |
   | Ways to Work | 3 + 1 bento — three tiers, then a wider custom card |
-  | Selected Work | Two media tiles a row with cycling aspect ratios; the first breaks the container to the viewport edge |
-  | Why Famysys | Five alternating full-width rows on hairlines, label and description swapping sides |
+  | Selected Work | Two columns of media tiles with cycling aspect ratios, flowed down the columns so every vertical gap is identical; both columns start at the container |
+  | Why Famysys | 3 + 2 on a six-track grid — three cards spanning two tracks, then two spanning three, so the bottom row fills its width |
   | FAQ | Accordion at a 72ch measure |
 
   Uneven spans are reserved for tiles that genuinely differ in weight or carry media. Even grids
