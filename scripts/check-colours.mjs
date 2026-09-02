@@ -106,7 +106,13 @@ const IN_USE = [
   ["header ground", colors.textOnDark, "text", "wordmark and nav links"],
   ["header ground", canvasOpacity[80], "text", "nav link at rest"],
   ["header ground", colors.accentOnDark, "ui", "nav underline, focus ring"],
-  ["header ground", colors.accentPrimary, "ui", "the bar's CTA fill, as a boundary"],
+  // The bar's CTA is the light primary variant on a dark bar, at the brief's direction, so
+  // its fill is the primary accent — which is chosen for legibility on LIGHT grounds and is
+  // not guaranteed to clear 3:1 against a near-black bar. `.header-cta-primary` therefore
+  // draws the boundary with a hairline in the lightened accent, and that hairline is what
+  // this row enforces. The fill's own number is in AVOIDED, which is where the hairline's
+  // reason for existing should be visible.
+  ["header ground", colors.accentOnDark, "ui", "the bar CTA's hairline, as a boundary"],
 
   // --- the primary control on a dark section, filled with the lightened accent
   ["dark ground", colors.accentOnDark, "ui", "primary button fill, as a shape"],
@@ -154,6 +160,12 @@ const AVOIDED = [
     "accent copy mid-fade — the reason a dark section carrying accent words sets fade={false}",
   ],
   ["dark ground", colors.accentPrimary, "ui", "Differentiator accent panel edge"],
+  [
+    "header ground",
+    colors.accentPrimary,
+    "ui",
+    "the bar CTA's fill — the reason it carries a hairline",
+  ],
 ];
 
 const COLUMN = { ground: 28, on: 11, role: 6, ratio: 9, floor: 7, verdict: 6 };

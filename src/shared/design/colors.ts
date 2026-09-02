@@ -1,5 +1,5 @@
 // EDIT COLOURS HERE. Change a value, save, and it updates everywhere on the site.
-// Every colour must be a hex value like '#1E0B2C'.
+// Every colour must be a hex value like '#12251F'.
 //
 // This is the ONLY file in the repository allowed to contain a hex colour. Everything
 // else — the opacity tints, the hover fills, the CSS variables in globals.css — is
@@ -8,48 +8,47 @@
 // can be checked in seconds. See docs/changing-colours.md.
 //
 // ---------------------------------------------------------------------------
-// PALETTE A — VOLTAGE
+// PALETTE B — KILN
 //
-// The Studio is not the parent company and should not borrow its four colours. This is
-// aubergine and electric magenta: a near-black plum ground with a blush-bone light one,
-// a magenta dark enough to be TEXT on the light grounds and therefore able to carry every
-// link, eyebrow and primary button, and a hot pink that is the same colour one register
-// up, for the dark grounds where the magenta goes flat.
+// The restrained half of the pair. Deep forest-petrol and burnt terracotta on warm sand:
+// a fired-clay palette, the colours of a workshop rather than of a screen. Nothing here
+// is neon, and nothing here is navy.
 //
-// Two colours beyond that, both rationed. Hot orange is secondary emphasis — status
-// markers, category chips, process numerals — and sits beside the magenta rather than
-// against it, both being warm. Acid lime is the opposite pole and is the one loud moment,
-// capped at a single use per page. On any given screen you see plum, bone, magenta and at
-// most ONE of the other two, which is what keeps four saturated colours from reading as a
-// paint chart.
+// The ground is a very dark blue-green — green enough to be unmistakably not navy, dark
+// enough to sit under a photograph without competing with it. The light ground is sand
+// rather than white or bone, which is what stops the terracotta looking like a warning.
 //
-// The magenta's lightness is the whole constraint. It has to clear 4.5:1 as text on the
-// deepest light ground AND carry bone text when it is a button fill, and contrast is
-// symmetric, so those are the same number: 4.772:1 on the deeper sand. That is why the
-// primary accent is a deep magenta rather than the coral or cyan the brief also offered —
-// neither can be a word on bone. The loud ones live where they can, which is the plum.
+// The accents are one family plus one spark. Terracotta carries every primary role on
+// light grounds; apricot is that same clay lightened for the dark ones. Aged brass is
+// secondary emphasis and sits between them. Jade is the single loud moment: cool against
+// three warm colours and family with the forest ground, so it reads as a highlight rather
+// than as an intrusion — and it is capped at one use per page, on dark grounds only.
+//
+// Same constraint as ever on the primary accent: it appears as TEXT on the light grounds,
+// so it has to be dark, and contrast being symmetric that same number decides whether a
+// button label reads on it. The terracotta clears 4.664:1 on the deeper sand.
 // ---------------------------------------------------------------------------
 
 export const colors = {
   // Backgrounds
-  pageBackground: "#FCF2EA", // warm blush-bone, the ground most pages sit on
-  darkBackground: "#1E0B2C", // deep aubergine, near-black with a plum cast
-  cardBackground: "#FFFBF7", // warm near-white, a card lifted off the bone
+  pageBackground: "#F2EDE1", // warm sand, the ground most pages sit on
+  darkBackground: "#12251F", // deep forest-petrol, dark enough to sit under a photograph
+  cardBackground: "#FCF8EE", // warm ivory, a card lifted off the sand
 
   // Text
-  textOnLight: "#210C2C", // the plum taken almost to black
-  textOnDark: "#FCEFE6", // warm bone, one step off the page ground
-  textMuted: "#3A1E42", // plum charcoal — used through its 70% step, never flat
+  textOnLight: "#16241E", // the forest taken almost to black
+  textOnDark: "#F1EBDD", // warm sand, one step off the page ground
+  textMuted: "#212B25", // moss charcoal — used through its 70% step, never flat
 
   // Brand accents
-  accentPrimary: "#B80865", // electric magenta — links, eyebrows, primary buttons
-  accentOnDark: "#FF86C6", // hot pink, the same colour a register up, for the plum
-  accentWarm: "#FF7038", // hot orange — status markers, chips, process numerals
-  accentHighlight: "#D2FA3C", // acid lime — one moment per page, dark grounds only
+  accentPrimary: "#A6381D", // burnt terracotta — links, eyebrows, primary buttons
+  accentOnDark: "#E5906A", // apricot, the same clay a register up, for the forest
+  accentWarm: "#D6A03C", // aged brass — status markers, chips, process numerals
+  accentHighlight: "#66E0B0", // jade — one moment per page, dark grounds only
 
   // Section grounds
-  sectionAlt: "#3A1750", // lifted aubergine, for variety between dark sections
-  sectionWarm: "#EFDACB", // deeper sand, for variety between light sections
+  sectionAlt: "#1E3A31", // lifted forest, for variety between dark sections
+  sectionWarm: "#E5DCCA", // deeper sand, for variety between light sections
 } as const;
 
 export type ColorName = keyof typeof colors;
