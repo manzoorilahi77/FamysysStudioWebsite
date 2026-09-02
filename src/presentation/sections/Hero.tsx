@@ -1,34 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import type { HeroContentView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { HeroMosaic } from "../components/HeroMosaic";
 import { Container } from "../components/Container";
 import { RevealHeading } from "../components/RevealHeading";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface HeroProps {
   readonly hero: HeroContentView;
 }
 
 export function Hero({ hero }: HeroProps) {
-  const [isMounted, setIsMounted] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const isRevealed = isMounted || prefersReducedMotion;
-  const fadeIn = (delayMs: number) => ({
-    opacity: isRevealed ? 1 : 0,
-    transform: prefersReducedMotion || isRevealed ? "translateY(0)" : "translateY(12px)",
-    transitionProperty: "opacity, transform",
-    transitionDuration: prefersReducedMotion ? "120ms" : "400ms",
-    transitionDelay: prefersReducedMotion ? "0ms" : `${delayMs}ms`,
-    transitionTimingFunction: "var(--ease-base)",
-  });
+  // The entrance is a CSS animation now, not an effect that flips opacity on mount — see
+  // `.enter-fade` in globals.css. The old shape meant the hero's supporting copy, its two
+  // buttons and its closing line were rendered at opacity 0 and only ever revealed if the
+  // client bundle ran; a keyframe animation finishes on its own. Reduced motion is handled
+  // in the stylesheet too, so this component no longer needs to know about it.
+  const fadeIn = (delayMs: number) => ({ "--enter-delay": `${delayMs}ms` }) as CSSProperties;
 
   return (
     // Exactly one viewport tall, header included — the header is fixed and overlays this
@@ -48,15 +37,7 @@ export function Hero({ hero }: HeroProps) {
           is what lets its right column reach the viewport edge instead of stopping at the
           container gutter. */}
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
-        <div
-          className="hero-mosaic-frame pointer-events-auto h-full"
-          style={{
-            transform: prefersReducedMotion || isRevealed ? "scale(1)" : "scale(1.04)",
-            transitionProperty: "transform",
-            transitionDuration: prefersReducedMotion ? "120ms" : "900ms",
-            transitionTimingFunction: "var(--ease-base)",
-          }}
-        >
+        <div className="hero-mosaic-frame enter-scale pointer-events-auto h-full">
           <HeroMosaic tiles={hero.mosaicTiles} />
         </div>
       </div>
@@ -78,14 +59,17 @@ export function Hero({ hero }: HeroProps) {
           >
             {hero.heading}
           </RevealHeading>
-          <p className="text-body mt-6 text-canvas-80" style={{ maxWidth: "52ch", ...fadeIn(200) }}>
+          <p
+            className="text-body enter-fade mt-6 text-canvas-80"
+            style={{ maxWidth: "52ch", ...fadeIn(200) }}
+          >
             {hero.body}
           </p>
-          <div className="mt-8 flex flex-wrap gap-4" style={fadeIn(200)}>
+          <div className="enter-fade mt-8 flex flex-wrap gap-4" style={fadeIn(200)}>
             <Button cta={hero.primaryCta} variant="primary" dark />
             <Button cta={hero.secondaryCta} variant="ghost" dark />
           </div>
-          <p className="text-small mt-6 text-canvas-60" style={fadeIn(300)}>
+          <p className="text-small enter-fade mt-6 text-canvas-60" style={fadeIn(300)}>
             {hero.supportingLine}
           </p>
         </div>

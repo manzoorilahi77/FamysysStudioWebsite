@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { useId, useRef, useState } from "react";
 import {
   CONTACT_FIELD_ORDER,
   toSubmitDemoRequestInput,
@@ -12,8 +13,7 @@ import {
 import type { ContactFormBlock } from "../../domain/contact/entities/ContactPage";
 import { CompanySize } from "../../domain/lead/value-objects/CompanySize";
 import { ContactRole } from "../../domain/lead/value-objects/ContactRole";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { revealStyle, staggerDelay } from "../motion/variants";
+import { staggerDelay } from "../motion/variants";
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
@@ -47,24 +47,18 @@ const ROW_STEP_MS = 50;
  * tabbing in from the hero would land on a field they cannot see. Triggering from mount
  * means every field is painted within about 500ms of load however the page is entered.
  *
- * The effect itself is the site's existing one: the same opacity-and-24px-rise from
- * `revealStyle`, and the same collapse to opacity-only under reduced motion.
+ * The entrance is a CSS animation rather than an effect that flips opacity on mount, and
+ * for this component that is a correctness matter rather than a preference: an effect that
+ * does not run leaves every field at opacity 0 AND still in the tab order, which is the
+ * exact failure the paragraph above was written to avoid — it just moved the trigger from
+ * scroll to load instead of removing the dependency. A keyframe animation finishes without
+ * JavaScript. Reduced motion is handled in the stylesheet. See `.enter-fade`.
  */
 function RevealOnLoad({ index, children }: { index: number; children: React.ReactNode }) {
-  const [hasEntered, setHasEntered] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setHasEntered(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   return (
     <div
-      style={{
-        ...revealStyle(hasEntered, prefersReducedMotion),
-        transitionDelay: `${staggerDelay(index, ROW_STEP_MS)}ms`,
-      }}
+      className="enter-fade"
+      style={{ "--enter-delay": `${staggerDelay(index, ROW_STEP_MS)}ms` } as CSSProperties}
     >
       {children}
     </div>
@@ -286,12 +280,7 @@ export function ContactForm({ form }: ContactFormProps) {
       {selectField("role", ROLE_OPTIONS)}
       {selectField("companySize", COMPANY_SIZE_OPTIONS)}
     </div>,
-    <FieldShell
-      key="brief"
-      id={fieldId("brief")}
-      label={form.labels.brief}
-      error={errors.brief}
-    >
+    <FieldShell key="brief" id={fieldId("brief")} label={form.labels.brief} error={errors.brief}>
       <textarea
         id={fieldId("brief")}
         name="brief"

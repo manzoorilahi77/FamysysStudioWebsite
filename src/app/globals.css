@@ -192,6 +192,70 @@ body {
    would sit on different baselines. clip-path clips without touching baseline
    behaviour. The bottom padding gives descenders room inside the clip; the top and
    side bleed keeps ascenders and the italic's overhang from being shaved. */
+/* ENTRANCE FADES ARE CSS, NOT JAVASCRIPT.
+   ---------------------------------------------------------------------------
+   The hero's supporting copy and the contact form's field rows arrive on LOAD rather than
+   on scroll, and both used to do it by rendering at opacity 0 and having an effect flip
+   them on mount. That makes the content conditional on the client bundle running: when it
+   does not, the words are simply gone, and in the form's case they are gone AND still in
+   the tab order.
+
+   A keyframe animation needs no JavaScript to finish. With `both` it holds the from-state
+   before it starts and the to-state after, so the entrance is identical while the page is
+   alive and the content is simply present when it is not. The delay is passed per element
+   as `--enter-delay`, which is what the stagger used to be.
+
+   See useInView for the same defect in its scroll-triggered form. */
+.enter-fade {
+  animation: enter-fade 400ms var(--ease-base) var(--enter-delay, 0ms) both;
+}
+
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-fade {
+    animation: enter-fade-reduced 120ms var(--ease-base) 0ms both;
+  }
+  @keyframes enter-fade-reduced {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* The hero mosaic's settle, on the same terms as `.enter-fade`: a keyframe rather than a
+   mount effect, so the frame is at its resting scale whether or not the bundle runs. */
+.enter-scale {
+  animation: enter-scale 900ms var(--ease-base) both;
+}
+
+@keyframes enter-scale {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-scale {
+    animation-duration: 120ms;
+  }
+}
+
 .reveal-word {
   display: inline-block;
   vertical-align: baseline;
