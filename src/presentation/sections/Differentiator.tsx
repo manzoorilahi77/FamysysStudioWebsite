@@ -5,6 +5,7 @@ import type { ElementTone } from "../components/ElementCard";
 import { Reveal } from "../components/Reveal";
 import { RevealHeading } from "../components/RevealHeading";
 import { Section } from "../components/Section";
+import { SectionHeader } from "../components/SectionHeader";
 import type { DifferentiatorBlockView } from "../lib/viewModels";
 
 interface DifferentiatorProps {
@@ -33,28 +34,34 @@ function toneFor(index: number): ElementTone {
  * is `accent-on-dark` (#7995F5) with ink text, which measures 5.015:1 both for the panel
  * against the ground and for the text on the panel — strictly better on both axes, at the
  * cost of a lighter, less saturated blue.
+ *
+ * `fade={false}` for the locked reason: this section's three accented display words are
+ * now set in accent-on-dark, which is derived against full ink at 5.015:1 and measures
+ * only 3.79:1 against the fade's start value. A dark section carrying any accent stops
+ * fading rather than working the colour around. It is the only `<Section dark>` on the
+ * site with accented words — every other accent heading sits on a light surface or in an
+ * unfaded hero.
  */
 export function Differentiator({ differentiator }: DifferentiatorProps) {
   return (
-    <Section dark ariaLabel={differentiator.heading}>
+    <Section dark fade={false} ariaLabel={differentiator.heading}>
       <Container>
-        {/* Heading and body both flush left and both narrower than the container: the
-            heading takes about 60% of it, the body a tighter measure beneath. The
-            reference's header is proportioned the same way, and it is what stops a
-            full-bleed dark section reading as an undifferentiated slab. */}
-        {/* No eyebrow: the brief's header shape is eyebrow-heading-body, but the content
+        {/* The shared split header, where this used to hand-roll the same two elements with
+            its own widths — a `max-w-[60%]` heading over a `max-w-[52ch]` body. The two
+            columns do that job now and do it at every breakpoint, and the section stops
+            being the one place on the homepage where the header shape is written out again.
+
+            No eyebrow: the brief's header shape is eyebrow-heading-body, but the content
             brief supplies no eyebrow string for this section and `leadIn` is not one — it
             is a sentence ending in a colon that introduces the four cards, and it is set
             as one, above them. Logged in docs/content-todo.md rather than invented here. */}
-        <div>
-          <RevealHeading
-            className="text-display-l max-w-[60%] min-w-[18ch] font-medium text-canvas"
-            accent={["creativity,"]}
-          >
-            {differentiator.heading}
-          </RevealHeading>
-          <p className="text-lead mt-6 max-w-[52ch] text-canvas-80">{differentiator.body}</p>
-        </div>
+        <SectionHeader
+          split
+          dark
+          accent={["creativity,"]}
+          heading={differentiator.heading}
+          body={differentiator.body}
+        />
 
         {/* Four across at desktop, two below lg, one below md — where the hover that
             reveals the descriptor does not exist, so the card opens up permanently
@@ -74,13 +81,14 @@ export function Differentiator({ differentiator }: DifferentiatorProps) {
           ))}
         </div>
 
-        {/* One of the page's two centred moments: the thesis, at display size, standing
-            alone with the statement measure of space around it. Everything else on the
-            page is flush left, which is what lets this one land. */}
+        {/* The page's ONE centred moment: the thesis, at display size, standing alone with
+            the statement measure of space around it. Everything else on the page — the
+            closing CTA heading included, since it went flush left — is left aligned, which
+            is what lets this one land. */}
         <div style={{ marginTop: spacing.statement }}>
           <RevealHeading
             as="p"
-            className="text-display-l mx-auto max-w-[24ch] text-center font-medium text-balance text-canvas"
+            className="text-heading mx-auto max-w-[30ch] text-center font-medium text-balance text-canvas"
             accent={["advantage", "identity."]}
           >
             {differentiator.closingStatement}

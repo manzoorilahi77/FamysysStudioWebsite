@@ -1,15 +1,14 @@
 import Image from "next/image";
 
-/** Intrinsic size of both wordmark files — a 4x render of the 32px display height. */
-const WORDMARK_WIDTH = 396;
+/** Intrinsic size of both wordmark files — a 4x render of the 32px display height the
+    header and the footer share, so every caller downsamples. */
+const WORDMARK_WIDTH = 424;
 const WORDMARK_HEIGHT = 128;
 
 interface WordmarkProps {
   readonly alt: string;
   /** Renders the canvas-tinted file for dark surfaces instead of the ink one. */
   readonly dark?: boolean;
-  /** Cross-fades between both files, for the header, which flips as the page scrolls. */
-  readonly crossfade?: boolean;
   readonly className?: string;
   readonly priority?: boolean;
 }
@@ -20,61 +19,25 @@ interface WordmarkProps {
  * on pure white, not the brand's warm canvas, and a filter chain that hits #F4F1E8
  * exactly is guesswork the build cannot verify.
  *
- * The header flips between surfaces mid-scroll, so it renders both files stacked and
- * cross-fades them. Both are in the DOM from the start, so the flip never waits on a
- * network request and never flashes.
+ * There is no cross-fade any more. It existed for one caller — the header, which used to
+ * flip surfaces mid-scroll and needed both files stacked so the flip never waited on a
+ * request. The header is permanently ink now and takes the canvas file alone.
+ *
+ * EVERY caller is currently `dark`, so the canvas file is the only one being served — the
+ * header, the footer and the contact card all sit on ink. The ink file is kept because the
+ * prop still offers a light surface and both variants are cut from one master in the same
+ * pass; dropping it would leave `dark={false}` pointing at nothing.
  */
-export function Wordmark({
-  alt,
-  dark = false,
-  crossfade = false,
-  className = "",
-  priority = false,
-}: WordmarkProps) {
-  const shared = {
-    width: WORDMARK_WIDTH,
-    height: WORDMARK_HEIGHT,
-    priority,
-    className: "h-full w-auto",
-  };
-
-  if (!crossfade) {
-    return (
-      <span className={`inline-block ${className}`}>
-        <Image
-          src={dark ? "/brand/famysys-studio-logo-canvas.png" : "/brand/famysys-studio-logo-ink.png"}
-          alt={alt}
-          {...shared}
-        />
-      </span>
-    );
-  }
-
+export function Wordmark({ alt, dark = false, className = "", priority = false }: WordmarkProps) {
   return (
-    <span className={`relative inline-block ${className}`}>
+    <span className={`inline-block ${className}`}>
       <Image
-        src="/brand/famysys-studio-logo-canvas.png"
+        src={dark ? "/brand/famysys-studio-logo-canvas.png" : "/brand/famysys-studio-logo-ink.png"}
         alt={alt}
-        {...shared}
-        style={{
-          opacity: dark ? 1 : 0,
-          transitionProperty: "opacity",
-          transitionDuration: "240ms",
-          transitionTimingFunction: "var(--ease-base)",
-        }}
-      />
-      <Image
-        src="/brand/famysys-studio-logo-ink.png"
-        alt=""
-        aria-hidden="true"
-        {...shared}
-        className="absolute inset-0 h-full w-auto"
-        style={{
-          opacity: dark ? 0 : 1,
-          transitionProperty: "opacity",
-          transitionDuration: "240ms",
-          transitionTimingFunction: "var(--ease-base)",
-        }}
+        width={WORDMARK_WIDTH}
+        height={WORDMARK_HEIGHT}
+        priority={priority}
+        className="h-full w-auto"
       />
     </span>
   );

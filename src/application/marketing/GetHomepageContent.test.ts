@@ -40,7 +40,10 @@ function fixtureIntro(label: string): SectionIntro {
 }
 
 function fixtureWhatWeDo(): WhatWeDoIntro {
-  return { intro: fixtureIntro("Our capabilities"), cta: createCta("Explore All Services", "/creative-services") };
+  return {
+    intro: fixtureIntro("Our capabilities"),
+    cta: createCta("Explore All Services", "/creative-services"),
+  };
 }
 
 function fixtureMedia(): MediaRef {
@@ -58,7 +61,11 @@ function fixtureDifferentiator(): DifferentiatorBlock {
     body: "AI has changed how creative work can be produced.",
     leadIn: "At Famysys Studio, we combine:",
     elements: [
-      { title: "Human Creativity", description: "Ideas, storytelling, art direction.", media: fixtureMedia() },
+      {
+        title: "Human Creativity",
+        description: "Ideas, storytelling, art direction.",
+        media: fixtureMedia(),
+      },
       {
         title: "Intelligent AI Workflows",
         description: "AI used where it genuinely improves speed.",
@@ -117,11 +124,27 @@ function fixtureWhyFamysys(): WhyFamysysBlock {
     heading: "Professional creative support. Without unnecessary overhead.",
     body: "A third option between expensive agencies and inconsistent freelancers.",
     reasons: [
-      { title: "Flexible", description: "Start with a single project." },
-      { title: "Efficient", description: "Structured production workflows." },
-      { title: "Human-led", description: "Creative judgment stays with our team." },
-      { title: "Scalable", description: "Designed to grow into ongoing partnerships." },
-      { title: "Value-driven", description: "Better creative value for the investment." },
+      { title: "Flexible", description: "Start with a single project.", media: fixtureMedia() },
+      {
+        title: "Efficient",
+        description: "Structured production workflows.",
+        media: fixtureMedia(),
+      },
+      {
+        title: "Human-led",
+        description: "Creative judgment stays with our team.",
+        media: fixtureMedia(),
+      },
+      {
+        title: "Scalable",
+        description: "Designed to grow into ongoing partnerships.",
+        media: fixtureMedia(),
+      },
+      {
+        title: "Value-driven",
+        description: "Better creative value for the investment.",
+        media: fixtureMedia(),
+      },
     ],
   };
 }

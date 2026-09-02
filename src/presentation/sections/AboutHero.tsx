@@ -32,12 +32,12 @@ export function AboutHero({ hero }: AboutHeroProps) {
           <Eyebrow dark>{hero.eyebrow}</Eyebrow>
           <RevealHeading
             as="h1"
-            className="text-hero mt-5 max-w-[20ch] font-semibold text-canvas"
+            className="text-heading mt-5 max-w-[20ch] font-semibold text-canvas"
             accent={["creative production."]}
           >
             {hero.heading}
           </RevealHeading>
-          <p className="text-lead mt-6 text-canvas-80" style={{ maxWidth: "54ch" }}>
+          <p className="text-body mt-6 text-canvas-80" style={{ maxWidth: "54ch" }}>
             {hero.body}
           </p>
         </div>

@@ -19,7 +19,9 @@ interface ElementCardProps {
 
 export function ElementCard({ element, tone }: ElementCardProps) {
   return (
-    <article className="element-card h-full">
+    <article className="element-card">
+      {/* The frame. It shrinks on hover and the image is cropped by `object-fit: cover`
+          inside it, so what moves is the boundary — nothing slides over the picture. */}
       <div className="element-media">
         <Image
           src={element.media.src}
@@ -32,9 +34,19 @@ export function ElementCard({ element, tone }: ElementCardProps) {
         />
       </div>
 
+      {/* The panel is exactly its own content in both states, so the resting height is the
+          title's and nothing more. The descriptor's wrapper is the single animated thing
+          in the card: its grid track runs 0fr to 1fr, the panel grows by exactly that, and
+          the media above gives up exactly that. The gap above the descriptor is padding
+          inside the track rather than a margin outside it, or 12px of it would survive the
+          collapse. */}
       <div className={`element-panel element-panel--${tone} p-6`}>
-        <p className="text-display-s font-medium">{element.title}</p>
-        <p className="element-description text-small mt-3">{element.description}</p>
+        <p className="element-title text-display-s font-medium">{element.title}</p>
+        <div className="element-description-slot">
+          <div className="element-description-clip">
+            <p className="element-description text-small">{element.description}</p>
+          </div>
+        </div>
       </div>
     </article>
   );

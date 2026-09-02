@@ -240,6 +240,14 @@ export const workIntro: SectionIntro = {
   body: "A growing collection of work created by Famysys Studio across design, video, AI-powered production and creative content.",
 };
 
+// One frame per reason, and each is picked against its own claim rather than for being a
+// nice studio photograph — the panel beside the ledger shows this image while that row is
+// being read, so a mismatch is visible for as long as the reader is on the row. A
+// replacement has to carry the same subject, and the `alt` has to be rewritten with it.
+function reasonImage(file: string, alt: string): MediaRef {
+  return MediaRef.create({ kind: "image", src: `/media/${file}.jpg`, alt, aspectRatio: "4:3" });
+}
+
 export const whyFamysysBlock: WhyFamysysBlock = {
   heading: "Professional creative support. Without unnecessary overhead.",
   body: "We believe businesses shouldn't have to choose between expensive agencies and inconsistent freelancers. Famysys Studio is being built to provide a third option: a flexible, technology-enabled creative production team that can grow with your requirements.",
@@ -247,25 +255,50 @@ export const whyFamysysBlock: WhyFamysysBlock = {
     {
       title: "Flexible",
       description: "Start with a single project. Expand when you need more.",
+      // The smallest complete setup there is: one phone, one tripod, one shop.
+      media: reasonImage(
+        "tier-grow",
+        "A phone mounted on a tripod filming a rail of clothing in a small shop.",
+      ),
     },
     {
       title: "Efficient",
       description:
         "AI and structured production workflows help us reduce unnecessary production overhead.",
+      // The workflow itself, on screen — the claim is about tooling, not about people.
+      media: reasonImage(
+        "about-approach",
+        "A colour-grading interface in close-up, showing colour wheels and a hue curve.",
+      ),
     },
     {
       title: "Human-led",
       description: "Creative judgment, quality control and accountability remain with our team.",
+      // Hands making a decision. The one reason whose subject has to be a person.
+      media: reasonImage(
+        "tier-scale",
+        "Two hands drawing artwork on a tablet with a stylus, beside a laptop and a mug.",
+      ),
     },
     {
       title: "Scalable",
       description:
         "Our production model is designed to grow from individual projects into ongoing creative partnerships.",
+      // The other end of the same line the Flexible frame starts: a full stage and crew.
+      media: reasonImage(
+        "process-produce",
+        "A film stage with rigged lighting, a camera crane and a crew of about a dozen at work.",
+      ),
     },
     {
       title: "Value-driven",
       description:
         "Our goal is not simply to produce more cheaply — it is to deliver better creative value for the investment.",
+      // Professional kit in an ordinary room: the result, without the overhead.
+      media: reasonImage(
+        "tier-launch",
+        "A professional studio light on a stand, lighting a desk and monitor in a dark room.",
+      ),
     },
   ],
 };

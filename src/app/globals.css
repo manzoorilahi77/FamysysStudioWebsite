@@ -8,6 +8,9 @@
   --color-canvas: #f4f1e8;
   --color-ink: #0b2c4d;
   --color-graphite: #24282c;
+  /* graphite at 70% — `colorDerived.bodyOnLight` in tokens.ts, 5.273:1 on canvas. It had
+     no CSS mirror until the nav panels needed it for their item descriptors. */
+  --color-graphite-70: #24282cb3;
   --color-accent: #1c50ff;
   --color-accent-on-dark: #7995f5;
   --color-hairline: #0b2c4d14;
@@ -30,13 +33,33 @@
   --color-canvas-60: #f4f1e899;
   --color-canvas-80: #f4f1e8cc;
 
+  /* §2's three light navies — hover fill (flat), hover fill (radial peak) and the
+     watermark numeral. Mixed from ink toward WHITE, because ink over the warm canvas goes
+     grey rather than blue. See `colorDerived` in tokens.ts for the measured ratios. */
+  --color-card-tint: #dce4ee;
+  --color-card-tint-deep: #cbd9ea;
+  --color-service-numeral: #bfcfe4;
+
+  /* The second light ground. Consecutive cream sections alternate on to it so a run of
+     them reads as separate panels rather than one sheet — see THE SECTION SEAM below for
+     the measured contrast on it. Mirrored as `colorDerived.canvasRaised` in tokens.ts. */
+  --color-canvas-raised: #efebe0;
+
   --color-primary-button-hover: #1a4be6;
   --color-primary-button-hover-on-dark: #e4e3dd;
   --color-accent-8: #1c50ff14;
 
   --radius-sm: 0.25rem;
 
-  --spacing-gutter: clamp(1.25rem, 5vw, 5.5rem);
+  --spacing-gutter: clamp(1.5rem, 4vw, 3rem);
+  /* The distance from a FULL-BLEED element's edge to the container line — what a
+     full-width band needs so its contents land on the same vertical as everything inside
+     `Container`. Below the 80rem max width the container is only inset by the gutter, so
+     the second term goes negative and `max()` falls back to the gutter. The `100%` stays
+     unresolved through the variable and is measured against whichever element finally uses
+     it, which is what lets one declaration serve both a section seam and a nav strip.
+     Keep 80rem in step with `container.maxWidth` in shared/design/tokens.ts. */
+  --container-inset: max(var(--spacing-gutter), calc((100% - 80rem) / 2 + var(--spacing-gutter)));
   --spacing-section: clamp(4.5rem, 10vh, 8.5rem);
   --spacing-section-dark: clamp(6.5rem, 14vh, 12rem);
   --spacing-statement: clamp(8rem, 18vh, 15rem);
@@ -62,12 +85,24 @@ body {
   line-height: 1.02;
   letter-spacing: -0.03em;
 }
-/* The hero headline sits in a 46%-wide column and has to hold two lines there, so it
-   takes its own step rather than display-xl, which broke it onto five. The column is
-   ~522px at every width from 1280 up, because the container caps at 80rem, so the line
-   count is set by the font size alone: this resolves to ~40px at 1440, about 24
-   characters a line, which is two lines for the client's 48-character headline. */
-.text-hero {
+/* THE HEADING STEP — every headline on the site, hero and section alike.
+   ---------------------------------------------------------------------------
+   It began as the hero's private step: the hero headline sits in a 46%-wide column and has
+   to hold two lines there, and display-xl broke it onto five. The column is ~522px at every
+   width from 1280 up, because the container caps at 80rem, so the line count is set by the
+   font size alone: this resolves to ~40px at 1440, about 24 characters a line, which is two
+   lines for the client's 48-character headline.
+
+   Every section heading now takes it too, in place of display-l (~55px at 1440) and, for the
+   closing CTA, display-xl (~82px). Two lines was the requirement, and at 55px a section
+   heading in the split header's six tracks ran to three and four. The scale below this one
+   is unchanged, so the hierarchy inside a section — heading, then display-s, then body — is
+   the same as it was; what changed is that a heading no longer outweighs the page it opens.
+
+   The two decorative numerals (§4 process, §6 capability) keep display-l. They are graphics
+   at a type size, not headings, and shrinking them with the headings would have flattened
+   the one place on the page where scale is the whole point. */
+.text-heading {
   font-size: clamp(1.9rem, 2.8vw, 2.6rem);
   line-height: 1.08;
   letter-spacing: -0.026em;
@@ -222,6 +257,28 @@ body {
   font-style: italic;
   font-size: 1.05em;
   letter-spacing: -0.01em;
+  /* The accented words now CARRY the accent rather than inheriting the heading's colour.
+     Raw accent on canvas is 5.107:1, which clears the 4.5:1 body floor before the display
+     sizes these words are only ever set at are considered. */
+  color: var(--color-accent);
+}
+
+/* Raw accent on ink is 2.457:1, so a dark surface swaps in the lightened value (5.015:1)
+   — the same substitution the focus ring makes, keyed off the same class.
+
+   CONSEQUENCE: a dark section carrying accented words can no longer run the entry fade.
+   accent-on-dark is derived against full ink and falls to 3.79:1 against the fade's start
+   value, so every `<Section dark>` with an accented heading takes `fade={false}`. See
+   Section.tsx. The inner-page heroes are plain `<section>` elements and never faded. */
+.surface-dark .text-display-accent {
+  color: var(--color-accent-on-dark);
+}
+
+/* And back again for a light card inside a dark surface, so a nested panel cannot inherit
+   the lightened value onto canvas. Ordered after the rule it overrides — the two match on
+   specificity. */
+.surface-light .text-display-accent {
+  color: var(--color-accent);
 }
 
 /* Dark sections settle their background as they enter: they start one step off
@@ -233,20 +290,144 @@ body {
   transition-timing-function: var(--ease-base);
 }
 
-/* Nav links — resting colour is slightly muted and lifts to full on hover, with an
-   underline that wipes in from the left. The wipe is a scaleX on a pseudo-element with
-   a left transform-origin, so it animates on the compositor rather than by growing a
-   box. Both tones exist because the bar is transparent over the ink hero and canvas
-   once it fills. */
+/* THE SECTION SEAM.
+   ---------------------------------------------------------------------------
+   Six of the homepage's nine sections are cream and five of them run consecutively —
+   HowWeWork through Faq — so past the hero and the single dark Differentiator the page
+   became one continuous sheet of colour with headings dropped into it. The other five
+   routes have the same shape in miniature. Padding cannot fix it: every section already
+   carries 4.5-8.5rem of it, and more air between two identical grounds only reads as more
+   of the same ground.
+
+   Two cues, both derived from the sections' own tone classes, so no page or section
+   component has to remember to ask for either.
+
+   1. TONE. Consecutive light sections alternate between canvas and canvas-raised. The
+      chained sibling selectors are run-position counters: `.bg-canvas + .bg-canvas` matches
+      the SECOND light section of a run, the three-term chain the third, and so on, each
+      longer chain outranking the shorter ones on specificity so the deepest match wins.
+      A run therefore alternates canvas / raised / canvas / raised wherever in the page it
+      begins, and a lone light section between two dark ones stays canvas. Written out to
+      six because the homepage's longest run is five.
+
+   2. LINE. A hairline at the boundary, held to the container line rather than bled to the
+      viewport edge, with a short accent segment at its left end — the same three-part
+      vocabulary the footer seam uses, minus the entry wipe, which needs an observer per
+      section for a mark this small. Drawn only where two sections of the SAME family meet:
+      a cream section following an ink one is already the loudest boundary on the page and
+      does not need a rule underneath it.
+
+   Both are scoped to `main > section` on purpose. The sticky index bars on
+   /creative-services and /how-we-work are `<nav class="bg-canvas">` and direct children of
+   main; they are dividers in their own right, already carry a border-b, and must not be
+   counted as a section of the run. */
+main > section {
+  --seam-inset: var(--container-inset);
+}
+
+/* The alternation is a variable rather than a background, so the chains below set one
+   value each and the utility class stays the fallback for the first section of a run. */
+main > section.bg-canvas {
+  background-color: var(--section-ground, var(--color-canvas));
+}
+
+main > section.bg-canvas + section.bg-canvas {
+  --section-ground: var(--color-canvas-raised);
+  --card-ground: var(--color-canvas);
+}
+main > section.bg-canvas + section.bg-canvas + section.bg-canvas {
+  --section-ground: var(--color-canvas);
+  --card-ground: var(--color-ink-6);
+}
+main > section.bg-canvas + section.bg-canvas + section.bg-canvas + section.bg-canvas {
+  --section-ground: var(--color-canvas-raised);
+  --card-ground: var(--color-canvas);
+}
+main
+  > section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas {
+  --section-ground: var(--color-canvas);
+  --card-ground: var(--color-ink-6);
+}
+main
+  > section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas
+  + section.bg-canvas {
+  --section-ground: var(--color-canvas-raised);
+  --card-ground: var(--color-canvas);
+}
+
+main > section.bg-canvas + section.bg-canvas,
+main > section.bg-ink + section.bg-ink {
+  position: relative;
+}
+
+main > section.bg-canvas + section.bg-canvas::before,
+main > section.bg-ink + section.bg-ink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--seam-inset);
+  right: var(--seam-inset);
+  height: 1px;
+  background-color: var(--color-ink-12);
+  pointer-events: none;
+}
+
+/* The accent segment. It is what makes the line read as a mark rather than as a default
+   border, and it is the only place the boundary carries colour. */
+main > section.bg-canvas + section.bg-canvas::after,
+main > section.bg-ink + section.bg-ink::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--seam-inset);
+  width: 3rem;
+  height: 2px;
+  background-color: var(--color-accent);
+  pointer-events: none;
+}
+
+main > section.bg-ink + section.bg-ink::before {
+  background-color: var(--color-canvas-16);
+}
+main > section.bg-ink + section.bg-ink::after {
+  background-color: var(--color-accent-on-dark);
+}
+
+/* Nav links. ONE tone, because the bar is now permanently ink — it no longer flips to
+   canvas on scroll, so the light variant that paired with the scrolled state is gone
+   along with it. Resting colour is slightly muted and lifts to full on hover, with an
+   underline that wipes in from the left. The wipe is a scaleX on a pseudo-element with a
+   left transform-origin, so it animates on the compositor rather than by growing a box.
+
+   The horizontal padding is tighter than it was: the link group has to read as one group
+   with a clear gap before the button pair, and it was spread wide enough to read as an
+   evenly-distributed row instead. */
 .nav-link {
   position: relative;
-  display: inline-block;
-  padding: 0.35rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.5rem;
   font-size: 0.9375rem;
   font-weight: 500;
+  color: var(--color-canvas-80);
   transition-property: color;
   transition-duration: 240ms;
   transition-timing-function: var(--ease-base);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link[aria-expanded="true"] {
+  color: var(--color-canvas);
 }
 
 .nav-link-label {
@@ -275,34 +456,243 @@ body {
   transform: scaleX(1);
 }
 
-.nav-link--dark {
-  color: var(--color-canvas-80);
+/* Markers. Every item carries one, so the two kinds of item are told apart before they
+   are clicked rather than after: a chevron means there is a panel under this, a dot means
+   there is not. Both are decorative — the disclosure state is carried by aria-expanded,
+   and the dot says nothing a pointer has not already said. */
+.nav-marker {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
-.nav-link--dark:hover,
-.nav-link--dark:focus-visible,
-.nav-link--dark[aria-expanded="true"] {
-  color: var(--color-canvas);
+.nav-chevron {
+  transform-origin: center;
+  transition-property: transform;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-base);
 }
 
-.nav-link--light {
+.nav-link[aria-expanded="true"] .nav-chevron {
+  transform: rotate(180deg);
+}
+
+/* accent-on-dark, not raw accent: the brand accent is 2.457:1 on ink, so a 4px accent dot
+   on this bar would be a mark nobody can see. The lightened variant reads 5.015:1. */
+.nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: var(--color-accent-on-dark);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-link:hover .nav-dot,
+.nav-link:focus-visible .nav-dot {
+  opacity: 1;
+}
+
+/* The backdrop behind an open panel. ONE element for all three panels, mounted by the
+   header rather than by each panel, because three of them would stack three ink-40 layers
+   the moment a pointer crossed from one trigger to the next.
+
+   It starts BELOW the header, so the bar itself stays crisp and — more to the point —
+   the backdrop cannot swallow a click meant for a nav link or a button. It is decorative
+   and carries aria-hidden; the panel's own dismissal is Escape, which is what a keyboard
+   user gets. Under reduced motion the header does not render it at all. */
+.nav-backdrop {
+  position: fixed;
+  top: var(--header-height, 5rem);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  /* THE BLUR IS NOT DECLARED HERE. Lightning CSS rewrote a `backdrop-filter` /
+     `-webkit-backdrop-filter` pair down to the prefixed property alone, and current
+     Chromium supports the standard one and not the alias — so the rule compiled to
+     something no browser we target applies, and the backdrop dimmed without blurring.
+     `Header` sets it inline instead, where nothing rewrites it. Verified by reading the
+     computed value rather than by looking at a screenshot, which the ink-40 fill alone
+     was enough to pass. */
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-backdrop[data-open="true"] {
+  opacity: 1;
+  transition-duration: 220ms;
+}
+
+/* The panel. A card whose containing block is the header's inner container — that box
+   carries `position: relative` for exactly this reason, so every inset below is measured
+   from the container's own edges and nothing here has to reconstruct `mx-auto max-w-7xl`
+   from viewport units, which would have overshot by the scrollbar on any platform that
+   reserves one.
+
+   The bridge is the half-rem of transparent space between the bar and the card. It belongs
+   to the panel, so a pointer travelling from the trigger to the card never leaves the
+   group and the close grace is never spent crossing a gap the design put there. */
+.nav-panel {
+  position: absolute;
+  top: 100%;
+  /* The gutter, not a copy of it. The panel's containing block is the header's inner
+     shell, so matching that shell's own padding is what keeps the card's edges on the
+     site's single container line at every width. */
+  left: var(--spacing-gutter);
+  right: var(--spacing-gutter);
+  margin-top: 0.5rem;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-ink-12);
+  border-radius: var(--radius-sm);
+  /* No shadow. The site is flat throughout and one floating card would be the only
+     lit object on it. */
+  box-shadow: none;
+}
+
+.nav-panel::before {
+  content: "";
+  position: absolute;
+  top: -0.5rem;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+}
+
+/* A PANEL IS AS WIDE AS WHAT IS IN IT. The three panels hold three different things and
+   were all being stretched to the same container width, which is only right for one of
+   them — see `navPanelVariant` in NavPanel.tsx for which is which.
+
+   `--wide` is the default above: three real columns of services, and it earns the width.
+
+   `--media` holds four covers. At the container's width they were stretched to ~278px
+   each, which is a hero treatment for a menu; 56rem puts them at ~194px, still a legible
+   cover. Anchored to the container's RIGHT edge rather than to its trigger, because the
+   trigger is the fourth of five items and a left-anchored card that size runs off the
+   viewport at the narrow end of the range where the bar is still inline.
+
+   `--narrow` holds four two-word labels in what was a three-column grid, so two thirds of
+   it was empty. It is sized to its content and starts under its own trigger; the inline
+   `left` comes from the trigger's `offsetLeft`, clamped to the container's gutters. */
+.nav-panel--media {
+  left: auto;
+  width: min(56rem, 100%);
+}
+
+.nav-panel--narrow {
+  width: 22rem;
+  max-width: calc(100vw - 2 * var(--spacing-gutter));
+}
+
+/* Short items get short spacing. The full-size rhythm was built for rows carrying a
+   sentence of descriptor; these carry two words, and the same padding around them was
+   most of what made the card read as empty. */
+.nav-panel--narrow .nav-panel-link {
+  padding-block: 0.4375rem;
+}
+
+.nav-panel--narrow .nav-panel-link-arrow {
+  top: 0.4375rem;
+}
+
+.nav-panel-column-label {
   color: var(--color-ink-70);
+  /* The label's own line box, reserved whether or not the column has a name. See
+     NavPanel for why some columns have none and why nothing is invented to fill them. */
+  min-height: 0.6875rem;
 }
 
-.nav-link--light:hover,
-.nav-link--light:focus-visible,
-.nav-link--light[aria-expanded="true"] {
-  color: var(--color-ink);
+/* Panel rows carry the SAME hover as the capability rows on /selected-work — sweep from
+   the left, title shifts right and goes accent, arrow arrives at the right. One hover
+   vocabulary across the site rather than one per surface. The sweep is a scaleX on a
+   pseudo-element for the same compositor reason it is there. */
+.nav-panel-link {
+  position: relative;
+  display: block;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-sm);
 }
 
-/* Panel rows get the same wipe treatment, on the title line only. */
-.nav-panel-link .media-tile {
+.nav-panel-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-ink-4);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-link:hover::before,
+.nav-panel-link:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.nav-panel-link-body {
+  position: relative;
+  z-index: 1;
+  display: block;
+  transition-property: transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-link:hover .nav-panel-link-body,
+.nav-panel-link:focus-visible .nav-panel-link-body {
+  transform: translateX(6px);
+}
+
+.nav-panel-link-title {
+  transition-property: color;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-link:hover .nav-panel-link-title,
+.nav-panel-link:focus-visible .nav-panel-link-title {
+  color: var(--color-accent);
+}
+
+.nav-panel-link-arrow {
+  position: absolute;
+  z-index: 1;
+  right: 0.75rem;
+  top: 0.625rem;
+  color: var(--color-accent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition-property: opacity, transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-link:hover .nav-panel-link-arrow,
+.nav-panel-link:focus-visible .nav-panel-link-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* The work panel's rows are covers, not titles, and image tiles already have a locked
+   hover on this site — accent border and a 4px lift. They keep it; a sweep behind a
+   photograph would be invisible anyway. */
+.nav-panel-feature .media-tile {
   transition-property: border-color, transform;
   transition-duration: var(--duration-fast);
 }
 
-.nav-panel-link:hover .media-tile,
-.nav-panel-link:focus-visible .media-tile {
+.nav-panel-feature:hover .media-tile,
+.nav-panel-feature:focus-visible .media-tile {
   border-color: var(--color-accent);
   transform: translateY(-4px);
 }
@@ -318,12 +708,81 @@ body {
   transform: scale(1.02);
 }
 
+/* The header buttons roll their label: the label leaves upward while a copy of it arrives
+   from below, so the word appears to turn over in place. The copy is aria-hidden, so the
+   accessible name is still the label once.
+
+   The wrapper's height comes from the real label; the copy is taken out of flow so it
+   cannot add to it, and `overflow: hidden` is what makes the two halves read as one
+   rolling surface rather than as two words passing. Transform only. */
+.button-roll {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.button-roll-label {
+  display: block;
+  transition-property: transform;
+  transition-duration: 240ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.button-roll-label--copy {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+}
+
+.button-motion:hover .button-roll-label {
+  transform: translateY(-100%);
+}
+
+.button-motion:hover .button-roll-label--copy {
+  transform: translateY(0);
+}
+
+/* The one place on the bar where a fill is the only thing giving a control a boundary.
+   The accent fill the header CTA now carries reads 2.457:1 against ink, under the 3:1 that
+   1.4.11 puts on a boundary that identifies a control, so a hairline in accent-on-dark
+   (5.015:1) draws the edge the fill cannot. The fill, the text and the hover fill are all
+   exactly as briefed; only the outline is added. */
+.header-cta-primary {
+  border: 1px solid var(--color-accent-on-dark);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .button-motion:hover {
     transform: none;
   }
+  /* No roll. The copy is removed outright rather than pinned in place — pinning it would
+     leave it sitting on top of the real label the moment a transform is disabled. */
+  .button-roll-label--copy {
+    display: none;
+  }
+  .button-motion:hover .button-roll-label {
+    transform: none;
+  }
   .nav-link-label::after {
     transition-duration: var(--duration-reduced);
+  }
+  .nav-chevron,
+  .nav-link[aria-expanded="true"] .nav-chevron {
+    transition-duration: var(--duration-reduced);
+  }
+  /* No sweep and no shift on a panel row, matching the capability rows on /selected-work.
+     The title still goes accent and the arrow still appears, so the row still answers. */
+  .nav-panel-link::before {
+    display: none;
+  }
+  .nav-panel-link:hover .nav-panel-link-body,
+  .nav-panel-link:focus-visible .nav-panel-link-body,
+  .nav-panel-link-arrow {
+    transform: none;
+  }
+  .nav-panel-feature:hover .media-tile,
+  .nav-panel-feature:focus-visible .media-tile {
+    transform: none;
   }
 }
 
@@ -408,8 +867,15 @@ body {
    `text-small` on the engagement-tier cards: it reads 4.570:1 on ink-06, 4.485:1 on
    ink-07 and 4.435:1 on ink-08. ink-06 is therefore the darkest compliant fill. The
    border steps to ink-12 to keep the edge reading against it. */
+/* The fill is a variable because the light card changes direction with the ground it
+   sits on. On canvas it presses DOWN into the page (ink-6, 1.118:1). On the raised
+   ground of an alternating section it lifts UP to canvas instead — a card pressed a
+   second step down there would have taken the accent link inside it from 4.564:1 to
+   4.35:1, under the 4.5 floor, which axe caught the moment the alternation shipped.
+   Lifting keeps that link on canvas at 5.112:1 and still separates the card from its
+   ground. `--card-ground` is set alongside `--section-ground` in THE SECTION SEAM. */
 .card-surface {
-  background-color: var(--color-ink-6);
+  background-color: var(--card-ground, var(--color-ink-6));
   border: 1px solid var(--color-ink-12);
   border-radius: var(--radius-sm);
   transition-property: border-color, transform;
@@ -549,12 +1015,16 @@ body {
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 85%, transparent 100%);
 }
 
-/* The mosaic runs behind the header, which means the nav sits over whatever photograph
-   happens to be passing. A gradient of the section's own ink holds the top of it back far
-   enough for the nav to read, while leaving the tiles visible moving underneath — which
-   is the point of running the mosaic up there in the first place. Automated contrast
-   checks cannot see this: axe skips any text over an image, so it is verified by
-   sampling the rendered pixels behind each nav link. */
+/* THE SCRIM CARRIES CONTRAST AGAIN. The header is transparent at scroll 0 and the mosaic
+   runs to the top of the section behind it, so the nav sits over whatever photograph
+   happens to be drifting past. This gradient is what the links are actually read against:
+   nearly-opaque ink across the band the bar occupies, dissolving before the tiles are
+   meant to be seen.
+
+   axe cannot evaluate text over an image, so this is verified by hiding the link text and
+   SAMPLING THE RENDERED PIXELS behind each one at several drift positions — the same
+   method used the first time it was solved. The values below are what that sampling
+   passed at; changing them means re-running it. */
 .hero-top-scrim {
   height: 9rem;
   background-image: linear-gradient(
@@ -698,33 +1168,550 @@ body {
   }
 }
 
-/* Why Famysys — alternating full-width rows separated by hairlines, denser and more
-   editorial than five equal cards. The label and the description swap columns row by
-   row; both stay left-aligned inside their own column, so the page's alignment rule
-   survives the alternation. */
+/* Why Famysys — five cards in a 3 + 2 grid, and almost none of it is new CSS. The card
+   surface, the clip-curtain reveal, the numeral going accent and scaling, and the cursor
+   glow are all §2's, reused by class rather than reimplemented: see .card-surface,
+   .capability-reveal, .capability-numeral and .capability-glow. Two things here are its
+   own — the mark, and the title's shift.
+
+   The mark is drawn twice from one definition. `.reason-icon-ghost` is the resting state
+   in ink-12, the same value the numeral rests at; `.reason-icon-draw` is the accent copy
+   stacked exactly on top of it, dashed out of sight until the card is hovered. Every
+   subpath carries `pathLength="1"`, so one dasharray value draws a circle and a 15-unit
+   line at the same rate — no per-path length constants, and adding a subpath to a mark
+   needs no CSS at all. */
+.reason-icon {
+  display: block;
+  color: var(--color-accent);
+}
+
+.reason-icon svg {
+  display: block;
+  overflow: visible;
+}
+
+.reason-icon-ghost {
+  color: var(--color-ink-12);
+}
+
+/* No positioning: the two groups are siblings in one SVG, so they already share a
+   coordinate space and register exactly. The accent copy is second in DOM order, which is
+   what puts it on top. */
+.reason-icon-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition-property: stroke-dashoffset;
+  transition-duration: 400ms;
+  transition-timing-function: var(--ease-base);
+}
+
+/* The draw is an ARRIVAL now, not a hover reward. It fired on hover when each reason was a
+   card, which meant the mark was never drawn for anyone reading with a keyboard, on a
+   phone, or simply not pointing at it — five marks that most readers only ever saw as a
+   ghost. It runs off the row's own observer instead, a beat after the numeral. */
+.reason-row[data-visible="true"] .reason-icon-draw {
+  stroke-dashoffset: 0;
+  transition-delay: 320ms;
+}
+
+/* ---------------------------------------------------------------------------
+   Why Famysys — the ledger
+   ---------------------------------------------------------------------------
+   Five equal statements, laid out as five equal rows on one spine. No card, no fill, no
+   shadow: the numeral opens the row, a rule separates it from the next, the mark closes it
+   on the right, and the type does the rest. The section this replaced was a 3 + 2 grid of
+   bordered boxes, which claimed a grouping the content does not have and repeated the
+   shape of the What We Do grid two sections above it.
+   ------------------------------------------------------------------------ */
+/* THE PINNED STAGE.
+   ---------------------------------------------------------------------------
+   From lg up this section holds still while a track several screens tall passes it, and
+   each scroll beat replaces the reason on the stage — frame, numeral, title and statement
+   together. It is `position: sticky` and nothing else: no scroll event is cancelled, so
+   the scrollbar, PageDown, Home/End and find-in-page all still work. `useScrollSequence`
+   owns the decision and writes `data-pinned`, because it takes two facts to make it —
+   wide enough, and motion not reduced — and only the hook can see both.
+
+   Unpinned the track is an ordinary div and the section is the ledger: five rows on a
+   spine, which is what a phone gets, and what anyone who has asked for less motion gets.
+
+   The two share every rule below this one. Only the handful under
+   `[data-pinned="true"]` differ. */
+.reason-track[data-pinned="true"] {
+  height: var(--reason-track-height);
+}
+
+.reason-track[data-pinned="true"] .reason-stage {
+  position: sticky;
+  top: var(--header-height, 5rem);
+  display: flex;
+  align-items: center;
+  min-height: calc(100svh - var(--header-height, 5rem));
+  /* Air above and below. Without it the stage's content measured exactly the height of the
+     stage — 817px of content in 817px of stage on a 900px viewport — so the frame's bottom
+     edge sat on the section's, and a stage with no margin around it reads as content that
+     did not fit rather than as content that was placed. */
+  padding-block: clamp(1.5rem, 5vh, 3.5rem);
+}
+
+.reason-track[data-pinned="true"] .reason-stage > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The stage carries one reason at a time, so the five rows stack in a single grid cell
+   instead of running down the page. Stacked rather than swapped in and out of the DOM: the
+   outgoing reason has to be able to leave while the incoming one arrives, and a row that
+   has been unmounted cannot animate. The cell is as tall as the tallest of the five, so
+   nothing below it moves as the statements change length. */
+.reason-track[data-pinned="true"] .reason-rows {
+  display: grid;
+}
+
+.reason-track[data-pinned="true"] .reason-row {
+  grid-area: 1 / 1;
+  padding-block: 0;
+  padding-left: 0;
+  opacity: 0;
+  transform: translateY(28px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+  pointer-events: none;
+}
+
+.reason-track[data-pinned="true"] .reason-row[data-current="true"] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* No separators and no spine on the stage: there is one row on it, and a rule above a
+   single row separates it from nothing. The frame is not sticky there either — the stage
+   it sits in already is, and a sticky box inside a sticky box has nothing left to travel
+   against. */
+.reason-track[data-pinned="true"] .reason-rule,
+.reason-track[data-pinned="true"] .reason-row:last-child::after,
+.reason-track[data-pinned="true"] .reason-spine {
+  display: none;
+}
+
+/* `relative`, NOT `static`. The frame stops sticking on the stage — the stage it sits in
+   already does, and a sticky box inside a sticky box has nothing left to travel against —
+   but it must stay a positioned element, because the five stacked images are
+   `position: absolute; inset: 0` against it. Setting `static` here handed them the
+   viewport as their containing block and every image went full-bleed behind the type. */
+.reason-track[data-pinned="true"] .reason-media {
+  position: relative;
+  /* `top` is still the sticky offset, and on a relatively positioned box it is a plain
+     nudge — it pushed the frame 99px down the stage and out of line with the copy. */
+  top: auto;
+}
+
+/* Centred against the frame on the stage, where there is one reason and two columns of
+   very different heights; top-aligned in the ledger, where five rows have to line up.
+
+   The frame also takes a wider column than it does in the ledger — six tracks against
+   five. The stage is a full viewport with one statement on it, and the picture is the half
+   of that statement worth giving the extra track to. */
+@media (min-width: 1024px) {
+  .reason-track[data-pinned="true"] .reason-layout {
+    align-items: center;
+  }
+}
+
+/* Tighter than the ledger's `mt-16`. On the stage the heading and the reason are the only
+   two things present, and 4rem of channel between them on a viewport that also has to hold
+   a photograph is 4rem taken off the photograph. */
+.reason-track[data-pinned="true"] .reason-layout {
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+/* The frame is capped against the VIEWPORT, not the column. Its width comes from the grid
+   and its height from the 4:3 ratio, so on a short screen the ratio alone would push the
+   stage past the fold — 444px of frame under a 370px header on a 900px viewport left its
+   bottom edge exactly on the stage's. The cap only binds where it has to: at 1440 the
+   column gives 352px of frame against a 396px cap, so nothing is cropped there, and the
+   image is `object-fit: cover` where it does bind. */
+.reason-track[data-pinned="true"] .reason-media {
+  max-height: min(44vh, 26rem);
+}
+
+/* Five marks, one per reason, filled as each is passed. Hidden unless pinned — the ledger
+   has its spine, and two answers to the same question is one too many. */
+.reason-steps {
+  display: none;
+}
+
+.reason-track[data-pinned="true"] .reason-steps {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: clamp(2rem, 4vh, 3.5rem);
+  list-style: none;
+  padding: 0;
+}
+
+.reason-step {
+  width: 2.75rem;
+  height: 2px;
+  background-color: var(--color-ink-12);
+  transition-property: background-color, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+  transform-origin: left center;
+}
+
+.reason-step[data-state="done"] {
+  background-color: var(--color-ink-20);
+}
+
+.reason-step[data-state="current"] {
+  background-color: var(--color-accent);
+  transform: scaleY(2);
+}
+
+/* THE FRAME AND THE LEDGER.
+   Stacked below lg, side by side above it. The frame is sticky in both — on a phone it
+   holds under the header while the rows pass beneath it, which is the only way a reader on
+   a small screen sees more than the first reason's image. */
+.reason-layout {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .reason-layout {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0;
+  }
+  .reason-media {
+    grid-column: 1 / span 5;
+  }
+  .reason-list {
+    grid-column: 7 / span 6;
+  }
+}
+
+.reason-media {
+  position: sticky;
+  top: calc(var(--header-height, 5rem) + 1rem);
+  overflow: hidden;
+  border: 1px solid var(--color-ink-8);
+  border-radius: var(--radius-sm);
+  /* 16:9 on a phone, where a 4:3 frame would take a third of the viewport for the whole
+     section; 4:3 from md, where there is room for the picture to be worth showing. */
+  aspect-ratio: 16 / 9;
+  background-color: var(--color-ink-6);
+}
+
+@media (min-width: 768px) {
+  .reason-media {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* Every image is in the same box, one on top of the other, and only opacity and transform
+   move — no layout, no reflow, nothing that could shift the ledger beside it while the
+   page is scrolling. */
+.reason-media-item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.06);
+  transition-property: opacity, transform;
+  /* Two very different durations on purpose. The cross-fade is quick, because a slow one
+     leaves two photographs half visible at once; the scale is slow enough to read as drift
+     rather than as a zoom, which is what gives a still frame the feel of footage. */
+  transition-duration: 520ms, 7000ms;
+  transition-timing-function: var(--ease-base), linear;
+}
+
+.reason-media-item[data-current="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Named, so the frame and the row cannot be read as unrelated. Opaque accent fill for the
+   reason every chip on this site carries one: nothing can measure text sitting on a
+   photograph, so the fill is what the colour is checked against — canvas on accent,
+   5.107:1. */
+.reason-media-chip {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  max-width: calc(100% - 2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+}
+
+.reason-list {
+  position: relative;
+}
+
+/* THE SPINE. A hairline down the left of the list with an accent fill that tracks how far
+   the reader has travelled — scroll-linked and continuous, not five discrete states. The
+   fill is a scaleY on a full-height element rather than an animated height, so it stays on
+   the compositor and never triggers layout while the page is scrolling. */
+.reason-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background-color: var(--color-ink-12);
+  overflow: hidden;
+}
+
+.reason-spine-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--color-accent);
+  transform-origin: top center;
+  /* No transition on the transform: the value is already following the scroll frame by
+     frame, and easing it would make the line lag the page it is reporting on. */
+}
+
+.reason-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Stacked below md, but the numeral and the mark share the top line: the mark is the row's
+   closing punctuation, and left under the copy on its own it read as a stray icon rather
+   than as the end of the row. */
 .reason-row {
-  border-top: 1px solid var(--color-ink-8);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  padding-block: clamp(1.75rem, 3.2vw, 2.75rem);
+  /* The indent is padding on the row, not on the list, so the rule below can start at the
+     row's border box — which is the spine. A rule that stopped short of it would leave the
+     ledger's corner open and the spine reading as a stray line beside the list. */
+  padding-left: clamp(1.25rem, 2.6vw, 2.5rem);
 }
 
-.reason-row:last-child {
-  border-bottom: 1px solid var(--color-ink-8);
+/* The rule belongs to the row below it, and it DRAWS — left to right, as the row arrives,
+   the same gesture §4's process rail makes. It is a pseudo-element rather than a border so
+   it can be scaled; a border cannot be transformed on its own. */
+.reason-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-ink-12);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 700ms;
+  transition-timing-function: var(--ease-base);
 }
 
-/* Selected Work — the first tile breaks the container and runs to the viewport edge, so
-   the portfolio grid reads as less contained than the content grids above it. The
-   breakout is a negative margin sized off the container gutter; `overflow-x: clip` on
-   the section absorbs any scrollbar-width discrepancy in the 100vw term without
-   creating a scroll container (unlike `hidden`, `clip` leaves the vertical axis
-   genuinely visible, so card hover lifts are not cropped). */
+.reason-row[data-visible="true"] .reason-rule {
+  transform: scaleX(1);
+}
+
+/* The ledger closes. Without this the last row's copy simply stops in the middle of the
+   section and the spine runs past it to nothing — a table with no bottom edge. */
+.reason-row:last-child::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--color-ink-12);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 700ms;
+  transition-delay: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.reason-row:last-child[data-visible="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Decorative, and sized to be the thing the eye lands on first: ink-20 is the same value
+   the numerals rest at everywhere else on the site. It goes accent while the row is
+   pointed at, which is the row's only hover state that changes colour. */
+.reason-numeral {
+  color: var(--color-ink-20);
+  transition-property: color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.reason-row:hover .reason-numeral,
+.reason-row[data-current="true"] .reason-numeral {
+  color: var(--color-accent);
+}
+
+/* Hover and current share the accent numeral on purpose: hovering a row IS reading it, and
+   inventing a second colour so the two states could be told apart would be a distinction
+   without a difference — the frame beside the ledger is already showing which row it is. */
+
+/* The title wipes in from the left behind the numeral rather than fading: a fade would
+   have four rows of the section doing the same thing as everything else on the page, and
+   the wipe is what makes the row read as being written rather than as appearing. */
+.reason-title {
+  clip-path: inset(0 100% 0 0);
+  transition-property: clip-path, transform;
+  transition-duration: 700ms, var(--duration-hover);
+  transition-delay: 140ms, 0ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.reason-row[data-visible="true"] .reason-title {
+  clip-path: inset(0 0 0 0);
+}
+
+.reason-row:hover .reason-title {
+  transform: translateX(6px);
+}
+
+.reason-body {
+  opacity: 0;
+  transform: translateY(10px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-delay: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.reason-row[data-visible="true"] .reason-body {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reason-numeral-slot {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.reason-title {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.reason-body {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.reason-mark {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--duration-base);
+  transition-delay: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.reason-row[data-visible="true"] .reason-mark {
+  opacity: 1;
+}
+
+/* From md the row is a real ledger line: numeral, title, statement, mark. The numeral
+   column is fixed rather than fluid so all five numerals share one left edge and one
+   right edge — a proportional column would set them at five slightly different widths and
+   the spine would stop reading as a spine. */
+/* From md the row is numeral, copy, mark. The copy stacks rather than running in its own
+   column: the ledger now shares the width with the frame, and a title column beside a
+   description column inside six tracks gives both of them about twenty characters a line.
+   The numeral column is fixed rather than fluid so all five numerals share one left edge
+   and one right edge — a proportional column sets them at five slightly different widths
+   and the spine stops reading as a spine. */
+@media (min-width: 768px) {
+  .reason-row {
+    grid-template-columns: 4.75rem minmax(0, 1fr) 2rem;
+    align-items: start;
+    column-gap: clamp(1.25rem, 2.4vw, 2rem);
+    row-gap: 0.5rem;
+  }
+  .reason-numeral-slot {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .reason-title {
+    grid-column: 2;
+    grid-row: 1;
+    /* Optically aligned to the numeral's cap height rather than to its box: the numeral is
+       display-l and the title display-s, so two boxes sharing a top edge do not share a
+       first line. */
+    padding-top: 0.6rem;
+  }
+  .reason-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .reason-mark {
+    grid-column: 3;
+    grid-row: 1;
+    padding-top: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Final state throughout: the rules are drawn, the titles are open, the marks are
+     inked. The delays are cleared as well as the durations — the global rule collapses
+     durations only, and a 320ms delay on a zero-length transition is still 320ms of
+     nothing happening. */
+  .reason-rule,
+  .reason-row:last-child::after,
+  .reason-title,
+  .reason-body,
+  .reason-mark,
+  .reason-icon-draw,
+  .reason-row[data-visible="true"] .reason-icon-draw {
+    transition-delay: 0ms;
+  }
+  .reason-row:hover .reason-title {
+    transform: none;
+  }
+  /* No drift. The frame still cross-fades — swapping the image is information, not
+     decoration — but the 7s scale is exactly the kind of ambient movement the setting is
+     asking to be rid of, so the current frame simply sits at 1. */
+  .reason-media-item,
+  .reason-media-item[data-current="true"] {
+    transform: none;
+  }
+  .reason-icon-draw {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The section wrapper shared by the homepage's Selected Work summary and by the
+   /selected-work grid. `overflow-x: clip` absorbs any sub-pixel overhang from a breakout
+   or a hover lift without creating a scroll container the way `hidden` would — unlike
+   `hidden`, `clip` leaves the vertical axis genuinely visible, so a card's 6px lift is
+   not cropped. */
 .work-section {
   overflow-x: clip;
 }
 
-@media (min-width: 1024px) {
-  .work-bleed {
-    margin-left: calc(-1 * (var(--spacing-gutter) + max(0px, (100vw - 80rem) / 2)));
-  }
-}
+/* NOTHING BLEEDS OUT OF THE CONTAINER ANY MORE. `.work-bleed` used to pull the first
+   tile of a work grid out to the viewport edge, on the homepage summary and then on
+   /selected-work. It is deleted rather than kept for a caller, because it was the cause
+   of the same defect in both places: one bled tile gives the two columns different left
+   edges and different widths, and the tiles below it land at unrelated heights. That
+   reads as broken long before it reads as deliberate.
+
+   Both grids now run on `.work-grid` — equal columns, both starting at the container, one
+   constant gap down each. On a section whose entire visual weight is the grid, the grid
+   has to be the thing that holds. */
 
 /* §4.11 Comparison — horizontal swipe below lg, scroll-snap + dot indicator. */
 .comparison-swipe {
@@ -777,11 +1764,209 @@ body {
   animation-play-state: paused;
 }
 
-/* FAQ accordion — famysys.com's own pattern: plain type, hairline rules between
-   items, chevron rotating 180° on open. The panel's height animates via
-   grid-template-rows 0fr→1fr (max-height animation needs a magic-number ceiling
-   and eases wrong when the real height is far under it). The inner wrapper
-   needs min-height:0 for the 0fr row to actually collapse. */
+/* FAQ — a header that holds still while its questions go past.
+
+   The section is two columns from lg. The left one is `position: sticky`, so the eyebrow
+   and heading stay put through the whole list and then leave with it; the right one is the
+   accordion, and it is the only thing that moves. The panel's height animates via
+   grid-template-rows 0fr→1fr (max-height animation needs a magic-number ceiling and eases
+   wrong when the real height is far under it). The inner wrapper needs min-height:0 for the
+   0fr row to actually collapse.
+
+   The rules are elements rather than borders for the same reason the capability rows'
+   are — they draw, one row at a time, and a border cannot be animated that way without
+   animating a box. Each row owns the rule ABOVE it and the list closes with one more. */
+
+/* `align-self: start` is the load-bearing half of this, not a tidiness flag: a grid item
+   stretches to the row's full height by default, and an element that is already as tall as
+   its container has nowhere to stick to — the property applies and does nothing.
+
+   `top` clears the fixed header, which publishes its own measured height. The fallback is
+   for the frame before that effect runs, not a second source of truth.
+
+   Nothing bounds this but the grid it sits in, which is the whole trick: sticky releases at
+   its containing block's bottom edge, so the aside travels exactly as far as the last
+   answer and the section then scrolls away in one piece.
+
+   lg only. Below it the layout is a stack, and a heading pinned above a list on a phone
+   would hold a third of the viewport hostage for the length of the section. */
+@media (min-width: 1024px) {
+  .faq-aside {
+    position: sticky;
+    top: calc(var(--header-height, 5rem) + 2.5rem);
+    align-self: start;
+  }
+}
+
+/* The eyebrow takes an accent square. It is generated content and the element keeps its own
+   text, so nothing here reaches the accessibility tree — the square is a mark, not a word. */
+.faq-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* WCAG 2.2 AA 2.5.8, Target Size (Minimum), 24x24 CSS px.
+   ---------------------------------------------------------------------------
+   The site's small accent links — "View all services →", "Compare every engagement →",
+   "Explore all work →" and the tier and FAQ CTAs — are 15px/24px type in a plain inline
+   box. An inline box is only as tall as its GLYPHS, not as its line-height, so every one of
+   them measured 22px against the 24px floor: a real failure, on every page, three times over
+   in the mega menu alone and three more in the mobile drawer.
+
+   `inline-flex` is what fixes it, and it fixes it by making the box honour the line-height
+   the type already has. The links do not grow, move, or change how they wrap — 24px was
+   always the line box, it just was not the border box. `min-height` is the belt: it holds
+   the floor if the type scale is ever retuned below it.
+
+   Applied at the call sites rather than to `a[class*="text-accent"]`, because a colour
+   utility is not a component and a rule keyed on one would catch every future accent link
+   whether or not it is a small standalone target. */
+.inline-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}
+
+.faq-eyebrow::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-accent);
+}
+.faq-rule {
+  display: block;
+  height: 1px;
+  background-color: var(--color-ink-8);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform, background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-list[data-drawn="true"] .faq-rule {
+  transform: scaleX(1);
+}
+
+/* The open row's own rule. Accent is a second signal alongside the chevron and the
+   expanded panel, never the only one — 1.4.1 is satisfied before this is added. */
+.faq-row[data-open="true"] > .faq-rule {
+  background-color: var(--color-accent);
+}
+
+.faq-trigger {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  /* Row rhythm, and it is load-bearing twice over. It is most of what makes the column
+     read as calm rather than as a dense list — the reference sits its questions about this
+     far apart — and it is also what gives the sticky header something to hold still
+     AGAINST. At 1.5rem the seven rows made a 568px column inside a 748px section, which
+     fits entirely on a 900px screen: the pin was real, measured at 475px of travel, and
+     invisible, because nothing scrolled inside the section to pin against. */
+  padding-block: clamp(1.5rem, 2.4vw, 2.25rem);
+  text-align: left;
+  opacity: 0;
+  transform: translateY(10px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-trigger[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The same sweep the capability rows and the header's panel rows carry. Closed rows only:
+   a row that is already open has answered, and a hover state on it repeats what the
+   expanded panel underneath is saying. */
+.faq-trigger[aria-expanded="false"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-ink-4);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-trigger[aria-expanded="false"]:hover::before,
+.faq-trigger[aria-expanded="false"]:focus-visible::before {
+  transform: scaleX(1);
+}
+
+/* A closed question is muted, an open one is full ink. ink-70 composites to #51677C on
+   canvas — 5.194:1, over the 4.5 text floor, which the flat slate this pattern usually
+   reaches for is not: the obvious #6B7A94 measures 3.88:1 and would have failed on the
+   primary interactive text of the section.
+
+   Inline by default, and transform does not apply to a non-replaced inline box. */
+.faq-question {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  color: var(--color-ink-70);
+  transition-property: transform, color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+[aria-expanded="true"] .faq-question {
+  color: var(--color-ink);
+}
+
+.faq-trigger[aria-expanded="false"]:hover .faq-question,
+.faq-trigger[aria-expanded="false"]:focus-visible .faq-question {
+  transform: translateX(6px);
+}
+
+/* Closed: a small ink-20 square. Open: an accent diamond. The rotation is what keeps this
+   out of 1.4.1 territory on its own terms — the mark changes SHAPE, not just colour — and
+   it is the fourth signal for a state the panel height, the accent rule above the row and
+   `aria-expanded` already carry. Scaled slightly on the turn so the diamond reads at the
+   same visual weight as the square it came from. */
+.faq-marker {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-ink-20);
+  transition-property: transform, background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-trigger[aria-expanded="false"]:hover .faq-marker,
+.faq-trigger[aria-expanded="false"]:focus-visible .faq-marker {
+  background-color: var(--color-ink-40);
+}
+
+[aria-expanded="true"] .faq-marker {
+  background-color: var(--color-accent);
+  transform: rotate(45deg) scale(1.15);
+}
+
+.faq-answer {
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-panel[data-open="true"] .faq-answer {
+  opacity: 1;
+}
+
 .faq-panel {
   display: grid;
   grid-template-rows: 0fr;
@@ -805,11 +1990,132 @@ body {
   transition-timing-function: var(--ease-base);
 }
 
-/* Any expanded disclosure that owns a chevron flips it — the FAQ rows and the mobile
-   drawer's group toggles. Keyed on the state rather than on .faq-trigger, so a second
-   disclosure does not silently render a chevron that never moves. */
+/* Any expanded disclosure that owns a chevron flips it. The FAQ rows used to be the other
+   caller and now carry `.faq-marker` instead, so the mobile drawer's group toggles are the
+   only one left — the `.faq-` prefix is kept because the rule is still keyed on state
+   rather than on a component, which is what lets a third disclosure adopt it without
+   silently rendering a chevron that never moves. */
 [aria-expanded="true"] .faq-chevron {
   transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No draw, no stagger, no sweep. The rows start finished and open and close on the
+     global reduced duration — the JS zeroes every delay to match. */
+  .faq-rule,
+  .faq-list[data-drawn="true"] .faq-rule {
+    transform: none;
+  }
+  .faq-trigger,
+  .faq-trigger[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+  .faq-trigger[aria-expanded="false"]::before {
+    display: none;
+  }
+  .faq-trigger[aria-expanded="false"]:hover .faq-question,
+  .faq-trigger[aria-expanded="false"]:focus-visible .faq-question {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The footer, and the seam above it
+   ---------------------------------------------------------------------------
+   The problem this solves: every page ends with a dark section — FinalCta on six of
+   them, ContactFormSection on the seventh — and the footer is `bg-ink` too, so the two
+   met at no boundary at all. A form and a sitemap ran together as one undifferentiated
+   slab of navy, and the only thing telling a reader they had left the page's last ask
+   and entered its index was that the words changed.
+
+   Three cues mark the seam, none of them loud on its own:
+
+     1. A full-bleed hairline at canvas-16 — the site's dark-surface divider value.
+     2. A short accent segment sitting ON that hairline at the container's left edge,
+        drawn in with a `scaleX` wipe when the footer arrives. Same mechanic as the nav
+        link underline and the service grid's own edges; the footer gets the site's
+        entry gesture rather than a new one.
+     3. A tonal lift: canvas-4 fading out over the footer's top half, so the footer
+        reads as a slightly raised plane rather than more of the section above it. It is
+        the same 1.111:1 step `.card-surface-dark` uses to say "this is a surface".
+*/
+
+.site-footer {
+  /* The lift. A gradient rather than a flat fill, because a flat one would just move the
+     seam down to wherever it ended — this has no bottom edge of its own to give away. */
+  background-image: linear-gradient(to bottom, var(--color-canvas-4), transparent 45%);
+}
+
+.footer-divider {
+  border-top: 1px solid var(--color-canvas-16);
+}
+
+/* Two pixels tall against the hairline's one, and pulled up by that one so it sits on the
+   line rather than under it. Accent-on-dark, not the raw brand accent: this is 2px of
+   colour on ink, where the brand accent measures 2.457:1 and would read as a smudge. */
+.footer-divider-accent {
+  display: block;
+  width: 5rem;
+  height: 2px;
+  margin-top: -1px;
+  background-color: var(--color-accent-on-dark);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.footer-divider[data-drawn="true"] .footer-divider-accent {
+  transform: scaleX(1);
+}
+
+/* Footer links had no hover at all and sat at one flat canvas-80, which made a column of
+   nine of them read as a paragraph rather than as nine targets. Resting colour drops to
+   canvas-60 (5.450:1 on ink, comfortably over the text floor) so the column headings above
+   them can be full canvas and carry the hierarchy, and the hover lifts to canvas with a
+   3px nudge — the same colour-plus-shift the panel rows already use. */
+.footer-link {
+  display: inline-block;
+  color: var(--color-canvas-60);
+  transition-property: color, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.footer-link:hover {
+  color: var(--color-canvas);
+  transform: translateX(3px);
+}
+
+/* The address is the footer's one real call to action, so it is underlined at rest rather
+   than on hover: a link that only announces itself under a cursor is not announcing itself
+   to anyone who is not already pointing at it. The hover brings the rule up to full canvas. */
+.footer-email {
+  display: inline-block;
+  color: var(--color-canvas);
+  border-bottom: 1px solid var(--color-canvas-40);
+  padding-bottom: 2px;
+  transition-property: border-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.footer-email:hover {
+  border-bottom-color: var(--color-canvas);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The seam is a boundary before it is an animation, so the accent segment is held OPEN
+     rather than closed — an entry gesture that never arrives would take the marker with
+     it. The link nudge simply stops. */
+  .footer-divider-accent {
+    transform: scaleX(1);
+  }
+  .footer-link:hover {
+    transform: none;
+  }
 }
 
 /* §4.17 Footer accordions — same disclosure pattern as the mobile drawer.
@@ -825,166 +2131,425 @@ body {
   }
 }
 
+/* The capability-card mechanics that used to sit here — clip curtain, cursor glow,
+   scaling numeral — are gone with the cards they belonged to. §2 What We Do had already
+   been rebuilt as a shared-edge grid and stopped using them; §Why Famysys was the last
+   caller and is now a ledger of rules and type (see `.reason-list`). Nothing referenced
+   them afterwards, so they are deleted rather than left as five orphaned classes with a
+   header explaining who used to own them. */
+
 /* ---------------------------------------------------------------------------
-   §2 What We Do — six capability cards
-   ------------------------------------------------------------------------ */
+   §2 What We Do — the service grid
+   ---------------------------------------------------------------------------
+   One bordered container divided by hairlines, not six cards with gutters. The whole
+   border is owned by exactly two things and no more:
 
-/* Entry is a clip curtain plus a 24px rise, not a fade: six tiles fading in together
-   read as one block arriving, and the diagonal stagger is only legible if each tile
-   has a hard edge you can watch move.
+     - the grid's own top and left edges, as absolutely-positioned spans;
+     - the right and bottom rules of the cells that happen to land in the last column
+       and last row.
 
-   Every inset is bled 16px past the border box, so once the reveal has finished the
-   clip region is strictly larger than the card on all four sides. Without the bleed
-   this wrapper would keep clipping for the life of the page and shave the top off the
-   card's own 6px hover lift. */
-.capability-reveal {
-  clip-path: inset(-16px -16px calc(100% + 16px) -16px);
-  transform: translateY(24px);
-  transition-property: clip-path, transform;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
+   Nothing is drawn twice. That matters for a reason beyond tidiness: ink-12 is
+   translucent, so two hairlines stacked on the same pixel composite to a visibly darker
+   line, and any scheme where an outer border overlapped a cell rule would show four hard
+   edges around a grid of faint ones. It also means the structure re-derives
+   itself at every breakpoint with no column count in JS — at one column the vertical
+   rules stop being internal dividers and simply become the outer right edge, which is
+   exactly the "hairlines running horizontally only" the single-column layout wants.
 
-.capability-reveal[data-visible="true"] {
-  clip-path: inset(-16px -16px -16px -16px);
-  transform: translateY(0);
-}
-
-/* `overflow: hidden` keeps the cursor glow inside the card's rounded corners. It does
-   not clip the hover lift, because the lift moves the whole card, glow included. */
-.capability-card {
+   The edges are spans rather than a `border`, because a border cannot be scaled from an
+   origin and the entry for this section is a draw. */
+.service-grid {
   position: relative;
-  overflow: hidden;
+  /* Contains the edge/marker stacking so nothing here can paint over the section's own
+     header or the CTA below it. */
+  isolation: isolate;
 }
 
-/* The numeral is the card's anchor. It is large enough to be the first thing the eye
-   lands on and muted enough not to compete with the title for meaning. Scaling from the
-   left keeps it pinned to the card's left edge as it grows. */
-.capability-numeral {
-  display: block;
-  /* Positioned so it paints above .capability-glow, which is the card's first child and
-     absolutely positioned: two positioned boxes with auto z-index paint in DOM order. */
-  position: relative;
-  transform-origin: left center;
-  transition-property: color, transform;
-  transition-duration: var(--duration-hover);
-  transition-timing-function: var(--ease-base);
-}
-
-.capability-card:hover .capability-numeral {
-  color: var(--color-accent);
-  transform: scale(1.06);
-}
-
-/* The arrow lives in the card's own left padding rather than in the text column, so it
-   can appear beside the title without the title moving to make room. Nothing here
-   animates but opacity and transform. */
-.capability-arrow {
+/* The two edges the container owns. Both scale from the top-left corner, so the outer
+   rectangle unfolds from one origin. Only top and left are animated here: right and
+   bottom belong to the last column and last row's cell rules, and they close the
+   rectangle during the hairline beat that follows. */
+.service-edge {
   position: absolute;
-  left: -1.4rem;
-  top: 0.15em;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition-property: opacity, transform;
-  transition-duration: var(--duration-hover);
+  z-index: 2;
+  background-color: var(--color-ink-12);
+  pointer-events: none;
+  transition-property: transform;
+  transition-duration: 600ms;
   transition-timing-function: var(--ease-base);
 }
 
-.capability-card:hover .capability-arrow {
-  opacity: 1;
-  transform: translateX(0);
+.service-edge--top {
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
 }
 
-/* One restrained cursor effect: an accent glow at 8% that tracks the pointer inside the
-   hovered card. Only `opacity` transitions — the position must not ease, or the glow
-   lags the cursor instead of following it. */
-.capability-glow {
+.service-edge--left {
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+
+.service-grid[data-drawn="true"] .service-edge--top {
+  transform: scaleX(1);
+}
+
+.service-grid[data-drawn="true"] .service-edge--left {
+  transform: scaleY(1);
+}
+
+/* A cell is flush against its neighbours — no gap, no margin, no border. The 1px between
+   two cells is one cell's rule, sitting on its own last pixel column or row.
+
+   NO FILL AT REST. A cell is the section's own canvas showing through, so the grid reads
+   as one unbroken cream plane that hairlines have been ruled across — six filled tiles
+   butted together read as six objects however tightly they are packed, which is the
+   opposite of what sharing edges is for. The fill belongs to hover and to nothing else:
+   the cell under the cursor is the only tinted one in the grid, and that is the signal.
+
+   `overflow: hidden` is doing a second job beyond containing the hover wash: it is what
+   crops the numeral. */
+.service-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Tighter than it was, and asymmetric. The cells were 384px tall at 1440, so the second
+     row of three sat below the fold and the grid had to be scrolled through rather than
+     taken in; they are ~265px now. The padding came down with them, but the real saving is
+     that the numeral no longer occupies layout height at all — see `.service-numeral`. The
+     deep bottom padding is the band it is cropped inside. */
+  padding: clamp(1.5rem, 2.2vw, 2rem);
+  padding-bottom: clamp(3.5rem, 5.5vw, 5rem);
+}
+
+/* Internal hairlines. Verticals lead horizontals by one step because a vertical divides
+   the row the eye is already crossing, so it lands where the reader is looking. Delays
+   are supplied by the component from the motion tokens rather than written here, so the
+   sequence has one source. */
+.service-rule {
+  position: absolute;
+  background-color: var(--color-ink-12);
+  pointer-events: none;
+  transition-property: transform;
+  transition-duration: 480ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.service-rule--v {
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition-delay: var(--rule-v-delay, 0ms);
+}
+
+.service-rule--h {
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-delay: var(--rule-h-delay, 0ms);
+}
+
+.service-grid[data-drawn="true"] .service-rule--v {
+  transform: scaleY(1);
+}
+
+.service-grid[data-drawn="true"] .service-rule--h {
+  transform: scaleX(1);
+}
+
+/* THE CARD BACKGROUND, and it only exists on hover. With the cells unfilled at rest this
+   is not a garnish on top of a tint, it is the entire fill: cream at rest, light navy under
+   the cursor.
+
+   Two layers, because the hovered cell has to lift as a WHOLE card and not just at the
+   corner the pointer came in at — a single gradient fading to transparent lit one corner of
+   an otherwise untouched cell. `card-tint` underneath is the body of the fill; the radial
+   on top of it peaks at `card-tint-deep` in the top-left, so the card still has a direction
+   rather than being a rectangle that switched on.
+
+   Both are opaque hex rather than an opacity of ink, and that is not a shortcut — see the
+   note in tokens.ts. Ink over this warm cream composites GREY, so the light navy the design
+   asks for is unreachable from the ink ramp at any alpha. */
+.service-wash {
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(
-    18rem circle at var(--glow-x, 50%) var(--glow-y, 50%),
-    var(--color-accent-8),
-    transparent 70%
+  background-color: var(--color-card-tint);
+  background-image: radial-gradient(
+    125% 125% at 0% 0%,
+    var(--color-card-tint-deep),
+    transparent 80%
   );
   transition-property: opacity;
-  transition-duration: var(--duration-hover);
+  transition-duration: 260ms;
   transition-timing-function: var(--ease-base);
 }
 
-.capability-card:hover .capability-glow {
+.service-cell:hover .service-wash {
   opacity: 1;
 }
 
+/* Title and descriptor arrive together as the cell's body; the numeral trails them. Both
+   are `position: relative` so they paint above the wash, which is absolutely positioned
+   and earlier in the DOM — two positioned boxes with auto z-index paint in DOM order. */
+.service-cell-body {
+  position: relative;
+  opacity: 0;
+  transform: translateY(16px);
+  transition-property: opacity, transform;
+  transition-duration: 320ms;
+  transition-timing-function: var(--ease-base);
+  transition-delay: var(--cell-delay, 0ms);
+}
+
+.service-grid[data-drawn="true"] .service-cell-body {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The gap between title and descriptor still carries most of why the grid reads calm, so
+   it stays a deliberate clamp rather than a spacing utility that invites being nudged. It
+   is smaller than it was, because the cell is — but it came down by less than the cell did,
+   which is what stops a shorter card reading as a tighter one. */
+.service-descriptor {
+  margin-top: clamp(0.875rem, 1.5vw, 1.375rem);
+}
+
+/* The title lifts, and that is all it does. It is full ink at rest — 12.5:1 on canvas,
+   11.71:1 once the hover tint is under it, both far over the floor — so there is no colour
+   left to escalate to and the shift carries the hover alone, which also keeps this
+   transform-only. The accent rule that used to wipe in under it is gone: the grid already
+   answers a hover in two places, with the fill and with the travelling square, and a third
+   signal on the same event was one more than the design needs. */
+.service-title {
+  transition-property: transform;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.service-cell:hover .service-title {
+  transform: translateY(-3px);
+}
+
+/* The numeral is a watermark, not a label: 1.405:1 on canvas, far under every floor, and
+   it is generated content for the reason `.decorative-numeral` records. It is its own light
+   navy rather than an ink-ramp step for the reason the hover fill is — ink on this cream
+   goes grey, and a grey numeral under blue-tinted cards is the one thing that would give
+   the derivation away. It is pitched one step deeper than the hover fill's peak so it
+   survives its own cell lighting up: 1.226:1 against the flat lift it actually sits on.
+
+   Out of flow, and cropped. It is absolutely positioned and hangs below the cell's bottom
+   edge, where `overflow: hidden` cuts it: the digits run off the bottom of the cell instead
+   of sitting politely inside it. Two things follow. The numeral can be far larger than a
+   265px cell could otherwise hold, which is what gives it the presence the reference has.
+   And it costs the cell no layout height at all, which is most of how the cells got short
+   enough for all six to be on screen at once — the height is now title, gap, descriptor and
+   padding, and nothing else.
+
+   `left` matches the cell's own inline padding so the numeral hangs on the same spine as
+   the copy above it. */
+.service-numeral {
+  position: absolute;
+  left: clamp(1.5rem, 2.2vw, 2rem);
+  bottom: -0.18em;
+  display: block;
+  font-size: clamp(3.5rem, 5.6vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  color: var(--color-service-numeral);
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 320ms, 260ms;
+  transition-timing-function: var(--ease-base);
+  transition-delay: var(--numeral-delay, 0ms), 0ms;
+}
+
+/* The numeral rises into its own crop on hover — a few more pixels of the digits clear the
+   cell's edge. Transform only, so the crop does the work rather than a second colour. */
+.service-cell:hover .service-numeral {
+  transform: translateY(-6px);
+}
+
+.service-grid[data-drawn="true"] .service-numeral {
+  opacity: 1;
+}
+
+/* The signature detail: ONE square for the whole grid, parked on the hairline junction at
+   the bottom-right of whichever cell the cursor is in. One element rather than one per
+   cell is what lets it TRAVEL between corners instead of blinking off and on — the move
+   is a transition on `transform`, so crossing from cell to cell reads as the square
+   sliding to its new intersection.
+
+   Colour is the raw brand `accent`. The lightened `accent-on-dark` was only ever a
+   workaround for accent measuring 2.457:1 against ink; on canvas the brand accent reads
+   5.107:1, so the square is unambiguous at 14px without substituting the colour. It is the
+   one saturated thing in the grid, which is exactly its job. */
+.service-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-accent);
+  pointer-events: none;
+  opacity: var(--marker-opacity, 0);
+  /* The -50% pair centres the square on the intersection; the custom properties are the
+     hovered cell's bottom-right corner, written straight to the element by the component
+     because a re-render per pointer enter is not worth a 14px square. */
+  transform: translate3d(var(--marker-x, 0px), var(--marker-y, 0px), 0) translate(-50%, -50%);
+  transition-property: transform, opacity;
+  transition-duration: 300ms, 240ms;
+  transition-timing-function: var(--ease-base);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  /* Final state, regardless of whether the card has been scrolled to yet. */
-  .capability-reveal,
-  .capability-reveal[data-visible="true"] {
-    clip-path: none;
+  /* A fully-drawn grid, in its final state, whether or not it has been scrolled to. Each
+     rule here restates the base selector rather than the `[data-drawn]` one so it wins on
+     source order at equal specificity, and every delay is zeroed explicitly: the global
+     reduced-motion rule collapses transition DURATION, not delay, so a stagger survives it
+     otherwise — the trap `Reveal` documents. */
+  .service-edge--top {
+    transform: scaleX(1);
+  }
+  .service-edge--left {
+    transform: scaleY(1);
+  }
+  .service-rule--v {
+    transform: scaleY(1);
+    transition-delay: 0ms;
+  }
+  .service-rule--h {
+    transform: scaleX(1);
+    transition-delay: 0ms;
+  }
+  .service-cell-body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0ms;
+  }
+  .service-numeral {
+    opacity: 1;
+    transition-delay: 0ms;
+  }
+  /* No shift, no numeral rise, no gradient, no square. The component also declines to
+     render the wash and the marker at all under reduced motion; these are the belt to that
+     pair of braces. */
+  .service-cell:hover .service-numeral {
     transform: none;
   }
-  .capability-card:hover .capability-numeral,
-  .capability-card:hover .capability-arrow {
+  .service-cell:hover .service-title {
     transform: none;
   }
-  .capability-card:hover .capability-glow {
+  .service-cell:hover .service-wash {
     opacity: 0;
+  }
+  .service-marker {
+    display: none;
   }
 }
 
 /* ---------------------------------------------------------------------------
-   §3 The Differentiator — image over a coloured panel
-   ------------------------------------------------------------------------ */
+   §3 The Differentiator — the frame closes in
+   ---------------------------------------------------------------------------
+   The card is a two-track flex column whose split moves on hover: the image gives up
+   height and the panel takes exactly what it releases. Total card height never changes.
+
+   This replaces an overlay. The panel used to be `position: absolute`, 65% tall, parked
+   38.46% of its own height below the card and sliding flush on hover — so it covered the
+   image rather than displacing it, and it was sized for its hover content in BOTH states.
+   That is where both pockets came from: one under the resting title, and another still
+   there after hovering.
+
+   HOW THE SPLIT IS DRIVEN, and why it is not two fixed percentages.
+
+   The brief specifies 62/38 at rest and 40/60 on hover, and also that the resting panel be
+   "exactly what the title needs, nothing more". Measured against the real content, those
+   two cannot both hold: a resting panel that exactly fits the title and a hover panel that
+   exactly fits title-plus-descriptor stand in a ~2.1:1 ratio, not the 60:38 (1.58:1) the
+   percentages assume, and the ratio itself moves with viewport because title and descriptor
+   line counts flip at different widths. Pinning 38% therefore re-creates the pocket the
+   brief is asking to remove — measured at 33px of empty panel at 1440 and 60px at 1024,
+   against the 62px the overlay had.
+
+   So the panel is sized by its content and the media takes the remainder. The descriptor
+   sits in a grid track that animates `0fr -> 1fr`, which is the one property in the whole
+   mechanic: the panel grows by exactly the descriptor's height, the media is `flex: 1` and
+   shrinks by exactly the same amount, and the boundary between them is one edge with one
+   transition behind it. Zero dead space in both states, at every width, with no per-
+   breakpoint arithmetic to keep true.
+
+   The card heights below are then chosen so the resulting split lands near the brief's
+   numbers. Hover comes out close (≈57/43 image-to-panel at 1440 against a target of
+   40/60); rest comes out tighter than 62/38, because a one- or two-line title genuinely
+   needs less than 38% and giving it 38% is the pocket again.
+
+   The image scales with its box (`object-fit: cover` inside an `overflow: hidden` frame)
+   rather than being uncovered from behind something, so the shrink reads as the frame
+   closing in on the picture. */
 
 .element-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius-sm);
 }
 
+/* The remainder of the card, whatever the panel is not using. `min-height: 0` because a
+   flex child otherwise refuses to shrink below its content's intrinsic height, and the
+   image would hold the split open. */
 .element-media {
-  position: absolute;
-  inset: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* The panel's height is a percentage of the card, so the card needs a definite height for
-   the split to resolve — `auto-rows-fr` alone leaves it dependent on content. A floor here
-   fixes the geometry and is what makes the four cards equal-height at every width. */
+/* Exactly its content, in both states. Nothing here is a percentage. */
+.element-panel {
+  flex: 0 0 auto;
+}
+
+/* A definite card height, not a `min-height`. With only a floor the card grew to whatever
+   the image's intrinsic size and the panel's hidden descriptor happened to need — 364px at
+   1440 against a 16rem floor — and the surplus went straight into the pocket.
+
+   Non-monotonic on purpose. 1024–1279 is the tallest band because it is the first to go
+   four-across while the container is still viewport-bound, which makes it the narrowest
+   the cards ever are (~218px), where the descriptor runs to four lines. From 1280 the
+   container caps at 80rem, the columns settle around 264–276px and three lines is enough. */
 @media (min-width: 768px) {
   .element-card {
-    min-height: 24rem;
+    height: 15.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .element-card {
-    min-height: 26rem;
+    height: 22rem;
   }
 }
 
-/* The panel is 65% of the card tall and sits 25% of the card below the bottom edge at
-   rest, so 40% of the card shows; on hover it slides flush and 65% shows. The image
-   behind it is uncovered from 60% down to 35%.
-   Doing it by occlusion rather than by shrinking the image's box means the whole hover
-   is one transform on one element: the card's outer box cannot change size, so a row of
-   four stays flush by construction rather than by four heights agreeing. 25/65 = 38.46%
-   of the panel's own height, which is what a percentage translateY resolves against. */
-.element-panel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 65%;
-  transform: translateY(38.46%);
-  transition-property: transform;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
-
-.element-card:hover .element-panel,
-.element-card:focus-within .element-panel {
-  transform: translateY(0);
+@media (min-width: 1280px) {
+  .element-card {
+    height: 17.5rem;
+  }
 }
 
 /* Charcoal on ink measures 1.047:1 and would have been an invisible card. Both fills
@@ -1001,47 +2566,88 @@ body {
   color: var(--color-canvas);
 }
 
+/* The one animated property in the card. A grid track interpolating `0fr -> 1fr` is how
+   CSS expresses "animate to the content's own height" without anybody having to know what
+   that height is — which is what lets the same rule serve a two-line descriptor and a
+   four-line one, at every breakpoint, with no measurement. */
+.element-description-slot {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition-property: grid-template-rows;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+@media (min-width: 768px) {
+  .element-card:hover .element-description-slot,
+  .element-card:focus-within .element-description-slot {
+    grid-template-rows: 1fr;
+  }
+}
+
+/* The clipper is the grid item, and it carries NO padding of its own. That distinction is
+   worth the extra element: a `0fr` track sizes the item's content box to zero, but padding
+   on that same item still paints, so a gap declared here would leave a 12px sliver of open
+   panel at rest — a small version of exactly the bug being fixed. The gap therefore lives
+   on the text inside, where the clip eats it along with the text.
+
+   `min-height: 0` is what lets the track actually reach zero. */
+.element-description-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The 120ms delay is on the hover rule only, never the base. Entering, the text waits for
+   the panel to have made room. Leaving, the rule stops applying and the delay goes with
+   it, so the descriptor fades at once as the panel closes — a one-directional delay is
+   what makes the reverse read as clean rather than as text loitering in a shrinking box. */
 .element-description {
+  padding-top: 0.75rem;
   opacity: 0;
   transition-property: opacity;
   transition-duration: var(--duration-base);
   transition-timing-function: var(--ease-base);
 }
 
-.element-card:hover .element-description,
-.element-card:focus-within .element-description {
-  opacity: 1;
+@media (min-width: 768px) {
+  .element-card:hover .element-description,
+  .element-card:focus-within .element-description {
+    opacity: 1;
+    transition-delay: 120ms;
+  }
 }
 
-/* Below md the hover is gone, so the split cannot carry the descriptor: the card
-   becomes a plain image-over-panel stack with everything visible at once. */
+/* Below md the hover does not exist, so nothing may depend on it. The card is a plain
+   content-height stack — deliberately NOT stretched to a shared row height: in one column
+   the four cards never sit beside each other, so equal heights buy nothing visible, and
+   the only place the surplus could go is the panel, which would be the pocket again. */
 @media (max-width: 767px) {
   .element-card {
-    display: flex;
-    flex-direction: column;
+    height: auto;
   }
   .element-media {
-    position: relative;
-    inset: auto;
+    flex: 0 0 auto;
     aspect-ratio: 4 / 3;
   }
-  .element-panel {
-    position: relative;
-    height: auto;
-    transform: none;
+  .element-description-slot {
+    grid-template-rows: 1fr;
+    transition-property: none;
   }
   .element-description {
     opacity: 1;
   }
 }
 
+/* Reduced motion gets the hover state as the resting state: the descriptor track is open,
+   the text is visible, and there is nothing left to animate between. */
 @media (prefers-reduced-motion: reduce) {
-  .element-card:hover .element-panel,
-  .element-card:focus-within .element-panel {
-    transform: translateY(38.46%);
+  .element-description-slot {
+    grid-template-rows: 1fr;
+    transition-property: none;
   }
   .element-description {
     opacity: 1;
+    transition-property: none;
   }
 }
 
@@ -1108,13 +2714,44 @@ body {
    rather than decorative. */
 .process-content {
   opacity: 0.75;
-  transition-property: opacity;
-  transition-duration: var(--duration-hover);
+  transform: translateY(0);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
   transition-timing-function: var(--ease-base);
 }
 
 .process-step[data-active="true"] .process-content {
   opacity: 1;
+}
+
+/* The accent tick over the active step's title. It occupies its 2px in every step, drawn
+   or not, so advancing the sequence cannot shift a single line of copy sideways or down —
+   the same rule the process dot already follows on the rail. */
+.process-content::before {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 2px;
+  margin-bottom: 0.9rem;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-step[data-active="true"] .process-content::before {
+  transform: scaleX(1);
+}
+
+/* A step that has not arrived yet. Last, so it outranks the active rule above for the same
+   specificity: a step cannot be both, and while the sequence is running the newest step is
+   revealed on the same frame it becomes active. Opacity and transform only — the step keeps
+   its place in the grid throughout, so five columns of layout are never in motion. */
+.process-step[data-revealed="false"] .process-content {
+  opacity: 0;
+  transform: translateY(18px);
 }
 
 @media (max-width: 1023px) {
@@ -1125,6 +2762,72 @@ body {
   .process-step[data-drawn="true"] .process-rule {
     transform: scaleY(1);
   }
+}
+
+/* THE PINNED SEQUENCE.
+   ---------------------------------------------------------------------------
+   The stage holds still while the track scrolls past it, and the five steps arrive one at
+   a time as it does. That is all `position: sticky` — the page never stops scrolling and no
+   scroll event is ever cancelled; see `useScrollSequence` for why anything that DID cancel
+   them would break the keyboard, the scrollbar and find-in-page at once.
+
+   `data-pinned` is written by that hook rather than by a media query here, because the
+   decision has two halves — wide enough for five steps on one row, and motion not reduced —
+   and the hook is the only place that can see both. Without it the element is an ordinary
+   div and the section is an ordinary section.
+
+   The track's height is the pin's whole budget, passed in as `--process-track-height`
+   because it depends on how many steps there are, and the stage sits under the fixed header
+   rather than at the viewport top, which is what keeps the section heading clear of the
+   bar for the two-and-a-bit screens the pin lasts. */
+.process-track[data-pinned="true"] {
+  height: var(--process-track-height);
+}
+
+.process-track[data-pinned="true"] .process-stage {
+  position: sticky;
+  top: var(--header-height, 5rem);
+  display: flex;
+  align-items: center;
+  min-height: calc(100svh - var(--header-height, 5rem));
+}
+
+.process-track[data-pinned="true"] .process-stage > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The watermark only exists while the section is pinned. Unpinned — narrow, or reduced
+   motion — the five steps are all present at once and there is no single current step for
+   it to show, so it would be a large decorative digit making a claim that is not true. */
+.process-watermark {
+  display: none;
+}
+
+.process-track[data-pinned="true"] .process-watermark {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-gutter);
+  display: grid;
+  line-height: 0.86;
+  color: var(--color-service-numeral);
+  pointer-events: none;
+}
+
+/* Every digit in the same grid cell, so the outgoing one leaves as the incoming one
+   arrives and the block never changes size between 01 and 05. */
+.process-watermark-digit {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(0.14em);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.process-watermark-digit[data-current="true"] {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1205,13 +2908,17 @@ html {
   display: none;
 }
 
+/* The bar itself bleeds edge to edge — it is a divider under a full-width header — but its
+   links sit on the container line, so the first service name starts on the same vertical as
+   the page copy below it rather than out at the viewport gutter. `--container-inset`
+   collapses to the plain gutter under 80rem, which is also what the scrolling strip wants. */
 .capability-index-list {
   display: flex;
   gap: 0.25rem;
   list-style: none;
   width: max-content;
   min-width: 100%;
-  padding-inline: var(--spacing-gutter);
+  padding-inline: var(--container-inset);
 }
 
 @media (min-width: 1024px) {
@@ -1329,13 +3036,16 @@ html {
   display: none;
 }
 
+/* Container line, not the viewport gutter — see `.capability-index-list`. From md up the
+   items stretch, so this also decides where the rule running through the numerals starts
+   and ends. */
 .process-overview-list {
   display: flex;
   align-items: stretch;
   list-style: none;
   width: max-content;
   min-width: 100%;
-  padding-inline: var(--spacing-gutter);
+  padding-inline: var(--container-inset);
 }
 
 @media (min-width: 768px) {
@@ -1707,6 +3417,162 @@ html {
   scroll-margin-top: 7rem;
 }
 
+/* "Where this stands" sits under a hairline rather than in its own band. The block and
+   the grid below it are one continuous light surface on purpose — a dark band between
+   them would separate the studio's position from the work it is a position about — so
+   the rule is what marks the block as a distinct statement without spending a colour on
+   it. */
+.work-framing {
+  border-top: 1px solid var(--color-ink-8);
+  padding-top: clamp(2rem, 4vw, 3.5rem);
+}
+
+/* The grid. Shared by /selected-work and by the homepage's Selected Work summary — one
+   arrangement, because they had the same defect and it has one fix.
+
+   ROW ORDER, not column flow. This was `column-count: 2`, which reads 01–04 down the left
+   and 05–08 down the right: a reader following the numbering has to finish the page and
+   come back to the top. Rows read 01 02 / 03 04, which is how a numbered set is read.
+
+   That reintroduces what the column flow was avoiding, so it is worth naming: with rows,
+   a tile shorter than its neighbour leaves the row's spare height under it, and because
+   the ratios are deliberately uneven, that surplus differed row by row and the spacing
+   looked ragged. Three things settle it, and none of them is going back to columns:
+
+     1. `gap` is a single number in both axes, so the space BETWEEN tiles is identical
+        everywhere by construction — a grid gap cannot vary the way a stack of margins can.
+     2. Items stretch to the row height (`.work-grid-item` passes it down to the article),
+        so a row's boundary is one line rather than two ragged ones.
+     3. The media is capped, below — which bounds how far two tiles in a row can differ in
+        the first place, and is what keeps the surplus small enough to stop reading as a
+        gap at all.
+
+   Both columns start at the container and are equal width. There is no bleed. */
+.work-grid {
+  --work-grid-gap: clamp(1.5rem, 3vw, 2.5rem);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--work-grid-gap);
+}
+
+@media (min-width: 768px) {
+  .work-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* The reveal wrapper sits between the grid and the tile, so the row height has to be
+   handed down or the article would sit at its own content height inside a taller box and
+   the stretch would buy nothing. */
+.work-grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.work-grid-item > * {
+  flex: 1 1 auto;
+}
+
+/* THE FRAME WIPES ITSELF OPEN.
+   ---------------------------------------------------------------------------
+   `clip-path` from a full bottom inset, on the tile rather than on the image, so the
+   BORDER is revealed with it and the frame appears to draw itself around the photograph
+   instead of fading in already complete. It is a compositor property, and it replaces an
+   opacity-and-translate wrapper that moved the whole card as one block.
+
+   Both grids take it — the homepage's cards, which drive it from `data-revealed`, and
+   /selected-work's tiles, which already carried `data-settled` for their own image
+   settle. Two attributes rather than one because the two components arrive differently:
+   the gallery's tiles also re-run this on every filter change.
+
+   The delay is the column stagger and it is zeroed under reduced motion at the call site,
+   not here: the global reduced-motion rule collapses every transition DURATION with
+   `!important`, and a delay is not a duration — it survives, and a staggered row still
+   arrives one tile at a time over as long as the stagger takes. */
+.work-grid .media-tile {
+  clip-path: inset(0 0 100% 0);
+  transition-property: border-color, transform, clip-path;
+  transition-duration: var(--duration-fast), var(--duration-fast), 820ms;
+  transition-delay: 0ms, 0ms, var(--work-reveal-delay, 0ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-grid [data-revealed="true"] .media-tile,
+.work-grid [data-settled="true"] .media-tile {
+  clip-path: inset(0 0 0 0);
+}
+
+/* The photograph settles from 1.06 as the frame opens, so the image is still moving when
+   the frame finishes and the two read as one gesture rather than as two effects. The
+   gallery's tiles keep their own 1.03 settle — see `.work-tile`. */
+.work-card .media-tile img {
+  transform: scale(1.06);
+  transition-property: transform;
+  transition-duration: 900ms;
+  transition-delay: var(--work-reveal-delay, 0ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-card[data-revealed="true"] .media-tile img {
+  transform: scale(1);
+}
+
+/* A beat behind the frame — the picture arrives, then it is named. */
+.work-card-caption {
+  opacity: 0;
+  transform: translateY(12px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-delay: calc(var(--work-reveal-delay, 0ms) + 260ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.work-card[data-revealed="true"] .work-card-caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hover fires from the whole card, not from the media alone. The caption is part of the
+   card, and a tile that dropped its lift the moment the cursor crossed onto its own title
+   read as a bug. Same escalation the gallery's tiles already use. */
+.work-card:hover .media-tile {
+  border-color: var(--color-accent);
+  transform: translateY(-6px);
+}
+
+.work-card:hover .media-tile-chip {
+  background-color: var(--color-ink);
+}
+
+/* Has to out-specify the settle above, or the settled 1 would win under the cursor and
+   the image would sit still on hover — the same trap `.work-tile` documents. */
+.work-card[data-revealed="true"]:hover .media-tile-media--scalable {
+  transform: scale(1.05);
+}
+
+/* ONE SHAPE FOR EVERY TILE, and the end of a long argument with itself.
+
+   The ratios used to cycle per tile, and the spread that produced — a 3:4 tile is 731px
+   tall in a 548px column against a 4:3 tile's 411px — was bounded by a fluid `max-height`
+   cap so that the taller of any two tiles in a row was never more than about 1.3x the
+   shorter. That cap worked, and it was the wrong thing to be doing: a row whose two tiles
+   differ at all leaves a hole under the shorter one, starts the next row at a different
+   height on each side, and reads as a broken grid rather than as an editorial one. The
+   patch existing at all was the evidence.
+
+   One ratio removes it. Every tile is 4:3, every row is level, the captions all start on
+   the same line, and the images crop to fit because they were already `object-fit: cover`.
+   The ratio lives here rather than on each tile's inline style so that the grid owns it —
+   which is also what lets /selected-work's tiles, whose ratio travels on the piece's own
+   MediaRef, sit in the same grid without carrying two different systems.
+
+   Below md the grid is one column, so there is no row to be level with; the tiles keep the
+   same shape anyway, because a portfolio that changes proportion with the viewport is a
+   portfolio the reader cannot compare. */
+.work-grid .media-tile {
+  aspect-ratio: 4 / 3;
+}
+
 /* The tile's hover treatment is the locked one — accent border, 6px lift, media scale,
    chip colour shift — but it fires from the WHOLE card rather than from the media alone,
    because the card's trigger is a stretched pseudo-element covering all of it. Keyboard
@@ -1810,11 +3676,22 @@ html {
 }
 
 /* The filter. Real buttons carrying aria-pressed, at a 44px target, because a chip that
-   only answers a pointer is not a control. */
+   only answers a pointer is not a control.
+
+   Filled pills now, rather than outlines on bare canvas: the row sits directly above the
+   grid and an unfilled chip at that size reads as a caption rather than as something to
+   press. One gap value on both axes, so a wrapped second row lines up under the first
+   instead of drifting — the row starts at the container edge, the same edge every
+   section heading on the page starts at.
+
+   The pressed state is the accent fill, which separates from the resting ink-06 by an
+   order of magnitude rather than by a tint, and carries canvas text at 5.107:1. Its
+   hover deepens the accent to the primary button's own hover value and holds 5.823:1,
+   so pointing at the chip that is already on does not undo the state. */
 .work-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.625rem;
 }
 
 .work-filter-chip {
@@ -1822,11 +3699,20 @@ html {
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--color-ink-20);
+  padding: 0.5rem 1.125rem;
+  background-color: var(--color-ink-6);
+  /* ink-60, and the step is much bigger than it looks. This border is the only thing
+     giving an unpressed chip a boundary — the ink-06 fill separates from canvas by
+     1.118:1 — so 1.4.11's 3:1 falls on the border alone. ink-12 measured 1.256:1 and
+     ink-20 only 1.485:1, nowhere near it; the ramp does not reach 3:1 until ~50% ink
+     (3.018:1 against canvas, but 2.96:1 against the chip's own fill on the inside, which
+     is the other adjacent colour and therefore also has to clear). ink-60 holds 3.941:1
+     against canvas and 3.531:1 against the fill, with room to spare on both. */
+  border: 1px solid var(--color-ink-60);
   border-radius: 9999px;
   font-size: 0.8125rem;
   line-height: 1.2;
+  font-weight: 500;
   color: var(--color-ink);
   transition-property: background-color, border-color, color;
   transition-duration: var(--duration-fast);
@@ -1834,93 +3720,242 @@ html {
 }
 
 .work-filter-chip:hover {
+  background-color: var(--color-ink-8);
   border-color: var(--color-accent);
 }
 
+/* After the hover rule and at equal specificity, so the pressed fill wins under a
+   cursor. */
 .work-filter-chip[aria-pressed="true"] {
-  background-color: var(--color-ink);
-  border-color: var(--color-ink);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
   color: var(--color-canvas);
 }
 
+.work-filter-chip[aria-pressed="true"]:hover {
+  background-color: var(--color-primary-button-hover);
+  border-color: var(--color-primary-button-hover);
+}
+
+/* Lighter than the name beside it: the count is a qualifier on the label, not a second
+   label. ink-70 is the lightest step on the ramp that still clears 4.5:1 over the chip's
+   own ink-06 fill. */
 .work-filter-count {
+  font-weight: 400;
   color: var(--color-ink-70);
 }
 
+/* Full canvas on the pressed chip, not canvas-80. The lighter WEIGHT is what separates
+   the count from the label — that is what the treatment asks for — and it survives here,
+   but the lighter COLOUR does not: canvas-80 measures 3.789:1 on the accent fill and
+   4.269:1 on its hover, both under the 4.5:1 text floor. Canvas holds 5.107:1 and
+   5.823:1. The resting chip keeps ink-70 for the count because ink-70 on the ink-06 fill
+   is 4.941:1, which clears it. */
 .work-filter-chip[aria-pressed="true"] .work-filter-count {
-  color: var(--color-canvas-80);
+  color: var(--color-canvas);
 }
 
-/* Progression — rows on hairlines rather than cards: one argument in three parts, not
-   three offers. */
-.progression-stage {
+/* Progression — three cards in a row, where it was three rows of plain text. The
+   argument is the same one; what changed is that each part of it now has something other
+   than a sentence carrying it, which is what let each description come down to one
+   sentence.
+
+   The columns touch at lg and the cards are padded apart from the inside, so the rule
+   under them is genuinely continuous rather than three rules with a gutter between them.
+   Below lg the cards stack and each keeps its own rule. */
+.progression-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
-  padding-block: 2.5rem;
-  border-top: 1px solid var(--color-canvas-16);
+  gap: 2.5rem;
+  list-style: none;
 }
 
-.progression-stage:last-child {
-  border-bottom: 1px solid var(--color-canvas-16);
+.progression-card-item {
+  display: flex;
+  flex-direction: column;
 }
 
-@media (min-width: 768px) {
-  .progression-stage {
-    grid-template-columns: 5rem minmax(0, 1fr);
-    gap: 2.5rem;
+.progression-card {
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .progression-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .progression-card {
+    padding-right: 2.5rem;
+  }
+
+  .progression-card-item:last-child .progression-card {
+    padding-right: 0;
   }
 }
 
+.progression-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* accent-on-dark, not raw accent: the brand accent is 2.457:1 on ink and would be a mark
+   nobody can see. This is also why the section stops fading — see WorkProgression. */
 .progression-numeral {
-  color: var(--color-canvas-16);
+  color: var(--color-accent-on-dark);
+}
+
+.progression-mark {
+  display: inline-flex;
+  color: var(--color-accent-on-dark);
+}
+
+/* `margin-top: auto` inside the stretched grid item is what puts every rule on the same
+   baseline whatever height the card above it came out at, so the three segments join.
+   300ms a segment across three segments is the same 900ms draw the process rail on
+   /how-we-work uses, and each numeral is delayed to match its own segment. */
+.progression-rule {
+  display: block;
+  height: 1px;
+  margin-top: auto;
+  background-color: var(--color-canvas-16);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 300ms;
+  transition-timing-function: linear;
+}
+
+.progression-row[data-drawn="true"] .progression-rule {
+  transform: scaleX(1);
 }
 
 .progression-pieces {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
+  gap: 0.5rem;
+  list-style: none;
 }
 
-.progression-pieces a {
-  text-decoration: underline;
-  text-underline-offset: 0.25em;
-  text-decoration-color: var(--color-canvas-40);
+/* The pieces as chips rather than an underlined run of text: they are the card's fourth
+   piece of structure, and eight approved titles set as prose would be the section
+   growing its word count back. */
+.progression-piece-chip {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  /* canvas-40, not the canvas-16 the section's other hairlines use. This border is the
+     only thing giving the chip a boundary, and a boundary that identifies a control is
+     held to 3:1 by 1.4.11 — canvas-16 reads 1.582:1 on ink and canvas-40 reads 3.231:1,
+     the first step on the ramp that clears it. Same reasoning, same value, as the
+     underlined fields on /contact. */
+  border: 1px solid var(--color-canvas-40);
+  border-radius: 9999px;
+  color: var(--color-canvas-80);
+  transition-property: color, border-color, background-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
 }
 
-.progression-pieces a:hover {
-  text-decoration-color: var(--color-canvas);
+.progression-piece-chip:hover {
+  color: var(--color-canvas);
+  border-color: var(--color-accent-on-dark);
+  background-color: var(--color-canvas-4);
 }
 
-/* Capability cross-link — one row per capability, on hairlines. */
-.capability-links {
-  border-top: 1px solid var(--color-ink-8);
+/* Capability cross-link — one row per capability, on hairlines, and the page's one
+   genuinely interactive moment. It costs no copy at all, which is the point: this
+   section lost its two-sentence introduction and gained this.
+
+   The hairlines are elements rather than borders because they DRAW: a scaleX from the
+   left, one row at a time, with each row's name arriving a fast step behind its own
+   rule. Borders cannot be animated that way without animating a box.
+
+   The hover sweep is the same scaleX on a pseudo-element, so it runs on the compositor
+   rather than by painting a widening box. It sits above the row's background and below
+   its content, which is why the name and the arrow are given a stacking context of their
+   own. */
+.capability-links > ul {
+  list-style: none;
+}
+
+.capability-row {
+  position: relative;
+}
+
+.capability-rule {
+  display: block;
+  height: 1px;
+  background-color: var(--color-ink-8);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-links[data-drawn="true"] .capability-rule {
+  transform: scaleX(1);
 }
 
 .capability-link {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
   padding-block: 1.5rem;
-  border-bottom: 1px solid var(--color-ink-8);
-  transition-property: padding-inline;
-  transition-duration: var(--duration-fast);
+  opacity: 0;
+  transform: translateY(10px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-base);
   transition-timing-function: var(--ease-base);
 }
 
-.capability-link:hover {
-  padding-inline: 0.75rem 0;
+.capability-link[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
 }
 
+.capability-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-ink-4);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.capability-link:hover::before,
+.capability-link:focus-visible::before {
+  transform: scaleX(1);
+}
+
+/* Both are inline by default and transform does not apply to a non-replaced inline box,
+   so both are made inline-block before anything is asked to move. */
+.capability-link-name,
 .capability-link-arrow {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
   transition-property: transform, color;
   transition-duration: var(--duration-hover);
   transition-timing-function: var(--ease-base);
 }
 
-.capability-link:hover .capability-link-arrow {
-  transform: translateX(6px);
+.capability-link:hover .capability-link-name,
+.capability-link:focus-visible .capability-link-name {
+  transform: translateX(8px);
+}
+
+.capability-link:hover .capability-link-arrow,
+.capability-link:focus-visible .capability-link-arrow {
+  transform: translateX(4px);
   color: var(--color-accent);
 }
 
@@ -2031,11 +4066,31 @@ html {
     transform: none;
   }
 
-  .capability-link:hover {
-    padding-inline: 0;
+  /* No draws. `transform: none` on a rule that rests at scaleX(0) IS the drawn state,
+     so both the progression rule and the capability hairlines are simply present. */
+  .progression-rule,
+  .progression-row[data-drawn="true"] .progression-rule,
+  .capability-rule,
+  .capability-links[data-drawn="true"] .capability-rule {
+    transform: none;
   }
 
-  .capability-link:hover .capability-link-arrow {
+  .capability-link {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* No sweep at all, rather than an instant one: a background that appears under the
+     cursor is the same event the sweep was, only faster. The arrow still goes accent
+     and the row is still a link, so the affordance survives without motion. */
+  .capability-link::before {
+    display: none;
+  }
+
+  .capability-link:hover .capability-link-name,
+  .capability-link:focus-visible .capability-link-name,
+  .capability-link:hover .capability-link-arrow,
+  .capability-link:focus-visible .capability-link-arrow {
     transform: none;
   }
 

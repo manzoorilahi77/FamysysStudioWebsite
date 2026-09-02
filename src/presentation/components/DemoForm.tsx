@@ -24,10 +24,10 @@ interface FieldProps {
 function Field({ id, label, error, children }: FieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="label text-canvas-80">
+      <label htmlFor={id} className="label block text-canvas-80">
         {label}
       </label>
-      <div className="mt-2">{children}</div>
+      <div className="mt-3">{children}</div>
       {error ? (
         <p id={`${id}-error`} className="text-small mt-1 text-accent-on-dark" role="alert">
           {error}
@@ -37,7 +37,12 @@ function Field({ id, label, error, children }: FieldProps) {
   );
 }
 
-const INPUT_CLASSES = "transition-base w-full rounded-sm border bg-transparent px-4 py-3 text-body text-canvas";
+// `.contact-field` — the site's dark form field, shared with /contact rather than a second
+// boxed variant living only here. Four boxed inputs beside the contact page's underlined
+// ones made the same studio look like two, and the shared class also carries the audited
+// numbers: a canvas-40 underline at 3.231:1 against the 3:1 UI-boundary floor, a canvas-60
+// hover, and an accent-on-dark error state that agrees with the message beside it.
+const INPUT_CLASSES = "contact-field";
 
 export function DemoForm() {
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -85,8 +90,15 @@ export function DemoForm() {
 
   if (status === "success") {
     return (
-      <div ref={confirmationRef} tabIndex={-1} role="status" className="rounded-sm border border-canvas-10 p-8">
-        <p className="text-display-s font-medium text-canvas">Thanks &mdash; we&apos;ll be in touch.</p>
+      <div
+        ref={confirmationRef}
+        tabIndex={-1}
+        role="status"
+        className="rounded-sm border border-canvas-16 bg-canvas-4 p-8"
+      >
+        <p className="text-display-s font-medium text-canvas">
+          Thanks &mdash; we&apos;ll be in touch.
+        </p>
         {/* TODO(client): "within one business day" is an operational commitment — confirm the
             studio can actually hold this turnaround before launch. */}
         <p className="text-body mt-2 text-canvas-80">
@@ -95,17 +107,6 @@ export function DemoForm() {
       </div>
     );
   }
-
-  // canvas-40, not canvas-10. These inputs have a transparent fill, so the border is the
-  // only thing identifying the control — a user-interface component boundary, with a 3:1
-  // floor under WCAG 1.4.11. canvas-10 reads 1.317:1 on ink and 1.317:1 against the
-  // fading section's start value; canvas-40 reads 3.231:1 and 2.887:1. The second number
-  // is why this form should not sit in a fading section, and FinalCta's does — see
-  // docs/content-todo.md. Found by the measured contrast pass built for /contact, which
-  // holds its own underlines to the same value.
-  const borderStyle = (hasError: boolean): React.CSSProperties => ({
-    borderColor: hasError ? "var(--color-accent-on-dark)" : "var(--color-canvas-40)",
-  });
 
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-5">
@@ -118,7 +119,6 @@ export function DemoForm() {
           aria-invalid={Boolean(fieldErrors.fullName)}
           aria-describedby={fieldErrors.fullName ? "fullName-error" : undefined}
           className={INPUT_CLASSES}
-          style={borderStyle(Boolean(fieldErrors.fullName))}
         />
       </Field>
 
@@ -131,7 +131,6 @@ export function DemoForm() {
           aria-invalid={Boolean(fieldErrors.email)}
           aria-describedby={fieldErrors.email ? "email-error" : undefined}
           className={INPUT_CLASSES}
-          style={borderStyle(Boolean(fieldErrors.email))}
         />
       </Field>
 
@@ -144,7 +143,6 @@ export function DemoForm() {
           aria-invalid={Boolean(fieldErrors.companyName)}
           aria-describedby={fieldErrors.companyName ? "companyName-error" : undefined}
           className={INPUT_CLASSES}
-          style={borderStyle(Boolean(fieldErrors.companyName))}
         />
       </Field>
 
@@ -156,8 +154,7 @@ export function DemoForm() {
           defaultValue=""
           aria-invalid={Boolean(fieldErrors.companySize)}
           aria-describedby={fieldErrors.companySize ? "companySize-error" : undefined}
-          className={INPUT_CLASSES}
-          style={borderStyle(Boolean(fieldErrors.companySize))}
+          className={`${INPUT_CLASSES} contact-field--select`}
         >
           <option value="" disabled>
             Choose a size

@@ -36,6 +36,13 @@ interface WorkGalleryProps {
  * `rendered` is what the DOM holds, which lags it by one fade. Under reduced motion the
  * two are the same value and the swap is instant.
  *
+ * THE INCOMING SET SETTLES RATHER THAN APPEARING. Each tile's wrapper is keyed on the
+ * rendered category as well as its slug, so a filter change remounts the wrappers and the
+ * standard reveal runs again — every tile fades and rises into its new position over the
+ * base 320ms rather than the grid cutting from one arrangement to another. Under reduced
+ * motion the key is the slug alone: the tiles that survive the filter are reused, so
+ * nothing re-animates, and the swap is the instant one the motion brief asks for.
+ *
  * The URL fragment is the detail view's address. See WorkDetailDialog for why the detail
  * is a panel rather than eight routes, and why it is still linkable.
  */
@@ -101,6 +108,7 @@ export function WorkGallery({
         );
 
   const open = pieces.find((piece) => piece.slug === openSlug);
+  const generation = renderedCategory ?? filter.allLabel;
 
   return (
     <Section ariaLabel={gridLabel} className="work-section">
@@ -139,11 +147,13 @@ export function WorkGallery({
           {activeCategory ?? filter.allLabel}
         </p>
 
-        {/* The first tile runs out to the viewport edge — see .work-bleed. It is the
-            first of the RENDERED set, so the bleed survives filtering. */}
+        {/* Tiles run ACROSS a row, so the numbering reads 01 02 / 03 04 rather than down
+            one column and back up the other. Filtering re-pairs the rows, which is why the
+            ratio spread is bounded by a capped media height rather than by hand-pairing
+            what sits beside what — see .work-grid. */}
         <div
           id="work-grid"
-          className="mt-14 grid items-start gap-8 md:grid-cols-2"
+          className="work-grid mt-14"
           style={{
             opacity: isSwapping ? 0 : 1,
             transitionProperty: "opacity",
@@ -153,10 +163,10 @@ export function WorkGallery({
         >
           {visible.map((piece, index) => (
             <Reveal
-              key={piece.slug}
+              key={prefersReducedMotion ? piece.slug : `${generation}:${piece.slug}`}
               index={index % 2}
               staggerStepMs={60}
-              className={index === 0 ? "work-bleed" : ""}
+              className="work-grid-item"
             >
               <WorkTile
                 piece={piece}

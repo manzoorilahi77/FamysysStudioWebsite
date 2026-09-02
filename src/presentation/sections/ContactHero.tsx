@@ -11,10 +11,11 @@ interface ContactHeroProps {
  * because famysys.com's own contact page does and this is the one page shaped against it
  * rather than against the other six.
  *
- * That has a consequence beyond this file: the header renders its dark-surface tone while
- * it sits transparent over an unscrolled page, which would put canvas nav links on a
- * canvas ground. `Header` therefore takes an `opensOnLight` prop, and /contact is the one
- * route that passes it.
+ * That has a consequence beyond this file. The header is transparent at scroll 0 and its
+ * links are canvas, which is right over the other six heroes and a 1:1 contrast failure
+ * over this one — so this route, alone, passes `solidAtTop` and the bar starts filled.
+ * Changing this hero to ink would remove the exception; keeping it canvas is the decision,
+ * and the exception is its cost.
  *
  * Nothing sits on the right half. The whitespace is the composition — a form is coming
  * two hundred pixels below, and a hero that filled its width would leave the page with no
@@ -37,12 +38,12 @@ export function ContactHero({ hero }: ContactHeroProps) {
           </p>
           <RevealHeading
             as="h1"
-            className="text-display-l mt-6 max-w-[18ch] font-medium text-ink"
+            className="text-heading mt-6 max-w-[22ch] font-medium text-ink"
             accent={["make it."]}
           >
             {hero.heading}
           </RevealHeading>
-          <p className="text-lead mt-8 text-ink-70" style={{ maxWidth: "52ch" }}>
+          <p className="text-body mt-8 text-ink-70" style={{ maxWidth: "52ch" }}>
             {hero.body}
           </p>
         </div>

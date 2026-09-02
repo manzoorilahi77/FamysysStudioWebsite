@@ -1,15 +1,11 @@
-"use client";
-
 import type { ServiceOffering } from "../../domain/services/entities/ServiceOffering";
-import { motion } from "../../shared/design/tokens";
 import type { CtaView } from "../lib/viewModels";
 import type { SectionIntro } from "../../domain/marketing/entities/SectionIntro";
 import { Button } from "../components/Button";
-import { CapabilityCard } from "../components/CapabilityCard";
 import { Container } from "../components/Container";
 import { Section } from "../components/Section";
 import { SectionHeader } from "../components/SectionHeader";
-import { useGridColumns } from "../hooks/useGridColumns";
+import { ServiceGrid } from "../components/ServiceGrid";
 
 interface WhatWeDoProps {
   readonly intro: SectionIntro;
@@ -18,39 +14,38 @@ interface WhatWeDoProps {
 }
 
 /**
- * Six text-only tiles of equal weight, so this is an even 3 x 2 grid, not a bento.
- * Uneven spans only earn their keep when the tiles differ in importance or carry media;
- * here they just produced mismatched heights and a hole to design around.
+ * The six capabilities, rebuilt from six separate cards into one bordered container
+ * divided by hairlines — the shape famysys.com's own service grid uses. The cards had two
+ * problems the grid does not have: they varied in height, because nothing tied them
+ * together, and six individual borders separated by gutters read as six things rather than
+ * as one offering with six parts. Sharing edges is what makes it a system; equal heights
+ * are now structural rather than something to keep an eye on.
  *
- * The reference's services block is 20 tiles with a photograph on each — that shape does
- * not survive being handed six lines of text, so the tiles carry a numeral instead and
- * the section earns its place on motion rather than on imagery.
+ * CANVAS, and the cells carry no fill of their own. The section is cream and stays cream:
+ * building it on ink made it the page's THIRD consecutive dark ground — hero, this, then §3
+ * The Differentiator — which cost §3 the thing its own docblock calls it, "the page's one
+ * mid-page dark beat". There was no light section left between the top of the page and the
+ * end of §3 for it to be a beat against. On canvas the rhythm reads again and §3 is once
+ * more the only dark ground between the hero and the closing statement.
  *
- * Entry is a diagonal: `(row + column)` steps, so the wave crosses the grid corner to
- * corner instead of sweeping row by row. The column count comes from the same breakpoints
- * the grid uses, so at one column the formula collapses to a plain sequential stagger,
- * which is the right reading of a diagonal when there is only one of them.
+ * The CARD design is the part that came from the dark reference, and none of it needed a
+ * dark section to work: cells with no fill at rest, a light navy that arrives only under the
+ * cursor, oversized numerals cropped by the cell's bottom edge, and one accent square that
+ * travels between hairline junctions. The three light navies those need are mixed toward
+ * white rather than taken off the ink ramp, because ink over this warm cream composites grey
+ * — see `colorDerived` in tokens.ts and the `.service-*` block in globals.css.
+ *
+ * The header splits: heading left, supporting line right, from lg up. A six-cell grid is
+ * the widest thing on the page, and opening it with a header that uses half the measure
+ * and stacks understates it; the split claims the width the grid below is about to use.
  */
 export function WhatWeDo({ intro, cta, capabilities }: WhatWeDoProps) {
-  const columns = useGridColumns();
-
   return (
     <Section ariaLabel={intro.heading}>
       <Container>
-        <SectionHeader eyebrow={intro.eyebrow} heading={intro.heading} body={intro.body} />
+        <SectionHeader split eyebrow={intro.eyebrow} heading={intro.heading} body={intro.body} />
 
-        <div className="mt-14 grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {capabilities.map((capability, index) => (
-            <CapabilityCard
-              key={capability.title}
-              capability={capability}
-              numeral={String(index + 1).padStart(2, "0")}
-              delayMs={
-                (Math.floor(index / columns) + (index % columns)) * motion.stagger.diagonalStepMs
-              }
-            />
-          ))}
-        </div>
+        <ServiceGrid capabilities={capabilities} />
 
         <div className="mt-10">
           <Button cta={cta} variant="ghost" />

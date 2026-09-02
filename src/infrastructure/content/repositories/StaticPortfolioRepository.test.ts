@@ -156,15 +156,29 @@ describe("StaticPortfolioRepository — Selected Work page", () => {
     expect(staged).toEqual(page.pieces.map((piece) => piece.slug.value));
   });
 
+  // The block was cut from three paragraphs to one at the manager's direction, so the
+  // assertion that it holds at least two paragraphs went with it — the shape it was
+  // guarding is no longer the shape the page wants. What it was actually protecting is
+  // asserted here instead, and more tightly than before: the block is still running
+  // visible copy rather than a comment or a chip, it still says in words that the work is
+  // not finished, and it still discloses that the covers are stand-ins. The upper bound
+  // is new, and is what stops the elaboration growing back one sentence at a time.
   it("keeps the honest framing block on the page rather than in a comment", async () => {
     const page = await new StaticPortfolioRepository().getSelectedWorkPage();
 
-    expect(page.framing.paragraphs.length).toBeGreaterThanOrEqual(2);
-    const framing = page.framing.paragraphs.join(" ");
+    const framing = page.framing.body;
+    expect(framing.trim().length).toBeGreaterThan(60);
+    // Two sentences at most. Counting terminators is crude, but the failure it catches —
+    // a fourth clause arriving as a third sentence — is exactly the one to catch.
+    expect(framing.match(/[.!?](\s|$)/g) ?? []).toHaveLength(2);
     // It has to actually say the work does not exist, in visible copy.
     expect(framing).toMatch(
       /none of them is finished|does not exist|not (yet )?(been )?(made|produced)/i,
     );
+    // And that the covers are not the work either. This sentence is the only place the
+    // page says so in its own running copy — the tile chips are a status marker and the
+    // longer explanation is behind a dialog — so losing it here loses it from the page.
+    expect(framing).toMatch(/stock/i);
     // "Coming soon" is the wording the brief rules out, everywhere on the page.
     expect(collectStrings(selectedWorkPage).join(" ")).not.toMatch(/coming soon/i);
   });

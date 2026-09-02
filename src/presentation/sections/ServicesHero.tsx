@@ -38,12 +38,12 @@ export function ServicesHero({ hero }: ServicesHeroProps) {
           <Eyebrow dark>{hero.eyebrow}</Eyebrow>
           <RevealHeading
             as="h1"
-            className="text-hero mt-5 max-w-[24ch] font-semibold text-canvas"
+            className="text-heading mt-5 max-w-[24ch] font-semibold text-canvas"
             accent={["one team."]}
           >
             {hero.heading}
           </RevealHeading>
-          <p className="text-lead mt-6 text-canvas-80" style={{ maxWidth: "58ch" }}>
+          <p className="text-body mt-6 text-canvas-80" style={{ maxWidth: "58ch" }}>
             {hero.body}
           </p>
           <div className="mt-8">

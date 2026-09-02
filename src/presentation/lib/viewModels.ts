@@ -15,6 +15,7 @@ import type { Cta } from "../../domain/shared/value-objects/Cta";
 import type { AspectRatio, MediaKind, MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import type { Differentiator } from "../../domain/marketing/entities/Differentiator";
 import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
+import type { WhyFamysysBlock } from "../../domain/marketing/entities/WhyFamysysBlock";
 import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../domain/marketing/entities/HeroContent";
@@ -130,6 +131,18 @@ export interface DifferentiatorBlockView {
   readonly leadIn: string;
   readonly elements: ReadonlyArray<DifferentiatorView>;
   readonly closingStatement: string;
+}
+
+export interface ValuePillarView {
+  readonly title: string;
+  readonly description: string;
+  readonly media: MediaView;
+}
+
+export interface WhyFamysysBlockView {
+  readonly heading: string;
+  readonly body: string;
+  readonly reasons: ReadonlyArray<ValuePillarView>;
 }
 
 export interface EngagementTierView {
@@ -330,6 +343,18 @@ export function toDifferentiatorBlockView(block: DifferentiatorBlock): Different
     leadIn: block.leadIn,
     elements: block.elements.map(toDifferentiatorView),
     closingStatement: block.closingStatement,
+  };
+}
+
+export function toWhyFamysysBlockView(block: WhyFamysysBlock): WhyFamysysBlockView {
+  return {
+    heading: block.heading,
+    body: block.body,
+    reasons: block.reasons.map((reason) => ({
+      title: reason.title,
+      description: reason.description,
+      media: toMediaView(reason.media),
+    })),
   };
 }
 

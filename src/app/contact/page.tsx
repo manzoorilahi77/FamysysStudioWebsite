@@ -23,9 +23,9 @@ export const metadata: Metadata = {
  * already decided to get in touch; a page that made them read four more blocks before
  * reaching the form would be arguing a case that has already been won.
  *
- * It is also the only page that opens LIGHT — see ContactHero, and the `opensOnLight`
- * prop below, which is what stops the transparent header rendering canvas nav links on a
- * canvas ground.
+ * It is also the only page that opens LIGHT — see ContactHero — which is why it is the one
+ * route passing `solidAtTop` to the header. The bar is transparent at scroll 0 everywhere
+ * else; over a canvas hero that would render canvas nav links on a canvas ground.
  *
  * There is no FinalCta here, for the obvious reason: the closing call to action on every
  * other page points at this one, and the form below IS the ask.
@@ -41,7 +41,10 @@ export default async function ContactRoute() {
 
   return (
     <>
-      <Header navigation={navigationView} opensOnLight />
+      {/* The only route that passes this. The bar is transparent at scroll 0 everywhere
+          else because everywhere else opens on ink; ContactHero opens on canvas, and a
+          transparent bar would put canvas nav links on a canvas ground at 1:1. */}
+      <Header navigation={navigationView} solidAtTop />
       <main id="main-content">
         <ContactHero hero={page.hero} />
         <ContactFormSection form={page.form} panel={page.panel} />

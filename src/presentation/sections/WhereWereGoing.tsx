@@ -29,7 +29,7 @@ export function WhereWereGoing({ direction }: WhereWereGoingProps) {
         <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-6">
           <div className="lg:col-span-7">
             <Reveal index={0} staggerStepMs={60}>
-              <p className="text-lead text-ink" style={{ maxWidth: "44ch" }}>
+              <p className="text-body text-ink" style={{ maxWidth: "44ch" }}>
                 {direction.ambition}
               </p>
             </Reveal>

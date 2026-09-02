@@ -117,7 +117,8 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
         if (period <= 0) {
           return;
         }
-        const next = (positions[index] ?? 0) + config.speed * config.baseDirection * direction * boost * dt;
+        const next =
+          (positions[index] ?? 0) + config.speed * config.baseDirection * direction * boost * dt;
         // Wrap into (-period, 0] so the duplicated copy always covers the seam.
         positions[index] = ((next % period) - period) % period;
         track.style.transform = `translate3d(0, ${positions[index]}px, 0)`;
@@ -144,7 +145,11 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
 
   return (
     <>
-      <div className="hero-mosaic" aria-label="Studio production stills">
+      {/* role="group", because `aria-label` is prohibited on a plain <div> — it has no
+          role for a name to attach to, and axe reports the attribute as having no effect.
+          The element is not decoration: it holds eight buttons that each open the same
+          lightbox, which is what `group` is for. The label names that set. */}
+      <div className="hero-mosaic" role="group" aria-label="Studio production stills">
         {columns.map(({ column, items, startIndex }, columnIndex) => {
           const trackItems = prefersReducedMotion ? items : buildTrack(items);
           return (

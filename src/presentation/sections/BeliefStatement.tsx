@@ -52,7 +52,7 @@ export function BeliefStatement({ belief }: BeliefStatementProps) {
         >
           <RevealHeading
             as="p"
-            className="text-display-l mx-auto max-w-[26ch] text-center font-medium text-balance text-ink"
+            className="text-heading mx-auto max-w-[30ch] text-center font-medium text-balance text-ink"
           >
             {belief.statement}
           </RevealHeading>

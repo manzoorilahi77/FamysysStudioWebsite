@@ -7,17 +7,19 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { CaseStudyDetailView } from "../lib/viewModels";
 
 /**
- * The ratio is content, not layout: it travels on the piece's own MediaRef, so the grid's
- * uneven rhythm survives filtering. The homepage held the same rhythm in a positional
- * array, which only works while all eight are on screen in a fixed order.
+ * The piece's own ratio, which is now used ONLY for the image's intrinsic dimensions —
+ * what next/image needs to reserve space and pick a source, and nothing the reader sees.
+ * The frame itself is 4:3 for every tile in the grid, set in `.work-grid`, because the
+ * uneven rhythm this map used to drive was the reason the grid had holes in it. The values
+ * stay per-ratio rather than collapsing to one pair so that a portrait source is still
+ * described to the browser as a portrait.
  */
-const RATIO: Record<AspectRatio, { readonly css: string; readonly w: number; readonly h: number }> =
-  {
-    "4:3": { css: "4 / 3", w: 1600, h: 1200 },
-    "3:4": { css: "3 / 4", w: 1200, h: 1600 },
-    "1:1": { css: "1 / 1", w: 1400, h: 1400 },
-    "16:9": { css: "16 / 9", w: 1600, h: 900 },
-  };
+const RATIO: Record<AspectRatio, { readonly w: number; readonly h: number }> = {
+  "4:3": { w: 1600, h: 1200 },
+  "3:4": { w: 1200, h: 1600 },
+  "1:1": { w: 1400, h: 1400 },
+  "16:9": { w: 1600, h: 900 },
+};
 
 interface WorkTileProps {
   readonly piece: CaseStudyDetailView;
@@ -61,7 +63,7 @@ export function WorkTile({ piece, statusLabel, isPriority, onOpen }: WorkTilePro
       data-settled={hasSettled}
       data-slug={piece.slug}
     >
-      <div className="media-tile" style={{ aspectRatio: ratio.css }}>
+      <div className="media-tile">
         <Image
           src={piece.media.src}
           alt={piece.media.alt}

@@ -40,11 +40,13 @@ export function Hero({ hero }: HeroProps) {
       className="surface-dark relative flex items-center overflow-hidden bg-ink pt-24"
       style={{ height: "100svh" }}
     >
-      {/* Full-bleed vertically and to the right edge: the mosaic starts at the very top
-          of the section, so tiles pass behind the transparent header, and finishes flush
-          with the section's bottom edge. It is positioned against the section rather than
-          placed in the container grid, which is what lets its right column reach the
-          viewport edge instead of stopping at the container gutter. */}
+      {/* Full-bleed to the right edge, and to the SECTION's top rather than to the bottom
+          of the header: the bar is transparent at scroll 0 again, so the strip behind it
+          is the one place the mosaic is doing its job — tiles drift past behind the nav.
+          Starting it below the header would put a bare ink band where that should be. It
+          is positioned against the section rather than placed in the container grid, which
+          is what lets its right column reach the viewport edge instead of stopping at the
+          container gutter. */}
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
         <div
           className="hero-mosaic-frame pointer-events-auto h-full"
@@ -71,12 +73,12 @@ export function Hero({ hero }: HeroProps) {
               already in view. */}
           <RevealHeading
             as="h1"
-            className="text-hero font-semibold text-canvas"
+            className="text-heading font-semibold text-canvas"
             accent={["the agency overhead."]}
           >
             {hero.heading}
           </RevealHeading>
-          <p className="text-lead mt-6 text-canvas-80" style={{ maxWidth: "52ch", ...fadeIn(200) }}>
+          <p className="text-body mt-6 text-canvas-80" style={{ maxWidth: "52ch", ...fadeIn(200) }}>
             {hero.body}
           </p>
           <div className="mt-8 flex flex-wrap gap-4" style={fadeIn(200)}>

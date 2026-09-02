@@ -187,7 +187,10 @@ export function WorkDetailDialog({
           <ul className="work-dialog-links mt-3">
             {piece.capabilities.map((capability) => (
               <li key={capability.href}>
-                <Link href={capability.href} className="text-small font-medium text-accent">
+                <Link
+                  href={capability.href}
+                  className="inline-link text-small font-medium text-accent"
+                >
                   {capability.title} &rarr;
                 </Link>
               </li>

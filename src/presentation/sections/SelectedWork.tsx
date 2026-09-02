@@ -2,7 +2,6 @@ import type { SectionIntro } from "../../domain/marketing/entities/SectionIntro"
 import type { CaseStudyView } from "../lib/viewModels";
 import { CaseStudyCard } from "../components/CaseStudyCard";
 import { Container } from "../components/Container";
-import { Reveal } from "../components/Reveal";
 import { Section } from "../components/Section";
 import { SectionHeader } from "../components/SectionHeader";
 
@@ -11,30 +10,33 @@ interface SelectedWorkProps {
   readonly caseStudies: ReadonlyArray<CaseStudyView>;
 }
 
-// Two tiles a row at desktop with the ratios cycling, so no two rows are the same
-// height. A portfolio grid should not march.
-const ASPECT_RATIOS = ["4 / 3", "3 / 4", "1 / 1", "4 / 3", "3 / 4", "4 / 3", "1 / 1", "3 / 4"];
-
+/**
+ * Two tiles a row, every tile the same shape.
+ *
+ * The ratios used to cycle — 4:3, 3:4, 1:1 — so that no two rows were the same height. On
+ * paper that is editorial; on the page it was a grid with holes in it, and it needed a
+ * capped media height to stop the worst pairings running to 1.8x each other. Both the
+ * cycle and its patch are gone. See `CaseStudyCard`.
+ *
+ * The reveal moved onto the card too. `Reveal` fades and lifts whatever is inside it,
+ * which is the right default for a paragraph and the wrong one for a photograph in a
+ * frame: the card wipes its frame open and settles the image inside it, which needs the
+ * two to be driven from one observer rather than from a wrapper around both.
+ */
 export function SelectedWork({ intro, caseStudies }: SelectedWorkProps) {
   return (
     <Section ariaLabel={intro.heading} className="work-section">
       <Container>
-        <SectionHeader heading={intro.heading} body={intro.body} />
-        {/* The first tile runs out to the viewport edge — see .work-bleed. */}
-        <div className="mt-14 grid items-start gap-8 md:grid-cols-2">
+        <SectionHeader split heading={intro.heading} body={intro.body} />
+        {/* Row order — 01 02 on the first row, 03 04 on the second. */}
+        <div className="work-grid mt-14">
           {caseStudies.map((caseStudy, index) => (
-            <Reveal
+            <CaseStudyCard
               key={caseStudy.slug}
-              index={index % 2}
-              staggerStepMs={60}
-              className={index === 0 ? "work-bleed" : ""}
-            >
-              <CaseStudyCard
-                caseStudy={caseStudy}
-                aspectRatio={ASPECT_RATIOS[index] ?? "4 / 3"}
-                isPriority={index === 0}
-              />
-            </Reveal>
+              caseStudy={caseStudy}
+              index={index}
+              isPriority={index === 0}
+            />
           ))}
         </div>
       </Container>

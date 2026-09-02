@@ -17,12 +17,19 @@ export interface WorkHero {
  * it, it reads as a body of finished work unless the page says otherwise in its own
  * copy. This block is that saying — placed immediately after the hero, before the reader
  * has seen a single tile, and rendered as visible text rather than a footnote.
+ *
+ * ONE paragraph, and the type says so. It was three, which is three times as much page
+ * as the single idea needs: the studio chose not to fill this page with weak work. The
+ * two facts a reader cannot do without — that nothing here is finished, and that every
+ * cover is a stand-in — stay inside that one paragraph rather than moving to a footnote,
+ * because the block is the page's position, not its disclaimer. Making the field
+ * singular is what stops the elaboration growing back.
  */
 export interface FramingBlock {
   readonly eyebrow: string;
   readonly heading: string;
-  /** Two or three sentences, as separate paragraphs. */
-  readonly paragraphs: ReadonlyArray<string>;
+  /** Two sentences at most. See above — this is a `string`, not a list, on purpose. */
+  readonly body: string;
 }
 
 /**
@@ -69,10 +76,15 @@ export interface ProgressionBlock {
   readonly stages: ReadonlyArray<ProgressionStage>;
 }
 
+/**
+ * The path out, and a navigation block rather than a section with an argument to make.
+ * It carries no body: an eyebrow, a short heading and six named rows already say what
+ * the rows do, and a two-sentence introduction above a list of links is the reader
+ * paying for something they were about to be told by the links themselves.
+ */
 export interface CapabilityCrossLink {
   readonly eyebrow: string;
   readonly heading: string;
-  readonly body: string;
   readonly links: ReadonlyArray<WorkCapabilityRef>;
 }
 

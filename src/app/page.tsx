@@ -23,6 +23,7 @@ import {
   toHeroContentView,
   toNavigationMenuView,
   toWaysToWorkBlockView,
+  toWhyFamysysBlockView,
 } from "../presentation/lib/viewModels";
 
 export default async function HomePage() {
@@ -49,7 +50,7 @@ export default async function HomePage() {
         <HowWeWork process={homepage.process} />
         <WaysToWork waysToWork={toWaysToWorkBlockView(homepage.waysToWork)} />
         <SelectedWork intro={homepage.workIntro} caseStudies={caseStudies.map(toCaseStudyView)} />
-        <WhyFamysys whyFamysys={homepage.whyFamysys} />
+        <WhyFamysys whyFamysys={toWhyFamysysBlockView(homepage.whyFamysys)} />
         <Faq faq={toFaqBlockView(homepage.faq)} />
         <FinalCta closingCta={homepage.closingCta} />
       </main>

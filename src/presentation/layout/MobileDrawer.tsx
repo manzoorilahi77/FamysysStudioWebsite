@@ -167,7 +167,7 @@ export function MobileDrawer({
                           <li>
                             <Link
                               href={entry.panel.footerHref}
-                              className="text-small font-medium text-accent"
+                              className="inline-link text-small font-medium text-accent"
                               onClick={onClose}
                             >
                               {entry.panel.footerLabel} &rarr;

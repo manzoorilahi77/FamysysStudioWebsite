@@ -138,8 +138,11 @@ const DRAFT_PIECES: Readonly<Record<string, DraftPiece>> = {
     capabilityTitles: ["AI Video & Virtual Presenters", "Explainer & Training Videos"],
     imageFile: "work-synthesia",
     imageAlt:
-      "A seated presenter under a single light in front of a black backdrop, framed by a camera in the foreground.",
-    aspectRatio: "3:4",
+      "A man sitting on the floor talking to a camera on a tripod, his face on its screen as he speaks.",
+    // 4:3, where the other seven kept the ratio they were sourced at. The replacement is a
+    // landscape frame and a 3:4 tile would have centre-cropped the camera out of it —
+    // leaving a man talking to nothing, which is the one thing this piece has to show.
+    aspectRatio: "4:3",
   },
   "Training Video Series": {
     demonstrates:
@@ -232,13 +235,16 @@ export const selectedWorkPage: SelectedWorkPage = {
     // TODO(client): expanded copy — draft, pending approval (every string below). This
     // block is what makes the rest of the page honest, and it is the first thing under
     // the hero on purpose. Do not cut it, and do not soften it into "coming soon".
+    //
+    // It was three paragraphs and is now one, at the manager's direction: the block has
+    // one idea to carry and the other two paragraphs were elaborating it. The cut copy
+    // is preserved verbatim in docs/content-todo.md rather than deleted. Two facts had
+    // to survive the cut and did — that nothing here is finished, and that every cover
+    // is a stand-in — because they are the only place the page says either in its own
+    // running copy rather than in a chip or behind a dialog.
     eyebrow: "Where this stands",
     heading: "We decided not to put weak work online.",
-    paragraphs: [
-      "The alternative was to fill this page with whatever footage already existed, made to other people's briefs, and leave a reader to work out which parts were ours.",
-      "So the eight pieces below were chosen instead. Each one exists to demonstrate a specific capability, and each is being produced to show that capability properly rather than to fill a slot in a grid.",
-      "None of them is finished. The titles and the intent are settled and are the studio's own; every cover here is a stock frame standing in until the real one exists.",
-    ],
+    body: "We could have filled this page with footage made to other people's briefs. We chose eight of our own instead — none of them is finished, and every cover below is a stock frame.",
   },
   filter: {
     // TODO(client): expanded copy — draft, pending approval (both labels). The chip
@@ -272,29 +278,34 @@ export const selectedWorkPage: SelectedWorkPage = {
     heading: "Why these eight, and why in this order.",
     body: "The list is not a menu. It runs from proving the studio can shoot at all to proving it can finish at a level worth commissioning, and each group answers the question the group before it raises.",
     stages: [
-      stage(
-        "Prove the studio",
-        "The first two films put the studio's own name on the work. One shows what it can build for itself; the other shows the same craft applied to a business that has to be taken seriously.",
-        ["famysys-studio-capability-film", "famysys-it-services-portfolio-film"],
-      ),
+      // One sentence each, at the manager's direction. The cards below carry a numeral,
+      // an icon and the piece names, so a stage's copy has three other things saying the
+      // same thing beside it; the longer versions are kept in docs/content-todo.md.
+      stage("Prove the studio", "The first two films put the studio's own name on the work.", [
+        "famysys-studio-capability-film",
+        "famysys-it-services-portfolio-film",
+      ]),
       stage(
         "Prove the range",
-        "The middle three take one production standard to a campaign, to footage somebody else shot, and to a presenter who does not exist. Different inputs, the same finish.",
+        "The middle three take one standard to a campaign, to footage somebody else shot, and to a presenter who does not exist.",
         ["food-restaurant-creative-campaign", "ugc-transformation", "synthesia-business-explainer"],
       ),
-      stage(
-        "Prove it scales",
-        "The last three move from a single piece to a system: a series that holds its template, a shoot that supplies a whole campaign, and motion work that lifts everything before it.",
-        ["training-video-series", "product-visual-campaign", "motion-graphics-showcase"],
-      ),
+      stage("Prove it scales", "The last three move from a single piece to a system.", [
+        "training-video-series",
+        "product-visual-campaign",
+        "motion-graphics-showcase",
+      ]),
     ],
   },
   capabilityCrossLink: {
-    // TODO(client): expanded copy — draft, pending approval (eyebrow, heading and body).
-    // The six names and their fragments are read from the capability catalogue.
+    // TODO(client): expanded copy — draft, pending approval (eyebrow and heading). The
+    // six names and their fragments are read from the capability catalogue.
+    //
+    // No body, at the manager's direction: this is a navigation block, and six named
+    // rows under a "Capabilities" eyebrow do not need two sentences telling a reader
+    // that links lead somewhere. The cut sentences are in docs/content-todo.md.
     eyebrow: "Capabilities",
-    heading: "Every piece here is one of six capabilities, shown working.",
-    body: "The pieces are what the work looks like. The capability pages are what is actually on offer, and what each one includes.",
+    heading: "Six capabilities, shown working.",
     links: capabilities.map((offering) => capabilityRef(offering.title)),
   },
   closingCta: {

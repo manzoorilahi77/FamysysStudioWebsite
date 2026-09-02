@@ -31,7 +31,10 @@ function TierCard({ tier }: { readonly tier: EngagementTierView }) {
       <p className="text-body mt-4 text-ink-70">{tier.summary}</p>
       <TierDetail label="Ideal for" value={tier.idealFor} />
       <TierDetail label="Typical work includes" value={tier.typicalWork} />
-      <Link href={tier.cta.href} className="text-small mt-auto pt-8 font-medium text-accent">
+      <Link
+        href={tier.cta.href}
+        className="inline-link text-small mt-auto pt-8 font-medium text-accent"
+      >
         {tier.cta.label} &rarr;
       </Link>
     </div>
@@ -42,7 +45,7 @@ export function WaysToWork({ waysToWork }: WaysToWorkProps) {
   return (
     <Section ariaLabel={waysToWork.heading}>
       <Container>
-        <SectionHeader heading={waysToWork.heading} body={waysToWork.body} />
+        <SectionHeader split heading={waysToWork.heading} body={waysToWork.body} />
 
         {/* Bento stays here too: 3 + 1 is a real hierarchy, three tiers against a
             wider custom card, not an uneven span for its own sake. */}

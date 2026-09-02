@@ -47,12 +47,41 @@ export const colorDerived = {
   // still required, and is re-derived from the new accent (mixed 43% toward canvas) rather than
   // carried over. Used for every accent role on a dark surface: text, borders, focus rings.
   accentOnDark: "#7995F5", // derived — 5.015:1 on ink (2.1c)
-  bodyOnLight: "#24282CB3", // graphite at 70% opacity, 5.273:1 on canvas — running body/lead color (2.1a)
+  bodyOnLight: "#24282CB3", // graphite at 70% opacity, 5.273:1 on canvas — running body/lead color (2.1a).
+  // Mirrored as --color-graphite-70 in globals.css; the nav panel descriptors use it directly.
   bodyOnDark: canvasOpacity[80], // 8.548:1 on ink — running body/lead color on dark surfaces (2.1a)
   // The light primary button is accent-filled now that canvas text on accent clears 4.5:1
   // (5.107:1). Its hover darkens the accent 14% toward ink and holds 5.823:1.
   primaryButtonHover: "#1A4BE6", // derived — accent-filled primary button's hover fill
   primaryButtonHoverOnDark: "#E4E3DD", // derived — deepened cream, hover fill for the canvas-surface primary button on dark sections
+  // §2's three light navies. All three are mixed from `ink` toward WHITE rather than
+  // toward canvas, and that is the whole reason they exist as colours instead of ink-ramp
+  // steps: canvas is warm (#F4F1E8, B is its LOWEST channel), so blending ink into it
+  // cannot produce a blue-leaning tint until roughly 21% — and by the time the mix is blue
+  // it has gone dark and desaturated (ink at 25% is #BAC0C1). No opacity of ink on this
+  // canvas reads as light navy. Mixed toward white, each keeps B > G > R.
+  //
+  // cardTint      — the hover fill's flat lift, the whole cell. 1.135:1 on canvas, the same
+  //                 order as `.card-surface`'s established 1.118:1 "this is a card" step.
+  //                 Text on it holds: full ink 11.71:1, ink-70 body 4.857:1.
+  // cardTintDeep  — the hover fill's radial peak, top-left corner only. Full ink 9.90:1,
+  //                 ink-70 body 4.559:1 — the worst case anywhere in the cell, and still
+  //                 over the 4.5 floor.
+  // numeral       — the watermark. Deliberately one step deeper than cardTintDeep so it
+  //                 survives being lit: 1.405:1 on bare canvas at rest, and still 1.226:1
+  //                 against the flat hover lift it sits on when the cell fills. Decorative
+  //                 by a wide margin either way — see `.decorative-numeral`.
+  // The site's second light ground. Six of nine homepage sections are cream and five of
+  // them run consecutively, so the page needed a way to say "new section" without a third
+  // colour in the palette: this is canvas taken one step down, warm-neutral like its
+  // parent, and it is the only value the alternation uses. Everything that sits on canvas
+  // clears its floor on this too — ink 11.882:1, ink-70 body 5.081:1, graphite-70 body
+  // 5.137:1, accent 4.842:1, and ink-70 on a .card-surface over it 4.753:1, the worst case
+  // on the ground and still over 4.5. Mirrored as --color-canvas-raised in globals.css.
+  canvasRaised: "#EFEBE0", // derived — alternating section ground (2.1a)
+  cardTintOnCanvas: "#DCE4EE", // derived — §2 cell hover fill, flat lift (2.1a)
+  cardTintDeepOnCanvas: "#CBD9EA", // derived — §2 cell hover fill, radial peak (2.1a)
+  serviceNumeralOnCanvas: "#BFCFE4", // derived — §2 watermark numeral (2.1a)
 } as const;
 
 export const type = {
@@ -77,9 +106,12 @@ export const typeScale = {
     lineHeight: 1.02,
     letterSpacing: "-0.03em",
   },
-  // The hero headline takes its own step rather than displayXl: in a 46%-wide column
+  // THE HEADING STEP. Named `hero` because that is where it started — the hero headline
+  // took its own step rather than displayXl: in a 46%-wide column
   // displayXl broke the client's 48-character headline onto five lines. This resolves to
   // ~52px at 1440, about 23 characters a line, so it holds two. See globals.css.
+  // Every section heading takes it too now, in place of displayL and, for the closing CTA,
+  // displayXl. Mirrored as `.text-heading` in globals.css, which is the name to use in markup.
   hero: { size: "clamp(1.9rem, 2.8vw, 2.6rem)", lineHeight: 1.08, letterSpacing: "-0.026em" },
   displayL: {
     size: "clamp(1.75rem, 3.85vw, 4.25rem)",
@@ -125,7 +157,16 @@ export const spacing = {
   section: "clamp(4.5rem, 10vh, 8.5rem)",
   sectionDark: "clamp(6.5rem, 14vh, 12rem)",
   statement: "clamp(8rem, 18vh, 15rem)",
-  gutter: "clamp(1.25rem, 5vw, 5.5rem)",
+  // THE SITE'S ONE GUTTER. The header bar, every section's Container and the footer all
+  // take this value, which is what makes a section's first character sit directly under
+  // the wordmark and its last pixel under the right edge of the header's CTA. It used to
+  // top out at 5.5rem while the header ran on a flat 1.5rem, so content was inset from
+  // the bar it was supposed to line up with — 4px at 390 and 64px at 1920.
+  //
+  // 3rem is the ceiling rather than 5.5rem because the header has to live inside it too:
+  // the bar's contents measure 1128px at their tightest, and at the old ceiling the 80rem
+  // shell left only 1104px, so the nav would have overflowed. At 3rem it has 1184px.
+  gutter: "clamp(1.5rem, 4vw, 3rem)",
 } as const;
 
 export const container = { maxWidth: "80rem" } as const; // 1280px
@@ -164,6 +205,21 @@ export const motion = {
     // one column rather than the two halves of a split, and a 120ms gap between a
     // numeral and the heading directly under it reads as a stall.
     blockStepMs: 100,
+  },
+  // §2 What We Do — the service grid assembles itself rather than fading in as a block:
+  // outer border, then internal hairlines, then cells, then numerals. Every `*DelayMs` is
+  // the moment its beat STARTS, measured from the grid entering view; the two `*Ms` values
+  // are durations. Verticals lead horizontals by one `hairlineStepMs` because a vertical
+  // divides the row you are already reading across, so it lands where the eye is.
+  gridDraw: {
+    outerMs: 600,
+    hairlineStepMs: 120,
+    verticalDelayMs: 600,
+    horizontalDelayMs: 720,
+    ruleMs: 480,
+    cellDelayMs: 840,
+    cellMs: 320,
+    numeralTrailMs: 200,
   },
   emphasis: {
     // /ways-to-work-with-us: the Custom Creative Partnership block is the page's

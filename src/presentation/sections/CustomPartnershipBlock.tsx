@@ -74,7 +74,7 @@ export function CustomPartnershipBlock({ custom }: CustomPartnershipBlockProps) 
           </div>
 
           <div style={enterStyle(1)}>
-            <RevealHeading className="text-display-l mt-10 font-medium text-canvas">
+            <RevealHeading className="text-heading mt-10 font-medium text-canvas">
               {custom.name}
             </RevealHeading>
             {/* The brief's descriptor is a sentence here, not a one- or two-word
