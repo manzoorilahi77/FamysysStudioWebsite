@@ -6,6 +6,7 @@ import type { NavEntryView, NavigationMenuView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { shellStyle } from "../components/Container";
 import { Wordmark } from "../components/Wordmark";
+import { HeaderLogo } from "../components/HeaderLogo";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { NavPanel } from "./NavPanel";
 import { MobileDrawer } from "./MobileDrawer";
@@ -24,6 +25,11 @@ interface HeaderProps {
    * not a design choice. See the note on the component.
    */
   readonly solidAtTop?: boolean;
+  /**
+   * Homepage only: the wordmark starts large in the hero and travels into the bar's slot
+   * as the page scrolls — see HeaderLogo. Every other page renders the plain wordmark.
+   */
+  readonly heroLogo?: boolean;
 }
 
 function hasPanel(entry: NavEntryView): boolean {
@@ -86,7 +92,7 @@ function Dot() {
  * an open panel starts where the bar ends. Same arrangement as `--services-anchor-offset`
  * on /creative-services.
  */
-export function Header({ navigation, solidAtTop = false }: HeaderProps) {
+export function Header({ navigation, solidAtTop = false, heroLogo = false }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [openHref, setOpenHref] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -219,8 +225,12 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
           {/* One file, both scroll states. Transparent means "on the hero", which is ink;
               scrolled means the bar is ink. Neither is light, so there is nothing for the
               ink variant to appear on and nothing to cross-fade between. That file is
-              still the one the footer and the contact card use. */}
-          <Wordmark alt="" dark priority className="h-8" />
+              still the one the footer and the contact card use.
+
+              On the homepage the slot is held by HeaderLogo instead: an invisible spacer
+              keeps this exact layout while the visible wordmark starts large in the hero
+              and travels here with scroll. */}
+          {heroLogo ? <HeaderLogo /> : <Wordmark alt="" dark priority className="h-8" />}
         </Link>
 
         <nav

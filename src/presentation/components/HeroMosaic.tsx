@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { MediaView } from "../lib/viewModels";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { MosaicLightbox } from "./MosaicLightbox";
@@ -30,22 +31,27 @@ const BOOST_TAU_S = 0.6;
 /** Scroll pixels needed to reach the ceiling; the boost is capped so it stays a drift. */
 const BOOST_PER_PIXEL = 0.035;
 const BOOST_MAX = 6;
+/** Scrolling while the cursor is over the mosaic rushes the columns much harder. */
+const HOVER_BOOST_PER_PIXEL = 0.12;
+const HOVER_BOOST_MAX = 14;
 
 interface HeroMosaicProps {
   readonly tiles: ReadonlyArray<MediaView>;
 }
 
-function ExpandIcon() {
+function ExpandCursorBadge() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span className="hero-mosaic-cursor-badge">
+      Expand
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path
+          d="M6 1v10M1 6h10"
+          stroke="currentColor"
+          strokeWidth="1.25"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
   );
 }
 
@@ -55,6 +61,33 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
   const trackRefs = useRef<Array<HTMLDivElement | null>>([]);
   const tileRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const lastFocusedIndex = useRef<number | null>(null);
+  // Read by the drift loop each scroll event; a ref so hovering never restarts the effect.
+  const isHoveringRef = useRef(false);
+  const cursorRef = useRef<HTMLDivElement | null>(null);
+  const [isCursorActive, setCursorActive] = useState(false);
+  // The cursor portals to <body>; gate it until mount so SSR never touches `document`.
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Position is written straight to the node — routing every mousemove through state
+  // would re-render the whole mosaic per frame. The active flag IS state, but React
+  // bails out when the value has not changed, so it only re-renders on the boundary
+  // between a tile and a gap: the disc shows over the photographs, the native arrow
+  // stays over the gaps between them.
+  const moveCursor = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") {
+      return;
+    }
+    const node = cursorRef.current;
+    if (node) {
+      node.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    }
+    const target = event.target instanceof Element ? event.target : null;
+    setCursorActive(Boolean(target?.closest(".hero-mosaic-tile")));
+  }, []);
 
   let cursor = 0;
   const columns = COLUMNS.map((column) => {
@@ -97,7 +130,9 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
         return;
       }
       directionTarget = delta > 0 ? -1 : 1;
-      boost = Math.min(BOOST_MAX, boost + Math.abs(delta) * BOOST_PER_PIXEL);
+      const perPixel = isHoveringRef.current ? HOVER_BOOST_PER_PIXEL : BOOST_PER_PIXEL;
+      const max = isHoveringRef.current ? HOVER_BOOST_MAX : BOOST_MAX;
+      boost = Math.min(max, boost + Math.abs(delta) * perPixel);
     }
 
     function step(now: number): void {
@@ -149,7 +184,20 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
           role for a name to attach to, and axe reports the attribute as having no effect.
           The element is not decoration: it holds eight buttons that each open the same
           lightbox, which is what `group` is for. The label names that set. */}
-      <div className="hero-mosaic" role="group" aria-label="Studio production stills">
+      <div
+        className="hero-mosaic"
+        role="group"
+        aria-label="Studio production stills"
+        onPointerEnter={(event) => {
+          isHoveringRef.current = true;
+          moveCursor(event);
+        }}
+        onPointerMove={moveCursor}
+        onPointerLeave={() => {
+          isHoveringRef.current = false;
+          setCursorActive(false);
+        }}
+      >
         {columns.map(({ column, items, startIndex }, columnIndex) => {
           const trackItems = prefersReducedMotion ? items : buildTrack(items);
           return (
@@ -199,9 +247,6 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
                         className="hero-mosaic-media h-full w-full object-cover"
                       />
                       <span className="hero-mosaic-scrim" aria-hidden="true" />
-                      <span className="hero-mosaic-expand" aria-hidden="true">
-                        <ExpandIcon />
-                      </span>
                       <span className="sr-only">{isRepeat ? "" : `Enlarge: ${tile.alt}`}</span>
                     </button>
                   );
@@ -211,6 +256,23 @@ export function HeroMosaic({ tiles }: HeroMosaicProps) {
           );
         })}
       </div>
+      {/* The custom cursor, portalled to <body>. It cannot live inside the mosaic frame:
+          the frame's mask-image would clip it, and the `.enter-scale` ancestor keeps a
+          transform after its entrance, which turns that element into the containing block
+          for `position: fixed` — the disc would anchor to the frame, not the viewport.
+          Position is written directly in moveCursor; the class only toggles the scale. */}
+      {isMounted
+        ? createPortal(
+            <div
+              ref={cursorRef}
+              className={`hero-mosaic-cursor${isCursorActive ? " is-active" : ""}`}
+              aria-hidden="true"
+            >
+              <ExpandCursorBadge />
+            </div>,
+            document.body,
+          )
+        : null}
       <MosaicLightbox
         tiles={tiles}
         openIndex={openIndex}

@@ -265,40 +265,41 @@ will show — so it has to be rewritten the day the real cover lands.
 
 File: `src/infrastructure/content/static/about.content.ts`
 
-**One image on the whole page**, and it has no people in it.
+**Six images across eight sections**, chosen under one rule: production, not people.
 
-| Slot                 | Section             | Ratio | Shows                                                                                                           | Unsplash id                        |
-| -------------------- | ------------------- | ----- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `about-approach.jpg` | What we do, and why | 4:3   | A colour-grading interface on a monitor, shot at an angle: two colour wheels beside a hue curve over a spectrum | `photo-1741517389370-740b5bdf0d96` |
+| Slot                       | Section                    | Ratio | Shows                                                                                                             | Unsplash id                        |
+| -------------------------- | -------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `about-hero.jpg`           | Hero                       | 16:9  | An empty photographic studio: white cyclorama, two softboxes, an overhead lighting rig, a camera bag on the floor | `photo-1471341971476-ae15ff5dd4ea` |
+| `about-claim-creative.jpg` | Claim 1 — direction        | 4:3   | An open sketchbook of thumbnail layouts in blue ink, a pencil across the page                                     | `photo-1523726491678-bf852e717f6a` |
+| `about-claim-workflow.jpg` | Claim 2 — workflow         | 3:4   | A laptop showing a video edit: a clip timeline under a preview frame, colour wheels beside it                     | `photo-1574717025058-2f8737d2e2b7` |
+| `about-approach.jpg`       | Claim 3 — AI               | 4:3   | A colour-grading interface: two colour wheels beside a hue curve over a spectrum                                  | `photo-1741517389370-740b5bdf0d96` |
+| `about-ecosystem.jpg`      | Where the Studio sits      | 4:3   | A camera operator seen from below, adjusting a rig by hand under a small lamp                                     | `photo-1558618666-fcd25c85cd64`    |
+| `about-direction.jpg`      | What we're building toward | 4:3   | A projector throwing a beam through haze in a red-lit room                                                        | `photo-1535016120720-40c646be5580` |
 
-**Two decisions worth recording.**
+**The rule, and why this page needs one.** At most one person in any frame, no crews, no
+faces presented as staff, no premises, and no legible brand marks at the rendered crop. On
+an About page a stranger's face reads as _our team_ and a photographed office reads as
+_our office_ — both false. Five of the six frames have no person in them at all; the sixth
+(`about-ecosystem`) is a single pair of hands on a camera rig with the operator's face
+soft and partly behind the equipment, which reads as the work rather than as a portrait.
 
-_Why only one, when the brief allowed two._ The second slot was offered for "Where we're
-going". It was left out. That block is two sentences — the client's ambition and the
-client's own statement that the studio is starting deliberately — and its whole effect is
-the pairing. A stock photograph beside them would be decoration competing with the one
-thing the section is for.
+**What was rejected at the crop check.** A three-person workshop table (a crew, and it
+read as a team photo); a designer at an Apple desk setup with a legible logo on the
+display; an open-plan office interior (premises); a clapperboard close-up with another
+studio's production name printed on it; and a monitor wall carrying third-party
+application chrome along the bottom edge.
 
-_Why this frame has no people in it._ The brief warns that stock photography of unrelated
-people is weaker on this page than anywhere else on the site, and that is right: on an
-About page a stranger's face reads as _our team_. This studio has no team page, no
-headcount and, in the brief's own words, is still starting — so a photograph implying
-staff would be the exact false note the rest of the page is written to avoid. A grading
-interface shows the work instead of implying the people.
-
-Three candidates were rejected during the crop check: a switcher desk with a legible
-Blackmagic Design wordmark and a Dell monitor; one person editing at a monitor (no brand
-marks, but a face); and an earlier crop of the chosen frame that included a dock of
-third-party application icons along the bottom edge. The shipped crop is pulled up above
-that dock — the only text left in frame is interface labelling ("Curves - Hue Vs Hue",
-"H.265 Main 10 L5.2"), which is a codec name, not a brand.
+The page previously carried one image, on the theory that a single frame was the safest
+answer to the "no stock strangers" warning. That was right about faces and wrong about
+quantity: two images across what became eight sections read as an unfinished page. The
+rule above solves the same problem without the emptiness.
 
 Same terms as everything above: Unsplash License, downloaded into `public/media/`, served
-locally, no attribution required to ship and no hotlinking. Checked at its final crop
-before wiring, and the alt text describes the stock frame rather than anything the studio
-made — so it has to be rewritten if a real image replaces it.
+locally, no attribution required to ship, no hotlinking. Every `alt` describes the stock
+frame rather than anything the studio made, so each has to be rewritten the day a real
+image replaces it.
 
-### Hero subhead runs three lines, not two-and-a-half
+## Hero subhead runs three lines, not two-and-a-half
 
 The hero detail brief asked for a subhead of two to two-and-a-half lines **and** a measure capped
 at 46–52ch. Those cannot both hold: the client's body copy is 180 characters, so at 52ch it is
@@ -920,10 +921,22 @@ content modules and therefore not up for review here. Regenerate with
 
 ## Drafted copy pending approval — About (`/about`)
 
-**The shortest page on the site, deliberately.** The brief says to keep About relatively
-short initially, so it has six sections where the other inner pages have eight or ten,
-and less copy in each. It should read as quiet by design rather than thin by accident,
-which is why the expansion below is modest and stops rather than filling space.
+**Short by design, not thin by accident.** The brief says to keep About relatively short
+because the studio is new. That still holds — but "short" had become "empty": five sparse
+sections, two images, and copy that read as a placeholder for a page rather than a page.
+It now has eight sections, and every added one says something a new studio can stand
+behind rather than something an established one would claim.
+
+The three new blocks are the substance:
+
+- **The three inputs** — human creativity, AI and structured production, each stated as
+  what it contributes AND where it stops. The second half is the point. A page that only
+  lists what each input gives is a page claiming AI does everything.
+- **How we're building** — capabilities, then process, then scale, with the studio's own
+  word for where each stands ("Now", "Next", "After that") and a closing sentence naming
+  what is _not_ ready yet: volume, and a large programme of work on a fixed calendar.
+- **What we do, and why**, expanded from one block to three claims, each paired with the
+  observable consequence a client could hold the studio to.
 
 **What is NOT drafted, and must not be edited here.** Six strings are the client's own,
 and they live in `aboutBlock` in `marketing.content.ts` — the one module that holds the
@@ -956,22 +969,35 @@ sections further down and be visibly false to anyone who checks.
 
 Two checks hold it. A unit test asserts the whole content module contains no digit at all
 and no founding, premises, award, certification or scale vocabulary. The browser
-verification asserts the same against the **rendered** page.
+verification asserts the same against the **rendered** page — including that the stage
+numerals contribute no digits, because they are generated content and therefore not in
+the page's text.
 
 One deliberate exception is worth naming: **"India" stays.** It appears in the client's
 own ambition sentence, describing the market the studio intends to serve. It is not an
 office or headquarters claim, and the location check targets premises language
-("headquartered", "based in", "our offices") rather than the word itself. Removing it
-would have meant dropping the brief's own wording.
+("headquartered", "based in", "our offices") rather than the word itself.
 
-### Commitments — there are none
+### Commitments — read these two carefully
 
-Checked, and the table is empty by design. No drafted string on this page makes a claim
-about size, history, turnaround, capacity or capability the studio has not established.
-The two sentences that come closest are both the client's own and both describe intent:
-the ambition, and the statement about starting deliberately. They are rendered as one
-block precisely so neither can be read without the other — an ambition on its own reads
-as a description of today.
+The expanded copy is more specific than the old page, and specificity is what makes a
+page worth reading. Two drafted sentences describe how the studio works and should be
+confirmed as true before launch rather than assumed:
+
+| Where                         | Sentence to confirm                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| approach › claim 1 › practice | "Every piece starts with a written creative direction that you see and agree before production begins." |
+| approach › claim 3 › practice | "It does not set the direction, and nothing generated goes out without a person having judged it."      |
+
+Both are process commitments, not capacity or turnaround claims, and both match the
+process described on `/how-we-work`. Neither promises a timescale, a volume or a
+guarantee — the drafted copy contains none of those words, and a unit test asserts it.
+
+The **caveat** in "How we're building" is the opposite kind of statement and is the most
+important sentence on the page: it says the studio is small, that you deal directly with
+the people doing the work, and that a large programme of work on a fixed calendar is the
+stage after this one. It exists so the page cannot be read as over-promising. If the
+client wants it softened, the honest move is to change what it says, not to remove it.
 
 ### Sections that were deliberately not built
 
@@ -987,35 +1013,84 @@ The belief statement is centred at display size with the statement measure of sp
 around it. It is the **site's third and last** centred moment — the homepage has the
 thesis line and the closing CTA heading, and everything else on every page is flush left.
 Nothing else on this page is centred, including the statement's own section label, which
-is why that label is an accessible name rather than a rendered eyebrow.
+is why that label is an accessible name rather than a rendered eyebrow. It also gets the
+page's slowest entry (760ms from 28px, against 320ms from 24px everywhere else), which is
+what keeps it the emphasis now that every other section moves too.
 
 ### Every drafted string
 
 <!-- generated: about drafted copy — do not edit by hand, run `pnpm docs:content-todo` -->
 
-**17 drafted strings**, against 8 read from the client's own
+**64 drafted strings**, against 8 read from the client's own
 content modules and therefore not up for review here. Regenerate with
 `pnpm docs:content-todo` after any edit to `about.content.ts`.
 
-| Where                      | Drafted string                                                                                                                                                                                                                                                                |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| hero › eyebrow             | About Famysys Studio                                                                                                                                                                                                                                                          |
-| hero › body                | A creative production studio, built to make professional creative work easier to commission and easier to keep producing.                                                                                                                                                     |
-| belief › label             | What we believe                                                                                                                                                                                                                                                               |
-| approach › eyebrow         | What we do, and why                                                                                                                                                                                                                                                           |
-| approach › heading         | Creative judgment, with production built around it.                                                                                                                                                                                                                           |
-| approach › paragraphs › 1  | The three are not interchangeable. Creative direction decides what a piece should be. The workflow decides whether it can be made again, to the same standard, without a scramble. AI is used where it removes production overhead, and left out where it would cost quality. |
-| approach › paragraphs › 2  | It is not a complicated method. Most of the difference is in applying it the same way every time.                                                                                                                                                                             |
-| approach › media › alt     | A colour-grading interface on a monitor, photographed at an angle: two colour wheels beside a hue curve drawn over a spectrum.                                                                                                                                                |
-| ecosystem › eyebrow        | Part of Famysys                                                                                                                                                                                                                                                               |
-| ecosystem › heading        | Where the Studio sits.                                                                                                                                                                                                                                                        |
-| ecosystem › paragraphs › 1 | So the Studio is not finding its feet alone. It is being built inside an existing business, with creative production as its own focus rather than a side of something else.                                                                                                   |
-| ecosystem › paragraphs › 2 | What the wider group does is its own work, and this page does not claim it as the Studio's. The link below goes to Famysys itself.                                                                                                                                            |
-| ecosystem › link › label   | Visit famysys.com                                                                                                                                                                                                                                                             |
-| direction › eyebrow        | Where we're going                                                                                                                                                                                                                                                             |
-| direction › heading        | What we are building toward.                                                                                                                                                                                                                                                  |
-| closingCta › heading       | Bring us something to make.                                                                                                                                                                                                                                                   |
-| closingCta › body          | Tell us what you are trying to produce and who it is for. We will tell you plainly whether it is something we can make well.                                                                                                                                                  |
+| Where                                                                                                             | Drafted string                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hero › eyebrow                                                                                                    | About Famysys Studio                                                                                                                                                                                                                                                               |
+| hero › body                                                                                                       | A creative production studio, built to make professional creative work easier to commission and easier to keep producing.                                                                                                                                                          |
+| hero › media › alt                                                                                                | An empty photographic studio: a white cyclorama lit by two softboxes and an overhead rig, a camera bag and lenses on the floor.                                                                                                                                                    |
+| belief › label                                                                                                    | What we believe                                                                                                                                                                                                                                                                    |
+| approach › eyebrow                                                                                                | What we do, and why                                                                                                                                                                                                                                                                |
+| approach › heading                                                                                                | Creative judgment, with production built around it.                                                                                                                                                                                                                                |
+| approach › practiceLabel                                                                                          | In practice                                                                                                                                                                                                                                                                        |
+| approach › claims › Creative direction decides what a piece should be. › title                                    | Creative direction decides what a piece should be.                                                                                                                                                                                                                                 |
+| approach › claims › Creative direction decides what a piece should be. › claim                                    | Nothing else on this page matters if the idea is wrong. Before anything is produced, someone with taste decides what the work is for, who it is speaking to and what it should feel like — and that decision is made by a person.                                                  |
+| approach › claims › Creative direction decides what a piece should be. › practice                                 | Every piece starts with a written creative direction that you see and agree before production begins. If the direction is unclear, we stop and fix that first, because production cannot rescue it later.                                                                          |
+| approach › claims › Creative direction decides what a piece should be. › media › alt                              | An open sketchbook filled with thumbnail layouts and notes in blue ink, a pencil resting across the page.                                                                                                                                                                          |
+| approach › claims › The workflow decides whether it can be made again. › title                                    | The workflow decides whether it can be made again.                                                                                                                                                                                                                                 |
+| approach › claims › The workflow decides whether it can be made again. › claim                                    | A good piece made once is luck. The same standard reached the second and the tenth time is a method, and it only happens when the steps are written down, in order, with a check at each one.                                                                                      |
+| approach › claims › The workflow decides whether it can be made again. › practice                                 | The same stages every time — understand, create, produce, refine, deliver — with the same review at the same point in each. Your second piece with us should feel like a continuation, not a restart.                                                                              |
+| approach › claims › The workflow decides whether it can be made again. › media › alt                              | A laptop screen showing a video edit in progress: a timeline of clips below a preview frame, colour wheels to one side.                                                                                                                                                            |
+| approach › claims › AI is used where it removes overhead, and left out where it would cost quality. › title       | AI is used where it removes overhead, and left out where it would cost quality.                                                                                                                                                                                                    |
+| approach › claims › AI is used where it removes overhead, and left out where it would cost quality. › claim       | Emerging tools are genuinely useful for the slow, repetitive parts of production. They are not a substitute for the decisions above, and pretending otherwise produces work that looks like everyone else's.                                                                       |
+| approach › claims › AI is used where it removes overhead, and left out where it would cost quality. › practice    | AI helps with drafts, variations, transcripts, rough assemblies and the versions a piece needs for different channels. It does not set the direction, and nothing generated goes out without a person having judged it.                                                            |
+| approach › claims › AI is used where it removes overhead, and left out where it would cost quality. › media › alt | A colour-grading interface on a monitor, photographed at an angle: two colour wheels beside a hue curve drawn over a spectrum.                                                                                                                                                     |
+| inputs › eyebrow                                                                                                  | The three inputs                                                                                                                                                                                                                                                                   |
+| inputs › heading                                                                                                  | What each input contributes, and where it stops.                                                                                                                                                                                                                                   |
+| inputs › body                                                                                                     | The studio is built on three things, and each is only useful because the other two are there. Naming where each one stops is the honest half of the description.                                                                                                                   |
+| inputs › inputs › Human creativity › name                                                                         | Human creativity                                                                                                                                                                                                                                                                   |
+| inputs › inputs › Human creativity › contributesLabel                                                             | Contributes                                                                                                                                                                                                                                                                        |
+| inputs › inputs › Human creativity › contributes                                                                  | Taste, judgment and the idea itself. Deciding what a piece is for, what it should say and what it should feel like — and recognising when a draft is not there yet.                                                                                                                |
+| inputs › inputs › Human creativity › stopsLabel                                                                   | Stops at                                                                                                                                                                                                                                                                           |
+| inputs › inputs › Human creativity › stops                                                                        | Volume. One person's judgment does not multiply by itself, and a studio that relied on it alone would be slow, expensive and inconsistent from one piece to the next.                                                                                                              |
+| inputs › inputs › AI › name                                                                                       | AI                                                                                                                                                                                                                                                                                 |
+| inputs › inputs › AI › contributesLabel                                                                           | Contributes                                                                                                                                                                                                                                                                        |
+| inputs › inputs › AI › contributes                                                                                | Speed on the repetitive parts: first drafts, variations, transcripts, rough assemblies and the many versions one piece needs across channels.                                                                                                                                      |
+| inputs › inputs › AI › stopsLabel                                                                                 | Stops at                                                                                                                                                                                                                                                                           |
+| inputs › inputs › AI › stops                                                                                      | Direction and sign-off. It does not decide what the work is for, and nothing it produces goes out without a person having judged it.                                                                                                                                               |
+| inputs › inputs › Structured production › name                                                                    | Structured production                                                                                                                                                                                                                                                              |
+| inputs › inputs › Structured production › contributesLabel                                                        | Contributes                                                                                                                                                                                                                                                                        |
+| inputs › inputs › Structured production › contributes                                                             | Repeatability. The same stages in the same order, with a review at the same point each time, so the second piece is as considered as the first.                                                                                                                                    |
+| inputs › inputs › Structured production › stopsLabel                                                              | Stops at                                                                                                                                                                                                                                                                           |
+| inputs › inputs › Structured production › stops                                                                   | Ideas. A process can make a good idea reliably; it cannot supply one. That is why it sits underneath the other two rather than in front of them.                                                                                                                                   |
+| building › eyebrow                                                                                                | How we're building                                                                                                                                                                                                                                                                 |
+| building › heading                                                                                                | Starting deliberately, in a set order.                                                                                                                                                                                                                                             |
+| building › body                                                                                                   | The studio is new, and saying so is easier than being caught out by it. This is the order things are being built in, and where each stage stands.                                                                                                                                  |
+| building › stages › Capabilities first › title                                                                    | Capabilities first                                                                                                                                                                                                                                                                 |
+| building › stages › Capabilities first › status                                                                   | Now                                                                                                                                                                                                                                                                                |
+| building › stages › Capabilities first › body                                                                     | Building the creative and production capability itself: the people, the tools and the working method for each service we offer. A studio that cannot yet make the work well has nothing to organise.                                                                               |
+| building › stages › Then process › title                                                                          | Then process                                                                                                                                                                                                                                                                       |
+| building › stages › Then process › status                                                                         | Next                                                                                                                                                                                                                                                                               |
+| building › stages › Then process › body                                                                           | Writing down how each kind of piece gets made, and running enough work through it to find where it needs tightening. The process described on this site is the one in use; refining it is the current work.                                                                        |
+| building › stages › Then scale › title                                                                            | Then scale                                                                                                                                                                                                                                                                         |
+| building › stages › Then scale › status                                                                           | After that                                                                                                                                                                                                                                                                         |
+| building › stages › Then scale › body                                                                             | Taking on more work, and more kinds of work, once the first two hold without effort. Growth that arrives before the method is ready is exactly what the word deliberately is there to prevent.                                                                                     |
+| building › caveat                                                                                                 | What that means for a client today: the work is made carefully and reviewed properly, and the studio is small enough that you deal directly with the people doing it. What is not ready yet is volume — a large programme of work on a fixed calendar is the stage after this one. |
+| ecosystem › eyebrow                                                                                               | Part of Famysys                                                                                                                                                                                                                                                                    |
+| ecosystem › heading                                                                                               | Where the Studio sits.                                                                                                                                                                                                                                                             |
+| ecosystem › paragraphs › 1                                                                                        | That is what makes starting deliberately possible. A standalone studio has to sell before it has built; this one can build first, because the business around it already runs.                                                                                                     |
+| ecosystem › paragraphs › 2                                                                                        | So the Studio is not finding its feet alone. It is being built inside an existing business, with creative production as its own focus rather than a side of something else.                                                                                                        |
+| ecosystem › paragraphs › 3                                                                                        | What the wider group does is its own work, and this page does not claim it as the Studio's. The link below goes to Famysys itself.                                                                                                                                                 |
+| ecosystem › media › alt                                                                                           | A camera operator seen from below, adjusting a rig by hand under a small lamp, the background out of focus.                                                                                                                                                                        |
+| ecosystem › link › label                                                                                          | Visit famysys.com                                                                                                                                                                                                                                                                  |
+| direction › eyebrow                                                                                               | Where we're going                                                                                                                                                                                                                                                                  |
+| direction › heading                                                                                               | What we are building toward.                                                                                                                                                                                                                                                       |
+| direction › ambitionLabel                                                                                         | The ambition                                                                                                                                                                                                                                                                       |
+| direction › presentLabel                                                                                          | Where we are today                                                                                                                                                                                                                                                                 |
+| direction › media › alt                                                                                           | A projector throwing a beam of light through haze in a red-lit room.                                                                                                                                                                                                               |
+| closingCta › heading                                                                                              | Bring us something to make.                                                                                                                                                                                                                                                        |
+| closingCta › body                                                                                                 | Tell us what you are trying to produce and who it is for. We will tell you plainly whether it is something we can make well.                                                                                                                                                       |
 
 <!-- /generated -->
 

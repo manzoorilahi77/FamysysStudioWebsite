@@ -8,9 +8,19 @@ export interface NavPanelColumn {
   readonly items: ReadonlyArray<MegaMenuLink>;
 }
 
-/** A thumbnail entry — used by the Selected Work panel, which shows work, not link text. */
+/**
+ * A card entry: a picture, the thing's name, and one line saying what it is. Used by the
+ * two panels that show things rather than link text — Selected Work's pieces and Ways to
+ * Work With Us's engagements.
+ *
+ * `description` is required rather than optional. A row of four pictures with four names
+ * under them is a shelf; the line underneath is what makes each one legible before it is
+ * clicked, and every source these are built from already has one, so there is nothing to
+ * invent and no reason to let a card ship without it.
+ */
 export interface NavPanelFeature extends NavItem {
   readonly media: MediaRef;
+  readonly description: string;
 }
 
 /**

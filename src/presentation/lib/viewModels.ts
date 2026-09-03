@@ -40,6 +40,13 @@ import type {
   CaseStudyDetail,
   WorkCapabilityRef,
 } from "../../domain/portfolio/entities/CaseStudyDetail";
+import type {
+  AboutHero,
+  ApproachBlock,
+  ApproachClaim,
+  DirectionBlock,
+  EcosystemBlock,
+} from "../../domain/about/entities/AboutPage";
 import type { ProcessStepDetail } from "../../domain/process/entities/ProcessStepDetail";
 import type { CapabilityDetail } from "../../domain/services/entities/CapabilityDetail";
 import type { ServicesHero } from "../../domain/services/entities/CreativeServicesPage";
@@ -69,6 +76,7 @@ export interface MegaMenuColumnView {
 
 export interface NavPanelFeatureView extends CtaView {
   readonly media: MediaView;
+  readonly description: string;
 }
 
 export interface NavPanelView {
@@ -241,6 +249,49 @@ export interface ServicesHeroView {
   readonly media: MediaView;
 }
 
+/* /about. Only the four blocks carrying a MediaRef or a Cta need a view — the inputs and
+   build-order blocks are plain strings all the way down and cross the boundary as they
+   are. */
+export interface AboutHeroView {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly body: string;
+  readonly media: MediaView;
+}
+
+export interface ApproachClaimView {
+  readonly title: string;
+  readonly claim: string;
+  readonly practice: string;
+  readonly media: MediaView;
+}
+
+export interface ApproachBlockView {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly intro: string;
+  readonly practiceLabel: string;
+  readonly claims: ReadonlyArray<ApproachClaimView>;
+}
+
+export interface EcosystemBlockView {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly paragraphs: ReadonlyArray<string>;
+  readonly media: MediaView;
+  readonly link: CtaView;
+}
+
+export interface DirectionBlockView {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly ambitionLabel: string;
+  readonly ambition: string;
+  readonly presentLabel: string;
+  readonly present: string;
+  readonly media: MediaView;
+}
+
 export interface FooterContentView {
   readonly tagline: string;
   readonly contactEmail: string;
@@ -270,7 +321,11 @@ function toMegaMenuColumnView(column: MegaMenuColumn): MegaMenuColumnView {
 }
 
 function toNavPanelFeatureView(feature: NavPanelFeature): NavPanelFeatureView {
-  return { ...toCtaView(feature), media: toMediaView(feature.media) };
+  return {
+    ...toCtaView(feature),
+    media: toMediaView(feature.media),
+    description: feature.description,
+  };
 }
 
 function toNavPanelView(panel: NavPanel): NavPanelView {
@@ -477,5 +532,55 @@ export function toFooterContentView(footer: FooterContent): FooterContentView {
     contactEmail: footer.contactEmail,
     legalLinks: footer.legalLinks.map(toCtaView),
     socialLinks: footer.socialLinks.map(toCtaView),
+  };
+}
+
+function toApproachClaimView(claim: ApproachClaim): ApproachClaimView {
+  return {
+    title: claim.title,
+    claim: claim.claim,
+    practice: claim.practice,
+    media: toMediaView(claim.media),
+  };
+}
+
+export function toAboutHeroView(hero: AboutHero): AboutHeroView {
+  return {
+    eyebrow: hero.eyebrow,
+    heading: hero.heading,
+    body: hero.body,
+    media: toMediaView(hero.media),
+  };
+}
+
+export function toApproachBlockView(approach: ApproachBlock): ApproachBlockView {
+  return {
+    eyebrow: approach.eyebrow,
+    heading: approach.heading,
+    intro: approach.intro,
+    practiceLabel: approach.practiceLabel,
+    claims: approach.claims.map(toApproachClaimView),
+  };
+}
+
+export function toEcosystemBlockView(ecosystem: EcosystemBlock): EcosystemBlockView {
+  return {
+    eyebrow: ecosystem.eyebrow,
+    heading: ecosystem.heading,
+    paragraphs: ecosystem.paragraphs,
+    media: toMediaView(ecosystem.media),
+    link: toCtaView(ecosystem.link),
+  };
+}
+
+export function toDirectionBlockView(direction: DirectionBlock): DirectionBlockView {
+  return {
+    eyebrow: direction.eyebrow,
+    heading: direction.heading,
+    ambitionLabel: direction.ambitionLabel,
+    ambition: direction.ambition,
+    presentLabel: direction.presentLabel,
+    present: direction.present,
+    media: toMediaView(direction.media),
   };
 }

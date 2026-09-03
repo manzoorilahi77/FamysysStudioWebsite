@@ -1,12 +1,7 @@
-"use client";
-
 import type { BeliefBlock } from "../../domain/about/entities/AboutPage";
-import { motion } from "../../shared/design/tokens";
 import { Container } from "../components/Container";
 import { RevealHeading } from "../components/RevealHeading";
 import { Section } from "../components/Section";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface BeliefStatementProps {
   readonly belief: BeliefBlock;
@@ -25,31 +20,25 @@ interface BeliefStatementProps {
  * `statement` padding gives it the most air any block on the site gets — the same
  * measure the homepage's thesis stands in.
  *
- * The only motion is a slightly longer entry than the copy around it: 520ms against
- * 320ms, the emphasis duration the Custom Partnership block uses. A different effect
- * would have been a new effect; a different duration is emphasis, and this page is
- * meant to feel quieter than the others.
+ * IT ARRIVES ON LOAD, NOT ON SCROLL, and that is a measurement rather than a preference:
+ * the hero holds 60svh and the statement's own padding puts this line about 700px down at
+ * a 900px viewport and about 640px down on a phone, so on every viewport the site is
+ * built for it is already inside the first screen. A scroll reveal on something nobody
+ * scrolls to is a reveal that never plays — it would simply render final and the page's
+ * emphasis would be the one block that does not move.
+ *
+ * So it takes the same mechanism the hero's own copy takes: a keyframe, which holds its
+ * from-state before it starts and its to-state after, and therefore needs no JavaScript
+ * to finish. Its entry is slower and further than anything else on the page — 760ms from
+ * 28px against 320ms from 24px — and it starts after the hero's copy has landed. A
+ * different effect would have been a new effect; a different pace is emphasis. See
+ * `.belief-enter` in globals.css, which also holds it still under reduced motion.
  */
 export function BeliefStatement({ belief }: BeliefStatementProps) {
-  const [ref, isInView] = useInView<HTMLDivElement>({ threshold: 0.2, once: true });
-  const prefersReducedMotion = useReducedMotion();
-  const hasArrived = prefersReducedMotion || isInView;
-
   return (
     <Section statement ariaLabel={belief.label}>
       <Container>
-        <div
-          ref={ref}
-          style={{
-            opacity: hasArrived ? 1 : 0,
-            transform: hasArrived || prefersReducedMotion ? "translateY(0)" : "translateY(20px)",
-            transitionProperty: "opacity, transform",
-            transitionDuration: prefersReducedMotion
-              ? `${motion.duration.reduced}ms`
-              : `${motion.emphasis.entryMs}ms`,
-            transitionTimingFunction: "var(--ease-base)",
-          }}
-        >
+        <div className="belief-enter">
           <RevealHeading
             as="p"
             className="text-heading mx-auto max-w-[30ch] text-center font-medium text-balance text-ink"

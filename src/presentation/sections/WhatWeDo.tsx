@@ -29,11 +29,13 @@ interface WhatWeDoProps {
  * more the only dark ground between the hero and the closing statement.
  *
  * The CARD design is the part that came from the dark reference, and none of it needed a
- * dark section to work: cells with no fill at rest, a light navy that arrives only under the
- * cursor, oversized numerals cropped by the cell's bottom edge, and one accent square that
- * travels between hairline junctions. The three light navies those need are mixed toward
- * white rather than taken off the ink ramp, because ink over this warm cream composites grey
- * — see `colorDerived` in tokens.ts and the `.service-*` block in globals.css.
+ * dark section to work: cells with no fill at rest, a full ink inversion that drops over the
+ * hovered cell as a top-down curtain, oversized numerals cropped by the cell's bottom edge,
+ * and one accent square that travels between hairline junctions. The inversion replaced a
+ * light tint mixed toward white — over this warm cream every mix composited grey, and the
+ * fix was to stop tinting and go all the way to the dark ground, which also hands the
+ * hovered cell cream-on-ink copy and a terracotta ember under its numeral. See the
+ * `.service-*` block in globals.css.
  *
  * The header splits: heading left, supporting line right, from lg up. A six-cell grid is
  * the widest thing on the page, and opening it with a header that uses half the measure

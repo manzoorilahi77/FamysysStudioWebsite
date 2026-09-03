@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Famysys Studio — Homepage exploration B: Kinetic</title>
+<meta name="description" content="Homepage direction B (Kinetic) for Famysys Studio. Motion is the medium: full-bleed photography, a pinned panel, a horizontal scroll, scroll-scrubbed type and cursor-tracked tiles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   COLOUR — fixed, identical across all three explorations
+------------------------------------------------------------------- */
+:root{
+  --pageBackground:#F2EDE1;
+  --darkBackground:#12251F;
+  --cardBackground:#FCF8EE;
+  --textOnLight:#16241E;
+  --textOnDark:#F1EBDD;
+  --textMuted:#212B25;
+  --accentPrimary:#A6381D;
+  --accentOnDark:#E5906A;
+  --accentWarm:#D6A03C;
+  --accentHighlight:#66E0B0;
+  --sectionAlt:#1E3A31;
+  --sectionWarm:#E5DCCA;
+
+  --display:"Syne", "Arial Black", Impact, sans-serif;
+  --sans:"Manrope", "Segoe UI", Helvetica, Arial, sans-serif;
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --ease-snap:cubic-bezier(.7,0,.2,1);
+  --gutter:clamp(20px, 4vw, 64px);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--darkBackground);
+  color:var(--textOnDark);
+  font-family:var(--sans);
+  font-size:clamp(16px, 1.05vw, 19px);
+  line-height:1.55;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+h1,h2,h3,h4{font-family:var(--display);font-weight:800;line-height:.95;letter-spacing:-.02em;margin:0}
+p{margin:0}
+ul{list-style:none;margin:0;padding:0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.shell{padding-inline:var(--gutter)}
+
+.eyebrow{
+  font-family:var(--sans);font-weight:700;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:.7em;
+}
+.eyebrow::before{content:"";width:2.2em;height:2px;background:currentColor;transform-origin:left;}
+.btn{
+  display:inline-flex;align-items:center;gap:.6em;
+  font-weight:700;font-size:.95rem;letter-spacing:.01em;
+  padding:1em 1.6em;border-radius:999px;text-decoration:none;
+  transition:transform .35s var(--ease-out), background-color .3s, color .3s;
+  will-change:transform;
+}
+.btn:hover{transform:translateY(-3px)}
+.btn-apricot{background:var(--accentOnDark);color:var(--textOnLight)}
+.btn-jade{background:var(--accentHighlight);color:var(--textOnLight)}
+.btn-ghost{box-shadow:inset 0 0 0 2px var(--textOnDark);color:var(--textOnDark)}
+.btn-ghost:hover{background:var(--textOnDark);color:var(--textOnLight)}
+.btn-ink{background:var(--textOnLight);color:var(--textOnDark)}
+.btn-terracotta{background:var(--accentPrimary);color:#fff}
+
+/* ------------------------------------------------------------------
+   HEADER — hides on scroll down, returns on scroll up (transform only)
+------------------------------------------------------------------- */
+.hdr{
+  position:fixed;inset:0 0 auto 0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.9rem var(--gutter);
+  background:rgba(18,37,31,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transform:translateY(0);transition:transform .5s var(--ease-snap);
+}
+.hdr.is-hidden{transform:translateY(-110%)}
+.hdr-progress{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accentHighlight);transform:scaleX(0);transform-origin:left;}
+.wordmark{font-family:var(--display);font-weight:800;font-size:1.15rem;letter-spacing:-.02em;text-decoration:none;display:flex;align-items:center;gap:.5em}
+.wordmark i{width:.6em;height:.6em;border-radius:50%;background:var(--accentOnDark);display:inline-block;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+.nav{display:flex;gap:1.6rem;align-items:center}
+.nav a{font-size:.85rem;font-weight:600;text-decoration:none;opacity:.9;position:relative}
+.nav a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accentHighlight);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease-out)}
+.nav a:hover::after{transform:scaleX(1)}
+.hdr .btn{padding:.7em 1.2em;font-size:.85rem}
+.menu-btn{display:none;font-weight:700;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
+.drawer{position:fixed;inset:0;z-index:49;background:var(--sectionAlt);padding:6rem var(--gutter) 3rem;display:flex;flex-direction:column;gap:1.4rem;font-family:var(--display);font-size:2rem;font-weight:800}
+.drawer[hidden]{display:none}
+.drawer a{text-decoration:none}
+@media (max-width:899px){
+  .nav,.hdr .btn{display:none}
+  .menu-btn{display:block}
+}
+
+/* ------------------------------------------------------------------
+   1. HERO — full-bleed frames cross-fade + headline assembles + scroll-scrub
+------------------------------------------------------------------- */
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:minmax(0,1fr);align-items:end;padding:8rem var(--gutter) 3rem;overflow:hidden}
+.hero-media{position:absolute;inset:0;z-index:0;will-change:transform,clip-path;transform-origin:center 40%}
+.hero-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.14);transition:opacity 1.4s ease, transform 7s linear}
+.hero-frame.is-active{opacity:1;transform:scale(1)}
+.hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(18,37,31,.35) 0%, rgba(18,37,31,.25) 40%, rgba(18,37,31,.92) 100%)}
+.hero-copy{position:relative;z-index:1;max-width:1200px;min-width:0;will-change:transform,opacity}
+.hero h1{font-size:clamp(2.1rem, 9.2vw, 9.6rem);max-width:12ch}
+.hero h1 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.06em;margin-bottom:-.06em}
+.hero h1 .wi{display:inline-block;transform:translateY(112%) rotate(4deg);animation:rise 1s var(--ease-out) forwards;animation-delay:calc(var(--i) * 80ms + 150ms)}
+.hero h1 .w:nth-child(even) .wi{transform:translateY(-112%) rotate(-4deg)}
+.hero h1 .hl{color:var(--accentOnDark)}
+@keyframes rise{to{transform:translateY(0) rotate(0)}}
+.hero-sub{margin-top:1.8rem;max-width:56ch;font-size:clamp(1rem, 1.35vw, 1.3rem);opacity:0;transform:translateY(24px);animation:fadeUp .9s var(--ease-out) forwards .9s}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2rem;opacity:0;transform:translateY(24px);animation:fadeUp .9s var(--ease-out) forwards 1.1s}
+.hero-support{margin-top:1.6rem;font-weight:600;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accentHighlight);opacity:0;animation:fadeUp .9s var(--ease-out) forwards 1.3s}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.hero-frames-nav{position:absolute;right:var(--gutter);top:50%;z-index:2;display:flex;flex-direction:column;gap:.6rem;transform:translateY(-50%)}
+.hero-frames-nav i{width:10px;height:10px;border-radius:50%;background:var(--textOnDark);opacity:.4;transform:scale(.7);transition:opacity .4s,transform .4s,background-color .4s}
+.hero-frames-nav i.is-active{opacity:1;transform:scale(1);background:var(--accentHighlight)}
+.hero-scroll{position:absolute;left:var(--gutter);bottom:1.4rem;z-index:2;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;display:flex;align-items:center;gap:.8em;opacity:.8}
+.hero-scroll i{width:1px;height:2.6em;background:var(--textOnDark);display:block;transform-origin:top;animation:drop 1.6s var(--ease-out) infinite}
+@keyframes drop{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1) translateY(100%);opacity:0}}
+@media (max-width:899px){.hero{padding-top:6rem}.hero-frames-nav{display:none}.hero-scroll{display:none}}
+
+/* ------------------------------------------------------------------
+   2. WHAT WE DO — cursor-tracked spotlight + tilting tiles
+------------------------------------------------------------------- */
+.caps{background:var(--sectionAlt);padding:clamp(5rem,10vw,9rem) var(--gutter);position:relative;overflow:hidden}
+.caps-head{display:grid;grid-template-columns:1.4fr 1fr;gap:3rem;align-items:end;margin-bottom:3.5rem}
+.caps h2{font-size:clamp(2.2rem,5.4vw,5.4rem);max-width:14ch}
+.caps-head p{max-width:46ch;opacity:.86}
+.caps-head .btn{margin-top:1.4rem}
+.cap-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;perspective:1400px}
+.spot{position:absolute;left:0;top:0;width:640px;height:640px;margin:-320px 0 0 -320px;border-radius:50%;pointer-events:none;z-index:2;
+  background:radial-gradient(circle, rgba(102,224,176,.32) 0%, rgba(229,144,106,.16) 35%, rgba(0,0,0,0) 68%);
+  mix-blend-mode:screen;opacity:0;transition:opacity .5s;will-change:transform}
+.cap-grid.is-live .spot{opacity:1}
+.cap{position:relative;aspect-ratio:4/4.6;border-radius:18px;overflow:hidden;background:var(--darkBackground);transform-style:preserve-3d;will-change:transform;transition:transform .25s var(--ease-out)}
+.cap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;transform:scale(1.06);transition:transform .8s var(--ease-out),opacity .5s;will-change:transform}
+.cap:hover img{transform:scale(1.14);opacity:.75}
+.cap::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,37,31,.05) 0%,rgba(18,37,31,.92) 100%)}
+.cap-body{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:space-between;padding:1.4rem}
+.cap-num{font-family:var(--display);font-weight:800;font-size:.9rem;letter-spacing:.1em;color:var(--accentWarm)}
+.cap h3{font-size:clamp(1.4rem,2.1vw,2rem);letter-spacing:-.01em;margin-bottom:.6rem}
+.cap p{font-size:.92rem;opacity:.9;max-width:34ch;transform:translateY(14px);opacity:0;transition:transform .5s var(--ease-out),opacity .5s}
+.cap:hover p,.cap.in p{opacity:.9;transform:translateY(0)}
+.cap-tag{position:absolute;right:1.2rem;top:1.2rem;z-index:1;width:44px;height:44px;border-radius:50%;background:var(--accentOnDark);display:grid;place-items:center;color:var(--textOnLight);transform:rotate(-45deg) scale(0);transition:transform .45s var(--ease-out)}
+.cap:hover .cap-tag{transform:rotate(0) scale(1)}
+@media (max-width:899px){
+  .caps-head{grid-template-columns:1fr;gap:1.4rem}
+  .cap-grid{grid-template-columns:1fr 1fr;perspective:none}
+  .cap{aspect-ratio:4/5}
+  .cap p{opacity:.9;transform:none}
+  .spot{display:none}
+}
+@media (max-width:560px){.cap-grid{grid-template-columns:1fr}.cap{aspect-ratio:4/3.2}}
+
+/* ------------------------------------------------------------------
+   3. THE DIFFERENTIATOR — pinned panel, four states
+------------------------------------------------------------------- */
+.diff{background:var(--pageBackground);color:var(--textOnLight);position:relative}
+.diff-stage{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template-columns:1.05fr 1fr;overflow:hidden}
+.diff-left{padding:clamp(3.5rem,7vh,6rem) var(--gutter) clamp(2rem,4vh,3.5rem);min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:2rem}
+.diff h2{font-size:clamp(2rem,3.9vw,4.2rem);max-width:13ch}
+.diff-intro{margin-top:1rem;max-width:48ch;color:var(--textMuted);font-size:.95rem}
+.diff-leadin{margin-top:1rem;font-weight:700;color:var(--accentPrimary)}
+.diff-rail li{display:grid;grid-template-columns:2.6rem 1fr;align-items:center;gap:.8rem;padding:.4rem 0;border-top:1px solid rgba(22,36,30,.14);font-family:var(--display);font-weight:800;font-size:clamp(1.1rem,1.7vw,1.6rem);opacity:.36;transform:translateX(0);transition:opacity .4s,transform .5s var(--ease-out),color .4s}
+.diff-rail li.is-active{opacity:1;transform:translateX(12px);color:var(--accentPrimary)}
+.diff-rail li small{font-family:var(--sans);font-weight:700;font-size:.72rem;letter-spacing:.14em}
+.diff-segs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:1.4rem}
+.diff-segs i{height:4px;background:rgba(22,36,30,.14);position:relative;overflow:hidden;display:block}
+.diff-segs i::after{content:"";position:absolute;inset:0;background:var(--accentPrimary);transform:scaleX(var(--p,0));transform-origin:left}
+.diff-closing{margin-top:1rem;font-family:var(--display);font-weight:800;font-size:clamp(1.1rem,1.6vw,1.7rem);letter-spacing:-.01em;line-height:1.1;max-width:22ch;opacity:0;transform:translateY(16px);transition:opacity .6s,transform .6s var(--ease-out)}
+.diff.is-end .diff-closing{opacity:1;transform:translateY(0)}
+.diff-right{position:relative;background:var(--darkBackground)}
+.diff-panel{position:absolute;inset:0}
+.diff-panel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.12);transition:opacity .7s ease,transform 1.4s var(--ease-out);will-change:transform,opacity}
+.diff-panel.is-active img{opacity:1;transform:scale(1)}
+.diff-panel::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,37,31,.9) 0%,rgba(18,37,31,.1) 55%)}
+.diff-copy{position:absolute;left:var(--gutter);right:var(--gutter);bottom:clamp(2rem,6vh,4rem);z-index:1;color:var(--textOnDark);opacity:0;transform:translateY(40px);transition:opacity .5s,transform .6s var(--ease-out)}
+.diff-panel.is-active .diff-copy{opacity:1;transform:translateY(0)}
+.diff-copy .k{font-family:var(--display);font-weight:800;font-size:clamp(3.5rem,8vw,8rem);line-height:.85;color:var(--accentOnDark);opacity:.9}
+.diff-copy h3{font-size:clamp(1.8rem,3.2vw,3.2rem);margin-top:.4rem}
+.diff-copy p{margin-top:.8rem;max-width:40ch;font-size:1.05rem}
+.diff-stack{display:none}
+/* Stacked mode: below 900px, and when reduced motion is on (pin released) */
+@media (max-width:899px){
+  .diff{height:auto !important}
+  .diff-stage{position:static;height:auto;grid-template-columns:1fr}
+  .diff-rail,.diff-segs{display:none}
+  .diff-right{display:none}
+  .diff-stack{display:grid;gap:1rem;padding:0 var(--gutter) 4rem}
+  .diff-closing{opacity:1;transform:none}
+}
+.diff-stack article{position:relative;border-radius:18px;overflow:hidden;background:var(--darkBackground);color:var(--textOnDark);min-height:300px;display:flex;align-items:flex-end;padding:1.4rem}
+.diff-stack img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.diff-stack div{position:relative;z-index:1}
+.diff-stack .k{font-family:var(--display);font-weight:800;font-size:2.6rem;color:var(--accentOnDark)}
+.diff-stack h3{font-size:1.6rem}
+.diff-stack p{margin-top:.5rem;max-width:38ch}
+
+/* ------------------------------------------------------------------
+   4. HOW WE WORK — scroll-scrubbed numeral rail + staircase steps
+------------------------------------------------------------------- */
+.hww{background:var(--darkBackground);padding:clamp(5rem,10vw,9rem) 0;position:relative;overflow:hidden}
+.hww-head{padding:0 var(--gutter);display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem}
+.hww h2{font-size:clamp(2.4rem,6vw,6.4rem);max-width:10ch}
+.hww-rail{margin-top:2.5rem;white-space:nowrap;font-family:var(--display);font-weight:800;font-size:clamp(9rem,28vw,30rem);line-height:.8;letter-spacing:-.04em;color:rgba(241,235,221,.13);will-change:transform;user-select:none;padding-left:var(--gutter);contain:layout paint}
+.hww-rail span{display:inline-block;margin-right:.18em;transition:color .5s}
+.hww-rail span.is-active{color:var(--accentOnDark)}
+.hww-body{position:relative;padding:3rem var(--gutter) 0}
+.hww-line{position:absolute;left:var(--gutter);top:3rem;bottom:0;width:3px;background:rgba(241,235,221,.12);overflow:hidden}
+.hww-line::after{content:"";position:absolute;inset:0;background:var(--accentWarm);transform:scaleY(var(--p,0));transform-origin:top}
+.steps{display:grid;gap:1.2rem;padding-left:2.4rem}
+.step{display:grid;grid-template-columns:5rem 1fr;gap:1.2rem;align-items:start;padding:1.6rem 1.8rem;border-radius:16px;background:var(--sectionAlt);max-width:640px;margin-left:calc(var(--n) * 7vw);opacity:0;transform:translateX(-60px) rotate(-2deg);transition:opacity .7s,transform .8s var(--ease-out);will-change:transform}
+.step.in{opacity:1;transform:translateX(0) rotate(0)}
+.step .k{font-family:var(--display);font-weight:800;font-size:2.4rem;color:var(--accentWarm);line-height:1}
+.step h3{font-size:clamp(1.5rem,2.4vw,2.2rem)}
+.step p{margin-top:.5rem;opacity:.88;max-width:44ch}
+@media (max-width:899px){.hww-head{grid-template-columns:1fr}.step{margin-left:0;grid-template-columns:3.4rem 1fr;padding:1.2rem}.steps{padding-left:1.6rem}}
+
+/* ------------------------------------------------------------------
+   5. WAYS TO WORK — marquee bands + rolling-letter tier rails
+------------------------------------------------------------------- */
+.ways{background:var(--sectionAlt);padding:clamp(4rem,8vw,7rem) 0 0;overflow:hidden}
+.ways-head{padding:0 var(--gutter);display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:end;margin-bottom:2.5rem}
+.ways h2{font-size:clamp(2.2rem,5.4vw,5.4rem);max-width:12ch}
+.ways-head p{max-width:44ch;opacity:.88}
+.mq{overflow:hidden;border-block:1px solid rgba(241,235,221,.14);padding:.9rem 0;background:var(--darkBackground)}
+.mq-track{display:flex;width:max-content;will-change:transform;animation:mq 34s linear infinite}
+.mq-track.rev{animation-direction:reverse;animation-duration:44s}
+.mq:hover .mq-track{animation-play-state:paused}
+.mq span{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,3.4rem);letter-spacing:-.02em;white-space:nowrap;padding-right:1.2em;display:inline-flex;align-items:center;gap:1.2em}
+.mq span::after{content:"";width:.35em;height:.35em;border-radius:50%;background:var(--accentWarm);display:inline-block}
+.mq.jade span::after{background:var(--accentHighlight)}
+.mq.jade span{font-family:var(--sans);font-weight:600;font-size:1rem;letter-spacing:.06em;text-transform:uppercase}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tiers{display:grid}
+.tier{position:relative;display:grid;grid-template-columns:1.1fr 1fr 1.2fr auto;gap:2rem;align-items:center;padding:2.4rem var(--gutter);border-top:1px solid rgba(241,235,221,.14);text-decoration:none;color:inherit;overflow:hidden;isolation:isolate}
+.tier::before{content:"";position:absolute;inset:0;background:var(--darkBackground);transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease-snap);z-index:-1}
+.tier:hover::before,.tier:focus-within::before{transform:scaleX(1)}
+.tier-name{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,6vw,6rem);line-height:.9;letter-spacing:-.03em;display:block}
+.tier-name .wd{display:inline-block;white-space:nowrap}
+.tier-name .l{display:inline-block;transition:transform .45s var(--ease-out),color .3s;transition-delay:calc(var(--i) * 28ms);will-change:transform}
+.tier:hover .tier-name .l{transform:translateY(-.12em);color:var(--accentOnDark)}
+.tier-desc{font-weight:700;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accentWarm);margin-top:.6rem}
+.tier-sum{max-width:36ch;opacity:.9}
+.tier-meta{display:grid;gap:.9rem;font-size:.92rem}
+.tier-meta dt{font-weight:700;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.tier-meta dd{margin:.2rem 0 0;opacity:.9}
+.tier-img{position:absolute;right:15%;top:50%;width:200px;aspect-ratio:4/3;border-radius:12px;overflow:hidden;transform:translate(40px,-50%) rotate(8deg) scale(.7);opacity:0;transition:transform .6s var(--ease-out),opacity .5s;z-index:-1;pointer-events:none}
+.tier:hover .tier-img{opacity:.55;transform:translate(0,-50%) rotate(-4deg) scale(1)}
+.tier-img img{width:100%;height:100%;object-fit:cover}
+.tier .btn{white-space:nowrap}
+.tier.custom{background:var(--accentOnDark);color:var(--textOnLight);grid-template-columns:1.1fr 1fr 1.2fr auto}
+.tier.custom::before{background:var(--accentWarm)}
+.tier.custom .tier-desc{color:var(--accentPrimary)}
+.tier.custom:hover .tier-name .l{color:var(--textOnLight)}
+.tier.custom .tier-meta dt{opacity:.8}
+@media (max-width:1100px){.tier{grid-template-columns:1fr 1fr;row-gap:1.4rem}.tier .btn{justify-self:start}}
+@media (max-width:899px){.ways-head{grid-template-columns:1fr}.tier{grid-template-columns:1fr;padding:2rem var(--gutter)}.tier-name{font-size:clamp(2.1rem,8.5vw,3.4rem)}.tier-img{display:none}.tier.custom{grid-template-columns:1fr}}
+
+/* ------------------------------------------------------------------
+   6. SELECTED WORK — horizontal scroll
+------------------------------------------------------------------- */
+.work{background:var(--darkBackground);position:relative}
+.work-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.work-top{position:absolute;top:calc(4.2rem + 2vh);left:var(--gutter);right:var(--gutter);display:flex;justify-content:space-between;align-items:baseline;gap:1rem;z-index:2}
+.work-count{font-family:var(--display);font-weight:800;font-size:clamp(1.4rem,2.6vw,2.4rem);letter-spacing:.02em;color:var(--accentWarm);display:flex;gap:.3em;white-space:nowrap;flex:none}
+.work-count .d{display:inline-block;height:1em;line-height:1;overflow:hidden;vertical-align:top}
+.work-count .d i{display:block;font-style:normal;transform:translateY(calc(var(--v,0) * -1em));transition:transform .5s var(--ease-snap);will-change:transform}
+.work-track{display:flex;gap:2.2vw;padding:0 var(--gutter);align-items:center;will-change:transform}
+.work-intro{flex:0 0 min(38vw,560px);padding-right:3vw}
+.work-intro h2{font-size:clamp(2.6rem,6vw,6.4rem);max-width:8ch}
+.work-intro p{margin-top:1.4rem;max-width:36ch;opacity:.88}
+.work-intro .btn{margin-top:1.6rem}
+.piece{flex:0 0 min(30vw,420px);text-decoration:none;color:inherit;display:block}
+.piece figure{margin:0;position:relative;aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:var(--sectionAlt)}
+.piece img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform .9s var(--ease-out);will-change:transform}
+.piece:hover img{transform:scale(1)}
+.piece figure::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,37,31,.85),rgba(18,37,31,0) 55%)}
+.piece .ref{position:absolute;left:1.1rem;top:1rem;z-index:1;font-family:var(--display);font-weight:800;font-size:1rem;color:var(--accentOnDark);background:rgba(18,37,31,.7);padding:.3em .6em;border-radius:6px}
+.piece .status{position:absolute;right:1.1rem;top:1rem;z-index:1;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;background:var(--accentWarm);color:var(--textOnLight);padding:.4em .7em;border-radius:999px}
+.piece figcaption{position:absolute;left:1.1rem;right:1.1rem;bottom:1.1rem;z-index:1}
+.piece h3{font-size:clamp(1.25rem,1.7vw,1.7rem);letter-spacing:-.01em}
+.piece p{margin-top:.4rem;font-size:.9rem;opacity:.9}
+.piece:nth-child(odd){transform:translateY(-4vh)}
+.piece:nth-child(even){transform:translateY(4vh)}
+.work-end{flex:0 0 min(30vw,420px);display:flex;flex-direction:column;justify-content:center;gap:1rem;padding-left:2vw}
+.work-end .big{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4vw,4rem);line-height:.95}
+.work-hint{position:absolute;bottom:1.6rem;left:var(--gutter);font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em}
+.work-hint i{width:3em;height:1px;background:currentColor;display:block;transform-origin:left;animation:slideHint 1.8s var(--ease-out) infinite}
+@keyframes slideHint{0%{transform:scaleX(0)}60%{transform:scaleX(1)}100%{transform:scaleX(1) translateX(100%);opacity:0}}
+/* Mobile answer: native horizontal swipe with snap points */
+@media (max-width:899px){
+  .work{height:auto !important;padding:5rem 0 4rem}
+  .work-stage{position:static;height:auto;overflow:visible}
+  .work-top{position:static;padding:0 var(--gutter);margin-bottom:1.4rem}
+  .work-track{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:14px;padding-bottom:1rem;transform:none !important;scrollbar-width:none}
+  .work-track::-webkit-scrollbar{display:none}
+  .work-intro{flex:0 0 82vw;scroll-snap-align:start}
+  .piece{flex:0 0 78vw;scroll-snap-align:start;transform:none !important}
+  .work-end{flex:0 0 82vw;scroll-snap-align:start}
+  .work-hint{display:none}
+}
+
+/* ------------------------------------------------------------------
+   7. WHY FAMYSYS — scroll-velocity skew ledger of giant words
+------------------------------------------------------------------- */
+.why{background:var(--sectionWarm);color:var(--textOnLight);padding:clamp(5rem,10vw,9rem) var(--gutter);overflow:hidden}
+.why-head{display:grid;grid-template-columns:1.2fr 1fr;gap:3rem;align-items:end;margin-bottom:3rem}
+.why h2{font-size:clamp(2.2rem,5.4vw,5.6rem);max-width:14ch}
+.why-head p{max-width:48ch;color:var(--textMuted)}
+.why-list{will-change:transform;transform-origin:center}
+.why-row{display:grid;grid-template-columns:3rem 1.2fr 1fr 130px;gap:1.6rem;align-items:center;padding:1.2rem 0;border-top:2px solid var(--textOnLight);opacity:0;transform:translateX(-50px);transition:opacity .6s,transform .8s var(--ease-out)}
+.why-row.in{opacity:1;transform:translateX(0)}
+.why-row:last-child{border-bottom:2px solid var(--textOnLight)}
+.why-row .k{font-family:var(--display);font-weight:800;font-size:1rem;color:var(--accentPrimary)}
+.why-row h3{font-size:clamp(2.4rem,7vw,7.2rem);line-height:.85;letter-spacing:-.04em;color:var(--textOnLight)}
+.why-row:nth-child(even) h3{color:var(--accentPrimary)}
+.why-row p{max-width:36ch;color:var(--textMuted);font-size:1rem}
+.why-thumb{width:130px;aspect-ratio:4/3;border-radius:10px;overflow:hidden;transform:rotate(4deg);transition:transform .6s var(--ease-out);justify-self:end}
+.why-row:nth-child(even) .why-thumb{transform:rotate(-4deg)}
+.why-row:hover .why-thumb{transform:rotate(0) scale(1.18)}
+.why-thumb img{width:100%;height:100%;object-fit:cover}
+@media (max-width:899px){.why-head{grid-template-columns:1fr;gap:1.2rem}.why-row{grid-template-columns:2rem 1fr 90px;grid-template-areas:"k h t" "k p t"}.why-row .k{grid-area:k}.why-row h3{grid-area:h}.why-row p{grid-area:p}.why-thumb{grid-area:t;width:90px}}
+
+/* ------------------------------------------------------------------
+   8. FAQ — rows enter from alternate sides, answers spring open
+------------------------------------------------------------------- */
+.faq{background:var(--darkBackground);padding:clamp(5rem,10vw,9rem) var(--gutter);overflow:hidden}
+.faq-head{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:end;margin-bottom:3rem}
+.faq h2{font-size:clamp(2.2rem,5.4vw,5.4rem);max-width:10ch}
+.faq-row{border-top:1px solid rgba(241,235,221,.16);opacity:0;transform:translateX(-80px);transition:opacity .6s,transform .8s var(--ease-out)}
+.faq-row:nth-child(even){transform:translateX(80px)}
+.faq-row.in{opacity:1;transform:translateX(0)}
+.faq-row:last-child{border-bottom:1px solid rgba(241,235,221,.16)}
+.faq-q{width:100%;display:grid;grid-template-columns:4rem 1fr 3rem;gap:1.4rem;align-items:center;text-align:left;padding:1.5rem 0;font-family:var(--display);font-weight:800;font-size:clamp(1.25rem,2.4vw,2.3rem);letter-spacing:-.02em;line-height:1.05}
+.faq-q .k{font-size:.95rem;color:var(--accentWarm);letter-spacing:.06em;transition:transform .4s var(--ease-out),color .3s;transform-origin:left}
+.faq-q[aria-expanded="true"] .k{transform:scale(1.6);color:var(--accentHighlight)}
+.faq-q .x{width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--textOnDark);display:grid;place-items:center;transition:transform .5s var(--ease-snap),background-color .3s,color .3s;justify-self:end}
+.faq-q .x svg{width:16px;height:16px}
+.faq-q[aria-expanded="true"] .x{transform:rotate(135deg);background:var(--accentHighlight);color:var(--textOnLight);box-shadow:none}
+.faq-a{padding:0 0 1.8rem 5.4rem}
+.faq-a-inner{max-width:62ch;opacity:.92;transform:translateY(0)}
+.faq-a-inner.pop{animation:pop .55s var(--ease-out) both}
+@keyframes pop{from{opacity:0;transform:translateY(-14px)}to{opacity:.92;transform:translateY(0)}}
+.faq-a .btn{margin-top:1rem}
+@media (max-width:899px){.faq-head{grid-template-columns:1fr}.faq-q{grid-template-columns:2.4rem 1fr 2.4rem;gap:.8rem}.faq-a{padding-left:3.2rem}.faq-q .x{width:32px;height:32px}}
+
+/* ------------------------------------------------------------------
+   9. FINAL CTA — full-bleed image scrubbed, rotating badge, magnetic button
+------------------------------------------------------------------- */
+.cta{position:relative;min-height:92vh;display:grid;place-items:center;text-align:center;padding:6rem var(--gutter);overflow:hidden;background:var(--darkBackground)}
+.cta-bg{position:absolute;inset:0;z-index:0}
+.cta-bg img{width:100%;height:100%;object-fit:cover;transform:scale(1.25);will-change:transform;opacity:.55}
+.cta-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(18,37,31,.2) 0%,rgba(18,37,31,.9) 75%)}
+.cta-in{position:relative;z-index:1;max-width:1000px}
+.cta h2{font-size:clamp(2.8rem,8vw,8.4rem);max-width:10ch;margin-inline:auto}
+.cta h2 .hl{color:var(--accentHighlight)}
+.cta p{margin:1.6rem auto 0;max-width:48ch;font-size:clamp(1rem,1.3vw,1.25rem)}
+.cta .btn{margin-top:2.2rem;font-size:1.05rem;padding:1.15em 2em;will-change:transform;transition:background-color .3s}
+.cta-line{margin-top:1.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:.78rem;color:var(--accentOnDark)}
+.badge{position:absolute;right:var(--gutter);top:var(--gutter);width:150px;height:150px;z-index:2}
+.badge svg{width:100%;height:100%;animation:spin 16s linear infinite;transform-origin:center}
+.badge text{font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;fill:var(--textOnDark)}
+.badge .dot{fill:var(--accentWarm)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:899px){.badge{width:100px;height:100px;top:1.2rem;right:1.2rem}.badge text{font-size:12.5px}}
+
+/* ------------------------------------------------------------------
+   FOOTER
+------------------------------------------------------------------- */
+.ftr{background:#0C1A15;color:var(--textOnDark);padding:4rem var(--gutter) 2.5rem;border-top:1px solid rgba(241,235,221,.1)}
+.ftr-grid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:2.5rem}
+.ftr .wordmark{font-size:1.5rem}
+.ftr-tag{margin-top:1rem;max-width:34ch;opacity:.88}
+.ftr-mail{display:inline-block;margin-top:1.2rem;font-weight:700;color:var(--accentHighlight);text-decoration:none}
+.ftr h4{font-family:var(--sans);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;color:var(--accentWarm)}
+.ftr li{margin:.45rem 0;font-size:.92rem}
+.ftr li a{text-decoration:none;opacity:.88}
+.ftr li a:hover{opacity:1;color:var(--accentOnDark)}
+.ftr-bottom{margin-top:3rem;padding-top:1.4rem;border-top:1px solid rgba(241,235,221,.1);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.8rem;opacity:.75}
+@media (max-width:899px){.ftr-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.ftr-grid{grid-template-columns:1fr}}
+
+/* Looping animations pause while their section is off screen (set by an IntersectionObserver) */
+.is-off .mq-track,.is-off .badge svg,.is-off .hero-scroll i,.is-off .wordmark i,.is-off .work-hint i,.is-off .hero-frame{animation-play-state:paused;transition:none}
+
+/* ------------------------------------------------------------------
+   REDUCED MOTION — everything readable at its final state
+------------------------------------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  .hero h1 .wi{transform:none;animation:none}
+  .hero-sub,.hero-ctas,.hero-support{opacity:1;transform:none;animation:none}
+  .hero-frame{transform:none}
+  .hero-media{clip-path:none !important;transform:none !important}
+  .hero-scroll i,.work-hint i,.wordmark i{animation:none}
+  .spot{display:none}
+  .cap p{opacity:.9;transform:none}
+  .cap img{transform:none}
+  /* pin released: four elements stacked */
+  .diff{height:auto !important}
+  .diff-stage{position:static;height:auto;grid-template-columns:1fr}
+  .diff-rail,.diff-segs,.diff-right{display:none}
+  .diff-stack{display:grid;gap:1rem;padding:0 var(--gutter) 4rem}
+  .diff-closing{opacity:1;transform:none}
+  .hww-rail{transform:none !important}
+  .hww-line::after{transform:scaleY(1)}
+  .step,.why-row,.faq-row{opacity:1;transform:none}
+  .mq-track{animation:none;transform:none}
+  .tier-name .l{transition:none}
+  /* horizontal section becomes vertical */
+  .work{height:auto !important;padding:5rem 0}
+  .work-stage{position:static;height:auto;overflow:visible}
+  .work-top{position:static;padding:0 var(--gutter);margin-bottom:1.4rem}
+  .work-track{flex-direction:column;align-items:stretch;transform:none !important;gap:1.2rem;overflow:visible}
+  .work-intro,.piece,.work-end{flex:none;max-width:720px;transform:none !important}
+  .piece figure{aspect-ratio:16/10}
+  .piece img{transform:none}
+  .work-hint{display:none}
+  .why-list{transform:none !important}
+  .why-thumb{transform:none}
+  .cta-bg img{transform:none !important}
+  .badge svg{animation:none}
+  .cta .btn{transform:none !important}
+}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#main">Skip to content</a>
+
+<!-- ============================ HEADER ============================ -->
+<header class="hdr" id="hdr">
+  <a class="wordmark" href="#top" aria-label="Famysys Studio, home"><i aria-hidden="true"></i>Famysys Studio</a>
+  <nav class="nav" aria-label="Primary">
+    <a href="#what-we-do">Creative Services</a>
+    <a href="#how-we-work">How We Work</a>
+    <a href="#ways-to-work">Ways to Work With Us</a>
+    <a href="#selected-work">Selected Work</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </nav>
+  <a class="btn btn-apricot" href="/contact">Start a Conversation</a>
+  <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="drawer">Menu</button>
+  <span class="hdr-progress" id="hdrProgress" aria-hidden="true"></span>
+</header>
+<nav class="drawer" id="drawer" hidden aria-label="Mobile">
+  <a href="#what-we-do">Creative Services</a>
+  <a href="#how-we-work">How We Work</a>
+  <a href="#ways-to-work">Ways to Work With Us</a>
+  <a href="#selected-work">Selected Work</a>
+  <a href="/about">About</a>
+  <a href="/contact">Contact</a>
+  <a class="btn btn-apricot" href="/contact" style="font-size:1rem;align-self:flex-start">Start a Conversation</a>
+</nav>
+
+<main id="main">
+
+<!-- ============================ 1. HERO ============================ -->
+<section class="hero" id="top" aria-labelledby="hero-h">
+  <div class="hero-media" id="heroMedia">
+    <img class="hero-frame is-active" src="media-b/hero-01.jpg" alt="An empty photography studio, softboxes and a beauty dish rigged around a white cyclorama." fetchpriority="high">
+    <img class="hero-frame" src="media-b/hero-02.jpg" alt="A person's eyes seen through the striped slate of a clapperboard, lit in red and blue." loading="lazy">
+    <img class="hero-frame" src="media-b/hero-03.jpg" alt="A recording studio at night: a mixing desk, monitors and guitars on the wall under warm light." loading="lazy">
+  </div>
+  <div class="hero-frames-nav" id="heroDots" aria-hidden="true"><i class="is-active"></i><i></i><i></i></div>
+  <div class="hero-copy" id="heroCopy">
+    <h1 id="hero-h" data-split>Creative production, without the <span class="hl">agency overhead.</span></h1>
+    <p class="hero-sub">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-apricot" href="/contact">Start a Conversation</a>
+      <a class="btn btn-ghost" href="#what-we-do">Explore Our Services</a>
+    </div>
+    <p class="hero-support">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+  <div class="hero-scroll" aria-hidden="true"><i></i>Scroll</div>
+</section>
+
+<!-- ============================ 2. WHAT WE DO ============================ -->
+<section class="caps" id="what-we-do" aria-labelledby="caps-h">
+  <div class="caps-head">
+    <div>
+      <p class="eyebrow" style="color:var(--accentHighlight)">Our capabilities</p>
+      <h2 id="caps-h" style="margin-top:1rem">One creative partner for your ongoing content needs.</h2>
+    </div>
+    <div>
+      <p>From a single promotional video to an ongoing stream of marketing content, Famysys Studio brings creative thinking, production expertise and AI-enabled workflows together under one roof.</p>
+      <a class="btn btn-jade" href="/creative-services">Explore All Services</a>
+    </div>
+  </div>
+  <div class="cap-grid" id="capGrid">
+    <div class="spot" id="spot" aria-hidden="true"></div>
+    <article class="cap"><img src="media-b/cap-design.jpg" alt="A tablet and a monitor both showing pages of a design layout, on a desk beside a plant." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">01</span><div><h3>Creative Design</h3><p>Social creatives, marketing collateral, presentations, brochures, banners and digital assets.</p></div></div></article>
+    <article class="cap"><img src="media-b/cap-video.jpg" alt="A clapperboard held up at the start of a take, two crew members blurred behind it." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">02</span><div><h3>Video Production &amp; Editing</h3><p>UGC editing, Reels, Shorts, promotional videos, business videos and content repurposing.</p></div></div></article>
+    <article class="cap"><img src="media-b/cap-ai.jpg" alt="A presenter standing at a desk in a bright office, hands folded, speaking to camera." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">03</span><div><h3>AI Video &amp; Virtual Presenters</h3><p>AI-generated videos, virtual presenters, AI UGC, visual storytelling and AI-assisted production.</p></div></div></article>
+    <article class="cap"><img src="media-b/cap-explainer.jpg" alt="A condenser microphone and headphones in front of a monitor showing an edit timeline." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">04</span><div><h3>Explainer &amp; Training Videos</h3><p>Business explainers, training content, course videos, onboarding and instructional content.</p></div></div></article>
+    <article class="cap"><img src="media-b/cap-motion.jpg" alt="Strands of light streaking across a dark frame, like long-exposure motion." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">05</span><div><h3>Motion Graphics &amp; Advanced Creative</h3><p>Motion graphics, animated typography, visual effects, compositing and creative enhancements.</p></div></div></article>
+    <article class="cap"><img src="media-b/cap-product.jpg" alt="A hand holding a phone showing a product page, over a laptop showing the same store." loading="lazy">
+      <span class="cap-tag" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13 13 3M5 3h8v8"/></svg></span>
+      <div class="cap-body"><span class="cap-num">06</span><div><h3>Product &amp; Brand Visuals</h3><p>Product visuals, lifestyle imagery, promotional assets, campaign visuals and AI-assisted brand content.</p></div></div></article>
+  </div>
+</section>
+
+<!-- ============================ 3. THE DIFFERENTIATOR ============================ -->
+<section class="diff" id="differentiator" aria-labelledby="diff-h">
+  <div class="diff-stage">
+    <div class="diff-left">
+      <div>
+        <p class="eyebrow" style="color:var(--accentPrimary)">The differentiator</p>
+        <h2 id="diff-h" style="margin-top:1rem">The right mix of creativity, technology and people.</h2>
+        <p class="diff-intro">AI has changed how creative work can be produced. But great creative work still requires judgment, storytelling, design sense and human quality control.</p>
+        <p class="diff-leadin">At Famysys Studio, we combine:</p>
+        <ol class="diff-rail" id="diffRail" aria-hidden="true">
+          <li class="is-active"><small>01</small><span>Human Creativity</span></li>
+          <li><small>02</small><span>Intelligent AI Workflows</span></li>
+          <li><small>03</small><span>Professional Production</span></li>
+          <li><small>04</small><span>Efficient Delivery</span></li>
+        </ol>
+        <div class="diff-segs" id="diffSegs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <p class="diff-closing">AI is our production advantage — not our identity.</p>
+    </div>
+    <div class="diff-right" id="diffRight">
+      <div class="diff-panel is-active"><img src="media-b/el-human.jpg" alt="A woman in a studio full of materials, looking at her phone with a laptop open." loading="lazy">
+        <div class="diff-copy"><span class="k">01</span><h3>Human Creativity</h3><p>Ideas, storytelling, art direction and creative judgment.</p></div></div>
+      <div class="diff-panel"><img src="media-b/el-ai.jpg" alt="A white robotic hand, fingers slightly curled, against a pale background." loading="lazy">
+        <div class="diff-copy"><span class="k">02</span><h3>Intelligent AI Workflows</h3><p>AI used where it genuinely improves speed, flexibility and production possibilities.</p></div></div>
+      <div class="diff-panel"><img src="media-b/el-production.jpg" alt="A camera operator filming an interview subject in a library, seen from behind the camera." loading="lazy">
+        <div class="diff-copy"><span class="k">03</span><h3>Professional Production</h3><p>Design, editing, motion, compositing and finishing.</p></div></div>
+      <div class="diff-panel"><img src="media-b/el-delivery.jpg" alt="Hands typing on a laptop at a clean white desk." loading="lazy">
+        <div class="diff-copy"><span class="k">04</span><h3>Efficient Delivery</h3><p>Structured workflows designed to deliver quality without unnecessary agency overhead.</p></div></div>
+    </div>
+  </div>
+  <!-- Stacked fallback: rendered on small screens and under reduced motion -->
+  <div class="diff-stack">
+    <article><img src="media-b/el-human.jpg" alt="" loading="lazy"><div><span class="k">01</span><h3>Human Creativity</h3><p>Ideas, storytelling, art direction and creative judgment.</p></div></article>
+    <article><img src="media-b/el-ai.jpg" alt="" loading="lazy"><div><span class="k">02</span><h3>Intelligent AI Workflows</h3><p>AI used where it genuinely improves speed, flexibility and production possibilities.</p></div></article>
+    <article><img src="media-b/el-production.jpg" alt="" loading="lazy"><div><span class="k">03</span><h3>Professional Production</h3><p>Design, editing, motion, compositing and finishing.</p></div></article>
+    <article><img src="media-b/el-delivery.jpg" alt="" loading="lazy"><div><span class="k">04</span><h3>Efficient Delivery</h3><p>Structured workflows designed to deliver quality without unnecessary agency overhead.</p></div></article>
+  </div>
+</section>
+
+<!-- ============================ 4. HOW WE WORK ============================ -->
+<section class="hww" id="how-we-work" aria-labelledby="hww-h">
+  <div class="hww-head">
+    <div>
+      <p class="eyebrow" style="color:var(--accentWarm)">How we work</p>
+      <h2 id="hww-h" style="margin-top:1rem">From idea to finished creative.</h2>
+    </div>
+    <a class="btn btn-ghost" href="/how-we-work">See the full process</a>
+  </div>
+  <div class="hww-rail" id="hwwRail" aria-hidden="true"><span class="is-active">01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+  <div class="hww-body">
+    <div class="hww-line" id="hwwLine" aria-hidden="true"></div>
+    <ol class="steps" id="steps">
+      <li class="step" style="--n:0"><span class="k">01</span><div><h3>Understand</h3><p>We understand what you're trying to communicate, who it's for and what success looks like.</p></div></li>
+      <li class="step" style="--n:1"><span class="k">02</span><div><h3>Create</h3><p>We develop the concept, script, design direction or production approach.</p></div></li>
+      <li class="step" style="--n:2"><span class="k">03</span><div><h3>Produce</h3><p>Our team combines creative tools, AI and human production expertise to build the content.</p></div></li>
+      <li class="step" style="--n:3"><span class="k">04</span><div><h3>Refine</h3><p>We review, refine and incorporate feedback within the agreed scope.</p></div></li>
+      <li class="step" style="--n:4"><span class="k">05</span><div><h3>Deliver</h3><p>You receive polished, platform-ready creative assets.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ 5. WAYS TO WORK ============================ -->
+<section class="ways" id="ways-to-work" aria-labelledby="ways-h">
+  <div class="ways-head">
+    <div>
+      <p class="eyebrow" style="color:var(--accentOnDark)">Ways to work with us</p>
+      <h2 id="ways-h" style="margin-top:1rem">Flexible ways to work with Famysys Studio.</h2>
+    </div>
+    <p>Whether you need one creative asset or an ongoing production partner, we can adapt to your requirements.</p>
+  </div>
+  <div class="mq" aria-hidden="true"><div class="mq-track"><span>Launch</span><span>Grow</span><span>Scale</span><span>Custom Creative Partnership</span><span>Launch</span><span>Grow</span><span>Scale</span><span>Custom Creative Partnership</span></div></div>
+  <div class="tiers">
+    <a class="tier" href="/ways-to-work-with-us">
+      <div><span class="tier-name" data-letters>Launch</span><span class="tier-desc">Essential Content</span></div>
+      <p class="tier-sum">For businesses looking to establish or refresh their regular creative output.</p>
+      <dl class="tier-meta"><div><dt>Ideal for</dt><dd>Small businesses, local businesses, startups and growing brands.</dd></div><div><dt>Typical work includes</dt><dd>Social creatives, short-form content, promotional assets and basic video production.</dd></div></dl>
+      <span class="btn btn-apricot">Talk to us</span>
+      <span class="tier-img" aria-hidden="true"><img src="media-b/tier-launch.jpg" alt="" loading="lazy"></span>
+    </a>
+    <a class="tier" href="/ways-to-work-with-us">
+      <div><span class="tier-name" data-letters>Grow</span><span class="tier-desc">Growth Content</span></div>
+      <p class="tier-sum">For businesses that need a more consistent flow of video and creative content.</p>
+      <dl class="tier-meta"><div><dt>Ideal for</dt><dd>Growing businesses, brands, training companies and businesses actively investing in digital marketing.</dd></div><div><dt>Typical work includes</dt><dd>Short-form video, UGC editing, AI-assisted video, social creatives, motion and content adaptations.</dd></div></dl>
+      <span class="btn btn-apricot">Talk to us</span>
+      <span class="tier-img" aria-hidden="true"><img src="media-b/tier-grow.jpg" alt="" loading="lazy"></span>
+    </a>
+    <a class="tier" href="/ways-to-work-with-us">
+      <div><span class="tier-name" data-letters>Scale</span><span class="tier-desc">Advanced Creative</span></div>
+      <p class="tier-sum">For businesses with larger or more sophisticated ongoing creative requirements.</p>
+      <dl class="tier-meta"><div><dt>Ideal for</dt><dd>Established businesses, B2B companies, product brands and marketing teams.</dd></div><div><dt>Typical work includes</dt><dd>Advanced video, explainers, training content, motion graphics, product visuals and multi-format creative production.</dd></div></dl>
+      <span class="btn btn-apricot">Talk to us</span>
+      <span class="tier-img" aria-hidden="true"><img src="media-b/tier-scale.jpg" alt="" loading="lazy"></span>
+    </a>
+    <a class="tier custom" href="/contact">
+      <div><span class="tier-name" data-letters>Custom Creative Partnership</span><span class="tier-desc">Your flexible creative production team.</span></div>
+      <p class="tier-sum">For businesses that need ongoing creative support across multiple formats and services.</p>
+      <dl class="tier-meta"><div><dt>Tell us what you need</dt><dd>We'll help structure the right production model.</dd></div></dl>
+      <span class="btn btn-ink">Talk to us about your requirements</span>
+      <span class="tier-img" aria-hidden="true"><img src="media-b/tier-custom.jpg" alt="" loading="lazy"></span>
+    </a>
+  </div>
+  <div class="mq jade" aria-hidden="true"><div class="mq-track rev"><span>Project-based when you need it</span><span>Ongoing when you need more</span><span>One creative asset or an ongoing production partner</span><span>Project-based when you need it</span><span>Ongoing when you need more</span><span>One creative asset or an ongoing production partner</span></div></div>
+</section>
+
+<!-- ============================ 6. SELECTED WORK ============================ -->
+<section class="work" id="selected-work" aria-labelledby="work-h">
+  <div class="work-stage">
+    <div class="work-top">
+      <p class="eyebrow" style="color:var(--accentOnDark)">Selected Creative Work</p>
+      <p class="work-count" aria-live="polite" aria-label="Piece 1 of 8"><span class="d" id="cntTens"><i>0<br>0<br>0<br>0<br>0<br>0<br>0<br>0</i></span><span class="d" id="cntOnes"><i>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8</i></span><span aria-hidden="true">/ 08</span></p>
+    </div>
+    <div class="work-track" id="workTrack">
+      <div class="work-intro">
+        <h2 id="work-h">Selected Creative Work</h2>
+        <p>A growing collection of work created by Famysys Studio across design, video, AI-powered production and creative content.</p>
+        <a class="btn btn-jade" href="/selected-work">Explore all work</a>
+      </div>
+      <a class="piece" href="/selected-work#famysys-studio-capability-film"><figure><img src="media-b/work-01.jpg" alt="A person holding a clapperboard in front of their face against a plain wall." loading="lazy"><span class="ref">01</span><span class="status">Planned</span><figcaption><h3>Famysys Studio Capability Film</h3><p>Show what the Studio itself can do.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#famysys-it-services-portfolio-film"><figure><img src="media-b/work-02.jpg" alt="A man on the phone at a desk, seen past the edge of a monitor." loading="lazy"><span class="ref">02</span><span class="status">Planned</span><figcaption><h3>Famysys IT Services Portfolio Film</h3><p>B2B/corporate credibility.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#food-restaurant-creative-campaign"><figure><img src="media-b/work-03.jpg" alt="Popcorn spilling from a striped paper box, photographed close." loading="lazy"><span class="ref">03</span><span class="status">Planned</span><figcaption><h3>Food / Restaurant Creative Campaign</h3><p>Multiple AI videos + social creatives.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#ugc-transformation"><figure><img src="media-b/work-04.jpg" alt="A hand holding a phone showing a photo feed, over a laptop with the same images." loading="lazy"><span class="ref">04</span><span class="status">Planned</span><figcaption><h3>UGC Transformation</h3><p>Raw footage → finished professional content.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#synthesia-business-explainer"><figure><img src="media-b/work-05.jpg" alt="A black-and-white profile portrait of a man with curly hair and a beard." loading="lazy"><span class="ref">05</span><span class="status">Planned</span><figcaption><h3>Synthesia Business Explainer</h3><p>Show presenter + visual storytelling.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#training-video-series"><figure><img src="media-b/work-06.jpg" alt="Two people working at laptops by a bright window." loading="lazy"><span class="ref">06</span><span class="status">Planned</span><figcaption><h3>Training Video Series</h3><p>Show scalable training production.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#product-visual-campaign"><figure><img src="media-b/work-07.jpg" alt="A wristwatch with a leather strap photographed on a dark surface." loading="lazy"><span class="ref">07</span><span class="status">Planned</span><figcaption><h3>Product Visual Campaign</h3><p>Product imagery → lifestyle → promotional content.</p></figcaption></figure></a>
+      <a class="piece" href="/selected-work#motion-graphics-showcase"><figure><img src="media-b/work-08.jpg" alt="Rows of soft-edged 3D shapes lit in purple and blue." loading="lazy"><span class="ref">08</span><span class="status">Planned</span><figcaption><h3>Motion Graphics Showcase</h3><p>Demonstrate progression toward premium creative.</p></figcaption></figure></a>
+      <div class="work-end">
+        <p class="big">Eight pieces. <span style="color:var(--accentOnDark)">None finished yet.</span></p>
+        <p style="opacity:.85;max-width:30ch">Every cover is a stock frame standing in for work that is planned, not produced.</p>
+        <a class="btn btn-ghost" href="/selected-work" style="align-self:flex-start">Explore all work</a>
+      </div>
+    </div>
+    <p class="work-hint" aria-hidden="true"><i></i>Scroll to travel</p>
+  </div>
+</section>
+
+<!-- ============================ 7. WHY FAMYSYS ============================ -->
+<section class="why" id="why" aria-labelledby="why-h">
+  <div class="why-head">
+    <div>
+      <p class="eyebrow" style="color:var(--accentPrimary)">Why Famysys</p>
+      <h2 id="why-h" style="margin-top:1rem">Professional creative support. Without unnecessary overhead.</h2>
+    </div>
+    <p>We believe businesses shouldn't have to choose between expensive agencies and inconsistent freelancers. Famysys Studio is being built to provide a third option: a flexible, technology-enabled creative production team that can grow with your requirements.</p>
+  </div>
+  <ul class="why-list" id="whyList">
+    <li class="why-row"><span class="k">01</span><h3>Flexible</h3><p>Start with a single project. Expand when you need more.</p><span class="why-thumb"><img src="media-b/why-lens.jpg" alt="" loading="lazy"></span></li>
+    <li class="why-row"><span class="k">02</span><h3>Efficient</h3><p>AI and structured production workflows help us reduce unnecessary production overhead.</p><span class="why-thumb"><img src="media-b/why-desk.jpg" alt="" loading="lazy"></span></li>
+    <li class="why-row"><span class="k">03</span><h3>Human-led</h3><p>Creative judgment, quality control and accountability remain with our team.</p><span class="why-thumb"><img src="media-b/why-toss.jpg" alt="" loading="lazy"></span></li>
+    <li class="why-row"><span class="k">04</span><h3>Scalable</h3><p>Our production model is designed to grow from individual projects into ongoing creative partnerships.</p><span class="why-thumb"><img src="media-b/why-reels.jpg" alt="" loading="lazy"></span></li>
+    <li class="why-row"><span class="k">05</span><h3>Value-driven</h3><p>Our goal is not simply to produce more cheaply — it is to deliver better creative value for the investment.</p><span class="why-thumb"><img src="media-b/why-mic.jpg" alt="" loading="lazy"></span></li>
+  </ul>
+</section>
+
+<!-- ============================ 8. FAQ ============================ -->
+<section class="faq" id="faq" aria-labelledby="faq-h">
+  <div class="faq-head">
+    <div>
+      <p class="eyebrow" style="color:var(--accentHighlight)">Questions</p>
+      <h2 id="faq-h" style="margin-top:1rem">Frequently asked.</h2>
+    </div>
+    <p style="opacity:.86;max-width:40ch">Seven things people ask before they start a conversation.</p>
+  </div>
+  <div class="faq-list" id="faqList">
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a1" id="faq-q1"><span class="k">01</span><span>Do you work with small businesses?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1" hidden><div class="faq-a-inner"><p>Yes. We work with businesses ranging from small and growing companies to larger organizations. Our engagement can start with a single project and expand as your requirements grow.</p></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a2" id="faq-q2"><span class="k">02</span><span>Do you only create AI-generated content?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2" hidden><div class="faq-a-inner"><p>No. AI is one of our production tools, not the entirety of our service. We combine AI with conventional design, editing, motion graphics, stock assets and human creative direction.</p></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a3" id="faq-q3"><span class="k">03</span><span>Can I give you my own raw video footage?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3" hidden><div class="faq-a-inner"><p>Yes. We can transform customer-provided footage into polished social and marketing content, including editing, text overlays, animation, music, captions, intro/outro and CTAs.</p></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a4" id="faq-q4"><span class="k">04</span><span>Can you create content from our existing documents or presentations?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4" hidden><div class="faq-a-inner"><p>Yes. We can transform suitable documents, presentations and training material into professional video and visual content.</p></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a5" id="faq-q5"><span class="k">05</span><span>Do you offer ongoing monthly support?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5" hidden><div class="faq-a-inner"><p>Yes. We can work on individual projects or provide ongoing creative production support.</p></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a6" id="faq-q6"><span class="k">06</span><span>How much do your services cost?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a6" role="region" aria-labelledby="faq-q6" hidden><div class="faq-a-inner"><p>We currently provide custom quotations rather than public pricing. Requirements vary significantly by complexity, volume and production approach.</p><a class="btn btn-apricot" href="/contact">Talk to us about your project</a></div></div></div>
+    <div class="faq-row"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a7" id="faq-q7"><span class="k">07</span><span>Can you do a sample before we commit?</span><span class="x" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg></span></button></h3>
+      <div class="faq-a" id="faq-a7" role="region" aria-labelledby="faq-q7" hidden><div class="faq-a-inner"><p>For suitable opportunities, we may provide a preview or limited sample to understand expectations and demonstrate our approach before moving into a paid engagement.</p></div></div></div>
+  </div>
+</section>
+
+<!-- ============================ 9. FINAL CTA ============================ -->
+<section class="cta" id="contact-cta" aria-labelledby="cta-h">
+  <div class="cta-bg" id="ctaBg"><img src="media-b/cta-bg.jpg" alt="" loading="lazy"></div>
+  <div class="badge" aria-hidden="true">
+    <svg viewBox="0 0 150 150"><defs><path id="ring" d="M75,75 m-58,0 a58,58 0 1,1 116,0 a58,58 0 1,1 -116,0"/></defs>
+      <circle class="dot" cx="75" cy="75" r="6"/>
+      <text><textPath href="#ring">Project today · Creative partner tomorrow · </textPath></text></svg>
+  </div>
+  <div class="cta-in">
+    <p class="eyebrow" style="color:var(--accentOnDark);justify-content:center">Let's talk</p>
+    <h2 id="cta-h" style="margin-top:1.2rem">Have a creative requirement? <span class="hl">Let's talk.</span></h2>
+    <p>Tell us what you're trying to create. We'll help you determine the right approach, scope and production model.</p>
+    <a class="btn btn-apricot" id="magnet" href="/contact">Start a Conversation</a>
+    <p class="cta-line">Project today. Creative partner tomorrow.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="ftr">
+  <div class="ftr-grid">
+    <div>
+      <a class="wordmark" href="#top"><i aria-hidden="true"></i>Famysys Studio</a>
+      <p class="ftr-tag">A professional creative production partner — combining human creativity, AI and efficient production.</p>
+      <a class="ftr-mail" href="mailto:hello@famysys.com">hello@famysys.com</a>
+    </div>
+    <div><h4>Creative Services</h4><ul>
+      <li><a href="/creative-services">Creative Design</a></li><li><a href="/creative-services">Video Production &amp; Editing</a></li><li><a href="/creative-services">AI Video &amp; Virtual Presenters</a></li><li><a href="/creative-services">Explainer &amp; Training Videos</a></li><li><a href="/creative-services">Motion Graphics &amp; Advanced Creative</a></li><li><a href="/creative-services">Product &amp; Brand Visuals</a></li></ul></div>
+    <div><h4>Ways to Work With Us</h4><ul>
+      <li><a href="/ways-to-work-with-us">Launch</a></li><li><a href="/ways-to-work-with-us">Grow</a></li><li><a href="/ways-to-work-with-us">Scale</a></li><li><a href="/ways-to-work-with-us">Custom Creative Partnership</a></li><li><a href="/how-we-work">How We Work</a></li><li><a href="/about">About</a></li></ul></div>
+    <div><h4>Selected Work</h4><ul>
+      <li><a href="/selected-work">Famysys Studio Capability Film</a></li><li><a href="/selected-work">Famysys IT Services Portfolio Film</a></li><li><a href="/selected-work">Food / Restaurant Creative Campaign</a></li><li><a href="/selected-work">UGC Transformation</a></li><li><a href="/selected-work">Synthesia Business Explainer</a></li><li><a href="/selected-work">Training Video Series</a></li><li><a href="/selected-work">Product Visual Campaign</a></li><li><a href="/selected-work">Motion Graphics Showcase</a></li></ul></div>
+  </div>
+  <div class="ftr-bottom"><span>© Famysys Studio</span><span>Homepage exploration B — Kinetic</span></div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var COARSE = window.matchMedia("(hover: none)").matches;
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var isNarrow = function () { return vw < 900; };
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Split helpers (words for the hero, letters for the tiers) ---------- */
+  function splitWords(el) {
+    var out = [];
+    var i = 0;
+    Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+      var isHl = node.nodeType === 1;
+      var text = node.textContent;
+      text.split(/\s+/).forEach(function (word) {
+        if (!word) return;
+        out.push('<span class="w' + (isHl ? " hl" : "") + '"><span class="wi" style="--i:' + (i++) + '">' + word + "</span></span>");
+      });
+    });
+    el.innerHTML = out.join(" ");
+  }
+  function splitLetters(el) {
+    var text = el.textContent;
+    var i = 0;
+    var html = text.split(" ").map(function (word) {
+      var letters = "";
+      for (var k = 0; k < word.length; k++) letters += '<span class="l" style="--i:' + (i++) + '">' + word[k] + "</span>";
+      return '<span class="wd">' + letters + "</span>";
+    }).join(" ");
+    el.setAttribute("aria-label", text);
+    el.innerHTML = html;
+  }
+  var h1 = document.querySelector("[data-split]");
+  if (h1) splitWords(h1);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-letters]"), function (el) {
+    splitLetters(el);
+  });
+
+  /* ---------- Header: menu, hide-on-scroll-down, progress ---------- */
+  var hdr = $("hdr"), drawer = $("drawer"), menuBtn = $("menuBtn"), hdrProgress = $("hdrProgress");
+  menuBtn.addEventListener("click", function () {
+    var open = drawer.hidden;
+    drawer.hidden = !open;
+    menuBtn.setAttribute("aria-expanded", String(open));
+    menuBtn.textContent = open ? "Close" : "Menu";
+    document.body.style.overflow = open ? "hidden" : "";
+  });
+  drawer.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") { drawer.hidden = true; menuBtn.setAttribute("aria-expanded", "false"); menuBtn.textContent = "Menu"; document.body.style.overflow = ""; }
+  });
+
+  /* ---------- Intersection reveals (steps, why rows, faq rows, caps on touch) ---------- */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+  }, { rootMargin: "0px 0px -12% 0px", threshold: 0.15 });
+  Array.prototype.forEach.call(document.querySelectorAll(".step, .why-row, .faq-row" + (COARSE ? ", .cap" : "")), function (el) { io.observe(el); });
+
+  /* Looping animations and the hero frame cycle only run while their section is on screen */
+  var visible = {};
+  var vio = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { visible[en.target.id] = en.isIntersecting; en.target.classList.toggle("is-off", !en.isIntersecting); });
+  }, { rootMargin: "10% 0px 10% 0px" });
+  Array.prototype.forEach.call(document.querySelectorAll("#top, #what-we-do, #differentiator, #how-we-work, #ways-to-work, #selected-work, #why, #contact-cta"), function (el) { vio.observe(el); });
+
+  /* ---------- FAQ ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".faq-q"), function (btn) {
+    btn.addEventListener("click", function () {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      var panel = $(btn.getAttribute("aria-controls"));
+      btn.setAttribute("aria-expanded", String(!open));
+      panel.hidden = open;
+      if (!open) {
+        var inner = panel.querySelector(".faq-a-inner");
+        inner.classList.remove("pop"); void inner.offsetWidth; inner.classList.add("pop");
+      }
+      measureAll();
+    });
+  });
+
+  /* ---------- Hero frame cycling (cross-fade + Ken Burns on a timer) ---------- */
+  var frames = Array.prototype.slice.call(document.querySelectorAll(".hero-frame"));
+  var dots = Array.prototype.slice.call(document.querySelectorAll("#heroDots i"));
+  var frameIdx = 0;
+  if (!RM && frames.length > 1) {
+    setInterval(function () {
+      if (visible.top === false) return;
+      frames[frameIdx].classList.remove("is-active"); dots[frameIdx].classList.remove("is-active");
+      frameIdx = (frameIdx + 1) % frames.length;
+      frames[frameIdx].classList.add("is-active"); dots[frameIdx].classList.add("is-active");
+    }, 4600);
+  }
+
+  /* ---------- Cursor tracking: What We Do spotlight + tilt ---------- */
+  var capGrid = $("capGrid"), spot = $("spot");
+  var caps = Array.prototype.slice.call(document.querySelectorAll(".cap"));
+  var ptr = { x: 0, y: 0, active: false, tile: null, tx: 0, ty: 0 };
+  if (!RM && !COARSE) {
+    capGrid.addEventListener("pointermove", function (e) {
+      var r = capGrid.getBoundingClientRect();
+      ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top; ptr.active = true;
+      var t = e.target.closest(".cap");
+      if (t) {
+        var tr = t.getBoundingClientRect();
+        ptr.tile = t; ptr.tx = (e.clientX - tr.left) / tr.width - 0.5; ptr.ty = (e.clientY - tr.top) / tr.height - 0.5;
+      } else { ptr.tile = null; }
+      capGrid.classList.add("is-live");
+    });
+    capGrid.addEventListener("pointerleave", function () {
+      ptr.active = false; ptr.tile = null; capGrid.classList.remove("is-live");
+      caps.forEach(function (c) { c.style.transform = ""; });
+    });
+  }
+
+  /* ---------- Magnetic CTA button ---------- */
+  var cta = document.querySelector(".cta"), magnet = $("magnet");
+  var mag = { dx: 0, dy: 0, tx: 0, ty: 0 };
+  if (!RM && !COARSE) {
+    cta.addEventListener("pointermove", function (e) {
+      var r = magnet.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = e.clientX - cx, dy = e.clientY - cy;
+      var dist = Math.hypot(dx, dy), radius = 160;
+      if (dist < radius) { var k = (1 - dist / radius) * 0.35; mag.tx = dx * k; mag.ty = dy * k; }
+      else { mag.tx = 0; mag.ty = 0; }
+    });
+    cta.addEventListener("pointerleave", function () { mag.tx = 0; mag.ty = 0; });
+  }
+
+  /* ---------- Scroll-driven modules (one shared rAF loop, layout cached on resize) ---------- */
+  var heroEl = document.querySelector(".hero"), heroMedia = $("heroMedia"), heroCopy = $("heroCopy");
+  var diff = document.querySelector(".diff"), diffPanels = Array.prototype.slice.call(document.querySelectorAll(".diff-panel"));
+  var diffRail = Array.prototype.slice.call(document.querySelectorAll("#diffRail li")), diffSegs = Array.prototype.slice.call(document.querySelectorAll("#diffSegs i"));
+  var hww = document.querySelector(".hww"), hwwRail = $("hwwRail"), hwwNums = Array.prototype.slice.call(hwwRail.children), hwwLine = $("hwwLine");
+  var work = document.querySelector(".work"), workTrack = $("workTrack"), cntOnes = $("cntOnes").firstElementChild, cntTens = $("cntTens").firstElementChild, workCount = document.querySelector(".work-count");
+  var whyList = $("whyList"), ctaBg = $("ctaBg").firstElementChild;
+
+  var M = {}; // cached measurements
+  var pinned = false; // true when the pinned/horizontal modules are active
+  function measureAll() {
+    vw = window.innerWidth; vh = window.innerHeight;
+    pinned = !RM && !isNarrow();
+    var y = window.scrollY;
+    function top(el) { return el.getBoundingClientRect().top + y; }
+    M.hero = { top: top(heroEl), h: heroEl.offsetHeight };
+    // Differentiator: four states, 0.9 of a viewport each, plus a settle band for the closing line
+    if (pinned) diff.style.height = Math.round(vh * 4.6) + "px"; else diff.style.height = "";
+    M.diff = { top: top(diff), h: diff.offsetHeight };
+    M.hww = { top: top(hww), h: hww.offsetHeight, railW: hwwRail.scrollWidth };
+    // Selected Work: wrapper height = one viewport + the distance the track has to travel
+    if (pinned) {
+      workTrack.style.transform = "";
+      var travel = Math.max(0, workTrack.scrollWidth - vw);
+      work.style.height = Math.round(vh + travel) + "px";
+      M.work = { top: top(work), travel: travel };
+    } else { work.style.height = ""; M.work = { top: top(work), travel: 0 }; }
+    M.why = { top: top(whyList), h: whyList.offsetHeight };
+    M.cta = { top: top(cta), h: cta.offsetHeight };
+    M.docH = document.documentElement.scrollHeight - vh;
+    dirty = true;
+  }
+
+  var dirty = true, lastY = window.scrollY, lastT = performance.now(), vel = 0, skew = 0, curDiff = -1, curHww = -1, curWork = -1, hdrHidden = false, lastHdrY = 0;
+  var tilt = { rx: 0, ry: 0 };
+  var last = {}; // last value written per module, so a frame with nothing new writes nothing
+
+  function frame(t) {
+    var y = window.scrollY;
+    var dt = Math.max(1, t - lastT); lastT = t;
+    var dy = y - lastY;
+    var instVel = dy / dt * 16; // px per ~frame
+    vel += (instVel - vel) * 0.18;
+    lastY = y;
+
+    // Header: progress bar + hide/show. Scroll-up always brings it back.
+    if (y !== last.y) { last.y = y; hdrProgress.style.transform = "scaleX(" + clamp(y / Math.max(1, M.docH), 0, 1) + ")"; }
+    if (y > 140 && dy > 2 && !hdrHidden) { hdr.classList.add("is-hidden"); hdrHidden = true; }
+    else if ((dy < -2 || y < 140) && hdrHidden) { hdr.classList.remove("is-hidden"); hdrHidden = false; }
+
+    if (!RM) {
+      // 1. Hero scrub: media shrinks into a rounded frame, copy drifts up and fades
+      var hp = clamp(y / Math.max(1, M.hero.h * 0.9), 0, 1);
+      if (hp !== last.hp) { last.hp = hp;
+      heroMedia.style.transform = "scale(" + (1 - hp * 0.12) + ")";
+      heroMedia.style.clipPath = "inset(" + (hp * 9) + "vh " + (hp * 6) + "vw " + (hp * 12) + "vh round " + (hp * 36) + "px)";
+      heroCopy.style.transform = "translateY(" + (-hp * 140) + "px)";
+      heroCopy.style.opacity = String(clamp(1 - hp * 1.5, 0, 1)); }
+
+      // 2. Cursor spotlight + tilt (values from pointer, applied here so it stays one write per frame)
+      if (ptr.active) {
+        spot.style.transform = "translate3d(" + ptr.x + "px," + ptr.y + "px,0)";
+        var targetRx = ptr.tile ? -ptr.ty * 10 : 0, targetRy = ptr.tile ? ptr.tx * 12 : 0;
+        tilt.rx += (targetRx - tilt.rx) * 0.2; tilt.ry += (targetRy - tilt.ry) * 0.2;
+        caps.forEach(function (c) {
+          c.style.transform = c === ptr.tile ? "rotateX(" + tilt.rx.toFixed(2) + "deg) rotateY(" + tilt.ry.toFixed(2) + "deg) scale(1.03)" : "";
+        });
+      }
+
+      // 3. Pinned Differentiator: four states, one image and copy each, segmented progress
+      if (pinned) {
+        var dp = clamp((y - M.diff.top) / Math.max(1, M.diff.h - vh), 0, 1);
+        var stateSpan = 0.88 / 4; // last 12% is the settle band
+        var di = clamp(Math.floor(dp / stateSpan), 0, 3);
+        if (di !== curDiff) {
+          curDiff = di;
+          diffPanels.forEach(function (p, i) { p.classList.toggle("is-active", i === di); });
+          diffRail.forEach(function (li, i) { li.classList.toggle("is-active", i === di); });
+        }
+        if (dp !== last.dp) { last.dp = dp;
+          diffSegs.forEach(function (s, i) { s.style.setProperty("--p", clamp((dp - i * stateSpan) / stateSpan, 0, 1).toFixed(3)); });
+          diff.classList.toggle("is-end", dp > 0.9); }
+      }
+
+      // 4. How We Work: numeral rail is a direct function of section progress
+      var hwp = clamp((y + vh * 0.8 - M.hww.top) / Math.max(1, M.hww.h), 0, 1);
+      var railTravel = Math.max(0, M.hww.railW - vw * 0.7);
+      if (hwp !== last.hwp) { last.hwp = hwp;
+        hwwRail.style.transform = "translate3d(" + (vw * 0.12 - hwp * railTravel) + "px,0,0)";
+        hwwLine.style.setProperty("--p", clamp((y + vh * 0.55 - M.hww.top) / Math.max(1, M.hww.h - vh * 0.4), 0, 1).toFixed(3)); }
+      var hi = clamp(Math.floor(hwp * 5), 0, 4);
+      if (hi !== curHww) { curHww = hi; hwwNums.forEach(function (n, i) { n.classList.toggle("is-active", i === hi); }); }
+
+      // 6. Selected Work: horizontal travel + rolling counter
+      if (pinned && M.work.travel > 0) {
+        var wp = clamp((y - M.work.top) / M.work.travel, 0, 1);
+        if (wp !== last.wp) { last.wp = wp;
+        workTrack.style.transform = "translate3d(" + (-wp * M.work.travel) + "px,0,0)";
+        var wi = clamp(Math.round(wp * 7.999), 0, 7);
+        if (wi !== curWork) {
+          curWork = wi;
+          cntOnes.style.setProperty("--v", wi);
+          workCount.setAttribute("aria-label", "Piece " + (wi + 1) + " of 8");
+        } }
+      }
+
+      // 7. Why Famysys: ledger skews with scroll velocity and settles back
+      var targetSkew = clamp(vel * 0.12, -5, 5);
+      skew += (targetSkew - skew) * 0.12;
+      if (Math.abs(skew) < 0.005) skew = 0;
+      // No visibility guard here: the ledger must be allowed to settle back to 0 even after it has
+      // scrolled off, or it freezes mid-shear and shows a stale skew when you scroll back to it.
+      // Writes stop on their own once skew reaches 0, because skew then equals last.skew.
+      if (skew !== last.skew) { last.skew = skew; whyList.style.transform = "skewY(" + skew.toFixed(3) + "deg)"; }
+
+      // 9. Final CTA: full-bleed image scales down as the section arrives, button magnetises
+      var cp = clamp((y + vh - M.cta.top) / Math.max(1, M.cta.h + vh), 0, 1);
+      if (cp !== last.cp) { last.cp = cp; ctaBg.style.transform = "scale(" + (1.28 - cp * 0.28) + ")"; }
+      mag.dx += (mag.tx - mag.dx) * 0.18; mag.dy += (mag.ty - mag.dy) * 0.18;
+      var magMoving = Math.abs(mag.dx) + Math.abs(mag.dy) > 0.05;
+      if (magMoving || last.mag) { last.mag = magMoving; magnet.style.transform = "translate3d(" + mag.dx.toFixed(1) + "px," + mag.dy.toFixed(1) + "px,0)"; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("scroll", function () { dirty = true; }, { passive: true });
+  var resizeT;
+  window.addEventListener("resize", function () { clearTimeout(resizeT); resizeT = setTimeout(measureAll, 120); });
+  window.addEventListener("load", measureAll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureAll);
+  measureAll();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

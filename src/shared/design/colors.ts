@@ -67,7 +67,7 @@ export const colors = {
   sectionWarm: "#E5DCCA",
 } as const;
 
-// ---------------------------------------------------------------------------
+
 // 3 — MIDNIGHT PLUM
 // A purple site. The dark ground is a saturated aubergine-violet, and the light
 // ground is pale lilac rather than white, so both halves are unmistakably tinted.

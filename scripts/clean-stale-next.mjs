@@ -19,6 +19,7 @@
 // out of .next under `output: "export"` — verified by deleting .next, building with the
 // variable set, and finding a complete production build in .next regardless.
 
+import { execSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
 import path from "node:path";
 
@@ -43,4 +44,46 @@ if (found) {
   rmSync(NEXT_DIR, { recursive: true, force: true });
   const left = mode === "dev" ? "production build" : "dev server";
   console.log(`[clean-stale-next] removed .next — it held a ${left} (.next/${found})`);
+}
+
+// Deleting .next is not enough when a dev server is still running: it re-creates its own
+// chunks and manifests in .next while `next build` compiles, and the build then fails in
+// "Collecting page data" with PageNotFoundError for every route. Nothing in the build
+// output points at the dev server, so the guard below names it instead.
+if (mode === "build" && !process.env.ALLOW_DEV_DURING_BUILD) {
+  const running = findNextDevProcesses();
+  if (running.length > 0) {
+    console.error(
+      [
+        "[clean-stale-next] a `next dev` server is running. It will overwrite .next while",
+        "the build runs and the build will fail with PageNotFoundError for every route.",
+        "",
+        ...running.map((line) => `  ${line}`),
+        "",
+        "Stop the dev server and build again (or set ALLOW_DEV_DURING_BUILD=1 to override).",
+      ].join("\n"),
+    );
+    process.exit(1);
+  }
+}
+
+/** Command lines of any running `next dev` process, best-effort — never throws. */
+function findNextDevProcesses() {
+  const command =
+    process.platform === "win32"
+      ? "powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='node.exe'\\\" | ForEach-Object { $_.CommandLine }\""
+      : "ps -A -o args=";
+
+  let output;
+  try {
+    output = execSync(command, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    return []; // No process list available — do not block the build over it.
+  }
+
+  return output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /\bnext\b/.test(line) && /\bdev\b/.test(line))
+    .filter((line) => !line.includes("clean-stale-next"));
 }

@@ -121,7 +121,13 @@ export function RevealHeading({
       id={id}
       className={className}
       style={{
-        opacity: isInView ? 1 : 0,
+        // Reduced motion resolves the heading immediately rather than fading it in as it
+        // enters. The words already hold still under the preference — the clip is dropped
+        // in the stylesheet and the per-line delays are dropped above — but the whole
+        // heading was still arriving at opacity 0 and resolving on scroll, which is a
+        // scroll-triggered change of appearance and exactly what the preference asks a
+        // page not to do. Nothing about the default path changes.
+        opacity: prefersReducedMotion || isInView ? 1 : 0,
         transitionProperty: "opacity",
         transitionDuration: prefersReducedMotion ? "120ms" : "420ms",
         transitionTimingFunction: "var(--ease-base)",

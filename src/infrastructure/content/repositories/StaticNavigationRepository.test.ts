@@ -83,11 +83,19 @@ describe("StaticNavigationRepository", () => {
     const ways = menu.primaryLinks.find(
       (entry) => entry.link.label.value === "Ways to Work With Us",
     );
-    const labels = (ways?.panel.columns ?? []).flatMap((column) =>
-      column.items.map((item) => item.label.value),
-    );
+    // Cards now, not a column of link text: the four engagements each carry the picture
+    // and the one-line descriptor /ways-to-work-with-us already gives them, and each links
+    // to its own tier on that page rather than to the top of it.
+    const labels = (ways?.panel.features ?? []).map((feature) => feature.label.value);
 
+    expect(ways?.panel.columns).toHaveLength(0);
     expect(labels).toEqual(["Launch", "Grow", "Scale", "Custom Creative Partnership"]);
+    expect(ways?.panel.features.every((feature) => feature.media.src.value.length > 0)).toBe(true);
+    expect(
+      ways?.panel.features.every((feature) =>
+        feature.href.value.startsWith("/ways-to-work-with-us#"),
+      ),
+    ).toBe(true);
   });
 
   it("shows work covers, not link text, in the Selected Work panel", async () => {
@@ -101,7 +109,7 @@ describe("StaticNavigationRepository", () => {
     expect(work?.panel.features.every((feature) => feature.media.src.value.length > 0)).toBe(true);
   });
 
-  it("gives every panel a footer link and every link item a description", async () => {
+  it("gives every panel a footer link, and every row and card a description", async () => {
     const repository = new StaticNavigationRepository();
 
     const menu = await repository.getPrimaryMenu();
@@ -109,8 +117,13 @@ describe("StaticNavigationRepository", () => {
       .map((entry) => entry.panel)
       .filter((panel) => panel.columns.length > 0 || panel.features.length > 0);
     const items = panels.flatMap((panel) => panel.columns.flatMap((column) => column.items));
+    // Cards carry a description too, and it is required rather than optional: four
+    // pictures with four names under them is a shelf, and the line underneath is what
+    // makes each one legible before it is clicked.
+    const cards = panels.flatMap((panel) => panel.features);
 
     expect(panels.every((panel) => panel.footerLink !== undefined)).toBe(true);
     expect(items.every((item) => item.description.trim().length > 0)).toBe(true);
+    expect(cards.every((card) => card.description.trim().length > 0)).toBe(true);
   });
 });

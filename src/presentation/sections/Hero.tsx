@@ -36,7 +36,7 @@ export function Hero({ hero }: HeroProps) {
           is positioned against the section rather than placed in the container grid, which
           is what lets its right column reach the viewport edge instead of stopping at the
           container gutter. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] lg:block">
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[34%] lg:block">
         <div className="hero-mosaic-frame enter-scale pointer-events-auto h-full">
           <HeroMosaic tiles={hero.mosaicTiles} />
         </div>
@@ -47,14 +47,23 @@ export function Hero({ hero }: HeroProps) {
         aria-hidden="true"
       />
 
-      <Container className="relative z-10">
-        <div className="lg:max-w-[46%]">
+      {/* pointer-events-none, because the container spans the full shell width at z-10:
+          transparent or not, it sits over the mosaic and swallows its hover. The copy
+          column switches events back on for its own text and buttons. */}
+      <Container className="pointer-events-none relative z-10">
+        <div className="pointer-events-auto lg:max-w-[62%]">
+          {/* Reserved box for the travelling wordmark — see HeaderLogo. The logo itself
+              is fixed-positioned and NOT in this flow, so the copy below never shifts as
+              it leaves; this box only holds its place, permanently, at the large size
+              (2.5× the 32px header render). Collapses under reduced motion, where the
+              logo renders in the header from the start (globals.css). */}
+          <div className="hero-logo-anchor" data-hero-logo-anchor aria-hidden="true" />
           {/* The h1 uses the same line-by-line reveal as every other display heading
               on the page; it just fires on mount rather than on scroll, because it is
               already in view. */}
           <RevealHeading
             as="h1"
-            className="text-heading font-semibold text-canvas"
+            className="text-hero-heading text-balance font-semibold text-canvas"
             accent={["the agency overhead."]}
           >
             {hero.heading}

@@ -27,8 +27,10 @@ interface ServiceCellProps {
  * edge. No border, no margin and NO BACKGROUND — the cell is flush against its neighbours,
  * contributes its own right and bottom hairline, and otherwise lets the section's canvas
  * show straight through. That is how the grid ends up sharing edges instead of stacking two
- * borders at every seam, and how it reads as one plane rather than six tiles. The light
- * navy fill arrives on hover and only on hover. See the `.service-*` block in globals.css.
+ * borders at every seam, and how it reads as one plane rather than six tiles. The ink
+ * inversion arrives on hover and only on hover — the wash drops over the cell as a top-down
+ * curtain and the copy flips to its on-dark colours. See the `.service-*` block in
+ * globals.css.
  *
  * The numeral carries `aria-hidden` for the same reason §Why Famysys's does: it is a
  * visual index of an unordered set of six capabilities, not part of the copy, and read

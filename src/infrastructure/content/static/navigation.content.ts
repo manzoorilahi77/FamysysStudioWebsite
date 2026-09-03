@@ -19,8 +19,8 @@ import type {
 import { EMPTY_NAV_PANEL } from "../../../domain/navigation/entities/NavPanel";
 import type { NavigationMenu } from "../../../domain/navigation/entities/NavigationMenu";
 import { capabilities } from "./services.content";
-import { waysToWorkBlock } from "./marketing.content";
 import { caseStudies } from "./portfolio.content";
+import { waysToWorkPage } from "./ways-to-work.content";
 import { slugifyTitle } from "./slugify";
 
 function megaLink(label: string, href: string, description: string): MegaMenuLink {
@@ -58,23 +58,38 @@ const creativeServicesPanel: NavPanel = {
   footerLink: createCta("View all services", "/creative-services"),
 };
 
+/**
+ * The four engagements as cards rather than as a list of four two-word labels.
+ *
+ * It was a single narrow column, 22rem wide under its own trigger, holding four short
+ * names — a card two thirds empty hanging under a menu bar that is otherwise held to the
+ * container line. The engagements already have a picture and a one-line descriptor on
+ * /ways-to-work-with-us, so showing those is not new content: the name, the descriptor and
+ * the image are all read from `waysToWorkPage`, which reads them from the client's own
+ * block. The menu cannot drift from the page it points at, which is the same rule the
+ * capability columns follow.
+ *
+ * Each card links to its own tier on that page rather than to the top of it.
+ */
+const engagementFeatures: ReadonlyArray<NavPanelFeature> = [
+  ...waysToWorkPage.tiers.map((tier) => ({
+    ...createCta(tier.name, `/ways-to-work-with-us#${tier.slug.value}`),
+    media: tier.media,
+    description: tier.descriptor,
+  })),
+  {
+    ...createCta(
+      waysToWorkPage.custom.name,
+      `/ways-to-work-with-us#${waysToWorkPage.custom.slug.value}`,
+    ),
+    media: waysToWorkPage.custom.media,
+    description: waysToWorkPage.custom.descriptor,
+  },
+];
+
 const waysToWorkPanel: NavPanel = {
-  columns: [
-    {
-      title: "Ways to work with us",
-      items: [
-        ...waysToWorkBlock.tiers.map((tier) =>
-          megaLink(tier.name, "/ways-to-work-with-us", tier.descriptor),
-        ),
-        megaLink(
-          waysToWorkBlock.custom.name,
-          "/ways-to-work-with-us",
-          waysToWorkBlock.custom.descriptor,
-        ),
-      ],
-    },
-  ],
-  features: [],
+  columns: [],
+  features: engagementFeatures,
   footerLink: createCta("Compare every engagement", "/ways-to-work-with-us"),
 };
 
@@ -86,6 +101,9 @@ const workFeatures: ReadonlyArray<NavPanelFeature> = caseStudies
   .map((piece) => ({
     ...createCta(piece.title, `/selected-work#${piece.slug.value}`),
     media: piece.media,
+    // The client's own one-line brief for the piece, the same line /selected-work prints
+    // under it. Nothing here is written for the menu.
+    description: piece.description,
   }));
 
 const selectedWorkPanel: NavPanel = {

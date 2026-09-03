@@ -85,6 +85,7 @@ const groups = [
       "primary-button-hover": colorDerived.primaryButtonHover,
       "primary-button-hover-on-dark": colorDerived.primaryButtonHoverOnDark,
       "accent-8": colorDerived.accentWash,
+      "accent-4": colorDerived.accentWashFaint,
       "accent-warm-wash": colorDerived.accentWarmWash,
       "hairline-on-section-alt": colorDerived.hairlineOnSectionAlt,
       "section-alt-entering": colorDerived.sectionAltEntering,

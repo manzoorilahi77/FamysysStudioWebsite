@@ -108,6 +108,14 @@ export const colorDerived = {
   /** An 8% accent wash — the resting fill of an accent-tinted chip on a light ground. */
   accentWash: withAlpha(colors.accentPrimary, 8),
   /**
+   * Half that, and the faintest colour on the site: the wash the navigation panel pulls
+   * down from its own top edge, so the card reads as lit by the bar it hangs off rather
+   * than as flat cream. 1.03:1 against the page ground — below anything a contrast floor
+   * governs, which is the point. Nothing is ever set ON it that is not already measured
+   * against canvas, because it does not move a colour far enough to matter.
+   */
+  accentWashFaint: withAlpha(colors.accentPrimary, 4),
+  /**
    * The warm accent as a wash, for the category chips. 22% rather than the accent's 8%
    * because the warm accent is close to the cream in luminance and a lighter wash simply
    * does not appear: at 12% it separates from the ground by 1.141:1, at 22% by 1.228:1,
@@ -271,6 +279,13 @@ export const motion = {
     // above it — the same reveal, given longer to land. A different effect would have
     // been a new effect; a different duration is emphasis.
     entryMs: 520,
+    // /about: the belief statement is the page's thesis and its one centred moment. On a
+    // page where every section now moves, the block that moves slowest and furthest is
+    // the one that reads as the point — 760ms from 28px, against 320ms from 24px. It is
+    // spent as a keyframe (`.belief-enter` in globals.css) rather than through a component,
+    // because the statement is inside the first screen at every viewport and arrives on
+    // load; this entry stays here so the number sits beside the other motion values.
+    statementEntryMs: 760,
   },
   parallax: {
     positioning: 24, // px — §4.5, scaled down from Superside's 40px per 2.7

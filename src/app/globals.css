@@ -78,6 +78,15 @@ body {
   line-height: 1.08;
   letter-spacing: -0.026em;
 }
+
+/* The hero's h1 only. A step above .text-heading — the opening statement is the one
+   heading allowed to outscale the section heads, and the copy column has the width
+   for it now that the mosaic holds 34%. */
+.text-hero-heading {
+  font-size: clamp(2.3rem, 3.5vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
 .text-display-l {
   font-size: clamp(1.75rem, 3.85vw, 4.25rem);
   line-height: 1.06;
@@ -656,13 +665,23 @@ main > section.bg-ink + section.bg-ink::after {
   top: 100%;
   /* The gutter, not a copy of it. The panel's containing block is the header's inner
      shell, so matching that shell's own padding is what keeps the card's edges on the
-     site's single container line at every width. */
+     site's single container line at every width. ALL THREE PANELS take this now — the
+     56rem row of covers and the 22rem column of tier names both ended somewhere the
+     page's own edge does not, and a menu bar whose cards each stop at a different place
+     reads as three menus rather than one. What differs between them is their contents,
+     which is what was actually different: see `navPanelVariant` in NavPanel.tsx. */
   left: var(--spacing-gutter);
   right: var(--spacing-gutter);
   margin-top: 0.5rem;
+  /* A cream card with the faintest warm wash pulled down from its top edge, rather than
+     flat canvas. It is a 4% accent over the page ground — 1.03:1, far below anything a
+     contrast floor governs, and deliberately so: it should read as the card being lit
+     from the bar it hangs off, not as a second colour. */
   background-color: var(--color-canvas);
+  background-image: linear-gradient(to bottom, var(--color-accent-4) 0%, transparent 5.5rem);
   border: 1px solid var(--color-ink-12);
   border-radius: var(--radius-sm);
+  overflow: hidden;
   /* No shadow. The site is flat throughout and one floating card would be the only
      lit object on it. */
   box-shadow: none;
@@ -677,53 +696,44 @@ main > section.bg-ink + section.bg-ink::after {
   height: 0.5rem;
 }
 
-/* A PANEL IS AS WIDE AS WHAT IS IN IT. The three panels hold three different things and
-   were all being stretched to the same container width, which is only right for one of
-   them — see `navPanelVariant` in NavPanel.tsx for which is which.
-
-   `--wide` is the default above: three real columns of services, and it earns the width.
-
-   `--media` holds four covers. At the container's width they were stretched to ~278px
-   each, which is a hero treatment for a menu; 56rem puts them at ~194px, still a legible
-   cover. Anchored to the container's RIGHT edge rather than to its trigger, because the
-   trigger is the fourth of five items and a left-anchored card that size runs off the
-   viewport at the narrow end of the range where the bar is still inline.
-
-   `--narrow` holds four two-word labels in what was a three-column grid, so two thirds of
-   it was empty. It is sized to its content and starts under its own trigger; the inline
-   `left` comes from the trigger's `offsetLeft`, clamped to the container's gutters. */
-.nav-panel--media {
-  left: auto;
-  width: min(56rem, 100%);
+/* The accent hairline along the top edge, drawn left to right as the panel opens — the
+   same gesture the section rules on /about and the process rail make, at the top of a
+   card instead of under a row. It is the panel's one piece of resting colour. */
+.nav-panel-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-image: linear-gradient(
+    to right,
+    var(--color-accent) 0%,
+    var(--color-accent-warm) 55%,
+    transparent 100%
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 520ms;
+  transition-timing-function: var(--ease-base);
 }
 
-.nav-panel--narrow {
-  width: 22rem;
-  max-width: calc(100vw - 2 * var(--spacing-gutter));
-}
-
-/* Short items get short spacing. The full-size rhythm was built for rows carrying a
-   sentence of descriptor; these carry two words, and the same padding around them was
-   most of what made the card read as empty. */
-.nav-panel--narrow .nav-panel-link {
-  padding-block: 0.4375rem;
-}
-
-.nav-panel--narrow .nav-panel-link-arrow {
-  top: 0.4375rem;
+.nav-panel-edge[data-open="true"] {
+  transform: scaleX(1);
 }
 
 .nav-panel-column-label {
-  color: var(--color-ink-70);
+  color: var(--color-accent);
   /* The label's own line box, reserved whether or not the column has a name. See
      NavPanel for why some columns have none and why nothing is invented to fill them. */
   min-height: 0.6875rem;
 }
 
 /* Panel rows carry the SAME hover as the capability rows on /selected-work — sweep from
-   the left, title shifts right and goes accent, arrow arrives at the right. One hover
-   vocabulary across the site rather than one per surface. The sweep is a scaleX on a
-   pseudo-element for the same compositor reason it is there. */
+   the left, title shifts right and goes accent, arrow arrives at the right — with one
+   addition here: an accent bar that grows down the row's left edge, so the row that is
+   pointed at is marked as well as tinted. The sweep and the bar are both transforms on
+   pseudo-elements, for the compositor. */
 .nav-panel-link {
   position: relative;
   display: block;
@@ -737,11 +747,15 @@ main > section.bg-ink + section.bg-ink::after {
   inset: 0;
   z-index: 0;
   border-radius: var(--radius-sm);
-  background-color: var(--color-ink-4);
+  /* An accent wash rather than the flat ink tint. At 8% over cream it is 1.06:1 against
+     the panel — a tint, not a fill — and every text role in the row keeps its measured
+     contrast because the wash sits between the ground and the accent, both of which the
+     copy already clears. */
+  background-color: var(--color-accent-8);
   transform: scaleX(0);
   transform-origin: left center;
   transition-property: transform;
-  transition-duration: 180ms;
+  transition-duration: 220ms;
   transition-timing-function: var(--ease-base);
 }
 
@@ -750,23 +764,44 @@ main > section.bg-ink + section.bg-ink::after {
   transform: scaleX(1);
 }
 
+.nav-panel-link-bar {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0.375rem;
+  bottom: 0.375rem;
+  width: 2px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition-property: transform;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-link:hover .nav-panel-link-bar,
+.nav-panel-link:focus-visible .nav-panel-link-bar {
+  transform: scaleY(1);
+}
+
 .nav-panel-link-body {
   position: relative;
   z-index: 1;
   display: block;
   transition-property: transform;
-  transition-duration: 180ms;
+  transition-duration: 220ms;
   transition-timing-function: var(--ease-base);
 }
 
 .nav-panel-link:hover .nav-panel-link-body,
 .nav-panel-link:focus-visible .nav-panel-link-body {
-  transform: translateX(6px);
+  transform: translateX(8px);
 }
 
 .nav-panel-link-title {
   transition-property: color;
-  transition-duration: 180ms;
+  transition-duration: 220ms;
   transition-timing-function: var(--ease-base);
 }
 
@@ -784,7 +819,7 @@ main > section.bg-ink + section.bg-ink::after {
   opacity: 0;
   transform: translateX(-4px);
   transition-property: opacity, transform;
-  transition-duration: 180ms;
+  transition-duration: 220ms;
   transition-timing-function: var(--ease-base);
 }
 
@@ -794,18 +829,170 @@ main > section.bg-ink + section.bg-ink::after {
   transform: translateX(0);
 }
 
-/* The work panel's rows are covers, not titles, and image tiles already have a locked
-   hover on this site — accent border and a 4px lift. They keep it; a sweep behind a
-   photograph would be invisible anyway. */
-.nav-panel-feature .media-tile {
-  transition-property: border-color, transform;
-  transition-duration: var(--duration-fast);
+/* THE CARDS. Four across the container, used by both picture panels: the engagements and
+   the featured work. The frame is 4:3 and everything that happens on hover happens inside
+   it — the picture pushes in, an accent wash rises over it from the bottom, and an arrow
+   arrives in the top-right corner — plus the name going accent and a rule drawing itself
+   under the card. Five signals, one gesture: the card is a door and it opens. */
+.nav-panel-card {
+  display: block;
+  position: relative;
+  padding-bottom: 0.75rem;
 }
 
-.nav-panel-feature:hover .media-tile,
-.nav-panel-feature:focus-visible .media-tile {
+.nav-panel-card-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-ink-8);
+  aspect-ratio: 4 / 3;
+  transition-property: border-color, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-frame,
+.nav-panel-card:focus-visible .nav-panel-card-frame {
   border-color: var(--color-accent);
   transform: translateY(-4px);
+}
+
+.nav-panel-card-image {
+  transition-property: transform;
+  transition-duration: 620ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-image,
+.nav-panel-card:focus-visible .nav-panel-card-image {
+  transform: scale(1.06);
+}
+
+/* The wash rises from the bottom of the frame rather than covering it: the picture is the
+   point and a full accent veil would hide it. It is the accent at 55% over the lower
+   third, which is enough for the arrow above it to read and little enough that the frame
+   is still a photograph. */
+.nav-panel-card-wash {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-accent) 55%, transparent) 0%,
+    transparent 62%
+  );
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-wash,
+.nav-panel-card:focus-visible .nav-panel-card-wash {
+  opacity: 1;
+}
+
+/* Cream on the accent fill is 5.768:1 — measured, and the same pairing the primary button
+   uses. The chip is what guarantees it: the glyph never sits on the photograph itself,
+   where no number could be promised. */
+.nav-panel-card-arrow {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+  font-size: 0.8125rem;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-6px, 6px);
+  transition-property: opacity, transform;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-arrow,
+.nav-panel-card:focus-visible .nav-panel-card-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.nav-panel-card-name {
+  transition-property: color;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-name,
+.nav-panel-card:focus-visible .nav-panel-card-name {
+  color: var(--color-accent);
+}
+
+/* The rule under the card draws from the left on hover — the same gesture the panel's own
+   top edge makes when it opens, so the card answers the card it sits in. */
+.nav-panel-card-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 320ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-card:hover .nav-panel-card-rule,
+.nav-panel-card:focus-visible .nav-panel-card-rule {
+  transform: scaleX(1);
+}
+
+/* The footer sits on a warm hairline rather than the flat ink one, which is the third
+   place the panel's colour appears and the quietest. */
+.nav-panel-footer {
+  border-top: 1px solid var(--color-accent-8);
+}
+
+.nav-panel-footer-link {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-panel-footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-footer-link:hover::after,
+.nav-panel-footer-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.nav-panel-footer-arrow {
+  display: inline-block;
+  transition-property: transform;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.nav-panel-footer-link:hover .nav-panel-footer-arrow,
+.nav-panel-footer-link:focus-visible .nav-panel-footer-arrow {
+  transform: translateX(4px);
 }
 
 /* Buttons lift as well as fill — colour alone read as a state change, not a response. */
@@ -910,8 +1097,52 @@ main > section.bg-ink + section.bg-ink::after {
   .nav-panel-link-arrow {
     transform: none;
   }
-  .nav-panel-feature:hover .media-tile,
-  .nav-panel-feature:focus-visible .media-tile {
+  /* The panel's colour survives; its movement does not. Washes, colour changes and the
+     opacity of the arrow chip are not motion, so they stay — every transform and every
+     drawn line is held at its end state instead. */
+  .nav-panel-edge,
+  .nav-panel-edge[data-open="true"],
+  .nav-panel-card-rule,
+  .nav-panel-card:hover .nav-panel-card-rule,
+  .nav-panel-card:focus-visible .nav-panel-card-rule,
+  .nav-panel-footer-link::after,
+  .nav-panel-footer-link:hover::after,
+  .nav-panel-footer-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .nav-panel-link-bar,
+  .nav-panel-link:hover .nav-panel-link-bar,
+  .nav-panel-link:focus-visible .nav-panel-link-bar {
+    transform: scaleY(1);
+  }
+
+  .nav-panel-link::before,
+  .nav-panel-link:hover::before,
+  .nav-panel-link:focus-visible::before {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+
+  .nav-panel-link:hover::before,
+  .nav-panel-link:focus-visible::before {
+    opacity: 1;
+  }
+
+  .nav-panel-link:hover .nav-panel-link-body,
+  .nav-panel-link:focus-visible .nav-panel-link-body,
+  .nav-panel-link:hover .nav-panel-link-arrow,
+  .nav-panel-link:focus-visible .nav-panel-link-arrow,
+  .nav-panel-card:hover .nav-panel-card-frame,
+  .nav-panel-card:focus-visible .nav-panel-card-frame,
+  .nav-panel-card:hover .nav-panel-card-image,
+  .nav-panel-card:focus-visible .nav-panel-card-image,
+  .nav-panel-card-image,
+  .nav-panel-card-arrow,
+  .nav-panel-card:hover .nav-panel-card-arrow,
+  .nav-panel-card:focus-visible .nav-panel-card-arrow,
+  .nav-panel-footer-link:hover .nav-panel-footer-arrow,
+  .nav-panel-footer-link:focus-visible .nav-panel-footer-arrow {
     transform: none;
   }
 }
@@ -1201,7 +1432,7 @@ div.grid > *:nth-child(even).card-surface-dark {
 .hero-mosaic {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: 1.25rem;
   height: 100%;
   overflow: hidden;
 }
@@ -1219,7 +1450,7 @@ div.grid > *:nth-child(even).card-surface-dark {
 .hero-mosaic-track {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.25rem;
   will-change: transform;
 }
 
@@ -1228,8 +1459,12 @@ div.grid > *:nth-child(even).card-surface-dark {
   display: block;
   width: 100%;
   overflow: hidden;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+  /* Deliberately rounder than the site's --radius-sm — at this tile size a 4px radius
+     reads as square; 1rem is what gives the strip its card-like softness. */
+  border-radius: 1rem;
+  /* The Expand disc replaces the pointer on the tile itself; in the gaps between tiles
+     the native arrow stays. */
+  cursor: none;
   transition-property: transform;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--ease-base);
@@ -1240,34 +1475,59 @@ div.grid > *:nth-child(even).card-surface-dark {
   transform: scale(1.03);
 }
 
-/* A scrim under the icon, so the corner arrows read over a bright frame as well as a
-   dark one. Both it and the icon are hidden until the tile is hovered or focused. */
-.hero-mosaic-scrim,
-.hero-mosaic-expand {
+/* A scrim under the cursor disc, so it reads over a bright frame as well as a dark
+   one. Hidden until the tile is hovered or focused. */
+.hero-mosaic-scrim {
   position: absolute;
   inset: 0;
   opacity: 0;
+  background-color: var(--color-ink-60);
   transition-property: opacity;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--ease-base);
 }
 
-.hero-mosaic-scrim {
-  background-color: var(--color-ink-60);
+.hero-mosaic-tile:hover .hero-mosaic-scrim,
+.hero-mosaic-tile:focus-visible .hero-mosaic-scrim {
+  opacity: 1;
 }
 
-.hero-mosaic-expand {
+/* The cursor follower. Fixed to the viewport — the transform written per mousemove is
+   the pointer position, so the badge inside re-centres itself with its own translate.
+   pointer-events: none keeps the real hit-testing on the tiles underneath. */
+.hero-mosaic-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Frosted glass disc in place of the arrow. The blur samples the photograph moving
+   underneath it, which is what makes the glass read as glass. */
+.hero-mosaic-cursor-badge {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.375rem;
+  width: 6.5rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--color-canvas) 14%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--color-canvas);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  transform: translate(-50%, -50%) scale(0);
+  transition-property: transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
 }
 
-.hero-mosaic-tile:hover .hero-mosaic-scrim,
-.hero-mosaic-tile:focus-visible .hero-mosaic-scrim,
-.hero-mosaic-tile:hover .hero-mosaic-expand,
-.hero-mosaic-tile:focus-visible .hero-mosaic-expand {
-  opacity: 1;
+.hero-mosaic-cursor.is-active .hero-mosaic-cursor-badge {
+  transform: translate(-50%, -50%) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2435,36 +2695,41 @@ div.grid > *:nth-child(even).card-surface-dark {
 }
 
 /* THE CARD BACKGROUND, and it only exists on hover. With the cells unfilled at rest this
-   is not a garnish on top of a tint, it is the entire fill: cream at rest, light navy under
-   the cursor.
+   is not a garnish on top of a tint, it is the entire fill — and the fill is an INVERSION:
+   cream at rest, full ink under the cursor. The old `card-tint` mix composited grey over
+   this warm cream and read as a smudge; going all the way to the dark ground instead makes
+   the hovered cell the section's one dark card against five cream neighbours, which is a
+   signal no tint could give.
 
-   Two layers, because the hovered cell has to lift as a WHOLE card and not just at the
-   corner the pointer came in at — a single gradient fading to transparent lit one corner of
-   an otherwise untouched cell. `card-tint` underneath is the body of the fill; the radial
-   on top of it peaks at `card-tint-deep` in the top-left, so the card still has a direction
-   rather than being a rectangle that switched on.
+   It arrives as a curtain, not a fade. `clip-path` opens from the top edge downward, so the
+   ink drops over the title first and floods down through the numeral band — a drawn motion
+   that belongs to the same family as the grid's own hairline draw. Top-down also means the
+   copy is covered early in the sweep, which is what lets the text colours flip on a short
+   delay without a cream-on-cream frame.
 
-   Both are opaque hex rather than an opacity of ink, and that is not a shortcut — see the
-   note in tokens.ts. Ink over this warm cream composites GREY, so the light navy the design
-   asks for is unreachable from the ink ramp at any alpha. */
+   Two glows over the solid ink give the card a direction: `section-alt` (the lighter
+   forest) breathes in from the top-left, and a terracotta ember sits low-left, exactly the
+   band the cropped numeral rises through. */
 .service-wash {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0;
-  background-color: var(--color-card-tint);
-  background-image: radial-gradient(
-    125% 125% at 0% 0%,
-    var(--color-card-tint-deep),
-    transparent 80%
-  );
-  transition-property: opacity;
-  transition-duration: 260ms;
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(120% 120% at 0% 0%, var(--color-section-alt), transparent 70%),
+    radial-gradient(
+      64% 48% at 10% 100%,
+      color-mix(in srgb, var(--color-accent) 55%, transparent),
+      transparent 74%
+    );
+  clip-path: inset(0 0 100% 0);
+  transition-property: clip-path;
+  transition-duration: 480ms;
   transition-timing-function: var(--ease-base);
 }
 
 .service-cell:hover .service-wash {
-  opacity: 1;
+  clip-path: inset(0 0 0 0);
 }
 
 /* Title and descriptor arrive together as the cell's body; the numeral trails them. Both
@@ -2491,22 +2756,32 @@ div.grid > *:nth-child(even).card-surface-dark {
    which is what stops a shorter card reading as a tighter one. */
 .service-descriptor {
   margin-top: clamp(0.875rem, 1.5vw, 1.375rem);
+  /* Same delay-behind-the-curtain timing as the title's colour — see `.service-title`. */
+  transition-property: color;
+  transition-duration: 240ms;
+  transition-delay: 80ms;
+  transition-timing-function: var(--ease-base);
 }
 
-/* The title lifts, and that is all it does. It is full ink at rest — 12.5:1 on canvas,
-   11.71:1 once the hover tint is under it, both far over the floor — so there is no colour
-   left to escalate to and the shift carries the hover alone, which also keeps this
-   transform-only. The accent rule that used to wipe in under it is gone: the grid already
-   answers a hover in two places, with the fill and with the travelling square, and a third
-   signal on the same event was one more than the design needs. */
+/* The title lifts and flips to the on-dark text colour, because the ground under it is
+   about to be ink. The 80ms delay on colour is timed to the wash: the curtain opens
+   top-down and reaches the title within the first ~150ms, so by the time the colour is
+   mid-transition the dark ground is already beneath it and there is no cream-on-cream
+   frame in either direction. */
 .service-title {
-  transition-property: transform;
-  transition-duration: 260ms;
+  transition-property: transform, color;
+  transition-duration: 260ms, 240ms;
+  transition-delay: 0ms, 80ms;
   transition-timing-function: var(--ease-base);
 }
 
 .service-cell:hover .service-title {
   transform: translateY(-3px);
+  color: var(--color-text-on-dark);
+}
+
+.service-cell:hover .service-descriptor {
+  color: var(--color-canvas-80);
 }
 
 /* The numeral is a watermark, not a label: 1.405:1 on canvas, far under every floor, and
@@ -2537,16 +2812,20 @@ div.grid > *:nth-child(even).card-surface-dark {
   font-weight: 500;
   color: var(--color-service-numeral);
   opacity: 0;
-  transition-property: opacity, transform;
-  transition-duration: 320ms, 260ms;
+  transition-property: opacity, transform, color;
+  transition-duration: 320ms, 340ms, 320ms;
   transition-timing-function: var(--ease-base);
-  transition-delay: var(--numeral-delay, 0ms), 0ms;
+  transition-delay: var(--numeral-delay, 0ms), 0ms, 120ms;
 }
 
-/* The numeral rises into its own crop on hover — a few more pixels of the digits clear the
-   cell's edge. Transform only, so the crop does the work rather than a second colour. */
+/* On hover the numeral rises further into its own crop and turns ghost-cream — the same
+   watermark logic as rest, mirrored for the dark ground it now sits on — while the wash's
+   terracotta ember glows through from behind it. The colour trails the transform slightly
+   so the digits read as rising INTO the lit band rather than switching state. The opacity
+   channel keeps its entry delay untouched; colour gets its own 120ms. */
 .service-cell:hover .service-numeral {
-  transform: translateY(-6px);
+  transform: translateY(-10px);
+  color: var(--color-canvas-16);
 }
 
 .service-grid[data-drawn="true"] .service-numeral {
@@ -2611,17 +2890,23 @@ div.grid > *:nth-child(even).card-surface-dark {
     opacity: 1;
     transition-delay: 0ms;
   }
-  /* No shift, no numeral rise, no gradient, no square. The component also declines to
+  /* No shift, no numeral rise, no curtain, no square. The component also declines to
      render the wash and the marker at all under reduced motion; these are the belt to that
-     pair of braces. */
+     pair of braces. The colour restatements matter most: with no ink wash beneath them,
+     the on-dark hover colours would put cream text on the cream canvas. */
   .service-cell:hover .service-numeral {
     transform: none;
+    color: var(--color-service-numeral);
   }
   .service-cell:hover .service-title {
     transform: none;
+    color: var(--color-ink);
+  }
+  .service-cell:hover .service-descriptor {
+    color: var(--color-ink-70);
   }
   .service-cell:hover .service-wash {
-    opacity: 0;
+    clip-path: inset(0 0 100% 0);
   }
   .service-marker {
     display: none;
@@ -4292,35 +4577,220 @@ html {
    About (/about)
    ============================================================================ */
 
-/* The whole page's stylesheet is these two rules, which is the point: About reuses the
-   split, the section header and the reveal that every other page already has, and adds
-   nothing of its own beyond the frame around its one image and the hairline that pairs
-   the ambition with the present tense.
+/* Eight sections, each on its own layout, and the stylesheet's job is the three things
+   the shared components do not already do: the frame every image sits in and its settle,
+   the hairline that draws as a section enters, and the three-direction arrival of the
+   inputs row. Everything else — the splits, the section header, the card hover, the
+   heading clip reveal — is the site's, reused by class.
 
-   Note what is NOT here — no settle on the image, no draw-on, no stagger of its own.
-   The page's motion brief is standard scroll reveals and the heading clip reveal only,
-   so `.about-media` is a frame rather than an animation. */
-.about-media {
+   THE FRAME AND THE SETTLE. Every image on the page renders at 1.03 and eases to 1 as
+   its block enters, over the draw duration so the picture is still settling while the
+   copy beside it is arriving. It is a transition keyed on `data-settled`, which the
+   block's own observer sets, rather than an animation on load: the images are below the
+   fold and nobody should see them resolve before they scroll to them. The one exception
+   is the hero, whose frame arrives on load with the rest of the hero and takes the same
+   `.enter-scale` keyframe the homepage mosaic does. */
+.about-frame {
   overflow: hidden;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-canvas-16);
-  aspect-ratio: 4 / 3;
+  border: 1px solid var(--color-hairline-on-dark);
 }
 
-/* The current position sits under a hairline beside the ambition, so the pairing is
-   structural. Reading the ambition without this line beside it would turn a statement of
-   intent into a claim about today. */
-.direction-present {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-ink-8);
+.bg-canvas .about-frame {
+  border-color: var(--color-ink-12);
+}
+
+.about-frame--16x9 {
+  aspect-ratio: 16 / 9;
+}
+.about-frame--4x3 {
+  aspect-ratio: 4 / 3;
+}
+.about-frame--1x1 {
+  aspect-ratio: 1 / 1;
+}
+.about-frame--3x4 {
+  aspect-ratio: 3 / 4;
+}
+
+.about-frame img {
+  transform: scale(1.03);
+  transition-property: transform;
+  transition-duration: var(--duration-draw);
+  transition-timing-function: var(--ease-base);
+}
+
+.about-frame[data-settled="true"] img {
+  transform: scale(1);
+}
+
+/* The hero's frame settles on load, not on scroll: the keyframe holds its end state
+   whether or not the bundle runs, which the transition above cannot promise for an
+   image that is on screen before the observer exists. */
+.about-frame--hero img {
+  transform: none;
+  transition: none;
+  animation: enter-scale 900ms var(--ease-base) both;
+}
+
+/* Below lg the hero frame is under the heading and a 16:9 band at full width is too
+   tall for a phone's 60svh; a shorter crop keeps the first paragraph on the fold. */
+@media (max-width: 1023px) {
+  .about-frame--hero {
+    aspect-ratio: 2 / 1;
+  }
+}
+
+/* THE BELIEF STATEMENT. Slower and further than anything else on the page — 760ms from
+   28px, against 320ms from 24px — and delayed so it lands after the hero's copy. A
+   keyframe rather than a scroll reveal because the statement is inside the first screen at
+   every viewport (see BeliefStatement.tsx for the measurement), and because `both` holds
+   the from-state before it runs and the to-state after, so the line is simply present when
+   the bundle never runs. */
+.belief-enter {
+  animation: belief-enter 760ms var(--ease-base) 420ms both;
+}
+
+@keyframes belief-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .belief-enter {
+    animation: enter-fade-reduced 120ms var(--ease-base) 0ms both;
+  }
+}
+
+/* THE DRAWN RULE. A scaleX from the left over the draw duration, as the process rail and
+   the reason rows draw. On the dark grounds it takes `--color-hairline-on-dark`, which the
+   seam rules switch per ground, so a rule on the alternate navy draws in that ground's own
+   hairline rather than the base one. */
+.drawn-rule {
+  height: 1px;
+  background-color: var(--color-ink-12);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duration-draw);
+  transition-timing-function: var(--ease-base);
+}
+
+.drawn-rule--dark {
+  background-color: var(--color-hairline-on-dark);
+}
+
+.drawn-rule[data-visible="true"] {
+  transform: scaleX(1);
+}
+
+/* THE INPUTS ROW. Three panels from three directions — the outer two from their own side,
+   the middle one rising — firing from one observer with a 120ms step, so they read as
+   converging rather than as a row fading in. The entry is on this wrapper and the card
+   hover is on the article inside it: two transforms on one box would fight over the
+   property and the lift would cancel the arrival or vice versa. */
+.about-input-entry {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 480ms;
+  transition-timing-function: var(--ease-base);
+}
+
+/* Stacked, below md, every panel rises. The three directions are a property of the ROW —
+   two panels converging on a middle one — and there is no row down here; worse, a panel
+   waiting 32px to the left or right of a full-width column is 32px wider than the
+   viewport, which is a horizontal scrollbar on a phone (measured: +8px at 390). */
+.about-input-entry[data-direction] {
+  transform: translateY(32px);
+}
+
+@media (min-width: 768px) {
+  .about-input-entry[data-direction="left"] {
+    transform: translateX(-32px);
+  }
+  .about-input-entry[data-direction="up"] {
+    transform: translateY(32px);
+  }
+  .about-input-entry[data-direction="right"] {
+    transform: translateX(32px);
+  }
+}
+
+.about-input-entry[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* THE BLEED. The ecosystem image runs from the viewport's left edge to the middle of the
+   page while the copy beside it holds the container line. The negative margin is the
+   container inset re-expressed in viewport units — the `%`-based `--container-inset`
+   would resolve against the grid column here, not the page — and `100vw` includes the
+   scrollbar, so the host clips horizontally to absorb the few pixels of overhang instead
+   of growing a second scrollbar. Below lg there is nothing to bleed into: the image is
+   the full container width, which is already the whole phone. */
+.about-bleed-host {
+  overflow-x: clip;
 }
 
 @media (min-width: 1024px) {
-  .direction-present {
-    padding-top: 0;
-    padding-left: 2rem;
-    border-top: none;
-    border-left: 1px solid var(--color-ink-8);
+  .about-bleed-left {
+    margin-left: calc(-1 * max(var(--spacing-gutter), (100vw - 80rem) / 2 + var(--spacing-gutter)));
+  }
+
+  .about-frame--bleed {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+/* THE STAGES. Each stage's numeral is the section's one colour moment — warm, as the
+   process numerals on /how-we-work are — and decorative in the WCAG sense: the ordinal is
+   carried by list position, so the digits are generated content (see `.decorative-numeral`).
+   Warm on ink clears the 3:1 large-text floor, and the section does not fade, so that
+   number holds from the first frame. */
+.about-stage-numeral {
+  color: var(--color-accent-warm);
+}
+
+.about-stage-numeral-slot {
+  display: block;
+  min-width: 3.25rem;
+  line-height: 1;
+}
+
+/* The status word — "Now", "Next", "After that" — as a small chip on a hairline, so it
+   reads as a state rather than as another eyebrow. Canvas text on ink; the border is the
+   dark-surface hairline and carries no meaning the word does not already carry. */
+.about-status {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-canvas-16);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-frame img,
+  .about-frame[data-settled="true"] img,
+  .about-frame--hero img {
+    transform: none;
+    animation: none;
+  }
+
+  .drawn-rule,
+  .drawn-rule[data-visible="true"] {
+    transform: scaleX(1);
+  }
+
+  .about-input-entry,
+  .about-input-entry[data-direction] {
+    transform: none;
   }
 }
 
@@ -4427,4 +4897,63 @@ html {
 /* The summary's own message needs no top margin: nothing sits above it. */
 .contact-summary > .contact-error:first-child {
   margin-top: 0;
+}
+
+/* ============================================================================
+   Homepage header logo travel (HeaderLogo + Hero)
+   ============================================================================ */
+
+/* The reserved box in the hero copy column: 5rem is the 32px header wordmark at the
+   hero's 2.5× (see HERO_LOGO_SCALE in HeaderLogo.tsx). It is empty on purpose — the
+   visible logo is the fixed element below, so nothing in the hero moves when the logo
+   travels away; this box just keeps the headline from sliding up into the space. */
+.hero-logo-anchor {
+  position: relative;
+  height: 5rem;
+  margin-bottom: 2rem;
+}
+
+/* Lift the logo alone on desktop: relative offset moves the anchor's box (and so the
+   travelling logo, which reads its rect) without moving the headline below it. */
+@media (min-width: 1024px) {
+  .hero-logo-anchor {
+    top: -2.5rem;
+  }
+}
+
+/* Holds the bar's layout on the homepage while the visible wordmark is elsewhere.
+   visibility rather than opacity, so it also drops out of the accessibility tree. */
+.header-logo-spacer {
+  display: inline-block;
+  visibility: hidden;
+}
+
+/* The one travelling element. Fixed at the viewport origin; every position it ever
+   takes is a transform written by HeaderLogo from the scroll offset — never top/left,
+   so the movement stays on the compositor. Hidden until the first measure has run, so
+   there is no frame of an unpositioned logo in the corner. */
+.header-logo-travel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  visibility: hidden;
+  will-change: transform;
+}
+
+/* No travel and no scale: the spacer becomes the real header logo, in place at normal
+   size from scroll 0, and the hero gives its reserved space back. The JS side bails on
+   the same media query, so no listeners run either. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo-anchor {
+    display: none;
+  }
+
+  .header-logo-spacer {
+    visibility: visible;
+  }
+
+  .header-logo-travel {
+    display: none;
+  }
 }

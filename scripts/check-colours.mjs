@@ -40,6 +40,15 @@ const GROUNDS = {
   // both transparent, so what sits on them is measured against what they resolve to.
   "warm chip wash": flatten(colorDerived.accentWarmWash, colors.pageBackground),
   "alternate ground, entering": flatten(colorDerived.sectionAltEntering, colors.pageBackground),
+  // The navigation panel's hovered row: an 8% accent wash over the panel's cream. The row
+  // keeps its title, its descriptor and its arrow while the wash is under them, so what
+  // those colours measure on the composite is the number that counts, not what they
+  // measure on bare cream.
+  "navigation row, hovered": flatten(colorDerived.accentWash, colors.pageBackground),
+  // The base navy's entry state — ink-90 over the page ground — which every fading dark
+  // section passes through for the first 900ms. Anything rendered on a fading section has
+  // to hold here as well as on the settled ground; /about's approach section relies on it.
+  "dark ground, entering": flatten(inkOpacity[90], colors.pageBackground),
 };
 
 /** [ground, foreground, role, what it is] — the pairings the markup actually produces. */
@@ -53,6 +62,8 @@ const IN_USE = [
   // cream it is 2.495:1, under even the 3:1 non-text floor. Filled, with navy on it, it
   // clears the text floor comfortably — see "accent warm fill" below.
   ["page ground", colorDerived.accentWarmWash, "decor", "category chip wash"],
+  ["page ground", colorDerived.accentWash, "decor", "navigation row hover wash"],
+  ["page ground", colorDerived.accentWashFaint, "decor", "navigation panel top wash"],
   ["page ground", colors.sectionWarm, "decor", "the alternate light ground, as a step"],
   ["page ground", inkOpacity[12], "decor", "seam hairline"],
   ["page ground", colorDerived.cardTintOnCanvas, "decor", "cell hover, flat lift"],
@@ -98,6 +109,7 @@ const IN_USE = [
 
   // --- accent fills, where the accent is the ground and something has to read on it
   ["accent primary fill", colors.pageBackground, "text", "primary button label"],
+  ["accent primary fill", colors.pageBackground, "ui", "the navigation card's arrow chip"],
   ["accent primary fill", colors.cardBackground, "text", "Differentiator accent panel copy"],
   ["accent highlight fill", colors.darkBackground, "text", "closing CTA label, hovered"],
   ["accent warm fill", colors.darkBackground, "text", "warm panel, status marker label"],
@@ -127,6 +139,11 @@ const IN_USE = [
   ["warm chip wash", color.textOnLight, "text", "category chip, full ink"],
   ["alternate ground, entering", colors.textOnDark, "text", "headings mid-fade"],
   ["alternate ground, entering", canvasOpacity[80], "text", "body copy mid-fade"],
+  ["navigation row, hovered", colors.accentPrimary, "text", "the row's title, hovered"],
+  ["navigation row, hovered", colorDerived.bodyOnLight, "text", "the row's descriptor"],
+  ["navigation row, hovered", color.textOnLight, "text", "full-ink copy on a hovered row"],
+  ["dark ground, entering", colors.textOnDark, "text", "headings and labels mid-fade"],
+  ["dark ground, entering", canvasOpacity[80], "text", "body copy mid-fade"],
 ];
 
 /** Pairings deliberately not used. Shown so the number is on record, not the assertion. */
@@ -134,6 +151,12 @@ const AVOIDED = [
   ["page ground", colors.accentHighlight, "text", "the highlight as text on the page ground"],
   ["page ground", colors.accentOnDark, "text", "the dark-ground accent on the page ground"],
   ["dark ground", colors.accentPrimary, "text", "the light-ground accent on the dark ground"],
+  // Why a dark section carrying either of these switches its fade OFF rather than
+  // working the colour around: both are derived against full ink, and both fall short
+  // during the fade's first 900ms. /about's building section (warm numerals) and closing
+  // CTA (accent-on-dark form states) are unfaded for exactly this reason.
+  ["dark ground, entering", colors.accentOnDark, "text", "accent copy mid-fade"],
+  ["dark ground, entering", colors.accentWarm, "large", "warm numerals mid-fade"],
   [
     "accent warm fill",
     colors.pageBackground,
