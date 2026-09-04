@@ -3740,27 +3740,132 @@ html {
 
 /* The comparison. A fit-finder, so every cell says what a tier IS — there are no ticks,
    no crosses and no withheld rows. A feature-gated grid implies a price ladder even with
-   no figures on it, and the brief forbids public pricing. */
+   no figures on it, and the brief forbids public pricing.
+
+   THREE PANELS ON A RAIL. It was hairlines across an open grid: four columns of grey
+   text, nothing holding a tier together down the page, and a heading block sitting over
+   an empty right half. Each tier is now a filled panel one hairline from its neighbours,
+   with the row labels on a rail outside the panels, so the table reads down as well as
+   across. `table-layout: fixed` is what makes the rail a constant and the three panels
+   exactly equal — three columns of "what this tier is" have no reason to differ in width,
+   and an auto layout would size them off their longest sentence.
+
+   THE THREE FILLS ARE THE SAME AT REST, deliberately. Tinting the middle column is how a
+   comparison says "recommended", and the brief names no recommended tier. The only thing
+   that separates a column from its neighbours is the reader pointing at it. */
 .comparison-table {
   width: 100%;
-  border-collapse: collapse;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
 .comparison-table th,
 .comparison-table td {
-  padding: 1.25rem 1.5rem 1.25rem 0;
   vertical-align: top;
+}
+
+/* The rail. Outside the panels and unfilled, so the container's left edge stays the
+   page's spine and the labels read as marginalia against the tiers, not as a column. */
+.comparison-table .comparison-corner,
+.comparison-table .comparison-label {
+  width: 12rem;
+  padding: 1.6rem 2.5rem 1.5rem 0;
+}
+
+/* The row rule carries on across the rail, so a label belongs to the band beside it
+   rather than floating in the margin next to one. Only the four labelled rows: the last
+   row's rail cell labels nothing, and a rule running out to a blank would be a line
+   drawn to nowhere. */
+.comparison-table tbody th.comparison-label {
   border-top: 1px solid var(--color-ink-8);
 }
 
-.comparison-table thead th {
-  border-top: 0;
-  padding-bottom: 1.5rem;
+.comparison-table .comparison-head,
+.comparison-table .comparison-cell {
+  padding: 1.5rem;
+  background-color: var(--color-card);
+  border-left: 1px solid var(--color-ink-8);
+  transition-property: background-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
 }
 
-.comparison-table tbody th {
-  width: 14rem;
+.comparison-table .comparison-head:last-child,
+.comparison-table .comparison-cell:last-child {
+  border-right: 1px solid var(--color-ink-8);
+}
+
+/* The head sits at the top of its panel and stays there. NOT sticky: the table is four
+   rows tall, and a head that detached and floated over its own rows landed a tier name
+   in the middle of another row's copy — a fix for a problem this table does not have. */
+.comparison-table .comparison-head {
+  vertical-align: bottom;
+  padding-top: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-top: 3px solid transparent;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.comparison-table .comparison-cell {
+  border-top: 1px solid var(--color-ink-8);
+}
+
+.comparison-table tbody tr:last-child .comparison-cell {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding-bottom: 1.75rem;
+}
+
+/* THE LIVE COLUMN — the section's one interaction, and the only thing that tells three
+   equal panels apart. Pointer or keyboard, since the state is driven from React rather
+   than :hover: a cell cannot reach the rest of its own column in CSS.
+   The live column drops to the SECTION's own ground rather than lifting off the card:
+   the three panels sit on the page as card, and the one you are reading opens back onto
+   it. Accent on canvas is 5.112:1 against 4.564:1 on the card, so the link inside the
+   live column gains contrast on the way. */
+.comparison-table .comparison-head[data-active="true"],
+.comparison-table .comparison-cell[data-active="true"] {
+  background-color: var(--section-ground, var(--color-canvas));
+}
+
+.comparison-table .comparison-head[data-active="true"] {
+  border-top-color: var(--color-accent);
+}
+
+.comparison-table .comparison-head[data-active="true"] .comparison-tier-name {
+  color: var(--color-accent);
+}
+
+/* A hanging hairline dash, not a bullet: these are lists of audiences and of work, not
+   a checklist, and a disc would be the second dot shape on a page whose only other one
+   is the swipe indicator. It takes the accent inside the live column — the one place the
+   column state reaches down into the detail. */
+.comparison-item {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-top: 0.375rem;
+}
+
+.comparison-item:first-child {
+  margin-top: 0;
+}
+
+.comparison-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 0.625rem;
+  height: 1px;
+  background-color: var(--color-ink-20);
+  transition-property: background-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.comparison-cell[data-active="true"] .comparison-item::before {
+  background-color: var(--color-accent);
 }
 
 /* Rows arrive top to bottom as the table enters, 60ms apart — the same rate every card
@@ -4005,6 +4110,7 @@ html {
 
 .work-card:hover .media-tile-chip {
   background-color: var(--color-ink);
+  color: var(--color-canvas);
 }
 
 /* Has to out-specify the settle above, or the settled 1 would win under the cursor and
@@ -4053,6 +4159,7 @@ html {
 .work-tile:hover .media-tile-chip,
 .work-tile:focus-within .media-tile-chip {
   background-color: var(--color-ink);
+  color: var(--color-canvas);
 }
 
 /* The image settles from 1.03 as the tile arrives, and stops there. Hover then takes it

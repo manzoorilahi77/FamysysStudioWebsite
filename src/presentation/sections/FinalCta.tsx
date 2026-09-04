@@ -33,32 +33,43 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
             spanning the whole container above a two-column block reads as a section
             heading introducing two things, when it is one half of one thing.
 
-            It keeps `h2` — it is still the section's name, and the page outline needs it —
-            but it drops to display-m and gives up the heading step. At 40 characters the
-            heading step needs a full container width to hold two lines, and that is exactly
-            the width this layout does not have to give it.
+            It takes the heading step, like every other section head on the site. It was on
+            display-m — a step below — on the argument that at 40 characters the heading step
+            needs a full container width to hold two lines. Half a container plus an 18ch
+            measure holds them: ~40px at 1440 against ~396px of measure is about 20 characters
+            a line, and the closing heading is the section's own name, not a subhead under it.
 
             Six tracks and six, rather than five and six with a channel between: the copy
             column now carries the heading as well, and five tracks broke it onto four
             lines. The measures on the paragraph and the closing line keep the column from
             running to its full width where it should not. */}
         {/* `items-stretch` (the grid default, where this said `items-start`) plus a column
-            flex: the copy column is now exactly as tall as the form panel beside it, and
-            the closing line is pushed to its foot with `mt-auto`. Top-aligned, the column
-            ended two thirds of the way up a 480px panel and left the section's bottom-left
-            quarter empty — the two halves have to start and finish together or the panel
-            reads as the only thing in the row. */}
+            flex: the copy column is exactly as tall as the form panel beside it, which is
+            what lets the two rules below — centre the pitch, pin the closing line — resolve
+            against the panel rather than against the copy's own height. Top-aligned, the
+            column ended two thirds of the way up a 480px panel and left the section's
+            bottom-left quarter empty. */}
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="flex flex-col lg:col-span-6">
-            {/* 18ch, and measured rather than guessed: at 20ch the two 27-character
-                headings ("Bring us something to make.", "Ready to start at step one?")
-                still fitted on one line — 417px of measure against ~400px of type. 18ch is
-                375px, which breaks those two and holds the 37- and 40-character ones to two
-                lines rather than pushing them to three. It is on the heading itself because
-                `ch` resolves against the element's own font size. */}
+          {/* `lg:justify-center` centres the pitch — heading, paragraph, button — on the
+              form panel's vertical middle, which is what a two-column row of unequal
+              content lengths needs: top-aligned, a 300px column against a 600px panel put
+              the whole left half in the row's upper third. The closing line leaves the
+              flow at `lg` and pins to the column's bottom edge instead of pushing the
+              stack up with `mt-auto`; an auto margin outranks `justify-content`, so in
+              flow it would have taken the centring back off. Absolute, it also keeps the
+              centred group's midpoint exactly on the panel's, rather than half the
+              closing line's height above it. */}
+          <div className="relative flex flex-col lg:col-span-6 lg:justify-center">
+            {/* 18ch, and measured rather than guessed. At the heading step it resolves to
+                ~430px at 1440, which holds the four 37- to 40-character headings to two
+                lines and leaves the two 27-character ones ("Bring us something to make.",
+                "Ready to start at step one?") on one — measured on all six routes at 1440,
+                1280 and 1024. It is on the heading itself because `ch` resolves against the
+                element's own font size, so the measure tracks the step rather than being a
+                fixed pixel width that would have to be retuned with it. */}
             <RevealHeading
               as="h2"
-              className="text-display-m max-w-[16ch] font-semibold text-balance text-canvas"
+              className="text-heading max-w-[18ch] font-semibold text-balance text-canvas"
               accent={accent}
             >
               {closingCta.heading}
@@ -84,10 +95,12 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
                 className="cta-highlight"
               />
             </div>
-            {/* The column's foot, not a fourth item in a stack: `mt-auto` puts it on the
-                panel's bottom edge, and the `pt-12` is the floor under how close it may
-                come to the button when the column is short. */}
-            <p className="text-small mt-auto max-w-[38ch] pt-12 text-canvas-60">
+            {/* The column's foot, not a fourth item in a stack. Below `lg` the columns
+                stack and it is simply the last line, held off the button by `pt-12`; at
+                `lg` it leaves the flow and pins to the column's bottom edge, which is the
+                form panel's bottom edge, so it can sit there without dragging the centred
+                pitch above it off the panel's middle. */}
+            <p className="text-small mt-auto max-w-[38ch] pt-12 text-canvas-60 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:pt-0">
               {closingCta.closingLine}
             </p>
           </div>
