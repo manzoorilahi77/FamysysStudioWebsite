@@ -21,12 +21,14 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
-  title: "About — Famysys Studio",
+export const metadata: Metadata = pageMetadata({
+  route: "/about",
+  title: "About",
   description:
     "Famysys Studio combines creative talent, emerging AI technologies and structured production workflows. Part of the Famysys ecosystem, and starting deliberately.",
-};
+});
 
 export default async function AboutRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Jost } from "next/font/google";
 import "./globals.css";
 import { colors } from "../shared/design/colors.ts";
+import { rootMetadata } from "../shared/site/metadata";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -34,10 +35,10 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Famysys Studio",
-  description: "Famysys Studio — video design and creative production.",
-};
+// Site-wide metadata: the origin every relative URL resolves against, the title template
+// each page's own name is appended to, and the Open Graph defaults a page inherits when
+// it does not state its own. See src/shared/site/metadata.ts.
+export const metadata: Metadata = rootMetadata;
 
 // Deviation from famysys.com: the live site's theme-color matches its canvas
 // background. This page opens on a dark hero, so mobile browser chrome is set to

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { GetPrimaryNavigation } from "../application/navigation/GetPrimaryNavigation";
 import { GetHomepageContent } from "../application/marketing/GetHomepageContent";
 import { GetFeaturedWork } from "../application/portfolio/GetFeaturedWork";
@@ -25,6 +26,9 @@ import {
   toWaysToWorkBlockView,
   toWhyFamysysBlockView,
 } from "../presentation/lib/viewModels";
+import { homeMetadata } from "../shared/site/metadata";
+
+export const metadata: Metadata = homeMetadata;
 
 export default async function HomePage() {
   const [navigation, homepage, caseStudies, capabilities] = await Promise.all([

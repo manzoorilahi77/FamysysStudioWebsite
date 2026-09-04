@@ -8,12 +8,14 @@ import { Header } from "../../presentation/layout/Header";
 import { ContactFormSection } from "../../presentation/sections/ContactFormSection";
 import { ContactHero } from "../../presentation/sections/ContactHero";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
-  title: "Contact — Famysys Studio",
+export const metadata: Metadata = pageMetadata({
+  route: "/contact",
+  title: "Contact",
   description:
     "Tell Famysys Studio what you are trying to create, who it is for and when you need it. Send a brief and hear back from the person who would direct the work.",
-};
+});
 
 /**
  * The seventh and last page, and the destination of nearly every call to action on the

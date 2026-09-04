@@ -6,6 +6,9 @@ import {
   sessionCookieOptions,
 } from "./session";
 
+// A fixture, not a secret: the signing key has to be a real string of the right length
+// for these assertions to mean anything, and it signs nothing outside this file.
+// allow-secret: test fixture
 const SECRET = "a-test-secret-that-is-long-enough-to-pass-the-check";
 
 beforeEach(() => {

@@ -18,12 +18,14 @@ import {
   toNavigationMenuView,
   toProcessStepDetailView,
 } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
-  title: "How We Work — Famysys Studio",
+export const metadata: Metadata = pageMetadata({
+  route: "/how-we-work",
+  title: "How We Work",
   description:
     "The five steps every Famysys Studio project runs through, what each one produces, and what we need from you at each stage.",
-};
+});
 
 export default async function HowWeWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this

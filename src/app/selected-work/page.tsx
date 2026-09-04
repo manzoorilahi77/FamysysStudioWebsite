@@ -16,14 +16,16 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  route: "/selected-work",
   // The description says the same thing the page's framing block says, because a search
   // result is the first place someone could mistake this for a portfolio of finished work.
-  title: "Selected Work — Famysys Studio",
+  title: "Selected Work",
   description:
     "The eight pieces Famysys Studio is building, what each one is meant to demonstrate, and why these eight. None of them has been produced yet.",
-};
+});
 
 export default async function SelectedWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this

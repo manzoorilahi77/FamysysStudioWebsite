@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { absoluteUrl } from "../shared/site/site";
 
 /**
  * /admin is a real, reachable route now — it is behind a password rather than behind not
@@ -19,5 +20,8 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/admin",
     },
+    // Absolute, because a sitemap reference is one of the few places in the protocol
+    // where a relative URL is not defined behaviour.
+    sitemap: absoluteUrl("/sitemap.xml"),
   };
 }

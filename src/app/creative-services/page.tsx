@@ -20,12 +20,14 @@ import {
   toNavigationMenuView,
   toServicesHeroView,
 } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
-  title: "Creative Services — Famysys Studio",
+export const metadata: Metadata = pageMetadata({
+  route: "/creative-services",
+  title: "Creative Services",
   description:
     "Design, video, AI-assisted production, motion and product visuals — what each service involves and what you receive.",
-};
+});
 
 export default async function CreativeServicesRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this

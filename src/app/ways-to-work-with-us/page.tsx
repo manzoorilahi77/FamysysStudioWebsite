@@ -20,12 +20,14 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { pageMetadata } from "../../shared/site/metadata";
 
-export const metadata: Metadata = {
-  title: "Ways to Work With Us — Famysys Studio",
+export const metadata: Metadata = pageMetadata({
+  route: "/ways-to-work-with-us",
+  title: "Ways to Work With Us",
   description:
     "Four ways to engage Famysys Studio — Launch, Grow, Scale and a Custom Creative Partnership — what each one suits, and how an engagement is scoped.",
-};
+});
 
 export default async function WaysToWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
