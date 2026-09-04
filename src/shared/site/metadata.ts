@@ -11,11 +11,27 @@ import { SITE_NAME, SITE_URL, absoluteUrl } from "./site";
  * only what is its own — its route, its title, its description — and this fills in the
  * rest.
  *
- * The card image is the site's own opengraph-image route, which Next generates at build
- * time from src/app/opengraph-image.tsx. It is not named here: Next attaches it to every
- * route under the segment that defines it, and naming it as well would produce two og:image
- * tags for the same picture.
+ * THE CARD IMAGE HAS TO BE NAMED HERE, which is not obvious and was wrong first time.
+ * src/app/opengraph-image.tsx attaches itself to routes that do not state an `openGraph`
+ * of their own — and every page using this helper states one. Next replaces the inherited
+ * object rather than merging into it, so the six inner pages shipped with a full set of
+ * Open Graph tags and no picture at all, while the homepage looked right. The URL is
+ * relative and resolves against `metadataBase`.
  */
+/**
+ * The one card every page shares, produced by src/app/opengraph-image.tsx at build time.
+ *
+ * The dimensions are stated rather than left to be discovered: several previews render
+ * the card from the tag alone, before the image has been fetched, and one without a size
+ * is laid out as a small square thumbnail instead of a wide banner.
+ */
+const OPEN_GRAPH_IMAGE = {
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: SITE_NAME,
+} as const;
+
 export function pageMetadata({
   route,
   title,
@@ -45,11 +61,13 @@ export function pageMetadata({
       siteName: SITE_NAME,
       locale: "en_US",
       type: "website",
+      images: [OPEN_GRAPH_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} — ${SITE_NAME}`,
       description,
+      images: [OPEN_GRAPH_IMAGE.url],
     },
   };
 }
@@ -81,11 +99,13 @@ export const rootMetadata: Metadata = {
     siteName: SITE_NAME,
     locale: "en_US",
     type: "website",
+    images: [OPEN_GRAPH_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
     description: "Famysys Studio — video design and creative production.",
+    images: [OPEN_GRAPH_IMAGE.url],
   },
 };
 
