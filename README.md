@@ -29,11 +29,27 @@ nowhere until `container.demoRequestIntake` is wired to something real.**
 
 ```bash
 pnpm install
+cp .env.example .env.local     # fill it in — the notes in that file say how
+pnpm db:migrate                # create the tables
+pnpm db:seed                   # populate them from the content modules
 pnpm dev
 ```
 
-Requires Node 20+ and pnpm. No other tooling. Placeholder media is committed under
+Requires Node 20+, pnpm, and a MySQL 8 database. Placeholder media is committed under
 `public/media/` — see `docs/content-todo.md` for every file's source.
+
+**Without a database**, set `CONTENT_SOURCE=static` and skip the two `db:` commands: the
+site reads the TypeScript modules under `src/infrastructure/content/static/` instead and
+runs exactly as it did before Phase 3. The admin panel still opens, but it cannot save —
+see `db/README.md`. The site also falls back to those files on its own when the database
+is unreachable, so an outage costs the panel rather than the site.
+
+**Deployment needs a Node runtime.** The site used to ship as a static export; it stopped
+being one when the panel gained a login, the save endpoint, and a contact form that stores
+what it receives — none of which a folder of HTML can do. The seven public pages are still
+prerendered to HTML at build time, from the database; only `/admin` and the two endpoints
+render per request. On cPanel that means "Setup Node.js App" rather than dropping a folder
+into `public_html`, and the build machine needs to reach the database.
 
 ## Scripts
 
@@ -46,6 +62,9 @@ Requires Node 20+ and pnpm. No other tooling. Placeholder media is committed und
 | `pnpm lint` | ESLint, including the layer-boundary rules in `eslint.config.mjs` |
 | `pnpm test` | Vitest unit tests |
 | `pnpm docs:content-todo` | Regenerates the How We Work drafted-copy inventory in `docs/content-todo.md` from the content module |
+| `pnpm db:migrate` | Applies pending database migrations. `-- --dry` to list them |
+| `pnpm db:seed` | Populates the database from the content modules. Idempotent; `-- --force` overwrites edited values |
+| `pnpm check-secrets` | Fails if a credential-shaped literal appears in a tracked file. Part of `pnpm lint` |
 
 ## Architecture: the layer dependency rule
 
@@ -57,8 +76,11 @@ domain/          — entities, value objects, repository interfaces. Imports onl
 shared/          — design tokens, cross-cutting value objects used by multiple domains.
 application/     — use cases (one class per operation, e.g. GetHomepageContent). Imports
                    domain/, application/, shared/.
-infrastructure/  — concrete repository implementations (Static*, Http*, Stub*) and the DI
-                   container. Imports domain/, infrastructure/, shared/.
+infrastructure/  — concrete repository implementations (Db*, Static*, Http*), the MySQL
+                   pool and the DI container. Imports domain/, infrastructure/, shared/.
+                   Every domain interface has two implementations — one reading the
+                   database, one reading the TypeScript content modules — selected by
+                   CONTENT_SOURCE in the composition root and nowhere else.
 presentation/    — React components, hooks, view-model mappers. Imports presentation/,
                    application/, domain/, shared/.
 app/             — Next.js routes (page.tsx, route.ts, layout.tsx). Imports app/,
@@ -397,17 +419,21 @@ The seventh and last page, and **the only one whose reference is famysys.com's o
 rather than the design language the other six share. The client asked for it, and that page
 already solves this problem.
 
-> ### Submissions currently go nowhere
+> ### Submissions are kept. Nobody is notified yet.
 >
 > Both forms — the closing "Start a Conversation" form on every page and the eight-field form
-> here — POST to `/api/demo-request`, backed by `StubLeadRepository`. That repository validates
-> the request, resolves, and **does nothing with it**: no email, no CRM, no queue, no database,
-> no file. A sender sees a confirmation and the inquiry is discarded.
+> here — POST to `/api/demo-request`, which validates through `SubmitDemoRequest` and writes a
+> row to `inquiries`. The admin panel's **Inquiries** screen lists them newest first, with
+> mark-as-read and archive.
 >
-> **This must be wired to email or the company backend before launch.** It is a one-line change
-> at the composition root — `container.demoRequestIntake` in `src/infrastructure/di/container.ts`
-> — behind the existing `LeadRepository` interface, so nothing else moves. It is the first item
-> in `docs/content-todo.md`.
+> Until Phase 3 this route was backed by `StubLeadRepository`, which validated a request and
+> discarded it — and worse, the route lived in a private `_api` folder that a static export
+> never emitted, so in production the form POSTed to a URL that did not exist.
+>
+> **What is still missing is notification.** Nothing emails anyone when an enquiry arrives, so
+> somebody has to open the panel to find it. `inquiries` carries `forwarded_at` and
+> `forward_error` for the forwarder that will stamp them: the row lands first and mail happens
+> after, so an outage can never cost a lead. It remains an item in `docs/content-todo.md`.
 
 **Two sections**, where the other inner pages have six to ten. Someone arriving here has already
 decided to get in touch; making them read four more blocks before reaching the form would be
@@ -545,19 +571,25 @@ tabbing down from the hero would land on a field they could not see. Triggering 
 every field within about 500ms of load however the page is entered. The effect itself is the
 site's existing `revealStyle`, including its collapse to opacity-only under reduced motion.
 
-## Swapping static content for a CMS
+## Two content sources, one set of interfaces
 
-Every `Static*Repository` in `src/infrastructure/content/repositories/` implements a domain
-repository interface (e.g. `StaticMarketingContentRepository implements MarketingContentRepository`).
-Nothing outside `infrastructure/` and the composition root knows or cares that the data is
-hard-coded — use cases and components depend on the interface, not the implementation.
+Every domain repository interface has two implementations. `Static*Repository` in
+`src/infrastructure/content/repositories/` reads the TypeScript modules; `Db*Repository` in
+`src/infrastructure/db/repositories/` reads MySQL. `CONTENT_SOURCE` picks, in
+`src/infrastructure/di/container.ts` — the sole composition root — and nothing else in the
+codebase moved when the database arrived. **No interface changed**, no use case changed, no
+component changed, no test of either changed. That was the point of the layering, and this
+is the receipt.
 
-To switch to a CMS: write a new class (e.g. `ContentfulMarketingContentRepository`) implementing
-the same interface, fetching from the CMS's API instead of `static/*.content.ts`, then change one
-line in `src/infrastructure/di/container.ts` — the sole composition root — to construct the new
-class instead of the `Static*` one. No use case, component, or test needs to change, because they
-were all written against the interface. `container.ts` documents this pattern in its own header
-comment.
+On top of the switch, every database repository is wrapped so that a database which cannot
+be **reached** hands over to its static counterpart. That fallback is deliberately narrow —
+see `src/infrastructure/db/fallback.ts`. A missing row is a bug and propagates; only a
+connection or credential failure falls back. A site that quietly renders last week's file
+because a query was wrong is a site where nobody finds out.
+
+`src/infrastructure/db/repositories/parity.test.ts` reads all twenty repository methods
+from both sources and asserts they are equal field for field, which is what says the
+migration was faithful.
 
 ## Design tokens
 

@@ -70,7 +70,7 @@ function tierSlug(name: string): Slug {
  * back character for character. If the brief ever supplies a sentence this cannot
  * reproduce, that test fails rather than the page quietly reflowing the client's words.
  */
-function splitListSentence(sentence: string): ReadonlyArray<string> {
+export function splitListSentence(sentence: string): ReadonlyArray<string> {
   const withoutPeriod = sentence.replace(/\.$/, "");
   const parts = withoutPeriod.split(", ");
   const last = parts.pop() ?? "";

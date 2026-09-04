@@ -25,8 +25,11 @@ import * as waysToWork from "./ways-to-work.content";
 function routesUnder(directory: string, prefix = ""): string[] {
   const routes: string[] = [];
   for (const entry of readdirSync(directory)) {
-    // Route groups, private folders and the API tree are not navigable pages.
-    if (entry.startsWith("_") || entry.startsWith("(") || entry === "api") {
+    // Route groups, private folders and the API tree are not navigable pages, and
+    // neither is the admin panel: it is behind a password, nothing on the public site
+    // links to it, and counting it here would turn this assertion into a list of eight
+    // that says nothing about whether the SITE's seven pages exist.
+    if (entry.startsWith("_") || entry.startsWith("(") || entry === "api" || entry === "admin") {
       continue;
     }
     const path = join(directory, entry);

@@ -4,10 +4,18 @@ import { toDemoRequestFieldErrors } from "../../../application/lead/DemoRequestF
 import { container } from "../../../infrastructure/di/container";
 
 /**
- * SUBMISSIONS CURRENTLY GO NOWHERE. `container.demoRequestIntake` is `StubLeadRepository`:
- * this route validates a request, resolves, and delivers it to nothing — no email, no CRM,
- * no queue, no file. Wiring it to a real destination is a launch blocker, not a nice to
- * have. See the README and the top of docs/content-todo.md.
+ * THE CONTACT FORM'S DESTINATION, WHICH FOR THE FIRST TIME IS SOMEWHERE.
+ *
+ * `container.demoRequestIntake` used to be `StubLeadRepository`: this route validated a
+ * request, resolved, and delivered it to nothing. Worse, the file lived in a private
+ * `_api` folder and was never emitted at all, because a static export cannot serve a
+ * request handler — so in production the form POSTed to a URL that did not exist and every
+ * enquiry ended in a 404. Both are fixed: the site runs on Node, this is a real route, and
+ * a validated enquiry becomes a row in `inquiries` that the panel's inbox lists.
+ *
+ * There is still no email. Forwarding is a later phase, and the table carries the columns
+ * it will stamp — the row lands first and a forwarder marks it afterwards, so a mail
+ * outage can never cost a lead.
  */
 interface DemoRequestPayload {
   fullName?: unknown;
@@ -78,6 +86,13 @@ export async function POST(request: Request): Promise<Response> {
     if (fieldErrors) {
       return NextResponse.json({ errors: fieldErrors }, { status: 422 });
     }
-    throw error;
+    // Not a field the sender can fix — the database refused it, or is not reachable. Say
+    // so rather than throwing: the sender has to know the message did not arrive, and the
+    // details belong in the server log, not in a response.
+    console.error("[contact] An enquiry could not be stored:", (error as Error)?.name);
+    return NextResponse.json(
+      { error: "We could not record that just now. Please try again in a moment." },
+      { status: 503 },
+    );
   }
 }

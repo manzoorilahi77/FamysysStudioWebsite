@@ -4,8 +4,9 @@ node_modules/
 # next.js
 .next/
 out/
-# dev server log, when npm run dev is started detached
+# server logs, when npm run dev / npm start is started detached
 dev.log
+start.log
 
 # production
 build/

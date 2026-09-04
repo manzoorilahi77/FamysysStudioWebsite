@@ -1,5 +1,24 @@
-import { describe, expect, it } from "vitest";
-import { POST } from "./route";
+import { describe, expect, it, vi } from "vitest";
+
+/**
+ * THE INTAKE IS REPLACED, AND THAT IS THE POINT OF THE MOCK.
+ *
+ * This route now writes an enquiry to MySQL. A test that let it do so would need
+ * credentials, would fail on a machine without them, and — worse — would put rows in the
+ * real inbox every time the suite ran. What is under test here is the route's contract:
+ * which payloads it accepts, which it rejects, and with what. Where an accepted one ends
+ * up is the repository's business, and has its own tests.
+ *
+ * The mock must be declared before the route is imported, which is why the import below
+ * is not at the top of the file.
+ */
+const submit = vi.fn(async () => undefined);
+
+vi.mock("../../../infrastructure/di/container", () => ({
+  container: { demoRequestIntake: { submit } },
+}));
+
+const { POST } = await import("./route");
 
 function jsonRequest(body: unknown): Request {
   return new Request("http://localhost/api/demo-request", {

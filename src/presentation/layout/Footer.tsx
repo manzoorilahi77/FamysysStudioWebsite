@@ -143,8 +143,20 @@ export function Footer({ entries, footer }: FooterProps) {
               : ""
           }`}
         >
+          {/* THE FULL STOP IS THE DOOR TO /admin.
+              It has to read as punctuation and nothing else: no colour of its own, no
+              underline, no hover, and `cursor-text` so the pointer does not change into a
+              hand and give it away. Tailwind's preflight already makes an anchor inherit
+              its colour and text-decoration, so what is left is the cursor. It stays
+              focusable — a link nobody can tab to is worse than a link nobody notices,
+              and what it opens is a login, not the panel. Obscurity is not what keeps the
+              panel shut; the session check on every /admin route and every admin endpoint
+              is. This only keeps a door out of the footer's reading order. */}
           <p className="text-small text-canvas-60">
-            &copy; {new Date().getFullYear()} Famysys Studio.
+            &copy; {new Date().getFullYear()} Famysys Studio
+            <Link href="/admin" className="cursor-text" aria-label="Admin">
+              .
+            </Link>
           </p>
           {footer.legalLinks.length > 0 ? (
             <div className="flex flex-wrap gap-6">

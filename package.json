@@ -13,7 +13,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . && node scripts/generate-color-css.mjs --check",
+    "lint": "eslint . && node scripts/generate-color-css.mjs --check && node scripts/check-secrets.mjs",
     "colours": "node scripts/generate-color-css.mjs",
     "check-colours": "node scripts/check-colours.mjs",
     "test": "vitest run",
@@ -21,9 +21,15 @@
     "format": "node scripts/format-changed.mjs",
     "format:all": "prettier --write .",
     "format:check": "prettier --check .",
-    "docs:content-todo": "node scripts/generate-content-todo.mjs"
+    "docs:content-todo": "node scripts/generate-content-todo.mjs",
+    "check-secrets": "node scripts/check-secrets.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:seed": "tsx scripts/db-seed.ts",
+    "db:status": "node scripts/db-status.mjs"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "mysql2": "^3.24.3",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -49,6 +55,7 @@
     "lighthouse": "^13.4.1",
     "prettier": "^3.4.2",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0",
     "vitest": "^2.1.8"
