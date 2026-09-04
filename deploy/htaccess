@@ -1,0 +1,44 @@
+# studio.famysys.com — the docroot holds no site any more.
+#
+# The seven pages, the admin panel and the two endpoints are all served by the Node
+# process this proxies to. Apache's job here is to terminate TLS, answer AutoSSL's
+# challenges from disk, and hand everything else to Node.
+#
+# Copy this file to ~/public_html/studio.famysys.com/.htaccess. It is kept in the repo so
+# that the port below and the port in deploy/ecosystem.config.js cannot drift apart
+# unnoticed — a mismatch shows as a 503 on every page with nothing in the Node log.
+
+# THIS ONE LINE IS WHY THE HOMEPAGE 404ed WHILE EVERY OTHER PAGE WAS FINE.
+#
+# A request for "/" maps to this directory, and mod_dir rewrites a directory request to
+# its DirectoryIndex before mod_rewrite ever sees it — so the proxy received a request for
+# /index.html, which is not a route this application has, and Next answered it correctly
+# with a 404. Every other path skips mod_dir entirely and worked from the first attempt,
+# which is the worst possible shape for the bug: the site's front door is the one page
+# nobody tests last.
+#
+# There is no index file to find here and there never will be. Turning the lookup off is
+# both the fix and the honest description of the directory.
+DirectoryIndex disabled
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # AutoSSL writes its challenge files into the docroot and then fetches them over HTTP.
+  # Proxied to Node they 404, the renewal fails, and the certificate expires weeks later
+  # with nothing having changed that day to explain it.
+  RewriteRule ^\.well-known/ - [L]
+
+  # The root and everything else, as two rules rather than one `^(.*)$`, so that the empty
+  # match for "/" is stated rather than relied on.
+  #
+  # [P] is a reverse proxy, not a redirect: the visitor's URL does not change and the
+  # loopback address is never exposed.
+  RewriteRule ^$ http://127.0.0.1:6570/ [P,L]
+  RewriteRule ^(.+)$ http://127.0.0.1:6570/$1 [P,L]
+</IfModule>
+
+# A 503 from this file means the Node process is down or listening on another port:
+#   pm2 describe fsstudios
+# A 404 that looks like a directory listing means mod_rewrite did not run at all.

@@ -25,18 +25,21 @@
 > — but it is no longer a blocker, because what is on the page is now a sentence rather than a
 > ticket number.
 
-> ## Launch blocker: the contact form delivers nowhere
+> ## Enquiries are stored, and nobody is told
 >
-> Both forms on this site — the closing "Start a Conversation" form on every page, and the
-> eight-field form on `/contact` — POST to `/api/demo-request`, which is backed by
-> `StubLeadRepository`. That repository validates the request, resolves, and **does nothing
-> with it**. There is no email, no CRM, no queue, no database and no file. A submission
-> shows the sender a confirmation and is then discarded.
+> This was worse: both forms POSTed to `/api/demo-request`, backed by a stub repository
+> that validated the request, resolved, and **did nothing with it** — and the endpoint
+> itself sat in a private folder the static export never emitted, so the POST 404ed. A
+> submission showed the sender a confirmation and vanished.
 >
-> **This must be wired to email or the company backend before launch.** It is a one-line
-> change at the composition root — `container.demoRequestIntake` in
-> `src/infrastructure/di/container.ts` — behind the existing `LeadRepository` interface, so
-> nothing else has to move. Until it is done, every inquiry the site collects is lost.
+> Both halves are fixed. Submissions are written to the `inquiries` table and appear in the
+> admin panel's inbox, newest first, with mark-as-read and archive.
+>
+> **What is still missing is the notification.** An enquiry exists only in the panel until
+> somebody opens the panel, so the site now loses enquiries slowly rather than instantly —
+> which is an improvement and not a solution. Somebody has to be in the habit of checking,
+> or a send has to be wired in. The `inquiries` table already carries `forwarded_at` and
+> `forward_error` for exactly that, so adding it is a hook rather than a rewrite.
 
 The homepage now runs on the client's real V1 Homepage Content Brief. Every heading, body
 paragraph, capability, process step, tier, reason and FAQ answer on the page is the client's own

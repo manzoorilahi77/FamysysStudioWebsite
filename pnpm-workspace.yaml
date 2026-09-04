@@ -1,3 +1,20 @@
+# pnpm installs a flat node_modules here rather than its default symlinked store.
+#
+# WHY. `next build` with `output: "standalone"` traces the modules the server actually
+# reaches and copies them into .next/standalone, and with pnpm's default layout it
+# reproduces the store by creating symlinks. Windows refuses to create a symlink unless
+# the process is elevated or Developer Mode is on, so the whole build fails at the copy
+# step with EPERM — after compiling successfully, which makes it read as a packaging bug
+# rather than a permission one.
+#
+# Hoisting is what npm and yarn do by default, so this is not an exotic layout; the cost
+# is that a package can resolve a dependency it did not declare, which pnpm's default
+# would have caught. That trade is worth a build that runs on the machine it is run on.
+#
+# THIS FILE, NOT .npmrc. pnpm 11 reads its own settings from here; node-linker in .npmrc
+# is silently ignored, which looks exactly like the setting not working.
+nodeLinker: hoisted
+
 allowBuilds:
   esbuild: true
   unrs-resolver: true

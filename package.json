@@ -25,7 +25,8 @@
     "check-secrets": "node scripts/check-secrets.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed": "tsx scripts/db-seed.ts",
-    "db:status": "node scripts/db-status.mjs"
+    "db:status": "node scripts/db-status.mjs",
+    "deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

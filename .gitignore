@@ -38,3 +38,6 @@ coverage/
 vr-out.txt
 shots-cta/
 shots*/
+
+# scratch space for scripts/deploy.mjs — the packed release, deleted after every run
+.deploy-tmp/

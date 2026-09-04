@@ -64,7 +64,24 @@ into `public_html`, and the build machine needs to reach the database.
 | `pnpm docs:content-todo` | Regenerates the How We Work drafted-copy inventory in `docs/content-todo.md` from the content module |
 | `pnpm db:migrate` | Applies pending database migrations. `-- --dry` to list them |
 | `pnpm db:seed` | Populates the database from the content modules. Idempotent; `-- --force` overwrites edited values |
+| `pnpm db:status` | Says whether this machine can reach the database and whether it holds content. Run it before a build |
 | `pnpm check-secrets` | Fails if a credential-shaped literal appears in a tracked file. Part of `pnpm lint` |
+| `pnpm deploy` | Uploads the built site to the server and switches it on. `-- --dry` to see what it would do |
+
+## Deployment
+
+The site runs as a Node process on cPanel — `docs/deployment.md` has the whole of it, and
+you want it before your first deploy rather than after. The two facts that surprise people:
+
+**The build reads the database.** The seven public pages are prerendered from MySQL at
+build time, so the machine running `pnpm build` needs to reach it. If it cannot, the build
+does not fail — it falls back to the content modules and ships a site that looks almost
+right and has none of the client's edits on it. `pnpm db:status` is the check.
+
+**Rolling back is a symlink move, not a rebuild.** Releases are timestamped directories on
+the server and the last five are kept, so undoing a bad deploy is two seconds and no
+upload. It rolls back code only: content lives in the database, and a content mistake is
+fixed in the panel.
 
 ## Architecture: the layer dependency rule
 
