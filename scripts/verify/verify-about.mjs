@@ -1,7 +1,7 @@
 // Browser verification for /about against the static export served on :3100.
 //
-//   node vr-serve.mjs 3100 &   (from the repo root)
-//   node verify-about.mjs
+//   node scripts/verify/vr-serve.mjs 3100 &   (from the repo root)
+//   node scripts/verify/verify-about.mjs
 //
 // 1. Motion: for each section, measure the opacity of its first reveal target while the
 //    section is still below the fold, then scroll it into view and measure again. A
@@ -18,7 +18,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { mkdirSync } from "node:fs";
 
 const URL = "http://127.0.0.1:3100/about";
-const OUT = process.argv[2] ?? "docs/about-redesign";
+const OUT = process.argv[2] ?? "docs/spec/about-redesign";
 mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch();

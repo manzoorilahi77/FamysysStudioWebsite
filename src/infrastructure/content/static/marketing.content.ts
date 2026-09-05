@@ -11,7 +11,6 @@
 
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
-import type { AspectRatio } from "../../../domain/shared/value-objects/MediaRef";
 import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
 import type { DifferentiatorBlock } from "../../../domain/marketing/entities/DifferentiatorBlock";
 import type { FaqBlock } from "../../../domain/marketing/entities/FaqBlock";
@@ -23,48 +22,50 @@ import type { WaysToWorkBlock } from "../../../domain/marketing/entities/Engagem
 import type { WhyFamysysBlock } from "../../../domain/marketing/entities/WhyFamysysBlock";
 import type { WhatWeDoIntro } from "../../../domain/marketing/repositories/MarketingContentRepository";
 
-// Mixed aspect ratios so the hero mosaic's staggered columns don't read as one repeated
-// tile size. Eight slots, ready for real Famysys Studio stills one-for-one.
+// The hero's accordion: five bands, one open at a time, standing for the five things the
+// studio actually does. Five and not eight — the strip is a column beside the headline
+// rather than a wall behind it, and a sixth band leaves no open band tall enough to read.
 //
-// TODO(client): every file below is stock photography from Unsplash, standing in until
-// the studio's own production stills exist. Source URLs are listed in
-// docs/content-todo.md. The alt text describes what each stock frame actually shows, so
-// it has to be rewritten alongside the images.
-interface MosaicTile {
+// Aspect ratio is `3:4` on every band because the accordion sizes them itself: a band is
+// a flex child of a fixed-height column and its image is `object-fit: cover`. The value
+// is carried anyway because `MediaRef` requires one and the CMS media library lists it.
+//
+// TODO(client): every file below is stock photography, standing in until the studio's own
+// production stills exist. Source URLs are listed in docs/content-todo.md. The alt text
+// describes what each stock frame actually shows, so it has to be rewritten alongside the
+// images.
+interface HeroBandSource {
   readonly file: string;
+  readonly label: string;
   readonly alt: string;
-  readonly aspectRatio: AspectRatio;
 }
 
-const MOSAIC_TILES: ReadonlyArray<MosaicTile> = [
-  { file: "mosaic-01", alt: "A clapperboard held up at the start of a take.", aspectRatio: "3:4" },
-  { file: "mosaic-02", alt: "A video edit timeline filling a monitor.", aspectRatio: "1:1" },
+const HERO_BANDS: ReadonlyArray<HeroBandSource> = [
   {
-    file: "mosaic-03",
-    alt: "A camera body and two lenses laid out on a dark surface.",
-    aspectRatio: "4:3",
-  },
-  {
-    file: "mosaic-04",
-    alt: "Footage open in an editing application on a desktop display.",
-    aspectRatio: "1:1",
-  },
-  {
-    file: "mosaic-05",
+    file: "hero-band-camera",
+    label: "Camera & rig",
     alt: "A camera rig filming a performer under coloured light.",
-    aspectRatio: "3:4",
   },
   {
-    file: "mosaic-06",
+    file: "hero-band-colour",
+    label: "Colour",
+    alt: "A colourist's desk with a grade open across two displays.",
+  },
+  {
+    file: "hero-band-motion",
+    label: "Motion",
+    alt: "A motion graphic of a wave form rendered in long light trails.",
+  },
+  {
+    file: "hero-band-design",
+    label: "Design",
     alt: "A designer's desk with creative-suite app icons on a tablet.",
-    aspectRatio: "4:3",
   },
   {
-    file: "mosaic-07",
-    alt: "A mirrorless camera beside a laptop showing a photo library.",
-    aspectRatio: "1:1",
+    file: "hero-band-content",
+    label: "Content",
+    alt: "A clapperboard held up at the start of a take.",
   },
-  { file: "mosaic-08", alt: "A compact camera lit in blue and magenta.", aspectRatio: "3:4" },
 ];
 
 export const heroContent: HeroContent = {
@@ -73,14 +74,15 @@ export const heroContent: HeroContent = {
   primaryCta: createCta("Start a Conversation", "/contact"),
   secondaryCta: createCta("Explore Our Services", "/creative-services"),
   supportingLine: "Project-based when you need it. Ongoing when you need more.",
-  mosaicTiles: MOSAIC_TILES.map((tile) =>
-    MediaRef.create({
+  bands: HERO_BANDS.map((band) => ({
+    label: band.label,
+    media: MediaRef.create({
       kind: "image",
-      src: `/media/${tile.file}.jpg`,
-      alt: tile.alt,
-      aspectRatio: tile.aspectRatio,
+      src: `/media/${band.file}.jpg`,
+      alt: band.alt,
+      aspectRatio: "3:4",
     }),
-  ),
+  })),
 };
 
 export const whatWeDoIntro: WhatWeDoIntro = {

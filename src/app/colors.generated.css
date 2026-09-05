@@ -28,8 +28,8 @@
    `accent-on-dark` is the lightened blue navy needs. `accent-warm` is secondary
    emphasis — chips, status markers, process numerals. `accent-highlight` is loud
    and rationed to one use per page. */
-  --color-accent: #a6381d;
-  --color-accent-on-dark: #e5906a;
+  --color-accent: #7e1b33;
+  --color-accent-on-dark: #f0a8b8;
   --color-accent-warm: #d6a03c;
   --color-accent-highlight: #66e0b0;
 
@@ -62,10 +62,10 @@
   --color-card-tint: #deddd3;
   --color-card-tint-deep: #d2d2c9;
   --color-service-numeral: #c3c4bb;
-  --color-primary-button-hover: #91351d;
-  --color-primary-button-hover-on-dark: #c37f5e;
-  --color-accent-8: #a6381d14;
-  --color-accent-4: #a6381d0a;
+  --color-primary-button-hover: #6f1c30;
+  --color-primary-button-hover-on-dark: #cc93a0;
+  --color-accent-8: #7e1b3314;
+  --color-accent-4: #7e1b330a;
   --color-accent-warm-wash: #d6a03c38;
   --color-hairline-on-section-alt: #f2ede129;
   --color-section-alt-entering: #1e3a31e6;

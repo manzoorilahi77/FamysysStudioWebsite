@@ -1,88 +1,117 @@
 "use client";
 
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { HeroContentView } from "../lib/viewModels";
 import { Button } from "../components/Button";
-import { HeroMosaic } from "../components/HeroMosaic";
-import { Container } from "../components/Container";
 import { RevealHeading } from "../components/RevealHeading";
+import { useHeroMotion } from "../hooks/useHeroMotion";
 
 interface HeroProps {
   readonly hero: HeroContentView;
 }
 
+/** The words the headline sets in the display accent face. */
+const ACCENT_PHRASES = ["agency overhead."] as const;
+
+/**
+ * THE HOMEPAGE HERO. Type left, a five-band accordion right, and a sixty-four bar level
+ * meter painted across the whole ground behind both.
+ *
+ * The meter is a canvas rather than elements because it is 64 shapes redrawn every frame;
+ * everything else here is layout and CSS. All of the motion — the meter, the copy
+ * column's lift, which band is open, the two magnetic buttons — comes from one loop in
+ * useHeroMotion, which is also where reduced motion is answered.
+ *
+ * WHAT IS NOT JAVASCRIPT. The entrance. The headline reveals through RevealHeading and
+ * everything under it through `.enter-fade`, both of which are keyframes and transitions
+ * that finish on their own — so with the bundle blocked or failed the hero is simply
+ * present, rather than a section of invisible text. That is the same rule the mosaic hero
+ * was rebuilt around and it has not changed; only what moves has.
+ */
 export function Hero({ hero }: HeroProps) {
-  // The entrance is a CSS animation now, not an effect that flips opacity on mount — see
-  // `.enter-fade` in globals.css. The old shape meant the hero's supporting copy, its two
-  // buttons and its closing line were rendered at opacity 0 and only ever revealed if the
-  // client bundle ran; a keyframe animation finishes on its own. Reduced motion is handled
-  // in the stylesheet too, so this component no longer needs to know about it.
+  const { sectionRef, canvasRef, bodyRef, activeBand, onBandEnter, onBandLeave } = useHeroMotion(
+    hero.bands.length,
+  );
+
   const fadeIn = (delayMs: number) => ({ "--enter-delay": `${delayMs}ms` }) as CSSProperties;
 
   return (
     // Exactly one viewport tall, header included — the header is fixed and overlays this
-    // section, so `pt-24` is what keeps the copy clear of it rather than the section
-    // being shortened by the header's height. Everything inside has to fit; the type
-    // scale came down for it, the section height did not go up.
+    // section, so the copy column's top padding is what keeps the type clear of it rather
+    // than the section being shortened by the bar's height.
     <section
+      ref={sectionRef}
       aria-label="Introduction"
-      className="surface-dark relative flex items-center overflow-hidden bg-ink pt-24"
-      style={{ height: "100svh" }}
+      className="hero-final surface-dark bg-ink"
     >
-      {/* Full-bleed to the right edge, and to the SECTION's top rather than to the bottom
-          of the header: the bar is transparent at scroll 0 again, so the strip behind it
-          is the one place the mosaic is doing its job — tiles drift past behind the nav.
-          Starting it below the header would put a bare ink band where that should be. It
-          is positioned against the section rather than placed in the container grid, which
-          is what lets its right column reach the viewport edge instead of stopping at the
-          container gutter. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[34%] lg:block">
-        <div className="hero-mosaic-frame enter-scale pointer-events-auto h-full">
-          <HeroMosaic tiles={hero.mosaicTiles} />
-        </div>
+      <div className="hero-final-meter" aria-hidden="true">
+        <canvas ref={canvasRef} />
       </div>
+      {/* The type sits left, so the ground is carried heaviest on that side and thins
+          across to the accordion. This is what the headline is actually read against —
+          the meter runs the full width behind it. */}
+      <div className="hero-final-veil" aria-hidden="true" />
 
-      <div
-        className="hero-top-scrim pointer-events-none absolute inset-x-0 top-0 z-[5]"
-        aria-hidden="true"
-      />
+      {/* A list, because that is what it is: five disciplines in a fixed order, and the
+          numeral beside each label is its position in that order. Only the open band is
+          expanded; the rest are legible slivers, so nothing here is content that hiding
+          would lose. */}
+      <ul className="hero-final-accordion">
+        {hero.bands.map((band, index) => (
+          <li
+            key={band.media.src}
+            className={`hero-final-band${index === activeBand ? " is-open" : ""}`}
+            onPointerEnter={() => onBandEnter(index)}
+            onPointerLeave={onBandLeave}
+          >
+            <Image
+              src={band.media.src}
+              alt={band.media.alt}
+              width={900}
+              height={1200}
+              sizes="(min-width: 901px) 28vw, 33vw"
+              priority={index === 0}
+              loading={index === 0 ? undefined : "lazy"}
+              className="hero-final-band-media"
+            />
+            <span className="hero-final-band-label">
+              {band.label}
+              <b>{String(index + 1).padStart(2, "0")}</b>
+            </span>
+          </li>
+        ))}
+      </ul>
 
-      {/* pointer-events-none, because the container spans the full shell width at z-10:
-          transparent or not, it sits over the mosaic and swallows its hover. The copy
-          column switches events back on for its own text and buttons. */}
-      <Container className="pointer-events-none relative z-10">
-        <div className="pointer-events-auto lg:max-w-[62%]">
-          {/* Reserved box for the travelling wordmark — see HeaderLogo. The logo itself
-              is fixed-positioned and NOT in this flow, so the copy below never shifts as
-              it leaves; this box only holds its place, permanently, at the large size
-              (2.5× the 32px header render). Collapses under reduced motion, where the
-              logo renders in the header from the start (globals.css). */}
-          <div className="hero-logo-anchor" data-hero-logo-anchor aria-hidden="true" />
-          {/* The h1 uses the same line-by-line reveal as every other display heading
-              on the page; it just fires on mount rather than on scroll, because it is
-              already in view. */}
-          <RevealHeading
-            as="h1"
-            className="text-hero-heading text-balance font-semibold text-canvas"
-            accent={["the agency overhead."]}
-          >
-            {hero.heading}
-          </RevealHeading>
-          <p
-            className="text-body enter-fade mt-6 text-canvas-80"
-            style={{ maxWidth: "52ch", ...fadeIn(200) }}
-          >
-            {hero.body}
-          </p>
-          <div className="enter-fade mt-8 flex flex-wrap gap-4" style={fadeIn(200)}>
-            <Button cta={hero.primaryCta} variant="primary" dark />
-            <Button cta={hero.secondaryCta} variant="ghost" dark />
-          </div>
-          <p className="text-small enter-fade mt-6 text-canvas-60" style={fadeIn(300)}>
-            {hero.supportingLine}
-          </p>
+      <div ref={bodyRef} className="hero-final-body">
+        <RevealHeading as="h1" className="hero-final-heading" accent={ACCENT_PHRASES}>
+          {hero.heading}
+        </RevealHeading>
+        <p className="hero-final-sub enter-fade" style={fadeIn(360)}>
+          {hero.body}
+        </p>
+        <div className="hero-final-cta enter-fade" style={fadeIn(480)}>
+          {/* The LIGHT primary variant on a dark ground, as the approved design has it:
+              the accent fill carrying the page ground as its label. Same choice the header
+              bar makes, and it needs the same hairline — see `.hero-final-btn--primary`. */}
+          <Button
+            cta={hero.primaryCta}
+            variant="primary"
+            rollOnHover
+            className="hero-final-btn hero-final-btn--primary"
+          />
+          <Button
+            cta={hero.secondaryCta}
+            variant="ghost"
+            dark
+            rollOnHover
+            className="hero-final-btn"
+          />
         </div>
-      </Container>
+        <p className="hero-final-sup enter-fade" style={fadeIn(600)}>
+          {hero.supportingLine}
+        </p>
+      </div>
     </section>
   );
 }

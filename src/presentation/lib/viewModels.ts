@@ -18,7 +18,7 @@ import type { DifferentiatorBlock } from "../../domain/marketing/entities/Differ
 import type { WhyFamysysBlock } from "../../domain/marketing/entities/WhyFamysysBlock";
 import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
-import type { HeroContent } from "../../domain/marketing/entities/HeroContent";
+import type { HeroBand, HeroContent } from "../../domain/marketing/entities/HeroContent";
 import type {
   CustomPartnership,
   EngagementTier,
@@ -99,13 +99,18 @@ export interface NavigationMenuView {
   readonly primaryCta: CtaView;
 }
 
+export interface HeroBandView {
+  readonly label: string;
+  readonly media: MediaView;
+}
+
 export interface HeroContentView {
   readonly heading: string;
   readonly body: string;
   readonly primaryCta: CtaView;
   readonly secondaryCta: CtaView;
   readonly supportingLine: string;
-  readonly mosaicTiles: ReadonlyArray<MediaView>;
+  readonly bands: ReadonlyArray<HeroBandView>;
 }
 
 export interface CaseStudyView {
@@ -349,6 +354,10 @@ export function toNavigationMenuView(navigation: NavigationMenu): NavigationMenu
   };
 }
 
+function toHeroBandView(band: HeroBand): HeroBandView {
+  return { label: band.label, media: toMediaView(band.media) };
+}
+
 export function toHeroContentView(hero: HeroContent): HeroContentView {
   return {
     heading: hero.heading,
@@ -356,7 +365,7 @@ export function toHeroContentView(hero: HeroContent): HeroContentView {
     primaryCta: toCtaView(hero.primaryCta),
     secondaryCta: toCtaView(hero.secondaryCta),
     supportingLine: hero.supportingLine,
-    mosaicTiles: hero.mosaicTiles.map(toMediaView),
+    bands: hero.bands.map(toHeroBandView),
   };
 }
 

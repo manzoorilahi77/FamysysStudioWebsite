@@ -24,14 +24,15 @@ function fixtureHero(): HeroContent {
     primaryCta: createCta("Start a Conversation", "/contact"),
     secondaryCta: createCta("Explore Our Services", "/creative-services"),
     supportingLine: "Project-based when you need it. Ongoing when you need more.",
-    mosaicTiles: Array.from({ length: 8 }, (_, index) =>
-      MediaRef.create({
+    bands: Array.from({ length: 5 }, (_, index) => ({
+      label: `Band ${index + 1}`,
+      media: MediaRef.create({
         kind: "image",
-        src: `/media/mosaic-${String(index + 1).padStart(2, "0")}.svg`,
+        src: `/media/hero-band-${String(index + 1).padStart(2, "0")}.svg`,
         alt: `Placeholder creative still ${index + 1}`,
-        aspectRatio: "1:1",
+        aspectRatio: "3:4",
       }),
-    ),
+    })),
   };
 }
 

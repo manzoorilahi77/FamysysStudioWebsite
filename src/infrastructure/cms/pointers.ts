@@ -22,7 +22,7 @@ const F = CONTENT_FILE;
 // marketing.content.ts — the client's own briefs. Everything here is approved copy.
 // ---------------------------------------------------------------------------
 export const hero = pointerFactory(F.marketing, "heroContent");
-export const mosaicTiles = pointerFactory(F.marketing, "MOSAIC_TILES");
+export const heroBands = pointerFactory(F.marketing, "HERO_BANDS");
 export const whatWeDo = pointerFactory(F.marketing, "whatWeDoIntro");
 export const differentiator = pointerFactory(F.marketing, "differentiatorBlock");
 export const processHome = pointerFactory(F.marketing, "processBlock");

@@ -1,9 +1,15 @@
 // EDIT COLOURS HERE. Change a value, save, and it updates everywhere on the site.
 // Every colour must be a hex value like '#17191C'.
 //
-// This is the ONLY file in the repository allowed to contain a hex colour. Everything
-// else — the opacity tints, the hover fills, the CSS variables in globals.css — is
-// derived from the values below.
+// THIS IS THE ONLY FILE YOU NEED. It is also the only file in the repository allowed to
+// contain a hex colour — `pnpm lint` fails on a hex written anywhere else. Everything
+// else is derived from the twelve values below: the opacity tints, the hover fills and
+// the CSS variables in globals.css are computed in colorMath.ts and tokens.ts, and
+// written out to colors.generated.css by `pnpm colours`, which `pnpm dev` and
+// `pnpm build` run for you. None of those three files needs a human to open it.
+//
+// The plain-English guide to every colour, what it does and how to check contrast is
+// docs/changing-colours.md.
 //
 // ===========================================================================
 // HOW TO SWITCH PALETTE
@@ -11,8 +17,8 @@
 // Every block is named `colors`. Exactly ONE may be uncommented at a time.
 // Comment out the active one, uncomment the one you want, then:
 //
-//     npm run check-colours
-//     npm run dev
+//     pnpm check-colours
+//     pnpm dev
 //
 // Nothing else needs editing. The last line of the file stays as it is.
 // If the dev server is already running, restart it — the CSS is generated at
@@ -44,9 +50,12 @@
 // } as const;
 
 // ---------------------------------------------------------------------------
-// 2 — KILN  (the forest one, rejected — kept for reference)
-// Deep forest-petrol and burnt terracotta. Rejected for reading too close to
-// Superside's green.
+// 2 — KILN  ***THIS IS THE LIVE PALETTE — the uncommented block below.***
+// Deep forest-petrol grounds and warm sand, with the Claret accent pair the
+// client approved on the hero. Kiln's original burnt terracotta accents were
+// the part that was rejected, for reading too close to Superside's green;
+// the nine grounds and neutrals survived that review unchanged. See the note
+// on the accent pair inside the block, and docs/explorations/03-colour/.
 // ---------------------------------------------------------------------------
 
 export const colors = {
@@ -58,8 +67,14 @@ export const colors = {
   textOnDark: "#F1EBDD",
   textMuted: "#212B25",
 
-  accentPrimary: "#A6381D",
-  accentOnDark: "#E5906A",
+  // THE CLARET PAIR. The nine grounds and neutrals above are Kiln's and are unchanged;
+  // these two are the approved hero design's own choice, adopted site-wide because the
+  // client rejected the terracotta they replace (#A6381D / #E5906A) before settling here.
+  // A deep wine carrying the primary fill, and a light rose for the roles a dark ground
+  // needs a lightened accent for. See docs/explorations/01-heroes/hero-final.html, which names
+  // them accentPrimary and accentOnDark for exactly these two slots.
+  accentPrimary: "#7E1B33",
+  accentOnDark: "#F0A8B8",
   accentWarm: "#D6A03C",
   accentHighlight: "#66E0B0",
 

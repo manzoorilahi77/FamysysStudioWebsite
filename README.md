@@ -2,7 +2,7 @@
 
 Marketing homepage for Famysys Studio, built on Next.js 15 (App Router) with a DDD-layered
 `src/` tree (`domain/` → `application/` → `infrastructure/` → `presentation/`/`app/`). See
-`docs/superpowers/specs/2026-08-28-famysys-studio-homepage-design.md` for the full design spec
+`docs/spec/2026-08-28-famysys-studio-homepage-design.md` for the full design spec
 (tokens, contrast rationale) and `docs/content-todo.md` for every placeholder that needs client
 confirmation before launch.
 
@@ -803,18 +803,10 @@ Every effect below is gated on `prefers-reduced-motion` and re-verified after ea
 
 ## Placeholder media
 
-`scripts/generate-media.mjs` regenerates every placeholder image referenced by
-`src/infrastructure/content/static/*.content.ts`, entirely locally — nothing is downloaded and no
-external tooling is needed. Images are hand-built SVG strings using only the locked design tokens.
-
-```bash
-pnpm generate:media
-```
-
-It writes 16 files: eight 4:3 tiles for Selected Work and eight mixed-ratio tiles for the hero
-mosaic. The script is deterministic — no randomness, no timestamps — so re-running against a
-non-empty `public/media/` overwrites every file with byte-identical content. Regenerate any time
-the content files' media filenames change.
+Every image referenced by `src/infrastructure/content/static/*.content.ts` is a real photograph
+committed to `public/media/`, and every one of them is a stand-in for work the studio has not
+produced yet. There is no generator: the SVG placeholder script this section used to describe was
+removed when the photography replaced it.
 
 **Every placeholder is inventoried in `docs/content-todo.md`**, with its file location and what
 needs to happen before launch. That file is the single source for "is this real or a

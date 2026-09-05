@@ -79,14 +79,6 @@ body {
   letter-spacing: -0.026em;
 }
 
-/* The hero's h1 only. A step above .text-heading — the opening statement is the one
-   heading allowed to outscale the section heads, and the copy column has the width
-   for it now that the mosaic holds 34%. */
-.text-hero-heading {
-  font-size: clamp(2.3rem, 3.5vw, 3.4rem);
-  line-height: 1.06;
-  letter-spacing: -0.03em;
-}
 .text-display-l {
   font-size: clamp(1.75rem, 3.85vw, 4.25rem);
   line-height: 1.06;
@@ -241,27 +233,6 @@ body {
     to {
       opacity: 1;
     }
-  }
-}
-
-/* The hero mosaic's settle, on the same terms as `.enter-fade`: a keyframe rather than a
-   mount effect, so the frame is at its resting scale whether or not the bundle runs. */
-.enter-scale {
-  animation: enter-scale 900ms var(--ease-base) both;
-}
-
-@keyframes enter-scale {
-  from {
-    transform: scale(1.04);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .enter-scale {
-    animation-duration: 120ms;
   }
 }
 
@@ -534,10 +505,15 @@ main > section.bg-ink + section.bg-ink::after {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  gap: 0.5rem;
+  /* No horizontal padding: the gap between one item and the next is now set on the list,
+     and the bracket before each label is what separates a label from the item before it.
+     The bottom padding is the distance from the baseline to the underline. */
+  padding: 0 0 4px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--color-canvas-80);
   transition-property: color;
   transition-duration: 240ms;
@@ -555,6 +531,11 @@ main > section.bg-ink + section.bg-ink::after {
   display: inline-block;
 }
 
+/* The underline is the accent rather than the label's own colour, and it is anchored to
+   the RIGHT at rest and to the LEFT once drawn — so it wipes in from the left on the way
+   and retreats to the right on the way out, rather than collapsing back the way it came.
+   accent-on-dark, because the raw accent reads 1.837:1 on the bar; the lightened value is
+   9.661:1, which is the row `check-colours` enforces as the nav underline. */
 .nav-link-label::after {
   content: "";
   position: absolute;
@@ -562,11 +543,11 @@ main > section.bg-ink + section.bg-ink::after {
   right: 0;
   bottom: -0.25rem;
   height: 1px;
-  background-color: currentColor;
+  background-color: var(--color-accent-on-dark);
   transform: scaleX(0);
-  transform-origin: left center;
+  transform-origin: 100% 50%;
   transition-property: transform;
-  transition-duration: 200ms;
+  transition-duration: 500ms;
   transition-timing-function: var(--ease-base);
 }
 
@@ -574,6 +555,7 @@ main > section.bg-ink + section.bg-ink::after {
 .nav-link:focus-visible .nav-link-label::after,
 .nav-link[aria-expanded="true"] .nav-link-label::after {
   transform: scaleX(1);
+  transform-origin: 0 50%;
 }
 
 /* Markers. Every item carries one, so the two kinds of item are told apart before they
@@ -600,22 +582,140 @@ main > section.bg-ink + section.bg-ink::after {
   transform: rotate(180deg);
 }
 
-/* accent-on-dark, not raw accent: the brand accent is 2.457:1 on ink, so a 4px accent dot
-   on this bar would be a mark nobody can see. The lightened variant reads 5.015:1. */
-.nav-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background-color: var(--color-accent-on-dark);
-  opacity: 0;
-  transition-property: opacity;
-  transition-duration: 180ms;
+/* THE BAR: LINKS EITHER SIDE OF A CENTRED WORDMARK.
+   ---------------------------------------------------------------------------
+   Three tracks, `1fr auto 1fr`. The wordmark takes the middle one, so it sits on the
+   viewport's centre line rather than wherever the two link groups happen to leave it —
+   which is the whole point of the arrangement and is not what `justify-content: space-
+   between` on a flex row would give.
+
+   Both `1fr` tracks have `auto` as their minimum, so a group wider than its share would
+   push the wordmark off centre rather than overflow. It does not come to that: the five
+   pages are split three left and two right BY WIDTH — see START_LINK_COUNT in Header.tsx
+   — which leaves the two sides within about 40px of each other at the 1280 the inline nav
+   appears at.
+
+   Below xl the two lists and the button pair are gone and the drawer trigger takes the
+   right track, so the wordmark stays centred with the Menu word balancing an empty left
+   track. */
+.cnav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.75rem);
+}
+
+.cnav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.875rem, 2.2vw, 2.125rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cnav-links--start {
+  grid-column: 1;
+}
+
+/* Inside `.cnav-end`, not a track of its own: the buttons and the drawer trigger share
+   the third column with it. */
+.cnav-links--end {
+  justify-content: flex-end;
+}
+
+.cnav-links li {
+  display: flex;
+  align-items: center;
+  gap: 0.72em;
+  /* The bracket below is drawn in `currentColor`, and it hangs off the LI rather than the
+     anchor — so without this it inherits the body's ink and draws the marker in the bar's
+     own ground. The link carries this same value; the bracket is simply taking it from one
+     level up. */
+  color: var(--color-canvas-80);
+}
+
+/* THE BRACKET. Half a frame — left, top and bottom edge, no right — set before every
+   label, held well back at rest and opening out to the accent as the item is pointed at
+   or focused. It replaced a dot that only appeared on hover: at rest the bar now has a
+   mark against every item, which is what gives the row its rhythm, and the thing that
+   changes on hover is its weight rather than its existence.
+
+   Decorative in the strict sense — it distinguishes nothing. The chevron is still what
+   says an item has a panel under it, and aria-expanded is still what says so to a screen
+   reader. */
+.cnav-links li::before {
+  content: "";
+  flex: none;
+  width: 3px;
+  height: 9px;
+  border-left: 1px solid currentColor;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.42;
+  transition-property: transform, opacity, border-color;
+  transition-duration: 500ms, 400ms, 400ms;
   transition-timing-function: var(--ease-base);
 }
 
-.nav-link:hover .nav-dot,
-.nav-link:focus-visible .nav-dot {
+.cnav-links li:hover::before,
+.cnav-links li:focus-within::before {
   opacity: 1;
+  transform: scale(1.9);
+  border-color: var(--color-accent-on-dark);
+}
+
+/* The three placements are EXPLICIT, and that is load-bearing rather than tidiness. Below
+   xl the two lists are `display: none`, which takes them out of the grid altogether — with
+   auto-placement the wordmark would then fall into the first track and the drawer trigger
+   into the second, putting the wordmark hard left and the Menu word beside it instead of
+   at the edge. Naming the columns keeps the empty first track, so the wordmark stays on
+   the centre line at every width. */
+.cnav-wordmark {
+  grid-column: 2;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-self: center;
+}
+
+.cnav-end {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+.cnav-actions {
+  display: none;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* The drawer trigger, and the only thing in the right track below xl. */
+.cnav-menu {
+  flex: none;
+}
+
+@media (min-width: 1280px) {
+  .cnav-actions {
+    display: flex;
+  }
+
+  .cnav-menu {
+    display: none;
+  }
+}
+
+/* The page names are long — "Ways to Work With Us", "Creative Services" — so the inline
+   lists need the full container width and only fit from xl up. Below that both groups go
+   and the drawer carries every one of them. */
+@media (max-width: 1279px) {
+  .cnav-links {
+    display: none;
+  }
 }
 
 /* The backdrop behind an open panel. ONE element for all three panels, mounted by the
@@ -1396,144 +1496,318 @@ div.grid > *:nth-child(even).card-surface-dark {
   color: var(--color-canvas);
 }
 
-/* Hero mosaic. The drift is driven from JS rather than CSS keyframes: it has to reverse
-   on scroll direction and accelerate with scroll velocity, and a keyframe animation can
-   do neither. The transform is the only thing JS touches per frame, so it stays on the
-   compositor.
+/* THE HOMEPAGE HERO.
+   ---------------------------------------------------------------------------
+   Type left, a five-band accordion right, and a level meter painted across the whole
+   ground behind both. Ported from docs/hero-explorations/hero-final.html, which is the
+   approved design; the colours below are the token equivalents of the hex it names.
 
-   The bottom mask is the only fade. The top is deliberately open so tiles are seen
-   passing behind the transparent header, and the last 15% dissolves into the ink so the
-   columns do not cut off hard at the section edge. */
-.hero-mosaic-frame {
-  mask-image: linear-gradient(to bottom, black 0%, black 85%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 85%, transparent 100%);
+   The meter itself is a canvas — see useHeroMotion, which owns the one animation loop
+   this section runs. Everything in this file is layout, and the two things that move
+   without JavaScript: the entrance, and the accordion's own hover.
+
+   The copy column sits on `--container-inset`, so the headline starts on exactly the
+   vertical every section below it does. The accordion does NOT: it is inset from the
+   VIEWPORT edge, the way the mosaic that preceded it was, because a strip pushed in to
+   the container line at 1440 reads as floating rather than as held against the edge. */
+.hero-final {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  /* A stacking context of its own, so the meter cannot paint over the fixed header. */
+  isolation: isolate;
+  padding-inline: var(--container-inset);
+  /* Top clears the fixed bar; bottom is deliberately smaller, which is what biases the
+     optical centre of the copy column above the true middle. */
+  padding-block: clamp(7.5rem, 18vh, 11.25rem) clamp(3.625rem, 9vh, 6.125rem);
 }
 
-/* THE SCRIM CARRIES CONTRAST AGAIN. The header is transparent at scroll 0 and the mosaic
-   runs to the top of the section behind it, so the nav sits over whatever photograph
-   happens to be drifting past. This gradient is what the links are actually read against:
-   nearly-opaque ink across the band the bar occupies, dissolving before the tiles are
-   meant to be seen.
+.hero-final-meter {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
 
-   axe cannot evaluate text over an image, so this is verified by hiding the link text and
-   SAMPLING THE RENDERED PIXELS behind each one at several drift positions — the same
-   method used the first time it was solved. The values below are what that sampling
-   passed at; changing them means re-running it. */
-.hero-top-scrim {
-  height: 9rem;
+.hero-final-meter canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* What the headline is actually read against. The type is on the left, so the ground is
+   carried heaviest there and thins across to the accordion, lifting again at the right
+   edge so the bands do not fall off a bright band into nothing. */
+.hero-final-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background-image: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-ink) 94%, transparent) 0%,
-    color-mix(in srgb, var(--color-ink) 74%, transparent) 55%,
-    transparent 100%
+    92deg,
+    color-mix(in srgb, var(--color-ink) 96%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 84%, transparent) 40%,
+    color-mix(in srgb, var(--color-ink) 40%, transparent) 68%,
+    color-mix(in srgb, var(--color-ink) 62%, transparent) 100%
   );
 }
 
-.hero-mosaic {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-  height: 100%;
-  overflow: hidden;
+.hero-final-body {
+  position: relative;
+  z-index: 8;
+  width: min(72ch, 48vw);
+  will-change: transform;
 }
 
-@media (min-width: 1024px) {
-  .hero-mosaic {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.hero-final-heading {
+  font-size: clamp(1.875rem, 4.8vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.034em;
+  font-weight: 400;
+  color: var(--color-canvas);
+}
+
+.hero-final-sub {
+  margin-top: clamp(1rem, 2.4vh, 1.625rem);
+  max-width: 44ch;
+  font-weight: 300;
+  font-size: clamp(0.875rem, 1.24vw, 1.0625rem);
+  line-height: 1.62;
+  color: var(--color-canvas-80);
+}
+
+.hero-final-cta {
+  margin-top: clamp(1.25rem, 3vh, 2rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8125rem;
+}
+
+.hero-final-sup {
+  margin-top: clamp(1rem, 2.4vh, 1.625rem);
+  font-size: 0.71875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-canvas-60);
+}
+
+/* The hero's buttons are pills rather than the site's 4px radius, and they follow the
+   pointer — see the magnet block in useHeroMotion, which writes the transform inline.
+   `transform` is therefore dropped from the transition: a transitioned transform written
+   every frame lags a frame behind the pointer and reads as drag. */
+.hero-final-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  padding: 0.9375rem 1.875rem;
+  font-size: 0.84375rem;
+  letter-spacing: 0.06em;
+  transition-property: color, background-color, border-color;
+  will-change: transform;
+}
+
+/* The label and the roll sit above the wash; without this the fill rising from below
+   would cross in front of the word it is meant to sit behind. */
+.hero-final-btn .button-roll {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-final-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transition-property: transform;
+  transition-duration: 550ms;
+  transition-timing-function: var(--ease-base);
+}
+
+/* THE PRIMARY CONTROL. The accent fill with the page ground as its label — the LIGHT
+   variant on a dark ground, which is what the approved design has and what the header bar
+   already does. It needs the same hairline for the same reason: the accent reads 1.597:1
+   against ink, under the 3:1 that 1.4.11 puts on the boundary identifying a control, so
+   the lightened accent (8.395:1) draws the edge the fill cannot. The fill, the label and
+   the hover are exactly as designed; only the outline is added. See `.header-cta-primary`,
+   which solves the identical problem on the bar. */
+.hero-final-btn--primary {
+  border: 1px solid var(--color-accent-on-dark);
+}
+
+.hero-final-btn--primary::before {
+  background-color: color-mix(in srgb, var(--color-ink) 30%, transparent);
+  transform: translateY(101%);
+}
+
+/* The wash rising from below IS the hover, so the fill itself is pinned. Unlayered, so it
+   wins over the Tailwind hover utility the primary variant carries — the same arrangement
+   `.cta-highlight:hover` relies on. Without it the fill would swap colour AND take the
+   wash, landing well darker than the design. */
+.hero-final-btn--primary:hover {
+  background-color: var(--color-accent);
+}
+
+.hero-final-btn--primary:hover::before {
+  transform: translateY(0);
+}
+
+.hero-final-btn:not(.hero-final-btn--primary)::before {
+  background-color: var(--color-canvas-10);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+}
+
+.hero-final-btn:not(.hero-final-btn--primary):hover::before {
+  transform: scaleY(1);
+}
+
+/* THE ACCORDION. Five bands, one open at a time: scroll steps which one, and pointing at
+   a band takes it over until the pointer leaves.
+
+   Its entrance is opacity ALONE, and deliberately not `.enter-fade`. The strip is centred
+   with a translate, and a keyframe that also moves the element vertically would fight the
+   centring for the length of the animation. */
+.hero-final-accordion {
+  position: absolute;
+  z-index: 6;
+  right: clamp(1.25rem, 4vw, 4rem);
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(13.75rem, 28vw, 26.25rem);
+  height: clamp(18.75rem, 58vh, 32.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: hero-final-accordion-in 950ms var(--ease-base) 640ms both;
+}
+
+@keyframes hero-final-accordion-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-.hero-mosaic-column {
-  overflow: hidden;
-}
-
-.hero-mosaic-track {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  will-change: transform;
-}
-
-.hero-mosaic-tile {
+.hero-final-band {
   position: relative;
-  display: block;
-  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
-  /* Deliberately rounder than the site's --radius-sm — at this tile size a 4px radius
-     reads as square; 1rem is what gives the strip its card-like softness. */
-  border-radius: 1rem;
-  /* The Expand disc replaces the pointer on the tile itself; in the gaps between tiles
-     the native arrow stays. */
-  cursor: none;
-  transition-property: transform;
-  transition-duration: var(--duration-fast);
+  background-color: var(--color-section-alt);
+  border: 1px solid var(--color-canvas-10);
+  transition-property: flex-grow, border-color;
+  transition-duration: 720ms, 500ms;
   transition-timing-function: var(--ease-base);
 }
 
-.hero-mosaic-tile:hover,
-.hero-mosaic-tile:focus-visible {
-  transform: scale(1.03);
+.hero-final-band.is-open {
+  flex-grow: 4.6;
+  border-color: var(--color-accent-on-dark);
 }
 
-/* A scrim under the cursor disc, so it reads over a bright frame as well as a dark
-   one. Hidden until the tile is hovered or focused. */
-.hero-mosaic-scrim {
+/* The closed bands are held well back so the open one is unambiguously the subject; it
+   comes most of the way, but not all of it, back to the photograph's own colour. */
+.hero-final-band-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.28) contrast(1.14) brightness(0.62);
+  transition-property: filter, transform;
+  transition-duration: 600ms, 900ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.hero-final-band.is-open .hero-final-band-media {
+  filter: saturate(0.7) contrast(1.03) brightness(0.96);
+}
+
+.hero-final-band:hover .hero-final-band-media {
+  transform: scale(1.05);
+}
+
+.hero-final-band-label {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  font-size: 0.59375rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-on-dark);
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--color-ink) 0%, transparent),
+    color-mix(in srgb, var(--color-ink) 90%, transparent)
+  );
+}
+
+/* The numeral appears only on the open band, so the closed slivers carry a name and
+   nothing else. */
+.hero-final-band-label b {
+  color: var(--color-accent-on-dark);
+  font-weight: 500;
   opacity: 0;
-  background-color: var(--color-ink-60);
   transition-property: opacity;
-  transition-duration: var(--duration-fast);
+  transition-duration: 500ms;
   transition-timing-function: var(--ease-base);
 }
 
-.hero-mosaic-tile:hover .hero-mosaic-scrim,
-.hero-mosaic-tile:focus-visible .hero-mosaic-scrim {
+.hero-final-band.is-open .hero-final-band-label b {
   opacity: 1;
 }
 
-/* The cursor follower. Fixed to the viewport — the transform written per mousemove is
-   the pointer position, so the badge inside re-centres itself with its own translate.
-   pointer-events: none keeps the real hit-testing on the tiles underneath. */
-.hero-mosaic-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 40;
-  pointer-events: none;
-  will-change: transform;
-}
+/* Below the point where the two columns stop fitting side by side the accordion moves
+   under the copy and lies on its side, and the last two bands are dropped: five bands
+   across a phone leaves the open one too narrow to show anything. Their labels go with
+   them, which is why the five are ordered with the least essential last. */
+@media (max-width: 900px) {
+  .hero-final {
+    display: block;
+    padding-block: clamp(6.5rem, 16vh, 9.375rem) clamp(12.75rem, 30vh, 17.5rem);
+  }
 
-/* Frosted glass disc in place of the arrow. The blur samples the photograph moving
-   underneath it, which is what makes the glass read as glass. */
-.hero-mosaic-cursor-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  width: 6.5rem;
-  aspect-ratio: 1;
-  border-radius: 9999px;
-  background-color: color-mix(in srgb, var(--color-canvas) 14%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--color-canvas);
-  font-size: 0.8125rem;
-  letter-spacing: 0.01em;
-  transform: translate(-50%, -50%) scale(0);
-  transition-property: transform;
-  transition-duration: var(--duration-fast);
-  transition-timing-function: var(--ease-base);
-}
+  .hero-final-body {
+    width: auto;
+    padding-top: clamp(1rem, 6vh, 3rem);
+  }
 
-.hero-mosaic-cursor.is-active .hero-mosaic-cursor-badge {
-  transform: translate(-50%, -50%) scale(1);
+  .hero-final-accordion {
+    left: var(--container-inset);
+    right: var(--container-inset);
+    top: auto;
+    bottom: clamp(2.75rem, 7vh, 5rem);
+    transform: none;
+    width: auto;
+    height: clamp(7.5rem, 20vh, 10.625rem);
+    flex-direction: row;
+  }
+
+  .hero-final-band:nth-child(n + 4) {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-mosaic-tile:hover,
-  .hero-mosaic-tile:focus-visible {
+  /* No pointer response on the photographs, and no rising wash on a button: both are
+     changes of appearance driven by a pointer rather than by a state the reader chose. */
+  .hero-final-band:hover .hero-final-band-media {
     transform: none;
+  }
+
+  .hero-final-btn::before {
+    display: none;
   }
 }
 
@@ -4695,8 +4969,8 @@ html {
    copy beside it is arriving. It is a transition keyed on `data-settled`, which the
    block's own observer sets, rather than an animation on load: the images are below the
    fold and nobody should see them resolve before they scroll to them. The one exception
-   is the hero, whose frame arrives on load with the rest of the hero and takes the same
-   `.enter-scale` keyframe the homepage mosaic does. */
+   is the hero, whose frame arrives on load with the rest of the hero — see
+   `.about-frame--hero img` below, which gives it a keyframe of its own. */
 .about-frame {
   overflow: hidden;
   border-radius: var(--radius-sm);
@@ -4732,12 +5006,31 @@ html {
 }
 
 /* The hero's frame settles on load, not on scroll: the keyframe holds its end state
-   whether or not the bundle runs, which the transition above cannot promise for an
-   image that is on screen before the observer exists. */
+   whether or not the bundle runs, which the transition above cannot promise for an image
+   that is on screen before the observer exists.
+
+   The keyframe lives here rather than beside `.enter-fade` because this is now its only
+   caller — it began as the homepage mosaic's settle and moved down with the class when
+   that hero was replaced. */
+@keyframes enter-scale {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 .about-frame--hero img {
   transform: none;
   transition: none;
   animation: enter-scale 900ms var(--ease-base) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-frame--hero img {
+    animation-duration: var(--duration-reduced);
+  }
 }
 
 /* Below lg the hero frame is under the heading and a 16:9 band at full width is too
@@ -5006,61 +5299,3 @@ html {
   margin-top: 0;
 }
 
-/* ============================================================================
-   Homepage header logo travel (HeaderLogo + Hero)
-   ============================================================================ */
-
-/* The reserved box in the hero copy column: 5rem is the 32px header wordmark at the
-   hero's 2.5× (see HERO_LOGO_SCALE in HeaderLogo.tsx). It is empty on purpose — the
-   visible logo is the fixed element below, so nothing in the hero moves when the logo
-   travels away; this box just keeps the headline from sliding up into the space. */
-.hero-logo-anchor {
-  position: relative;
-  height: 5rem;
-  margin-bottom: 2rem;
-}
-
-/* Lift the logo alone on desktop: relative offset moves the anchor's box (and so the
-   travelling logo, which reads its rect) without moving the headline below it. */
-@media (min-width: 1024px) {
-  .hero-logo-anchor {
-    top: -2.5rem;
-  }
-}
-
-/* Holds the bar's layout on the homepage while the visible wordmark is elsewhere.
-   visibility rather than opacity, so it also drops out of the accessibility tree. */
-.header-logo-spacer {
-  display: inline-block;
-  visibility: hidden;
-}
-
-/* The one travelling element. Fixed at the viewport origin; every position it ever
-   takes is a transform written by HeaderLogo from the scroll offset — never top/left,
-   so the movement stays on the compositor. Hidden until the first measure has run, so
-   there is no frame of an unpositioned logo in the corner. */
-.header-logo-travel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
-  visibility: hidden;
-  will-change: transform;
-}
-
-/* No travel and no scale: the spacer becomes the real header logo, in place at normal
-   size from scroll 0, and the hero gives its reserved space back. The JS side bails on
-   the same media query, so no listeners run either. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-logo-anchor {
-    display: none;
-  }
-
-  .header-logo-spacer {
-    visibility: visible;
-  }
-
-  .header-logo-travel {
-    display: none;
-  }
-}

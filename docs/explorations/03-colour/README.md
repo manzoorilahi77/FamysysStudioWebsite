@@ -31,5 +31,5 @@ and on the branch.
 - [closing-cta-hovered.png](closing-cta-hovered.png) — the page's one use of
   `accentHighlight`: the closing call to action, hovered.
 
-Regenerate any of these with `node vr-colour-shots.mjs` and `node vr-colour-detail.mjs`
-against `node vr-serve.mjs 3100`.
+Regenerate any of these with `node scripts/verify/vr-colour-shots.mjs` and `node scripts/verify/vr-colour-detail.mjs`
+against `node scripts/verify/vr-serve.mjs 3100`.

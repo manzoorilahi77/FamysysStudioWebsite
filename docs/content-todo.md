@@ -60,24 +60,34 @@ them as if they were.
 
 Source URL for any id below: `https://unsplash.com/photos/<id>`.
 
-### Hero mosaic (§1)
+### Hero accordion (§1)
 
-File: `src/infrastructure/content/static/marketing.content.ts` (`MOSAIC_TILES`)
+File: `src/infrastructure/content/static/marketing.content.ts` (`HERO_BANDS`)
 
-Eight slots at mixed aspect ratios (3:4, 1:1, 4:3), split 3 / 3 / 2 across the three drifting
-columns. **Real production stills drop in one-for-one** without touching the layout — replace the
-file and rewrite the `alt`, which currently describes the stock frame.
+Five bands, one open at a time, each standing for one of the studio's disciplines. Every band
+carries a LABEL as well as a picture, and the label is copy — it is the only word on the band and
+it names a service, so it wants the client's own vocabulary rather than these placeholders. The
+numeral beside it is the band's position and is not editable. **Real production stills drop in
+one-for-one**: the accordion sizes every band itself (`object-fit: cover`), so a replacement needs
+no particular ratio. Rewrite the `alt` alongside the file.
 
-| Slot            | Ratio | Shows                                             | Unsplash id                        |
-| --------------- | ----- | ------------------------------------------------- | ---------------------------------- |
-| `mosaic-01.jpg` | 3:4   | Clapperboard at the start of a take               | `photo-1485846234645-a62644f84728` |
-| `mosaic-02.jpg` | 1:1   | Video edit timeline filling a monitor             | `photo-1574717024653-61fd2cf4d44d` |
-| `mosaic-03.jpg` | 4:3   | Camera body and lenses on a dark surface          | `photo-1516035069371-29a1b244cc32` |
-| `mosaic-04.jpg` | 1:1   | Footage open in an editing application            | `photo-1492619375914-88005aa9e8fb` |
-| `mosaic-05.jpg` | 3:4   | Camera rig filming under coloured light           | `photo-1601506521937-0121a7fc2a6b` |
-| `mosaic-06.jpg` | 4:3   | Designer's desk, creative-suite icons on a tablet | `photo-1626785774573-4b799315345d` |
-| `mosaic-07.jpg` | 1:1   | Mirrorless camera beside a laptop                 | `photo-1621600411688-4be93cd68504` |
-| `mosaic-08.jpg` | 3:4   | Compact camera lit in blue and magenta            | `photo-1516724562728-afc824a36e84` |
+| Slot                     | Label         | Shows                                             |
+| ------------------------ | ------------- | ------------------------------------------------- |
+| `hero-band-camera.jpg`   | Camera & rig  | Camera rig filming a performer under coloured light |
+| `hero-band-colour.jpg`   | Colour        | Colourist's desk, a grade open across two displays  |
+| `hero-band-content.jpg`  | Content       | Clapperboard held up at the start of a take         |
+| `hero-band-design.jpg`   | Design        | Designer's desk, creative-suite icons on a tablet   |
+| `hero-band-motion.jpg`   | Motion        | Motion graphic of a wave form in long light trails  |
+
+> **Provenance not recorded.** These five came from `docs/explorations/01-heroes/media-4/`, which the
+> approved hero design referenced, and that folder carries no source manifest — so unlike every
+> other stock image on this page there is no Unsplash id to cite. They are stand-ins either way and
+> are meant to be replaced, but if the site ships before the studio's own stills exist, the licence
+> for each of these five has to be established first.
+
+The eight `mosaic-0*.jpg` files remain in `public/media/` and are no longer referenced by anything:
+they belonged to the drifting three-column hero this accordion replaced. Delete them once nobody
+wants them back.
 
 ### The Differentiator (§3)
 
@@ -327,7 +337,8 @@ pick one:
 
 Once a source is settled, the work is: restore an `AutoplayVideo` component (muted, looping,
 `playsInline`, `IntersectionObserver`-paused off-screen, poster on each, and not autoplaying under
-reduced motion), and widen `MediaRef` handling in the hero mosaic so a tile can be `kind: "video"`.
+reduced motion), and widen `MediaRef` handling in the hero accordion so a band can be
+`kind: "video"`.
 
 ### Logo and favicon
 

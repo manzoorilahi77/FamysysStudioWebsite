@@ -42,7 +42,9 @@ const KEEP_RELEASES = 5;
  *
  * `src` and `scripts` stay. The content writer reads the TypeScript sources back at
  * runtime on the CONTENT_SOURCE=static path, and `db/migrations` is worth having beside
- * the app it migrated.
+ * the app it migrated. The one part of `scripts` that does not ship is `scripts/verify` —
+ * browser screenshot scripts that need Playwright and a served export, neither of which
+ * exists on the host. The two script patterns below empty it.
  */
 const EXCLUDE = [
   // Unanchored, and deliberately without a leading "./". GNU tar matches an exclude
@@ -56,8 +58,9 @@ const EXCLUDE = [
   ".next/cache",
   "docs",
   "out",
-  "shots-cta",
+  "shots*",
   "vr-*.mjs",
+  "verify-about.mjs",
   "vr-out.txt",
   "tsconfig.tsbuildinfo",
 ];

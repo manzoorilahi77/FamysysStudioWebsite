@@ -28,5 +28,5 @@ Aubergine and electric magenta. All at 1440, against the static export in `out/`
 - [header-over-alt-ground.png](header-over-alt-ground.png) — the header's own near-black
   ground against a section, and the light ground below it.
 
-Regenerate with `node vr-colour-shots.mjs` and `node vr-colour-detail.mjs` against
-`node vr-serve.mjs 3100`.
+Regenerate with `node scripts/verify/vr-colour-shots.mjs` and `node scripts/verify/vr-colour-detail.mjs` against
+`node scripts/verify/vr-serve.mjs 3100`.

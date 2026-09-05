@@ -7,7 +7,7 @@ import {
   footer,
   hero,
   homeClosingCta,
-  mosaicTiles,
+  heroBands,
   processHome,
   waysToWorkHome,
   whatWeDo,
@@ -45,12 +45,18 @@ export function homeSections(
         ...ctaFields("Secondary CTA", homepage.hero.secondaryCta, hero("secondaryCta")),
       ],
       lists: [
-        // The mosaic's alt text, which is the only copy in it — the eight file names are
-        // built from `MOSAIC_TILES[i].file` and are not strings a reader ever meets.
+        // The accordion's two strings per band. The file names are built from
+        // `HERO_BANDS[i].file` and are not copy a reader ever meets; the numeral beside
+        // each label is the band's position, so it is not editable either.
         list(
-          "Mosaic alt text",
-          homepage.hero.mosaicTiles.map((tile) => tile.alt),
-          (index) => mosaicTiles(index, "alt"),
+          "Band labels",
+          homepage.hero.bands.map((band) => band.label),
+          (index) => heroBands(index, "label"),
+        ),
+        list(
+          "Band alt text",
+          homepage.hero.bands.map((band) => band.media.alt),
+          (index) => heroBands(index, "alt"),
         ),
       ],
     }),

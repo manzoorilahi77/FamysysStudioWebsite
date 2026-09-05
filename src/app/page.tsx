@@ -42,7 +42,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header navigation={navigationView} heroLogo />
+      <Header navigation={navigationView} />
       <main id="main-content">
         <Hero hero={toHeroContentView(homepage.hero)} />
         <WhatWeDo

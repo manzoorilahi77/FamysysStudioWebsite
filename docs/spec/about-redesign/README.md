@@ -2,16 +2,16 @@
 
 Evidence for the About redesign: eight sections, six images, motion on every section, and
 the two-pass contrast check. Everything here was measured against the **static export**
-(`npm run build`, then `node vr-serve.mjs 3100`), which is the artifact the site ships —
+(`npm run build`, then `node scripts/verify/vr-serve.mjs 3100`), which is the artifact the site ships —
 not against the dev server.
 
-`verify-about.mjs` is the script that produced it. Run it from this directory with the
-export being served on port 3100:
+`scripts/verify/verify-about.mjs` is the script that produced it. Run it from the repository
+root with the export being served on port 3100:
 
 ```
 npm run build
-node vr-serve.mjs 3100          # from the repo root, in its own shell
-node docs/about-redesign/verify-about.mjs docs/about-redesign
+node scripts/verify/vr-serve.mjs 3100          # from the repo root, in its own shell
+node scripts/verify/verify-about.mjs docs/spec/about-redesign
 ```
 
 It exits non-zero on any failure and prints one line per check.

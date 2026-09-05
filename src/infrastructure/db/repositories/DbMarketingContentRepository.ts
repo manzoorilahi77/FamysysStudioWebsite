@@ -3,6 +3,7 @@ import type { DifferentiatorBlock } from "../../../domain/marketing/entities/Dif
 import type { FaqBlock, FaqItem } from "../../../domain/marketing/entities/FaqBlock";
 import type { FooterContent } from "../../../domain/marketing/entities/FooterContent";
 import type { HeroContent } from "../../../domain/marketing/entities/HeroContent";
+import type { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import type { ProcessBlock } from "../../../domain/marketing/entities/ProcessBlock";
 import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
 import type { WaysToWorkBlock } from "../../../domain/marketing/entities/EngagementTier";
@@ -23,7 +24,7 @@ import { collectionRecordStore, faqItems, homeTiers } from "./shared";
  * field keys the admin panel shows — and nothing above this layer can tell.
  *
  * WHAT STILL COMES FROM THE CONTENT MODULE, AND WHY.
- * The image files behind the hero mosaic, the four differentiator cards and the five
+ * The image files behind the hero accordion, the four differentiator cards and the five
  * reasons: their PATHS and aspect ratios. Those are not copy — nobody edits them in a
  * text field, they are files that have to exist on disk in a particular shape — so they
  * are structure the module still owns, while every word beside them, alt text included,
@@ -52,9 +53,7 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
       primaryCta: store.cta(owner, "primary-cta"),
       secondaryCta: store.cta(owner, "secondary-cta"),
       supportingLine: store.text(owner, "supporting-line"),
-      mosaicTiles: store
-        .list(owner, "mosaic-alt-text")
-        .map((alt, index) => withAlt(shape.mosaicTiles, index, alt)),
+      bands: bands(store, owner, shape.bands),
     };
   }
 
@@ -211,6 +210,37 @@ function mediaAt(
   return mediaFrom(found.media.src.value, found.media.kind, found.media.aspectRatio, alt);
 }
 
+/**
+ * The accordion's bands. Two lists that have to line up by index — the label and the alt
+ * text of the same band — read once each and zipped against the image paths the content
+ * module still owns. The labels are the list of record: a band with no label is a band
+ * the accordion cannot caption, so a missing alt is the error rather than a silent "".
+ */
+function bands(
+  store: ContentStore,
+  owner: string,
+  shape: ReadonlyArray<{ readonly media: MediaRef }>,
+) {
+  const labels = store.list(owner, "band-labels");
+  const alts = store.list(owner, "band-alt-text");
+  return labels.map((label, index) => {
+    const alt = alts[index];
+    if (alt === undefined) {
+      throw new Error(
+        `No alt text for band ${index}. The database has ${labels.length} band labels and ${alts.length} alt strings.`,
+      );
+    }
+    return {
+      label,
+      media: withAlt(
+        shape.map((band) => band.media),
+        index,
+        alt,
+      ),
+    };
+  });
+}
+
 function withAlt(
   shape: ReadonlyArray<{
     readonly src: { value: string };
@@ -223,7 +253,7 @@ function withAlt(
   const found = shape[index];
   if (!found) {
     throw new Error(
-      `No image for tile ${index}. The content module defines ${shape.length}; the database has more.`,
+      `No image for band ${index}. The content module defines ${shape.length}; the database has more.`,
     );
   }
   return mediaFrom(found.src.value, found.kind, found.aspectRatio, alt);

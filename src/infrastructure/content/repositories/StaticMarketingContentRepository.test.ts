@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { StaticMarketingContentRepository } from "./StaticMarketingContentRepository";
 
 describe("StaticMarketingContentRepository", () => {
-  it("returns hero content with two CTAs and eight mosaic tiles", async () => {
+  it("returns hero content with two CTAs and five labelled accordion bands", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const hero = await repository.getHero();
@@ -12,8 +12,15 @@ describe("StaticMarketingContentRepository", () => {
     expect(hero.supportingLine.length).toBeGreaterThan(0);
     expect(hero.primaryCta.label.value).toBe("Start a Conversation");
     expect(hero.secondaryCta.label.value).toBe("Explore Our Services");
-    // Eight slots so real stills drop in one-for-one — see docs/content-todo.md.
-    expect(hero.mosaicTiles).toHaveLength(8);
+    // Five slots so real stills drop in one-for-one — see docs/content-todo.md.
+    expect(hero.bands).toHaveLength(5);
+    expect(hero.bands.map((band) => band.label)).toEqual([
+      "Camera & rig",
+      "Colour",
+      "Motion",
+      "Design",
+      "Content",
+    ]);
   });
 
   it("returns a What We Do intro with an eyebrow, heading, body and CTA", async () => {

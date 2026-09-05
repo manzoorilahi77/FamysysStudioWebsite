@@ -15,7 +15,7 @@ else, and you should not: no other file in the project is allowed to contain a c
 ## How to change a colour
 
 1. Open `src/shared/design/colors.ts`.
-2. Find the colour you want and replace its hex value. It must look like `#0B2C4D` — a
+2. Find the colour you want and replace its hex value. It must look like `#12251F` — a
    hash followed by six characters, in quotes, with a comma after it.
 3. Save the file.
 4. In a terminal at the project folder, run:
@@ -40,33 +40,33 @@ read once when the site starts.
 
 | Name             | What it is                                                                                |
 | ---------------- | ----------------------------------------------------------------------------------------- |
-| `pageBackground` | The light ground most of the site sits on. Change this and the whole site's mood changes. |
-| `darkBackground` | The deep navy used for the hero and the other dark sections.                              |
-| `cardBackground` | White. The fill of a raised card sitting on a cream section.                              |
+| `pageBackground` | The warm sand most of the site sits on. Change this and the whole site's mood changes.    |
+| `darkBackground` | The deep forest green used for the hero and the other dark sections.                      |
+| `cardBackground` | Warm ivory. The fill of a raised card sitting on a sand section.                          |
 
 ### Text
 
 | Name          | What it is                                                                                                                                                            |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `textOnLight` | Headings and strong copy on the cream sections.                                                                                                                       |
-| `textOnDark`  | Headings and strong copy on the navy sections.                                                                                                                        |
-| `textMuted`   | The grey that running body copy is mixed from. It is never used at full strength — the site uses it at 70%, which is what makes body copy sit quieter than a heading. |
+| `textOnLight` | Headings and strong copy on the sand sections.                                                                                                                        |
+| `textOnDark`  | Headings and strong copy on the forest sections.                                                                                                                      |
+| `textMuted`   | The moss charcoal that running body copy is mixed from. It is never used at full strength — the site uses it at 70%, which is what makes body copy sit quieter than a heading. |
 
 ### Brand accents
 
 | Name              | What it is                                                                                                                                                                                |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accentPrimary`   | The main brand blue. Buttons, links, eyebrow labels, focus rings. The most visible colour on the site after the two backgrounds.                                                          |
-| `accentOnDark`    | A lighter version of the same blue. The main blue is too dark to read on navy, so anything blue on a dark section uses this instead.                                                      |
-| `accentWarm`      | The warm orange. Secondary emphasis: category chips, status markers, process numerals. **Use it as a fill with dark text on it, not as coloured words on cream** — see the warning below. |
-| `accentHighlight` | The bright lime. Loud on purpose. **One use per page, maximum**, and only on a dark section.                                                                                              |
+| `accentPrimary`   | The deep claret. Buttons, links, eyebrow labels, focus rings. The most visible colour on the site after the two backgrounds.                                                              |
+| `accentOnDark`    | The light rose — the same claret taken up. The claret is far too dark to read on forest, so anything accented on a dark section uses this instead.                                        |
+| `accentWarm`      | The aged brass. Secondary emphasis: category chips, status markers, process numerals. **Use it as a fill with dark text on it, not as coloured words on sand** — see the warning below. |
+| `accentHighlight` | The bright jade. Loud on purpose. **One use per page, maximum**, and only on a dark section.                                                                                              |
 
 ### Section grounds
 
 | Name          | What it is                                                                                                                                      |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sectionAlt`  | A lighter navy. When two dark sections sit next to each other, the second one uses this so the page does not read as one endless block of navy. |
-| `sectionWarm` | A deeper cream. Same idea for consecutive light sections.                                                                                       |
+| `sectionAlt`  | A lifted forest. When two dark sections sit next to each other, the second uses this so the page does not read as one endless block of forest.  |
+| `sectionWarm` | A deeper sand. Same idea for consecutive light sections.                                                                                        |
 
 You do not have to do anything to make the alternation happen — the site works out which
 sections are next to each other on its own.
@@ -84,10 +84,10 @@ for lines and borders that carry meaning.
 
 ```
 ground                       on          role   ratio     floor          what it is
-page background (cream)      #0B2C4D     text   12.549:1  4.5:1   PASS   headings and full-ink copy
-page background (cream)      #1C50FF     text   5.107:1   4.5:1   PASS   links and eyebrows
+page ground                  #16241E     text   13.773:1  4.5:1   PASS   headings and full-ink copy
+page ground                  #7E1B33     text   8.594:1   4.5:1   PASS   links and eyebrows
 ...
-All 41 enforced pairings pass.
+All 47 enforced pairings pass.
 ```
 
 - **PASS** — fine, nothing to do.
@@ -98,7 +98,7 @@ All 41 enforced pairings pass.
 
 The command's second table, **AVOIDED**, lists pairings the site deliberately does not
 use, with the number that explains why. It never fails the check — it is there so you can
-see, for example, that the bright lime on cream measures 1.141:1 and is effectively
+see, for example, that the bright jade on sand measures 1.398:1 and is effectively
 invisible.
 
 ---
@@ -151,8 +151,10 @@ line you changed with the ones around it.
 
 ## For developers
 
-- `src/shared/design/colors.ts` — the fourteen bases. The only file allowed to contain a
-  hex literal, enforced by a `no-restricted-syntax` rule in `eslint.config.mjs`.
+- `src/shared/design/colors.ts` — the twelve bases. The only file allowed to contain a
+  hex literal, enforced by a `no-restricted-syntax` rule in `eslint.config.mjs`. Nine
+  further palettes sit commented out beneath the live one; exactly one block may be
+  uncommented at a time.
 - `src/shared/design/colorMath.ts` — `withAlpha`, `mix`, `flatten`, `contrastRatio`. No
   colour is named here; these only transform.
 - `src/shared/design/tokens.ts` — every derived value: the two opacity ramps, the hover
@@ -162,7 +164,7 @@ line you changed with the ones around it.
   fails on drift, and also rejects a hex written by hand into `globals.css`.
 - `scripts/check-colours.mjs` — the contrast table. Add a row to `IN_USE` whenever the
   markup starts rendering a pairing that is not already listed.
-- `docs/colour-proof/` — screenshots showing a palette change reaching the built site, and
+- `docs/explorations/03-colour/` — screenshots showing a palette change reaching the built site, and
   the expanded palette in place.
 
 ### Where the five new colours are used

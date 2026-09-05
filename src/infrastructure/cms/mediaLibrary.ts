@@ -46,7 +46,7 @@ function collectUses(sources: MediaSources): ReadonlyArray<MediaUse> {
   const { homepage, creativeServices, howWeWork, waysToWork, selectedWork, about } = sources;
 
   return [
-    ...homepage.hero.mosaicTiles.map((tile) => mediaUse("Home — Hero mosaic", tile)),
+    ...homepage.hero.bands.map((band) => mediaUse("Home — Hero accordion", band.media)),
     ...homepage.differentiator.elements.map((element) => mediaUse(element.title, element.media)),
     ...homepage.whyFamysys.reasons.map((reason) => mediaUse(reason.title, reason.media)),
     mediaUse("Creative Services — Hero", creativeServices.hero.media),

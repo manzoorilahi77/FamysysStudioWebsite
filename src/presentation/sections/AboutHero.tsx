@@ -24,7 +24,7 @@ interface AboutHeroProps {
  * No call to action, still deliberately: this page's argument is "here is who this is",
  * and the ask belongs at the foot. Everything here arrives on load rather than on scroll,
  * so the entrance is the CSS keyframe `.enter-fade` and the image's settle is
- * `.enter-scale` — both hold their end state when JavaScript never runs.
+ * `enter-scale` keyframe — both hold their end state when JavaScript never runs.
  */
 export function AboutHero({ hero }: AboutHeroProps) {
   const fadeIn = (delayMs: number) => ({ "--enter-delay": `${delayMs}ms` }) as CSSProperties;
