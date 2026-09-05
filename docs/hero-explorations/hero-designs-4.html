@@ -1,0 +1,2903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twelve Accents, Twelve Backgrounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   PALETTE
+
+   Nine fixed colours. Only accentPrimary (--af) and accentOnDark (--a)
+   change, and they change per design — each hero sets its own pair as
+   local custom properties. --al is the label colour that pair requires
+   on the filled button; --ah is the hover wash over that fill, which is
+   always a tint of a fixed colour and always moves the label's contrast
+   in the safe direction.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --page:#F2EDE1;
+  --dark:#12251F;
+  --card:#FCF8EE;
+  --onLight:#16241E;
+  --onDark:#F1EBDD;
+  --muted:#212B25;      /* light grounds only — 1.07:1 on --dark */
+  --alt:#1E3A31;
+  --sand:#E5DCCA;
+  --hi:#66E0B0;
+
+  --sans:'Jost',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --e-io:cubic-bezier(.65,0,.35,1);
+  --e-back:cubic-bezier(.34,1.56,.64,1);
+  --e-soft:cubic-bezier(.25,.46,.45,.94);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--page);color:var(--onLight);
+  font-family:var(--sans);font-weight:400;font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  /* twelve full-viewport sections all running entry transitions give Chrome
+     far too much to anchor against; left on, it nudges the scroll mid-run */
+  overflow-anchor:none;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p,figure{margin:0}
+::selection{background:var(--alt);color:var(--card)}
+
+.acc{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:.005em;
+  color:var(--a)}
+
+/* wordmark — stepped square mark plus type, sized by the parent's font-size */
+.wm{display:inline-flex;align-items:center;gap:.62em;line-height:1;white-space:nowrap}
+.wm-mk{width:1.02em;height:1.02em;background:currentColor;flex:none;
+  clip-path:polygon(0 0,100% 0,100% 34%,67% 34%,67% 67%,34% 67%,34% 100%,0 100%)}
+.wm-t{font-weight:500;letter-spacing:.14em;font-size:.78em;text-transform:uppercase}
+.wm-t i{font-style:normal;opacity:.55;font-weight:300}
+
+/* ── sections ─────────────────────────────────────────────────────────── */
+.hero{position:relative;height:100svh;min-height:600px;overflow:hidden;isolation:isolate;
+  background:var(--dark);color:var(--onDark)}
+.bgslot{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bgslot canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.veil{position:absolute;inset:0;z-index:1;pointer-events:none}
+
+.tag{position:absolute;z-index:40;left:clamp(18px,4vw,48px);bottom:clamp(16px,3vh,34px);
+  display:flex;align-items:baseline;gap:.7em;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;font-weight:500;pointer-events:none;color:var(--onDark)}
+.tag b{font-weight:600;font-size:13px;letter-spacing:.08em}
+.tag span{opacity:.62;font-weight:400}
+.tag u{text-decoration:none;color:var(--a);opacity:.9;font-size:10px;letter-spacing:.16em}
+
+/* ── the navbar the client picked out: centred wordmark, links either side,
+      a small marker before each. Five designs use it; seven do something
+      else. ─────────────────────────────────────────────────────────────── */
+.cnav{position:absolute;z-index:30;inset:clamp(18px,3vh,32px) clamp(18px,4vw,52px) auto;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(16px,3vw,44px)}
+.cnav ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;
+  gap:clamp(14px,2.2vw,34px);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:400}
+.cnav ul.r{justify-content:flex-end}
+.cnav li{display:flex;align-items:center;gap:.72em}
+.cnav li::before{content:"";flex:none;background:currentColor;opacity:.42;
+  transition:transform .5s var(--e-back),opacity .4s var(--e-soft),background .4s var(--e-soft)}
+.cnav a{position:relative;padding-bottom:4px;opacity:.72;transition:opacity .4s var(--e-soft)}
+.cnav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:var(--a);transform:scaleX(0);transform-origin:100% 50%;
+  transition:transform .5s var(--e-out)}
+.cnav li:hover::before{opacity:1;transform:scale(1.9);background:var(--a)}
+.cnav li:hover a{opacity:1}
+.cnav li:hover a::after{transform:scaleX(1);transform-origin:0 50%}
+.cnav .wm{font-size:15px}
+.cnav--sq li::before{width:4px;height:4px}
+.cnav--dia li::before{width:5px;height:5px;transform:rotate(45deg)}
+.cnav--dia li:hover::before{transform:rotate(45deg) scale(1.8)}
+.cnav--dot li::before{width:5px;height:5px;border-radius:50%}
+.cnav--rule li::before{width:11px;height:1px}
+.cnav--rule li:hover::before{transform:scaleX(1.8)}
+.cnav--brk li::before{width:3px;height:9px;background:none;
+  border-left:1px solid currentColor;border-top:1px solid currentColor;
+  border-bottom:1px solid currentColor}
+.cnav--brk li:hover::before{background:none;border-color:var(--a)}
+.cnav--under::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:1px;
+  background:currentColor;opacity:.16}
+.cnav--seps ul{gap:0}
+.cnav--seps li{padding:0 clamp(10px,1.6vw,22px);position:relative}
+.cnav--seps li + li::after{content:"";position:absolute;left:0;top:50%;width:1px;height:9px;
+  margin-top:-4px;background:currentColor;opacity:.2}
+.cnav--wide ul{gap:clamp(18px,3.4vw,52px);letter-spacing:.3em;font-size:10px}
+
+/* ── buttons ──────────────────────────────────────────────────────────── */
+.btn{position:relative;display:inline-block;overflow:hidden;border-radius:999px;
+  padding:15px 30px;font-size:13.5px;letter-spacing:.06em;font-weight:500;white-space:nowrap;
+  will-change:transform}
+.btn .roll{display:block;position:relative;overflow:hidden;height:1.2em;z-index:1}
+.btn .roll span{display:block;transition:transform .58s var(--e-out)}
+.btn .roll span:last-child{position:absolute;inset:0;transform:translateY(105%)}
+.btn:hover .roll span{transform:translateY(-105%)}
+.btn:hover .roll span:last-child{transform:translateY(0)}
+/* the one accent button. --af is the fill, --al the label, --ah the hover
+   wash — a tint of a fixed colour, never a new hue */
+.b-a{background:var(--af);color:var(--al)}
+.b-a::before{content:"";position:absolute;inset:0;background:var(--ah);
+  transform:translateY(101%);transition:transform .55s var(--e-out)}
+.b-a:hover::before{transform:translateY(0)}
+.b-a--x::before{transform:scaleX(0);transform-origin:0 50%}
+.b-a--x:hover::before{transform:scaleX(1)}
+.b-a--y::before{transform:scaleY(0);transform-origin:50% 100%}
+.b-a--y:hover::before{transform:scaleY(1)}
+.b-ghost{border:1px solid rgba(241,235,221,.32);color:var(--onDark)}
+.b-ghost::before{content:"";position:absolute;inset:0;background:rgba(241,235,221,.11);
+  transform:scaleY(0);transform-origin:50% 100%;transition:transform .5s var(--e-out)}
+.b-ghost:hover::before{transform:scaleY(1)}
+
+/* ── entry primitives ─────────────────────────────────────────────────── */
+.ln{display:block;overflow:hidden}
+.ln>span{display:block;transform:translate3d(0,110%,0);
+  transition:transform 1.05s var(--e-out) var(--d,0ms)}
+.in .ln>span{transform:translate3d(0,0,0)}
+.up{opacity:0;transform:translate3d(0,26px,0);
+  transition:opacity .8s var(--e-soft) var(--d,0ms),transform .9s var(--e-out) var(--d,0ms)}
+.in .up{opacity:1;transform:none}
+.fade{opacity:0;transition:opacity .95s var(--e-soft) var(--d,0ms)}
+.in .fade{opacity:1}
+.rise{opacity:0;transform:translate3d(0,44px,0) scale(.96);
+  transition:opacity .9s var(--e-soft) var(--d,0ms),transform 1.1s var(--e-out) var(--d,0ms)}
+.in .rise{opacity:1;transform:none}
+
+/* ── shared plate treatment ───────────────────────────────────────────── */
+.pl{position:relative;margin:0;overflow:hidden;background:var(--alt);
+  border:1px solid rgba(241,235,221,.10)}
+.pl img{width:100%;height:100%;object-fit:cover;
+  filter:saturate(.28) contrast(1.15) brightness(.7);
+  transition:filter .55s var(--e-soft),transform .85s var(--e-out)}
+.pl:hover img{filter:saturate(.72) contrast(1.03) brightness(.98);transform:scale(1.06)}
+.pl figcaption{position:absolute;left:0;right:0;bottom:0;padding:6px 8px;font-size:9px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--onDark);
+  background:linear-gradient(rgba(18,37,31,0),rgba(18,37,31,.92));
+  opacity:0;transform:translateY(40%);
+  transition:opacity .45s var(--e-soft),transform .45s var(--e-out)}
+.pl:hover figcaption{opacity:1;transform:none}
+.pl::after{content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 1px var(--a);opacity:0;transition:opacity .45s var(--e-soft)}
+.pl:hover::after{opacity:.55}
+
+/* ── the three-column showcase, shared bones ──────────────────────────── */
+.cols{position:absolute;z-index:5;display:flex;pointer-events:none}
+.cols .col{position:relative;overflow:hidden;flex:none;
+  -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent);
+  mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent)}
+.cols .run{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;
+  will-change:transform;pointer-events:auto}
+.cols .run .pl{flex:none}
+
+/* ── spacers: the scroll room each background needs to be seen working ── */
+.gap{min-height:70svh;display:flex;align-items:center;padding:0 clamp(18px,5vw,64px)}
+.gap--l{background:var(--page);color:var(--onLight)}
+.gap--w{background:var(--sand);color:var(--onLight)}
+.gap--d{background:var(--alt);color:var(--onDark)}
+.gap-in{width:100%;max-width:1320px;margin:0 auto;display:grid;
+  grid-template-columns:auto 1fr auto;gap:clamp(18px,4vw,56px);align-items:baseline}
+.gap-n{font-size:clamp(48px,9vw,110px);font-weight:300;line-height:.82;letter-spacing:-.03em;
+  opacity:.24}
+.gap-t{font-size:clamp(17px,2.1vw,26px);font-weight:400;line-height:1.35;max-width:38ch}
+.gap-t em{font-family:var(--serif);font-style:italic;opacity:.74;display:block;
+  font-size:.78em;margin-top:.42em;letter-spacing:.005em}
+.gap-t b{display:block;font-size:.44em;font-weight:500;letter-spacing:.2em;
+  text-transform:uppercase;margin-top:1.1em;opacity:.55}
+.gap-sw{display:inline-block;width:.72em;height:.72em;border-radius:50%;
+  vertical-align:-.02em;margin-right:.5em}
+.gap-s{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;white-space:nowrap}
+@media (max-width:760px){
+  .gap-in{grid-template-columns:1fr;gap:14px}
+  .gap-s{display:none}
+}
+
+/* ── masthead and footer ──────────────────────────────────────────────── */
+.top{background:var(--dark);color:var(--onDark);padding:clamp(56px,11vh,120px) clamp(18px,5vw,64px)}
+.top-in{max-width:1320px;margin:0 auto}
+.top h2{font-size:clamp(30px,5.4vw,62px);font-weight:400;line-height:1.02;
+  letter-spacing:-.025em;margin:.5em 0 .34em;max-width:19ch;text-wrap:balance}
+.top h2 i{font-family:var(--serif);font-style:italic;color:var(--hi)}
+.top p{max-width:64ch;opacity:.72;font-size:clamp(15px,1.6vw,18px);font-weight:300}
+.top .wm{font-size:19px}
+.top-meta{margin-top:clamp(30px,5vh,56px);display:flex;flex-wrap:wrap;gap:10px}
+.top-meta i{font-style:normal;border:1px solid rgba(241,235,221,.24);border-radius:999px;
+  padding:7px 15px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.78}
+.top-band{margin-top:clamp(26px,4vh,44px);display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid rgba(241,235,221,.16)}
+.top-band i{font-style:normal;flex:1 1 8.333%;min-width:56px;height:34px;display:block}
+.foot{background:var(--dark);color:var(--onDark);padding:clamp(48px,9vh,90px) clamp(18px,5vw,64px)}
+.foot-in{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;gap:22px;
+  align-items:baseline;justify-content:space-between}
+.foot .wm{font-size:16px}
+.foot p{max-width:58ch;font-size:14px;font-weight:300;opacity:.62}
+
+/* ── reduced motion: at rest, in final state, one frame per background ── */
+@media (max-width:620px){ .tag u{display:none} }
+
+.rm *,.rm *::before,.rm *::after{animation:none!important;transition:none!important}
+.rm .ln>span{transform:none!important}
+.rm .up,.rm .fade,.rm .rise{opacity:1!important;transform:none!important}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <h2>Twelve accents against the forest ground, and twelve <i>live backgrounds</i> to hold them.</h2>
+    <p>Following 08 Assembly and 10 Signal. The ground stays #12251F. Only accentPrimary and
+      accentOnDark move, and they move across five palette relationships — complementary, split
+      complementary, triadic, analogous and monochromatic. Every accent clears 4.5:1 as serif italic
+      on that ground and 4.5:1 for its button label. Five of the twelve show the work in three
+      vertical columns, each one placed and paced differently; the other seven use mechanisms that
+      have not appeared in the previous three sets. The copy is identical in all twelve.</p>
+    <div class="top-meta">
+      <i>Twelve backgrounds</i><i>One WebGL context</i><i>Five colour relationships</i><i>Reduced-motion safe</i>
+    </div>
+    <div class="top-band">
+      <i style="background:#E8607F"></i><i style="background:#F27ABA"></i><i style="background:#F2695E"></i>
+      <i style="background:#EC8ADF"></i><i style="background:#E0A62E"></i><i style="background:#CE8AF2"></i>
+      <i style="background:#66E378"></i><i style="background:#4FCEE8"></i><i style="background:#3BE8A8"></i>
+      <i style="background:#7E1B33"></i><i style="background:#5B2470"></i><i style="background:#8E2422"></i>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     01 · ROSEWOOD — complementary. Deep rose #E8607F, 4.89:1 on the
+     ground. Background is a topographic contour field on canvas. The
+     work runs full width behind the type in three columns, all going
+     up together at one speed, held back by a centre scrim.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e1{--a:#E8607F;--af:#E8607F;--al:#12251F;--ah:rgba(241,235,221,.24)}
+.e1 .veil{background:
+  radial-gradient(58% 46% at 50% 50%,rgba(18,37,31,.5) 0%,rgba(18,37,31,.12) 62%,rgba(18,37,31,0) 100%),
+  linear-gradient(rgba(18,37,31,.72),rgba(18,37,31,0) 24%,rgba(18,37,31,0) 72%,rgba(18,37,31,.8))}
+.e1-cols{inset:0;gap:clamp(6px,.9vw,16px);padding:0 clamp(6px,.9vw,16px);opacity:.5}
+.e1-cols .col{flex:1 1 0;min-width:0}
+.e1-cols .run{gap:clamp(6px,.9vw,16px)}
+.e1-cols .pl{aspect-ratio:3/4}
+.e1-scrim{position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(64% 50% at 50% 50%,rgba(18,37,31,.94) 0%,rgba(18,37,31,.74) 46%,
+    rgba(18,37,31,.18) 82%,rgba(18,37,31,0) 100%)}
+.e1-body{position:absolute;z-index:8;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(100px,15vh,158px) clamp(20px,7vw,110px) clamp(60px,9vh,104px);will-change:transform}
+.e1-h{font-size:clamp(33px,6vw,88px);line-height:1.02;letter-spacing:-.032em;font-weight:400;
+  max-width:15ch;text-wrap:balance}
+.e1-sub{margin-top:clamp(18px,2.6vh,30px);max-width:56ch;font-weight:300;opacity:.82;
+  font-size:clamp(14.5px,1.4vw,18px);line-height:1.62;--d:300ms}
+.e1-cta{margin-top:clamp(22px,3.2vh,36px);display:flex;flex-wrap:wrap;gap:14px;
+  justify-content:center;--d:440ms}
+.e1-sup{margin-top:clamp(20px,3vh,32px);font-size:12px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.6;--d:580ms}
+@media (max-width:860px){
+  .e1 .cnav ul{display:none}
+  .e1 .cnav{grid-template-columns:1fr;justify-items:center}
+  .e1-cols{opacity:.34}
+  .e1-cols .col:nth-child(3){display:none}
+}
+</style>
+<section class="hero e1" id="e1" data-hero data-bg="contour">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="cols e1-cols" data-cols>
+    <div class="col"><div class="run" data-run>
+      <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+      <figure class="pl"><img src="media-4/06-cine-hand.jpg" alt=""><figcaption>Handheld</figcaption></figure>
+      <figure class="pl"><img src="media-4/03-cine-lens.jpg" alt=""><figcaption>Lens</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run>
+      <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+      <figure class="pl"><img src="media-4/05-camera-hands.jpg" alt=""><figcaption>Body</figcaption></figure>
+      <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+      <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run>
+      <figure class="pl"><img src="media-4/14-design-desk.jpg" alt=""><figcaption>Desk</figcaption></figure>
+      <figure class="pl"><img src="media-4/04-neon-camera.jpg" alt=""><figcaption>Camera</figcaption></figure>
+      <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+      <figure class="pl"><img src="media-4/07-light-streaks.jpg" alt=""><figcaption>Motion</figcaption></figure>
+    </div></div>
+  </div>
+  <div class="e1-scrim"></div>
+
+  <nav class="cnav cnav--sq">
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li></ul>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul class="r"><li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e1-body" data-body>
+    <h1 class="e1-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e1-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e1-cta up">
+      <a class="btn b-a" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e1-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <div class="tag"><b>01</b><span>Rosewood</span><u>#E8607F · complementary</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">01</span>
+    <p class="gap-t">Rosewood<em>A contour map drawn on canvas — eight nested rings whose radius is modulated
+      by four sine terms per angle, so they read as topography rather than as circles. The centre
+      leans toward the pointer and the ring phase advances with the scroll. Three columns of work
+      run the full width behind the type, all going up together at one speed, held back to half
+      opacity with a scrim through the middle.</em>
+      <b><span class="gap-sw" style="background:#E8607F"></span>#E8607F · complementary to the ground · 4.89:1</b></p>
+    <span class="gap-s">02 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     02 · BLOOM — complementary, further round toward magenta. #F27ABA,
+     6.31:1. Background is a caustic web in GLSL. The work is on the
+     surface of a drum turning about its own vertical axis.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e2{--a:#F27ABA;--af:#F27ABA;--al:#12251F;--ah:rgba(241,235,221,.24)}
+.e2 .veil{background:linear-gradient(88deg,rgba(18,37,31,.9) 0%,rgba(18,37,31,.66) 44%,
+  rgba(18,37,31,.12) 70%,rgba(18,37,31,.4) 100%)}
+.e2-nav{position:absolute;z-index:30;left:clamp(18px,4vw,54px);right:clamp(18px,4vw,54px);
+  top:clamp(18px,3vh,32px)}
+.e2-nav .row{display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding-bottom:12px}
+.e2-nav .wm{font-size:16px}
+.e2-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:clamp(14px,2.3vw,34px);
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.e2-nav a{opacity:.72;position:relative;padding-bottom:3px;transition:opacity .4s var(--e-soft)}
+.e2-nav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:var(--a);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--e-out)}
+.e2-nav a:hover{opacity:1}
+.e2-nav a:hover::after{transform:scaleX(1)}
+.e2-keyline{height:1px;background:rgba(241,235,221,.16);position:relative;overflow:hidden}
+.e2-keyline i{position:absolute;inset:0;background:var(--a);transform:scaleX(0);
+  transform-origin:0 50%;will-change:transform}
+.e2-body{position:absolute;z-index:8;left:0;top:0;bottom:0;width:min(54ch,50vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(104px,15vh,160px) clamp(20px,3vw,44px) clamp(60px,9vh,100px) clamp(22px,5vw,76px);
+  will-change:transform}
+.e2-h{font-size:clamp(31px,4.9vw,76px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e2-sub{margin-top:clamp(16px,2.4vh,26px);max-width:46ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.26vw,17px);line-height:1.62;--d:360ms}
+.e2-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e2-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+
+/* the drum: seven plates papered round a cylinder that turns on its own
+   vertical axis. Each plate's place on the drum is written once; the only
+   per-frame write is the cylinder's own rotation. */
+.e2-drum{position:absolute;z-index:6;right:clamp(24px,8vw,168px);top:50%;
+  width:clamp(220px,26vw,376px);height:clamp(300px,54vh,540px);
+  margin-top:calc(clamp(300px,54vh,540px) * -.5);
+  perspective:1150px;perspective-origin:50% 50%;pointer-events:none}
+.e2-cyl{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.e2-drum .pl{position:absolute;left:50%;top:50%;width:clamp(112px,13.6vw,196px);aspect-ratio:3/4;
+  margin:calc(clamp(112px,13.6vw,196px) * -.6667) 0 0 calc(clamp(112px,13.6vw,196px) * -.5);
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  pointer-events:auto;will-change:transform,opacity}
+.e2-axis{position:absolute;left:50%;top:6%;bottom:6%;width:1px;margin-left:-.5px;
+  background:linear-gradient(rgba(241,235,221,0),rgba(241,235,221,.2),rgba(241,235,221,0));
+  opacity:0;transition:opacity .5s var(--e-soft);pointer-events:none}
+.e2-drum:hover .e2-axis{opacity:1}
+.e2-cap{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(46px,8vh,84px);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.55;
+  display:flex;align-items:center;gap:9px;--d:760ms}
+.e2-cap b{color:var(--a);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.06em;
+  font-size:12px}
+@media (max-width:900px){
+  .e2-nav ul{display:none}
+  .e2-body{width:auto;right:0;padding:clamp(104px,16vh,150px) 22px clamp(238px,36vh,320px)}
+  .e2-drum{width:210px;height:250px;right:auto;left:50%;margin:0 0 0 -105px;top:auto;
+    bottom:clamp(38px,6vh,74px)}
+  .e2-drum .pl{width:104px;margin:-70px 0 0 -52px}
+  .e2-cap{display:none}
+}
+</style>
+<section class="hero e2" id="e2" data-hero data-bg="caustic">
+  <div class="bgslot" data-slot><canvas data-still hidden aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="e2-nav">
+    <div class="row">
+      <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+      <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li>
+        <li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+    </div>
+    <div class="e2-keyline"><i data-keyline></i></div>
+  </div>
+
+  <div class="e2-drum" data-drum>
+    <div class="e2-cyl" data-cyl>
+      <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+      <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+      <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+      <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+      <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+      <figure class="pl"><img src="media-4/04-neon-camera.jpg" alt=""><figcaption>Camera</figcaption></figure>
+    </div>
+    <div class="e2-axis"></div>
+  </div>
+
+  <div class="e2-body" data-body>
+    <h1 class="e2-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e2-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e2-cta up">
+      <a class="btn b-a b-a--y" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e2-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e2-cap up">Drum <b data-drumdeg>000°</b></p>
+  <div class="tag"><b>02</b><span>Bloom</span><u>#F27ABA · complementary</u></div>
+</section>
+
+<section class="gap gap--d">
+  <div class="gap-in">
+    <span class="gap-n">02</span>
+    <p class="gap-t">Bloom<em>A caustic web in GLSL — the bright net you get on the floor of a pool,
+      built by folding the sampling point back through itself five times and taking the reciprocal
+      of the distance, so the light gathers into lines instead of drifting into cloud. Scroll speed
+      tightens the web and the cursor moves where it gathers. The work is papered round a drum
+      turning on its own vertical axis; the scroll drives it and pointing at it slows it to a crawl.</em>
+      <b><span class="gap-sw" style="background:#F27ABA"></span>#F27ABA · complementary to the ground · 6.31:1</b></p>
+    <span class="gap-s">03 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     03 · EMBER — split complementary, the warm-red half. #F2695E,
+     5.31:1. Background is a halftone dot matrix. Three columns split
+     across both edges: one down the left, two up the right, unequal.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e3{--a:#F2695E;--af:#F2695E;--al:#12251F;--ah:rgba(241,235,221,.26)}
+.e3 .veil{background:
+  radial-gradient(56% 46% at 50% 50%,rgba(18,37,31,.93) 0%,rgba(18,37,31,.64) 58%,rgba(18,37,31,.1) 100%),
+  linear-gradient(rgba(18,37,31,.7),rgba(18,37,31,0) 26%,rgba(18,37,31,0) 76%,rgba(18,37,31,.72))}
+.e3-colsL{left:0;top:0;bottom:0;width:clamp(74px,10vw,158px)}
+.e3-colsR{right:0;top:0;bottom:0;gap:clamp(6px,.7vw,12px)}
+.e3-colsL .col{width:100%}
+.e3-colsR .col:nth-child(1){width:clamp(58px,7vw,110px)}
+.e3-colsR .col:nth-child(2){width:clamp(74px,10vw,158px)}
+.e3 .cols .run{gap:clamp(6px,.7vw,12px)}
+.e3 .cols .pl{aspect-ratio:3/4}
+.e3-body{position:absolute;z-index:8;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(100px,15vh,156px) clamp(120px,20vw,320px) clamp(58px,9vh,100px);
+  will-change:transform}
+.e3-h{font-size:clamp(30px,5.4vw,80px);line-height:1.02;letter-spacing:-.034em;font-weight:400;
+  max-width:15ch;text-wrap:balance}
+.e3-sub{margin-top:clamp(16px,2.4vh,28px);max-width:52ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.3vw,17.5px);line-height:1.62;--d:330ms}
+.e3-cta{margin-top:clamp(20px,3vh,34px);display:flex;flex-wrap:wrap;gap:13px;
+  justify-content:center;--d:460ms}
+.e3-sup{margin-top:clamp(18px,2.6vh,28px);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.58;--d:590ms}
+.e3-rate{position:absolute;z-index:9;left:50%;transform:translateX(-50%);
+  bottom:clamp(16px,3vh,34px);display:flex;gap:5px;--d:720ms}
+.e3-rate i{display:block;width:20px;height:2px;background:rgba(241,235,221,.2);position:relative;
+  overflow:hidden}
+.e3-rate i span{position:absolute;inset:0;background:var(--a);transform:scaleX(0);
+  transform-origin:0 50%;will-change:transform}
+@media (max-width:900px){
+  .e3 .cnav ul{display:none}
+  .e3 .cnav{grid-template-columns:1fr;justify-items:center}
+  .e3-body{padding:clamp(100px,16vh,150px) 74px clamp(58px,9vh,100px)}
+  .e3-colsL{width:52px}
+  .e3-colsR .col:nth-child(1){display:none}
+  .e3-colsR .col:nth-child(2){width:52px}
+}
+</style>
+<section class="hero e3" id="e3" data-hero data-bg="halftone">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="cols e3-colsL" data-cols>
+    <div class="col"><div class="run" data-run data-dir="1">
+      <figure class="pl"><img src="media-4/07-light-streaks.jpg" alt=""><figcaption>Motion</figcaption></figure>
+      <figure class="pl"><img src="media-4/12-on-location.jpg" alt=""><figcaption>Location</figcaption></figure>
+      <figure class="pl"><img src="media-4/02-type-study.jpg" alt=""><figcaption>Type</figcaption></figure>
+      <figure class="pl"><img src="media-4/10-slate-portrait.jpg" alt=""><figcaption>Slate</figcaption></figure>
+    </div></div>
+  </div>
+  <div class="cols e3-colsR" data-cols>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/06-cine-hand.jpg" alt=""><figcaption>Handheld</figcaption></figure>
+      <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+      <figure class="pl"><img src="media-4/04-neon-camera.jpg" alt=""><figcaption>Camera</figcaption></figure>
+      <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+      <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+      <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+    </div></div>
+  </div>
+
+  <nav class="cnav cnav--rule cnav--under">
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li></ul>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul class="r"><li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e3-body" data-body>
+    <h1 class="e3-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e3-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e3-cta up">
+      <a class="btn b-a b-a--x" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e3-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <div class="e3-rate up"><i><span></span></i><i><span></span></i><i><span></span></i></div>
+  <div class="tag"><b>03</b><span>Ember</span><u>#F2695E · split complementary</u></div>
+</section>
+
+<section class="gap gap--w">
+  <div class="gap-in">
+    <span class="gap-n">03</span>
+    <p class="gap-t">Ember<em>A halftone screen on canvas — a fixed grid of about thirteen hundred dots
+      whose radius is set by a plane wave crossing the field, with a bulge that follows the cursor
+      and a second, slower wave running against the first. Three columns, but split: one narrow
+      column down the left edge and two of unequal width up the right, so the type sits in the
+      channel between them. Three meters under the copy show the three rates.</em>
+      <b><span class="gap-sw" style="background:#F2695E"></span>#F2695E · split complementary, warm half · 5.31:1</b></p>
+    <span class="gap-s">04 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     04 · ORCHID — split complementary, the violet-magenta half.
+     #EC8ADF, 7.09:1. Background is a Truchet tiling in GLSL. The work
+     recedes down a corridor and comes back toward you.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e4{--a:#EC8ADF;--af:#EC8ADF;--al:#12251F;--ah:rgba(241,235,221,.24)}
+.e4 .veil{background:
+  radial-gradient(64% 56% at 50% 54%,rgba(18,37,31,.5) 0%,rgba(18,37,31,.2) 60%,rgba(18,37,31,.1) 100%),
+  linear-gradient(rgba(18,37,31,.86),rgba(18,37,31,.1) 30%,rgba(18,37,31,.16) 68%,rgba(18,37,31,.88))}
+/* corner-anchored navigation: wordmark in one corner, links stacked in the other */
+.e4-nav{position:absolute;z-index:30;inset:clamp(18px,3vh,32px) clamp(18px,4vw,54px) auto;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.e4-nav .wm{font-size:16px}
+.e4-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
+  align-items:flex-end;gap:7px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase}
+.e4-nav li{display:flex;align-items:center;gap:.8em}
+.e4-nav li::after{content:"";width:0;height:1px;background:var(--a);
+  transition:width .5s var(--e-out);order:2}
+.e4-nav li:hover::after{width:16px}
+.e4-nav a{opacity:.66;order:1;transition:opacity .4s var(--e-soft)}
+.e4-nav li:hover a{opacity:1}
+.e4-scrim{position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(42% 32% at 50% 50%,rgba(18,37,31,.9) 0%,rgba(18,37,31,.6) 54%,
+    rgba(18,37,31,0) 100%)}
+.e4-body{position:absolute;z-index:8;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(110px,17vh,180px) clamp(20px,7vw,110px) clamp(88px,14vh,150px);will-change:transform}
+.e4-h{font-size:clamp(31px,5.6vw,84px);line-height:1.02;letter-spacing:-.034em;font-weight:400;
+  max-width:15ch;text-wrap:balance}
+.e4-sub{margin-top:clamp(16px,2.4vh,28px);max-width:52ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.3vw,17.5px);line-height:1.62;--d:340ms}
+.e4-cta{margin-top:clamp(20px,3vh,34px);display:flex;flex-wrap:wrap;gap:13px;
+  justify-content:center;--d:470ms}
+.e4-sup{margin-top:clamp(18px,2.6vh,28px);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+
+/* the corridor: six plates on a shared z axis, the whole thing tilting to the pointer */
+.e4-corr{position:absolute;z-index:5;inset:0;perspective:920px;perspective-origin:50% 52%;
+  pointer-events:none}
+.e4-stage{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.e4-corr .pl{position:absolute;left:50%;top:50%;width:clamp(112px,12.4vw,205px);aspect-ratio:16/10;
+  margin:calc(clamp(112px,12.4vw,205px) * -.3125) 0 0 calc(clamp(112px,12.4vw,205px) * -.5);
+  will-change:transform,opacity;pointer-events:auto}
+.e4-cap{position:absolute;z-index:9;left:50%;transform:translateX(-50%);
+  bottom:clamp(16px,3vh,34px);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  opacity:.5;display:flex;align-items:center;gap:10px;--d:740ms}
+.e4-cap b{color:var(--a);font-weight:500;font-size:11px;letter-spacing:.12em}
+@media (max-width:900px){
+  .e4-nav ul{display:none}
+  .e4-corr .pl{width:104px;margin:-32px 0 0 -52px}
+  .e4-body{padding:clamp(100px,16vh,150px) 22px clamp(70px,11vh,120px)}
+  .e4-cap{display:none}
+}
+</style>
+<section class="hero e4" id="e4" data-hero data-bg="truchet">
+  <div class="bgslot" data-slot><canvas data-still hidden aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="e4-corr">
+    <div class="e4-stage" data-stage>
+      <figure class="pl" data-z><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl" data-z><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+      <figure class="pl" data-z><img src="media-4/07-light-streaks.jpg" alt=""><figcaption>Motion</figcaption></figure>
+      <figure class="pl" data-z><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+      <figure class="pl" data-z><img src="media-4/05-camera-hands.jpg" alt=""><figcaption>Body</figcaption></figure>
+      <figure class="pl" data-z><img src="media-4/12-on-location.jpg" alt=""><figcaption>Location</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="e4-scrim"></div>
+
+  <div class="e4-nav">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li>
+      <li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </div>
+
+  <div class="e4-body" data-body>
+    <h1 class="e4-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e4-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e4-cta up">
+      <a class="btn b-a" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e4-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e4-cap up">Corridor <b data-corrdepth>06</b></p>
+  <div class="tag"><b>04</b><span>Orchid</span><u>#EC8ADF · split complementary</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">04</span>
+    <p class="gap-t">Orchid<em>A Truchet tiling in GLSL — every cell in the grid draws one of two
+      quarter-arc pairs depending on a hash of its coordinates, and because the hash is re-seeded
+      slowly, the whole weave keeps rebuilding itself into new continuous paths. Grid density rides
+      the scroll and the field turns under the cursor. The work is a corridor: six plates receding
+      on a shared axis, coming forward continuously, the whole corridor tipping toward the pointer.</em>
+      <b><span class="gap-sw" style="background:#EC8ADF"></span>#EC8ADF · split complementary, violet half · 7.09:1</b></p>
+    <span class="gap-s">05 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     05 · BRASS — triadic, the amber-gold third. #E0A62E, 7.38:1.
+     Background is a triangulated shard field on canvas. Three columns
+     on the left, type on the right, middle column reversed and widest,
+     and none of them moves unless you scroll.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e5{--a:#E0A62E;--af:#E0A62E;--al:#12251F;--ah:rgba(241,235,221,.26)}
+.e5 .veil{background:linear-gradient(268deg,rgba(18,37,31,.94) 0%,rgba(18,37,31,.8) 40%,
+  rgba(18,37,31,.3) 70%,rgba(18,37,31,.6) 100%),
+  linear-gradient(rgba(18,37,31,.86),rgba(18,37,31,0) 18%,rgba(18,37,31,0) 84%,rgba(18,37,31,.72))}
+/* two tiers: the wordmark row holds its width, the links row is centred under it */
+.e5-nav{position:absolute;z-index:30;left:clamp(18px,4vw,54px);right:clamp(18px,4vw,54px);
+  top:clamp(18px,3vh,32px)}
+.e5-t1{display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding-bottom:12px;border-bottom:1px solid rgba(241,235,221,.14)}
+.e5-t1 .wm{font-size:16px}
+.e5-t1 em{font-style:normal;font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.5}
+.e5-t2{display:flex;justify-content:center;gap:clamp(16px,2.8vw,42px);padding-top:12px;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;will-change:transform,opacity}
+.e5-t2 a{position:relative;opacity:.7;padding-bottom:3px;transition:opacity .4s var(--e-soft)}
+.e5-t2 a::after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:1px;
+  background:var(--a);transition:left .45s var(--e-out),right .45s var(--e-out)}
+.e5-t2 a:hover{opacity:1}
+.e5-t2 a:hover::after{left:0;right:0}
+.e5-body{position:absolute;z-index:8;right:0;top:0;bottom:0;width:min(50ch,47vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(112px,17vh,172px) clamp(22px,5vw,76px) clamp(56px,9vh,96px) clamp(20px,3vw,44px);
+  will-change:transform}
+.e5-h{font-size:clamp(30px,4.7vw,72px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e5-sub{margin-top:clamp(16px,2.4vh,26px);max-width:44ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.24vw,17px);line-height:1.62;--d:360ms}
+.e5-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e5-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+.e5-cols{left:0;top:0;bottom:0;gap:clamp(7px,.8vw,14px);padding-left:clamp(10px,1.4vw,24px)}
+.e5-cols .col:nth-child(1){width:clamp(58px,7vw,112px)}
+.e5-cols .col:nth-child(2){width:clamp(92px,13vw,210px)}
+.e5-cols .col:nth-child(3){width:clamp(50px,6vw,92px)}
+.e5-cols .run{gap:clamp(7px,.8vw,14px)}
+.e5-cols .pl{aspect-ratio:3/4}
+.e5-scrub{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(16px,3vh,34px);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;
+  display:flex;align-items:center;gap:10px;--d:740ms}
+.e5-scrub i{display:block;width:74px;height:1px;background:rgba(241,235,221,.22);position:relative}
+.e5-scrub i span{position:absolute;top:-2px;bottom:-2px;left:0;width:14px;background:var(--a);
+  will-change:transform}
+@media (max-width:900px){
+  .e5-t2{gap:12px;font-size:9.5px;letter-spacing:.1em}
+  .e5-t1 em{display:none}
+  .e5-t2 a:nth-child(n+4){display:none}
+  .e5-body{width:auto;left:0;padding:clamp(112px,18vh,168px) 22px clamp(168px,26vh,230px)}
+  .e5-cols{top:auto;bottom:clamp(44px,7vh,72px);height:clamp(96px,16vh,140px);
+    left:0;right:0;justify-content:center}
+  .e5-cols .col:nth-child(1){width:64px}
+  .e5-cols .col:nth-child(2){width:78px}
+  .e5-cols .col:nth-child(3){width:56px}
+  .e5-scrub{display:none}
+}
+</style>
+<section class="hero e5" id="e5" data-hero data-bg="shards">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="cols e5-cols" data-cols>
+    <div class="col"><div class="run" data-run data-dir="1">
+      <figure class="pl"><img src="media-4/03-cine-lens.jpg" alt=""><figcaption>Lens</figcaption></figure>
+      <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+      <figure class="pl"><img src="media-4/09-motion-wave.jpg" alt=""><figcaption>Motion</figcaption></figure>
+      <figure class="pl"><img src="media-4/10-slate-portrait.jpg" alt=""><figcaption>Slate</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl"><img src="media-4/14-design-desk.jpg" alt=""><figcaption>Desk</figcaption></figure>
+      <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+      <figure class="pl"><img src="media-4/12-on-location.jpg" alt=""><figcaption>Location</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run data-dir="1">
+      <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+      <figure class="pl"><img src="media-4/04-neon-camera.jpg" alt=""><figcaption>Camera</figcaption></figure>
+      <figure class="pl"><img src="media-4/02-type-study.jpg" alt=""><figcaption>Type</figcaption></figure>
+      <figure class="pl"><img src="media-4/06-cine-hand.jpg" alt=""><figcaption>Handheld</figcaption></figure>
+    </div></div>
+  </div>
+
+  <div class="e5-nav">
+    <div class="e5-t1">
+      <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+      <em>Creative production</em>
+    </div>
+    <div class="e5-t2" data-tier2>
+      <a href="#">Creative Services</a><a href="#">How We Work</a>
+      <a href="#">Ways to Work With Us</a><a href="#">Selected Work</a><a href="#">Contact</a>
+    </div>
+  </div>
+
+  <div class="e5-body" data-body>
+    <h1 class="e5-h">
+      <span class="ln" style="--d:190ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:280ms"><span>without the</span></span>
+      <span class="ln" style="--d:370ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e5-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e5-cta up">
+      <a class="btn b-a b-a--x" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e5-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e5-scrub up">Scrubbed <i data-scrub><span></span></i></p>
+  <div class="tag"><b>05</b><span>Brass</span><u>#E0A62E · triadic</u></div>
+</section>
+
+<section class="gap gap--d">
+  <div class="gap-in">
+    <span class="gap-n">05</span>
+    <p class="gap-t">Brass<em>A shard field on canvas: a jittered lattice triangulated into about two
+      hundred faces, each one filled at a brightness set by a plane wave crossing the field, so the
+      facets light up in sweeps. The vertices lean toward the cursor and spring back. Three columns
+      down the left with the type on the right, the middle one twice the width of its neighbours and
+      running the other way — and none of them moves on its own. Stop scrolling and they stop.</em>
+      <b><span class="gap-sw" style="background:#E0A62E"></span>#E0A62E · triadic, amber third · 7.38:1</b></p>
+    <span class="gap-s">06 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     06 · IRIS — triadic, the violet third. #CE8AF2, 6.52:1. Background
+     is a radial warp-streak field. The work is three plates on three
+     planes and the scroll pulls focus through them.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e6{--a:#CE8AF2;--af:#CE8AF2;--al:#12251F;--ah:rgba(241,235,221,.24)}
+.e6 .veil{background:
+  radial-gradient(50% 40% at 50% 48%,rgba(18,37,31,.62) 0%,rgba(18,37,31,.24) 62%,rgba(18,37,31,0) 100%),
+  linear-gradient(rgba(18,37,31,.82),rgba(18,37,31,0) 26%,rgba(18,37,31,0) 70%,rgba(18,37,31,.86))}
+/* three planes, and only one of them is ever in focus */
+.e6-rack{position:absolute;inset:0;z-index:4;pointer-events:none}
+.e6-rack .pl{position:absolute;width:clamp(160px,21vw,336px);aspect-ratio:4/3;
+  pointer-events:auto;transform:translateZ(0);contain:paint}
+/* the out-of-focus copy is a canvas the blur is baked into once, not a CSS
+   filter. A filtered layer that is cross-faded is re-rasterised on every
+   frame of the fade — 100ms frames; a canvas of the same pixels is not. */
+.e6-rack .pl .soft{position:absolute;inset:0;z-index:1;width:100%;height:100%;
+  display:block;will-change:opacity;transition:opacity .55s var(--e-soft)}
+.e6-rack .pl.sharp .soft{opacity:0}
+.e6-rack .pl figcaption{z-index:2}
+/* the plates never move per frame: a transform written every frame over a
+   blurred child forces the blur to be rasterised again, which is a 100ms
+   frame. They step once, on a transition, when the focal plane changes. */
+.e6-rack .pl{transition:opacity .55s var(--e-soft)}
+.e6-rack .pl:nth-child(1){left:5%;top:15%;transform:rotate(-2.5deg) translateZ(0)}
+.e6-rack .pl:nth-child(2){right:6%;top:29%;transform:rotate(2deg) translateZ(0)}
+.e6-rack .pl:nth-child(3){left:23%;bottom:8%;transform:rotate(1.4deg) translateZ(0)}
+/* the plate box never moves. What comes forward is the sharp copy inside it. */
+.e6-rack .pl > img:first-of-type{transform:scale(1.05)}
+.e6-rack .pl.sharp > img:first-of-type{transform:scale(1)}
+.e6-rack .pl figcaption{opacity:1;transform:none;background:linear-gradient(rgba(18,37,31,0),rgba(18,37,31,.86))}
+.e6-scrim{position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:radial-gradient(50% 40% at 50% 48%,rgba(18,37,31,.9) 0%,rgba(18,37,31,.66) 52%,
+    rgba(18,37,31,.1) 100%)}
+.e6-body{position:absolute;z-index:8;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(104px,16vh,164px) clamp(20px,6vw,96px) clamp(64px,10vh,110px);will-change:transform}
+.e6-h{font-size:clamp(33px,6vw,90px);line-height:1.01;letter-spacing:-.034em;font-weight:400;
+  max-width:15ch;text-wrap:balance}
+.e6-sub{margin-top:clamp(18px,2.6vh,30px);max-width:54ch;font-weight:300;opacity:.82;
+  font-size:clamp(14.5px,1.36vw,17.5px);line-height:1.62;--d:340ms}
+.e6-cta{margin-top:clamp(22px,3.2vh,36px);display:flex;flex-wrap:wrap;gap:14px;
+  justify-content:center;--d:470ms}
+.e6-sup{margin-top:clamp(20px,3vh,32px);font-size:12px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.6;--d:600ms}
+.e6-focus{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(16px,3vh,34px);
+  display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;opacity:.55;--d:740ms}
+.e6-focus i{display:block;width:16px;height:1px;background:rgba(241,235,221,.24);
+  transition:background .4s var(--e-soft),transform .4s var(--e-out)}
+.e6-focus i.on{background:var(--a);transform:scaleY(3)}
+@media (max-width:860px){
+  .e6 .cnav ul{display:none}
+  .e6 .cnav{grid-template-columns:1fr;justify-items:center}
+  .e6-rack .pl{width:150px}
+  .e6-rack .pl:nth-child(1){left:-4%;top:12%}
+  .e6-rack .pl:nth-child(2){right:-5%;top:30%}
+  .e6-rack .pl:nth-child(3){left:14%;bottom:6%}
+  .e6-focus{display:none}
+}
+</style>
+<section class="hero e6" id="e6" data-hero data-bg="streaks">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="e6-rack" data-rack>
+    <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><canvas class="soft" data-soft aria-hidden="true"></canvas><figcaption>Studio — far</figcaption></figure>
+    <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><canvas class="soft" data-soft aria-hidden="true"></canvas><figcaption>Rig — mid</figcaption></figure>
+    <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><canvas class="soft" data-soft aria-hidden="true"></canvas><figcaption>Grade — near</figcaption></figure>
+  </div>
+  <div class="e6-scrim"></div>
+
+  <nav class="cnav cnav--dot cnav--seps">
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li></ul>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul class="r"><li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e6-body" data-body>
+    <h1 class="e6-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e6-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e6-cta up">
+      <a class="btn b-a b-a--y" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e6-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e6-focus up">Focus <i class="on"></i><i></i><i></i></p>
+  <div class="tag"><b>06</b><span>Iris</span><u>#CE8AF2 · triadic</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">06</span>
+    <p class="gap-t">Iris<em>Radial warp streaks on canvas — a hundred and ninety lines drawn outward
+      from a vanishing point that follows the cursor, their length set by how fast you are scrolling,
+      so the field stretches into a warp on a flick and settles into a starfield when you stop. The
+      work is a rack focus: three plates on three planes, only ever one of them sharp, and the scroll
+      pulls the focal plane from the far one to the near one. Point at any of them and focus goes there.</em>
+      <b><span class="gap-sw" style="background:#CE8AF2"></span>#CE8AF2 · triadic, violet third · 6.52:1</b></p>
+    <span class="gap-s">07 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     07 · JADE — analogous, the brighter-green side. #66E378, 9.79:1.
+     Background is a field of plucked strings. The work is three columns
+     run as a diagonal band straight across the hero.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e7{--a:#66E378;--af:#66E378;--al:#12251F;--ah:rgba(241,235,221,.26)}
+.e7 .veil{background:linear-gradient(96deg,rgba(18,37,31,.97) 0%,rgba(18,37,31,.88) 34%,
+  rgba(18,37,31,.42) 62%,rgba(18,37,31,.24) 100%)}
+/* a floating capsule: one pill holding wordmark and links together */
+.e7-nav{position:absolute;z-index:30;left:50%;transform:translateX(-50%);
+  top:clamp(16px,2.6vh,28px);display:flex;align-items:center;gap:clamp(16px,2.4vw,34px);
+  padding:9px clamp(16px,2vw,26px);border-radius:999px;
+  border:1px solid rgba(241,235,221,.18);background:rgba(18,37,31,.5);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  transition:border-color .5s var(--e-soft),background .5s var(--e-soft)}
+.e7-nav:hover{border-color:rgba(241,235,221,.34)}
+.e7-nav .wm{font-size:14px}
+.e7-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:clamp(12px,1.8vw,26px);
+  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+.e7-nav li{white-space:nowrap}
+.e7-nav a{opacity:.7;position:relative;transition:opacity .4s var(--e-soft)}
+.e7-nav a::before{content:"";position:absolute;left:50%;right:50%;bottom:-5px;height:1px;
+  background:var(--a);transition:left .45s var(--e-out),right .45s var(--e-out)}
+.e7-nav a:hover{opacity:1}
+.e7-nav a:hover::before{left:-2px;right:-2px}
+.e7-nav .dot{width:5px;height:5px;border-radius:50%;background:var(--a);flex:none;opacity:.85}
+.e7-body{position:absolute;z-index:8;left:0;top:0;bottom:0;width:min(50ch,50vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(104px,15vh,160px) clamp(20px,3vw,40px) clamp(58px,9vh,98px) clamp(22px,5vw,76px);
+  will-change:transform}
+.e7-h{font-size:clamp(30px,4.8vw,74px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e7-sub{margin-top:clamp(16px,2.4vh,26px);max-width:44ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.26vw,17px);line-height:1.62;--d:360ms}
+.e7-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e7-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+/* the band: the whole three-column rig turned eleven degrees and run past
+   the hero on both ends, so the columns read as a diagonal current */
+.e7-band{position:absolute;z-index:5;left:32%;right:-16%;top:-24%;bottom:-24%;
+  transform:rotate(-11deg);display:flex;gap:clamp(10px,1.4vw,22px);pointer-events:none}
+.e7-band .col{position:relative;overflow:hidden;flex:none;width:clamp(88px,12vw,190px);
+  -webkit-mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent);
+  mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent)}
+.e7-band .col:nth-child(2){width:clamp(70px,9.4vw,150px)}
+.e7-band .col:nth-child(3){width:clamp(96px,13vw,205px)}
+.e7-band .run{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;
+  gap:clamp(10px,1.4vw,22px);will-change:transform;pointer-events:auto}
+.e7-band .pl{aspect-ratio:3/4;flex:none}
+.e7-mark{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(16px,3vh,34px);
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.5;
+  display:flex;align-items:center;gap:10px;--d:760ms}
+.e7-mark i{display:block;width:34px;height:1px;background:var(--a);opacity:.7;
+  transform:rotate(-11deg)}
+@media (max-width:900px){
+  .e7-nav ul{display:none}
+  .e7-body{width:auto;right:0;padding:clamp(96px,15vh,140px) 22px clamp(214px,32vh,300px)}
+  .e7-band{left:-14%;right:-14%;top:auto;bottom:-22%;height:50vh;justify-content:center}
+  .e7-band .col{width:74px}
+  .e7-band .col:nth-child(2){width:60px}
+  .e7-band .col:nth-child(3){width:80px}
+  .e7-mark{display:none}
+}
+</style>
+<section class="hero e7" id="e7" data-hero data-bg="strings">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="e7-band" data-cols>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+      <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+      <figure class="pl"><img src="media-4/06-cine-hand.jpg" alt=""><figcaption>Handheld</figcaption></figure>
+      <figure class="pl"><img src="media-4/09-motion-wave.jpg" alt=""><figcaption>Motion</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/04-neon-camera.jpg" alt=""><figcaption>Camera</figcaption></figure>
+      <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+      <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+      <figure class="pl"><img src="media-4/03-cine-lens.jpg" alt=""><figcaption>Lens</figcaption></figure>
+    </div></div>
+    <div class="col"><div class="run" data-run data-dir="-1">
+      <figure class="pl"><img src="media-4/14-design-desk.jpg" alt=""><figcaption>Desk</figcaption></figure>
+      <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+      <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+      <figure class="pl"><img src="media-4/05-camera-hands.jpg" alt=""><figcaption>Body</figcaption></figure>
+    </div></div>
+  </div>
+
+  <nav class="e7-nav">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <span class="dot"></span>
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li>
+      <li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e7-body" data-body>
+    <h1 class="e7-h">
+      <span class="ln" style="--d:190ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:280ms"><span>without the</span></span>
+      <span class="ln" style="--d:370ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e7-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e7-cta up">
+      <a class="btn b-a" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e7-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e7-mark up">Eleven degrees <i></i></p>
+  <div class="tag"><b>07</b><span>Jade</span><u>#66E378 · analogous</u></div>
+</section>
+
+<section class="gap gap--w">
+  <div class="gap-in">
+    <span class="gap-n">07</span>
+    <p class="gap-t">Jade<em>Twenty-eight strings hung down the frame on canvas, each one a damped
+      spring: the pointer pushes the ones it passes and they ring back through zero and settle,
+      which is why the field keeps moving after the cursor has gone. The scroll adds a slow sway
+      across all of them. The work is three columns of unequal width run as one band turned eleven
+      degrees, all three going the same way, each at its own rate.</em>
+      <b><span class="gap-sw" style="background:#66E378"></span>#66E378 · analogous, green side · 9.79:1</b></p>
+    <span class="gap-s">08 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     08 · LAGOON — analogous, the cool-teal side. #4FCEE8, 8.65:1.
+     Background is a kaleidoscopic polar fold in GLSL. The work is a
+     split-flap board: five rows turning over on their own clocks.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e8{--a:#4FCEE8;--af:#4FCEE8;--al:#12251F;--ah:rgba(241,235,221,.24)}
+.e8 .veil{background:
+  radial-gradient(60% 50% at 26% 50%,rgba(18,37,31,.9) 0%,rgba(18,37,31,.66) 54%,rgba(18,37,31,.2) 100%),
+  linear-gradient(rgba(18,37,31,.7),rgba(18,37,31,0) 28%,rgba(18,37,31,0) 74%,rgba(18,37,31,.76))}
+.e8-body{position:absolute;z-index:8;left:0;top:0;bottom:0;width:min(50ch,49vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(104px,15vh,160px) clamp(20px,3vw,40px) clamp(58px,9vh,98px) clamp(22px,5vw,76px);
+  will-change:transform}
+.e8-h{font-size:clamp(30px,4.8vw,74px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e8-sub{margin-top:clamp(16px,2.4vh,26px);max-width:44ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.26vw,17px);line-height:1.62;--d:360ms}
+.e8-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e8-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+/* the board: five rows, each a card with two faces, turning forever forward */
+.e8-board{position:absolute;z-index:6;right:clamp(20px,4vw,70px);top:50%;
+  width:clamp(190px,22vw,326px);display:flex;flex-direction:column;gap:6px;
+  transform:translateY(-50%);perspective:1100px}
+.e8-row{position:relative;aspect-ratio:16/6;transform-style:preserve-3d;
+  transition:transform .66s var(--e-io);will-change:transform}
+.e8-row .face{position:absolute;inset:0;overflow:hidden;background:var(--alt);
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  border:1px solid rgba(241,235,221,.1)}
+.e8-row .face.b{transform:rotateX(180deg)}
+.e8-row .face img{width:100%;height:100%;object-fit:cover;
+  filter:saturate(.32) contrast(1.12) brightness(.76);transition:filter .5s var(--e-soft)}
+.e8-row .face em{position:absolute;left:0;bottom:0;padding:5px 8px;font-style:normal;
+  font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--onDark);
+  background:linear-gradient(rgba(18,37,31,0),rgba(18,37,31,.9))}
+.e8-row::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;
+  background:rgba(18,37,31,.8);z-index:3;pointer-events:none}
+.e8-board:hover .e8-row .face img{filter:saturate(.74) contrast(1.02) brightness(.98)}
+.e8-board::before{content:"";position:absolute;inset:-13px;border:1px solid var(--a);
+  opacity:0;transition:opacity .5s var(--e-soft);pointer-events:none}
+.e8-board:hover::before{opacity:.45}
+.e8-hold{position:absolute;z-index:9;right:clamp(20px,4vw,70px);bottom:clamp(15px,2.6vh,30px);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;--d:760ms}
+.e8-hold b{color:var(--a);font-weight:500}
+@media (max-width:900px){
+  .e8 .cnav ul{display:none}
+  .e8 .cnav{grid-template-columns:1fr;justify-items:center}
+  .e8-body{width:auto;right:0;padding:clamp(100px,15vh,146px) 22px clamp(268px,38vh,340px)}
+  .e8-board{width:190px;right:auto;left:22px;top:auto;bottom:clamp(46px,8vh,84px);
+    transform:none}
+  .e8-row:nth-child(n+4){display:none}
+  .e8-hold{display:none}
+}
+</style>
+<section class="hero e8" id="e8" data-hero data-bg="kaleido">
+  <div class="bgslot" data-slot><canvas data-still hidden aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <nav class="cnav cnav--dia cnav--wide">
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li></ul>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul class="r"><li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e8-board" data-board>
+    <div class="e8-row" data-row>
+      <div class="face f"><img src="media-4/01-rig-neon.jpg" alt=""><em>Rig</em></div>
+      <div class="face b"><img src="media-4/13-studio-room.jpg" alt=""><em>Studio</em></div>
+    </div>
+    <div class="e8-row" data-row>
+      <div class="face f"><img src="media-4/15-grade-desk.jpg" alt=""><em>Grade</em></div>
+      <div class="face b"><img src="media-4/11-patch-bay.jpg" alt=""><em>Patch bay</em></div>
+    </div>
+    <div class="e8-row" data-row>
+      <div class="face f"><img src="media-4/12-on-location.jpg" alt=""><em>Location</em></div>
+      <div class="face b"><img src="media-4/08-stage-red.jpg" alt=""><em>Stage</em></div>
+    </div>
+    <div class="e8-row" data-row>
+      <div class="face f"><img src="media-4/14-design-desk.jpg" alt=""><em>Desk</em></div>
+      <div class="face b"><img src="media-4/16-storyboard.jpg" alt=""><em>Board</em></div>
+    </div>
+    <div class="e8-row" data-row>
+      <div class="face f"><img src="media-4/07-light-streaks.jpg" alt=""><em>Motion</em></div>
+      <div class="face b"><img src="media-4/04-neon-camera.jpg" alt=""><em>Camera</em></div>
+    </div>
+  </div>
+
+  <div class="e8-body" data-body>
+    <h1 class="e8-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e8-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e8-cta up">
+      <a class="btn b-a b-a--x" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e8-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e8-hold up">Board — <b data-flapstate>running</b></p>
+  <div class="tag"><b>08</b><span>Lagoon</span><u>#4FCEE8 · analogous</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">08</span>
+    <p class="gap-t">Lagoon<em>A kaleidoscope in GLSL: the plane is taken to polar coordinates, the
+      angle folded into a wedge, and a warped noise field sampled inside it, so whatever the noise
+      does is mirrored around the centre. The wedge count breathes between six and twelve, the whole
+      figure turns with the scroll and re-centres on the cursor. The work is a split-flap board —
+      five rows, each on its own clock, always turning the same way. Point at it and it holds.</em>
+      <b><span class="gap-sw" style="background:#4FCEE8"></span>#4FCEE8 · analogous, teal side · 8.65:1</b></p>
+    <span class="gap-s">09 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     09 · VERDANT — monochromatic. #3BE8A8, 10.15:1, the same hue family
+     as the ground and the only accent on the page. Background is a
+     ripple field. Three columns centred, type above and below them,
+     moving on inertia and coasting to a stop.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e9{--a:#3BE8A8;--af:#3BE8A8;--al:#12251F;--ah:rgba(241,235,221,.26)}
+.e9 .veil{background:
+  radial-gradient(70% 56% at 50% 50%,rgba(18,37,31,.24) 0%,rgba(18,37,31,.56) 62%,rgba(18,37,31,.88) 100%),
+  linear-gradient(rgba(18,37,31,.72),rgba(18,37,31,0) 22%,rgba(18,37,31,0) 78%,rgba(18,37,31,.78))}
+/* mirrored bar: links on the left, wordmark on the right */
+.e9-nav{position:absolute;z-index:30;inset:clamp(18px,3vh,32px) clamp(18px,4vw,54px) auto;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-direction:row-reverse}
+.e9-nav .wm{font-size:16px}
+.e9-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:clamp(14px,2.3vw,34px);
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.e9-nav li{display:flex;align-items:center;gap:.7em}
+.e9-nav li::before{content:"";width:1px;height:9px;background:currentColor;opacity:.3;
+  transition:height .45s var(--e-out),background .4s var(--e-soft)}
+.e9-nav li:hover::before{height:17px;background:var(--a);opacity:1}
+.e9-nav a{opacity:.7;transition:opacity .4s var(--e-soft)}
+.e9-nav li:hover a{opacity:1}
+.e9-body{position:absolute;z-index:8;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(88px,13vh,132px) clamp(20px,6vw,90px) clamp(46px,7vh,80px);will-change:transform}
+.e9-h{font-size:clamp(26px,3.7vw,54px);line-height:1.04;letter-spacing:-.03em;font-weight:400;
+  max-width:19ch;text-wrap:balance}
+.e9-sub{margin-top:clamp(12px,1.8vh,20px);max-width:60ch;font-weight:300;opacity:.78;
+  font-size:clamp(13.5px,1.16vw,15.5px);line-height:1.6;--d:320ms}
+/* the band the copy is built around */
+.e9-band{margin:clamp(16px,2.6vh,30px) 0;width:min(430px,76vw);height:clamp(196px,31vh,290px);
+  display:flex;gap:clamp(7px,.9vw,14px);--d:200ms}
+.e9-band .col{position:relative;overflow:hidden;flex:1 1 0;min-width:0;
+  -webkit-mask-image:linear-gradient(transparent,#000 13%,#000 87%,transparent);
+  mask-image:linear-gradient(transparent,#000 13%,#000 87%,transparent)}
+.e9-band .run{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;
+  gap:clamp(7px,.9vw,14px);will-change:transform}
+.e9-band .pl{aspect-ratio:3/4;flex:none}
+.e9-cta{margin-top:clamp(6px,1vh,12px);display:flex;flex-wrap:wrap;gap:13px;
+  justify-content:center;--d:460ms}
+.e9-sup{margin-top:clamp(14px,2vh,22px);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.58;--d:580ms}
+.e9-inertia{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(16px,3vh,34px);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;
+  display:flex;align-items:center;gap:10px;--d:720ms}
+.e9-inertia i{display:block;width:52px;height:2px;background:rgba(241,235,221,.2);
+  position:relative;overflow:hidden}
+.e9-inertia i span{position:absolute;inset:0;background:var(--a);transform:scaleX(0);
+  transform-origin:50% 50%;will-change:transform}
+@media (max-width:900px){
+  .e9-nav ul{display:none}
+  .e9-nav{flex-direction:row;justify-content:center}
+  .e9-band{width:min(300px,86vw);height:clamp(140px,22vh,200px)}
+  .e9-inertia{display:none}
+}
+</style>
+<section class="hero e9" id="e9" data-hero data-bg="ripple">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <nav class="e9-nav">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li>
+      <li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e9-body" data-body>
+    <h1 class="e9-h">
+      <span class="ln" style="--d:170ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:260ms"><span>without the <span class="acc">agency overhead.</span></span></span>
+    </h1>
+    <p class="e9-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+
+    <div class="e9-band rise" data-cols>
+      <div class="col"><div class="run" data-run data-dir="1">
+        <figure class="pl"><img src="media-4/03-cine-lens.jpg" alt=""><figcaption>Lens</figcaption></figure>
+        <figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure>
+        <figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure>
+        <figure class="pl"><img src="media-4/08-stage-red.jpg" alt=""><figcaption>Stage</figcaption></figure>
+      </div></div>
+      <div class="col"><div class="run" data-run data-dir="1">
+        <figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure>
+        <figure class="pl"><img src="media-4/12-on-location.jpg" alt=""><figcaption>Location</figcaption></figure>
+        <figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure>
+        <figure class="pl"><img src="media-4/09-motion-wave.jpg" alt=""><figcaption>Motion</figcaption></figure>
+      </div></div>
+      <div class="col"><div class="run" data-run data-dir="1">
+        <figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure>
+        <figure class="pl"><img src="media-4/05-camera-hands.jpg" alt=""><figcaption>Body</figcaption></figure>
+        <figure class="pl"><img src="media-4/14-design-desk.jpg" alt=""><figcaption>Desk</figcaption></figure>
+        <figure class="pl"><img src="media-4/10-slate-portrait.jpg" alt=""><figcaption>Slate</figcaption></figure>
+      </div></div>
+    </div>
+
+    <div class="e9-cta up">
+      <a class="btn b-a" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e9-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e9-inertia up">Inertia <i data-inertia><span></span></i></p>
+  <div class="tag"><b>09</b><span>Verdant</span><u>#3BE8A8 · monochromatic</u></div>
+</section>
+
+<section class="gap gap--d">
+  <div class="gap-in">
+    <span class="gap-n">09</span>
+    <p class="gap-t">Verdant<em>Rings on water, drawn on canvas: the pointer drops one wherever it moves
+      fast enough, a slow metronome drops one anyway so the field is never still, and each ring
+      thins as it grows. Where two cross they brighten. The three columns are centred and the copy
+      is built around them — headline above, calls to action below — and they run on inertia: the
+      scroll gives them velocity and they coast down to nothing on their own.</em>
+      <b><span class="gap-sw" style="background:#3BE8A8"></span>#3BE8A8 · monochromatic with the ground · 10.15:1</b></p>
+    <span class="gap-s">10 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     10 · CLARET — complementary, taken to both ends at once. The italic
+     is a light rose #F0A8B8 at 8.39:1 on the ground; the button is a
+     deep wine #7E1B33 carrying a #FCF8EE label at 9.47:1. Background is
+     an inverse-radius tunnel. The work is one frame under a rostrum
+     camera: a gate that travels across it as the hero is scrolled.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e10{--a:#F0A8B8;--af:#7E1B33;--al:#FCF8EE;--ah:rgba(18,37,31,.3)}
+.e10 .veil{background:
+  radial-gradient(46% 40% at 50% 44%,rgba(18,37,31,.9) 0%,rgba(18,37,31,.62) 56%,rgba(18,37,31,.1) 100%),
+  linear-gradient(rgba(18,37,31,.72),rgba(18,37,31,0) 26%,rgba(18,37,31,0) 68%,rgba(18,37,31,.84))}
+.e10-body{position:absolute;z-index:8;left:0;right:0;top:0;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:clamp(96px,14vh,148px) clamp(20px,10vw,200px) 0;will-change:transform}
+.e10-h{font-size:clamp(29px,4.9vw,72px);line-height:1.02;letter-spacing:-.034em;font-weight:400;
+  max-width:15ch;text-wrap:balance}
+.e10-sub{margin-top:clamp(14px,2vh,24px);max-width:50ch;font-weight:300;opacity:.8;
+  font-size:clamp(13.5px,1.22vw,16.5px);line-height:1.6;--d:340ms}
+.e10-cta{margin-top:clamp(18px,2.6vh,30px);display:flex;flex-wrap:wrap;gap:13px;
+  justify-content:center;--d:470ms}
+.e10-sup{margin-top:clamp(14px,2.2vh,24px);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+
+/* the rostrum: one frame far larger than its gate, and the gate travels
+   across it as the hero is scrolled. Everything here is one transform. */
+.e10-rost{position:absolute;z-index:6;left:clamp(20px,7vw,124px);right:clamp(20px,7vw,124px);
+  bottom:clamp(58px,9vh,104px);height:clamp(108px,18vh,188px);overflow:hidden;
+  background:var(--alt);border:1px solid rgba(241,235,221,.14);
+  transition:height .65s var(--e-out),border-color .5s var(--e-soft);--d:700ms}
+.e10-rost:hover{height:clamp(146px,25vh,250px);border-color:var(--a)}
+.e10-rost img{position:absolute;left:0;top:0;width:186%;height:auto;max-width:none;
+  transform-origin:0 0;will-change:transform;
+  filter:saturate(.3) contrast(1.15) brightness(.72);transition:filter .6s var(--e-soft)}
+.e10-rost:hover img{filter:saturate(.72) contrast(1.03) brightness(.96)}
+.e10-gate{position:absolute;inset:0;pointer-events:none;z-index:2}
+.e10-gate::before,.e10-gate::after{content:"";position:absolute;background:var(--a);opacity:.5}
+.e10-gate::before{left:50%;top:0;bottom:0;width:1px;margin-left:-.5px}
+.e10-gate::after{top:50%;left:0;right:0;height:1px;margin-top:-.5px}
+.e10-gate i{position:absolute;width:11px;height:11px;border:1px solid var(--a);opacity:.55}
+.e10-gate i:nth-child(1){left:7px;top:7px;border-right:0;border-bottom:0}
+.e10-gate i:nth-child(2){right:7px;top:7px;border-left:0;border-bottom:0}
+.e10-gate i:nth-child(3){left:7px;bottom:7px;border-right:0;border-top:0}
+.e10-gate i:nth-child(4){right:7px;bottom:7px;border-left:0;border-top:0}
+.e10-read{position:absolute;z-index:3;left:10px;bottom:8px;font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--onDark);opacity:.72;display:flex;gap:12px;
+  align-items:center;pointer-events:none}
+.e10-read b{color:var(--a);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+@media (max-width:900px){
+  .e10 .cnav ul{display:none}
+  .e10 .cnav{grid-template-columns:1fr;justify-items:center}
+  .e10-body{padding:clamp(92px,14vh,132px) 22px 0}
+  .e10-rost{left:16px;right:16px;bottom:clamp(46px,7vh,82px);height:clamp(96px,15vh,150px)}
+  .e10-rost img{width:260%}
+}
+</style>
+<section class="hero e10" id="e10" data-hero data-bg="tunnel">
+  <div class="bgslot" data-slot><canvas data-still hidden aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <nav class="cnav cnav--brk">
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li></ul>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul class="r"><li><a href="#">Selected Work</a></li><li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e10-body" data-body>
+    <h1 class="e10-h">
+      <span class="ln" style="--d:180ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:270ms"><span>without the</span></span>
+      <span class="ln" style="--d:360ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e10-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e10-cta up">
+      <a class="btn b-a" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e10-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <div class="e10-rost fade" data-rost>
+    <img src="media-4/01-rig-neon.jpg" alt="" data-rostimg>
+    <div class="e10-gate"><i></i><i></i><i></i><i></i></div>
+    <p class="e10-read">Rostrum <b data-rostpos>00.0 / 00.0</b></p>
+  </div>
+
+  <div class="tag"><b>10</b><span>Claret</span><u>#F0A8B8 / #7E1B33 · complementary</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">10</span>
+    <p class="gap-t">Claret<em>An inverse-radius tunnel in GLSL. Depth is one over the distance to the
+      axis, which is exactly what perspective does to a corridor, so the rings crowd toward the
+      vanishing point without a march ever being run. The axis bends toward the cursor and scroll
+      speed sets how fast you travel down it. The work is one frame under a rostrum camera: the
+      plate is more than twice the width of its gate, and the gate tracks across and pushes in as
+      the hero is scrolled, with the cursor trimming the height. This is the one hero that takes the
+      complementary hue to both ends — light rose in the type, deep wine in the button.</em>
+      <b><span class="gap-sw" style="background:#F0A8B8"></span>#F0A8B8 on the ground, 8.39:1 &nbsp;·&nbsp;
+        <span class="gap-sw" style="background:#7E1B33"></span>#7E1B33 fill, label 9.47:1</b></p>
+    <span class="gap-s">11 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     11 · CINDER — split complementary taken to both ends. Italic
+     #F0A6E6 at 8.65:1; button #5B2470 with a #FCF8EE label at 10.25:1.
+     Background is a bar field. The work is an accordion of bands.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e11{--a:#F0A6E6;--af:#5B2470;--al:#FCF8EE;--ah:rgba(241,235,221,.2)}
+.e11 .veil{background:linear-gradient(92deg,rgba(18,37,31,.96) 0%,rgba(18,37,31,.84) 40%,
+  rgba(18,37,31,.4) 68%,rgba(18,37,31,.62) 100%)}
+/* a bar with a live index: status dot left, wordmark centred, counter right */
+.e11-nav{position:absolute;z-index:30;inset:clamp(18px,3vh,32px) clamp(18px,4vw,54px) auto;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;
+  padding-bottom:11px;border-bottom:1px solid rgba(241,235,221,.14)}
+.e11-nav .wm{font-size:16px}
+.e11-nav .st{display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.24em;
+  text-transform:uppercase;opacity:.6}
+.e11-nav .st i{width:6px;height:6px;border-radius:50%;background:var(--a);flex:none}
+.e11-nav .ix{justify-self:end;display:flex;align-items:center;gap:11px;font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;opacity:.62}
+.e11-nav .ix b{font-size:15px;font-weight:400;letter-spacing:.02em;color:var(--a);
+  font-variant-numeric:tabular-nums}
+.e11-links{position:absolute;z-index:30;left:clamp(18px,4vw,54px);right:clamp(18px,4vw,54px);
+  top:calc(clamp(18px,3vh,32px) + 44px);display:flex;gap:clamp(14px,2.4vw,36px);
+  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;will-change:transform,opacity}
+.e11-links a{opacity:.66;position:relative;padding-bottom:3px;transition:opacity .4s var(--e-soft)}
+.e11-links a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:var(--a);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--e-out)}
+.e11-links a:hover{opacity:1}
+.e11-links a:hover::after{transform:scaleX(1)}
+.e11-body{position:absolute;z-index:8;left:0;top:0;bottom:0;width:min(50ch,48vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(120px,18vh,180px) clamp(20px,3vw,40px) clamp(58px,9vh,98px) clamp(22px,5vw,76px);
+  will-change:transform}
+.e11-h{font-size:clamp(30px,4.7vw,72px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e11-sub{margin-top:clamp(16px,2.4vh,26px);max-width:44ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.24vw,17px);line-height:1.62;--d:360ms}
+.e11-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e11-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+/* the accordion: five bands, one open at a time */
+.e11-acc{position:absolute;z-index:6;right:clamp(20px,4vw,64px);top:50%;transform:translateY(-50%);
+  width:clamp(220px,28vw,420px);height:clamp(300px,58vh,520px);display:flex;flex-direction:column;
+  gap:5px}
+.e11-band{position:relative;flex:1 1 0;min-height:0;overflow:hidden;background:var(--alt);
+  border:1px solid rgba(241,235,221,.1);
+  transition:flex-grow .72s var(--e-out),border-color .5s var(--e-soft)}
+.e11-band.on{flex-grow:4.6;border-color:var(--a)}
+.e11-band img{width:100%;height:100%;object-fit:cover;
+  filter:saturate(.28) contrast(1.14) brightness(.62);
+  transition:filter .6s var(--e-soft),transform .9s var(--e-out)}
+.e11-band.on img{filter:saturate(.7) contrast(1.03) brightness(.96)}
+.e11-band:hover img{transform:scale(1.05)}
+.e11-band em{position:absolute;left:0;right:0;bottom:0;padding:7px 10px;font-style:normal;
+  font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--onDark);
+  background:linear-gradient(rgba(18,37,31,0),rgba(18,37,31,.9));
+  display:flex;justify-content:space-between;align-items:center}
+.e11-band em b{color:var(--a);font-weight:500;opacity:0;transition:opacity .5s var(--e-soft)}
+.e11-band.on em b{opacity:1}
+@media (max-width:900px){
+  .e11-links{display:none}
+  .e11-nav .st span{display:none}
+  .e11-body{width:auto;right:0;padding:clamp(104px,16vh,150px) 22px clamp(204px,30vh,280px)}
+  .e11-acc{width:auto;left:22px;right:22px;top:auto;bottom:clamp(44px,7vh,80px);transform:none;
+    height:clamp(120px,20vh,170px);flex-direction:row}
+  .e11-band:nth-child(n+4){display:none}
+}
+</style>
+<section class="hero e11" id="e11" data-hero data-bg="bars">
+  <div class="bgslot"><canvas data-c2d aria-hidden="true"></canvas></div>
+  <div class="veil"></div>
+
+  <div class="e11-nav">
+    <span class="st"><i></i><span>On air</span></span>
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <span class="ix">Hero <b data-index>11</b> / 12</span>
+  </div>
+  <div class="e11-links" data-links>
+    <a href="#">Creative Services</a><a href="#">How We Work</a>
+    <a href="#">Ways to Work With Us</a><a href="#">Selected Work</a><a href="#">Contact</a>
+  </div>
+
+  <div class="e11-acc" data-acc>
+    <div class="e11-band on"><img src="media-4/01-rig-neon.jpg" alt=""><em>Camera &amp; rig<b>01</b></em></div>
+    <div class="e11-band"><img src="media-4/15-grade-desk.jpg" alt=""><em>Colour<b>02</b></em></div>
+    <div class="e11-band"><img src="media-4/09-motion-wave.jpg" alt=""><em>Motion<b>03</b></em></div>
+    <div class="e11-band"><img src="media-4/14-design-desk.jpg" alt=""><em>Design<b>04</b></em></div>
+    <div class="e11-band"><img src="media-4/10-slate-portrait.jpg" alt=""><em>Content<b>05</b></em></div>
+  </div>
+
+  <div class="e11-body" data-body>
+    <h1 class="e11-h">
+      <span class="ln" style="--d:190ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:280ms"><span>without the</span></span>
+      <span class="ln" style="--d:370ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e11-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e11-cta up">
+      <a class="btn b-a b-a--y" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e11-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <div class="tag"><b>11</b><span>Cinder</span><u>#F0A6E6 / #5B2470 · split complementary</u></div>
+</section>
+
+<section class="gap gap--w">
+  <div class="gap-in">
+    <span class="gap-n">11</span>
+    <p class="gap-t">Cinder<em>Sixty-four bars stood up across the frame on canvas, their heights the sum
+      of three sines running at different rates with a bulge that swells wherever the cursor is, so
+      it reads as a level meter rather than as decoration. Scroll speed raises the whole field. The
+      work is an accordion of five bands down the right: the scroll steps which one is open, and
+      pointing at any of them takes it over.</em>
+      <b><span class="gap-sw" style="background:#F0A6E6"></span>#F0A6E6 on the ground, 8.65:1 &nbsp;·&nbsp;
+        <span class="gap-sw" style="background:#5B2470"></span>#5B2470 fill, label 10.25:1</b></p>
+    <span class="gap-s">12 next</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     12 · AURORA — complementary at both ends again, but the warm half.
+     Italic #F5928A at 7.15:1; button #8E2422 with a #FCF8EE label at
+     8.16:1. Background is the only one with no canvas at all. The work
+     fills a grid one cell at a time as the hero is scrolled.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+.e12{--a:#F5928A;--af:#8E2422;--al:#FCF8EE;--ah:rgba(241,235,221,.18)}
+.e12 .veil{background:
+  radial-gradient(64% 54% at 50% 46%,rgba(18,37,31,.34) 0%,rgba(18,37,31,.6) 62%,rgba(18,37,31,.86) 100%),
+  linear-gradient(rgba(18,37,31,.74),rgba(18,37,31,0) 24%,rgba(18,37,31,0) 72%,rgba(18,37,31,.8))}
+/* the aurora is three conic discs, blurred once and then only ever moved */
+.e12-au{position:absolute;inset:-34%;z-index:0;pointer-events:none;
+  filter:blur(84px) saturate(1.05);will-change:transform}
+.e12-au i{position:absolute;border-radius:50%;display:block;will-change:transform}
+.e12-au i:nth-child(1){left:4%;top:8%;width:58%;height:58%;opacity:.6;
+  background:conic-gradient(from 0deg,#12251F 0%,#1E3A31 24%,#F5928A 42%,#1E3A31 60%,#12251F 100%)}
+.e12-au i:nth-child(2){left:38%;top:22%;width:50%;height:50%;opacity:.42;
+  background:conic-gradient(from 120deg,#12251F 0%,#1E3A31 30%,#66E0B0 47%,#1E3A31 64%,#12251F 100%)}
+.e12-au i:nth-child(3){left:18%;top:36%;width:64%;height:64%;opacity:.5;
+  background:conic-gradient(from 240deg,#12251F 0%,#1E3A31 26%,#8E2422 44%,#F5928A 58%,#12251F 100%)}
+.e12-nav{position:absolute;z-index:30;left:0;right:0;top:clamp(18px,3vh,32px);
+  display:flex;flex-direction:column;align-items:center;gap:11px}
+.e12-nav .wm{font-size:16px}
+.e12-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:clamp(14px,2.4vw,36px);
+  font-size:10.5px;letter-spacing:.22em;text-transform:uppercase}
+.e12-nav a{opacity:.68;position:relative;padding-bottom:3px;transition:opacity .4s var(--e-soft)}
+.e12-nav a::after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:1px;
+  background:var(--a);transition:left .45s var(--e-out),right .45s var(--e-out)}
+.e12-nav a:hover{opacity:1}
+.e12-nav a:hover::after{left:0;right:0}
+.e12-body{position:absolute;z-index:8;left:0;top:0;bottom:0;width:min(48ch,46vw);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(118px,17vh,176px) clamp(20px,3vw,40px) clamp(58px,9vh,98px) clamp(22px,5vw,76px);
+  will-change:transform}
+.e12-h{font-size:clamp(30px,4.6vw,70px);line-height:1.02;letter-spacing:-.034em;font-weight:400}
+.e12-sub{margin-top:clamp(16px,2.4vh,26px);max-width:44ch;font-weight:300;opacity:.8;
+  font-size:clamp(14px,1.24vw,17px);line-height:1.62;--d:360ms}
+.e12-cta{margin-top:clamp(20px,3vh,32px);display:flex;flex-wrap:wrap;gap:13px;--d:480ms}
+.e12-sup{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.58;--d:600ms}
+/* the grid fills one cell at a time as the hero is scrolled */
+.e12-grid{position:absolute;z-index:6;right:clamp(20px,4vw,64px);top:50%;transform:translateY(-50%);
+  width:clamp(230px,34vw,500px);display:grid;grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:1fr;gap:clamp(5px,.7vw,11px)}
+.e12-cell{position:relative;aspect-ratio:4/5;overflow:hidden;background:rgba(30,58,49,.42);
+  border:1px solid rgba(241,235,221,.08)}
+.e12-cell .pl{position:absolute;inset:0;border:0;opacity:0;transform:translateY(22%) scale(.94);
+  transition:opacity .62s var(--e-soft),transform .78s var(--e-out)}
+.e12-cell.on .pl{opacity:1;transform:none}
+.e12-cell::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  border:1px solid var(--a);opacity:0;transition:opacity .5s var(--e-soft)}
+.e12-cell.on::before{opacity:.2}
+.e12-cell:hover::before{opacity:.85}
+.e12-count{position:absolute;z-index:9;right:clamp(20px,4vw,64px);bottom:clamp(16px,3vh,34px);
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.55;--d:760ms}
+.e12-count b{color:var(--a);font-weight:500;font-size:12px;font-variant-numeric:tabular-nums}
+@media (max-width:900px){
+  .e12-nav ul{display:none}
+  .e12-body{width:auto;right:0;padding:clamp(94px,14vh,132px) 22px clamp(150px,25vh,220px)}
+  .e12-grid{width:auto;left:22px;right:22px;top:auto;bottom:clamp(44px,7vh,80px);transform:none;
+    grid-template-columns:repeat(4,1fr)}
+  .e12-cell:nth-child(n+5){display:none}
+  .e12-count{display:none}
+}
+</style>
+<section class="hero e12" id="e12" data-hero data-bg="aurora">
+  <div class="bgslot"><div class="e12-au" data-au><i></i><i></i><i></i></div></div>
+  <div class="veil"></div>
+
+  <nav class="e12-nav">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <ul><li><a href="#">Creative Services</a></li><li><a href="#">How We Work</a></li>
+      <li><a href="#">Ways to Work With Us</a></li><li><a href="#">Selected Work</a></li>
+      <li><a href="#">Contact</a></li></ul>
+  </nav>
+
+  <div class="e12-grid" data-grid>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/01-rig-neon.jpg" alt=""><figcaption>Rig</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/13-studio-room.jpg" alt=""><figcaption>Studio</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/15-grade-desk.jpg" alt=""><figcaption>Grade</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/07-light-streaks.jpg" alt=""><figcaption>Motion</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/10-slate-portrait.jpg" alt=""><figcaption>Slate</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/11-patch-bay.jpg" alt=""><figcaption>Patch bay</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/16-storyboard.jpg" alt=""><figcaption>Board</figcaption></figure></div>
+    <div class="e12-cell"><figure class="pl"><img src="media-4/05-camera-hands.jpg" alt=""><figcaption>Body</figcaption></figure></div>
+  </div>
+
+  <div class="e12-body" data-body>
+    <h1 class="e12-h">
+      <span class="ln" style="--d:190ms"><span>Creative production,</span></span>
+      <span class="ln" style="--d:280ms"><span>without the</span></span>
+      <span class="ln" style="--d:370ms"><span class="acc">agency overhead.</span></span>
+    </h1>
+    <p class="e12-sub up">Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.</p>
+    <div class="e12-cta up">
+      <a class="btn b-a b-a--x" href="#" data-mag><span class="roll"><span>Start a Conversation</span><span>Start a Conversation</span></span></a>
+      <a class="btn b-ghost" href="#" data-mag><span class="roll"><span>Explore Our Services</span><span>Explore Our Services</span></span></a>
+    </div>
+    <p class="e12-sup up">Project-based when you need it. Ongoing when you need more.</p>
+  </div>
+
+  <p class="e12-count up">Filled <b data-fillcount>0</b> / 8</p>
+  <div class="tag"><b>12</b><span>Aurora</span><u>#F5928A / #8E2422 · complementary</u></div>
+</section>
+
+<section class="gap gap--l">
+  <div class="gap-in">
+    <span class="gap-n">12</span>
+    <p class="gap-t">Aurora<em>The one background with no canvas anywhere: three conic-gradient discs,
+      blurred once by the compositor and after that only ever moved, counter-rotating and leaning
+      into the cursor. It costs a transform per frame and nothing else. The work is a grid of eight
+      that fills one cell at a time as the hero is scrolled and empties again as it leaves, so the
+      grid is the scroll position.</em>
+      <b><span class="gap-sw" style="background:#F5928A"></span>#F5928A on the ground, 7.15:1 &nbsp;·&nbsp;
+        <span class="gap-sw" style="background:#8E2422"></span>#8E2422 fill, label 8.16:1</b></p>
+    <span class="gap-s">end</span>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span class="wm"><i class="wm-mk"></i><span class="wm-t">Famysys <i>Studio</i></span></span>
+    <p>Twelve heroes, twelve live backgrounds, twelve accents across five palette relationships.
+      Identical copy throughout, Jost and Instrument Serif Italic only, one animation loop and one
+      WebGL context for the whole file. Nothing here touches the live site.</p>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   ONE engine for twelve live backgrounds.
+
+   · one requestAnimationFrame loop for the whole file
+   · ONE WebGL context, total. Four designs draw in GLSL (02 Bloom,
+     04 Orchid, 08 Lagoon, 10 Claret); they share a single canvas that is
+     re-parented into whichever of them is on screen, each keeps its own
+     compiled program in that context, and all four are compiled at load
+     rather than the first time they scroll into view. Nothing is ever
+     created or destroyed after boot, so the context count never leaves 1
+     and there is no context-loss path to handle.
+   · seven designs own a cheap 2d context each and are stepped only while
+     their hero is the one in front
+   · one design (12 Aurora) has no canvas at all — three blurred conic
+     discs the compositor rasterises once and then only ever transforms
+   · every background reads its own hero's accent off the CSS custom
+     property, so no background invents a colour
+   · geometry is measured on load / resize / image-settle only, so no
+     frame reads layout; every per-frame write is a transform or an opacity
+   · prefers-reduced-motion: the loop never starts, every hero is put in
+     its final state, and each background is painted exactly one frame —
+     for the GLSL four that frame is drawn once in the shared context and
+     copied into a still canvas of their own, after which the shared
+     canvas is removed from the document
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (RM) root.classList.add("rm");
+
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var sy = window.scrollY || window.pageYOffset || 0, lastSy = sy, sv = 0;
+  var DPR = Math.min(window.devicePixelRatio || 1, 1);
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  /* ── entry ─────────────────────────────────────────────────────────── */
+  var heroes = document.querySelectorAll("[data-hero]");
+  if (RM) {
+    [].forEach.call(heroes, function (s) { s.classList.add("in"); });
+  } else {
+    var entry = new IntersectionObserver(function (rows) {
+      rows.forEach(function (r) {
+        if (r.isIntersecting) { r.target.classList.add("in"); entry.unobserve(r.target); }
+      });
+    }, { threshold: 0.16 });
+    [].forEach.call(heroes, function (s) { entry.observe(s); });
+  }
+
+  var bgs = {};
+
+  /* ── registry ──────────────────────────────────────────────────────── */
+  var regs = [];
+  function reg(sel, fn) {
+    var el = document.querySelector(sel);
+    if (!el) return null;
+    var item = { el: el, fn: fn, top: 0, h: 0, vis: false, ratio: 0 };
+    regs.push(item);
+    return item;
+  }
+  function measure() {
+    vw = window.innerWidth; vh = window.innerHeight;
+    for (var i = 0; i < regs.length; i++) {
+      var r = regs[i].el.getBoundingClientRect();
+      regs[i].top = r.top + (window.scrollY || window.pageYOffset || 0);
+      regs[i].h = r.height;
+      if (regs[i].onMeasure) regs[i].onMeasure(regs[i]);
+    }
+    var ids = Object.keys(bgs || {});
+    for (var j = 0; j < ids.length; j++) {
+      var rec = bgs[ids[j]];
+      if (rec.impl && rec.impl.resize) rec.impl.resize();
+    }
+  }
+
+  /* ── pointer ───────────────────────────────────────────────────────── */
+  var P = { x: 0, y: 0, tx: 0, ty: 0, cx: -9999, cy: -9999, has: false };
+  if (!RM) {
+    window.addEventListener("pointermove", function (e) {
+      P.tx = (e.clientX / vw) * 2 - 1;
+      P.ty = (e.clientY / vh) * 2 - 1;
+      P.cx = e.clientX; P.cy = e.clientY; P.has = true;
+    }, { passive: true });
+  }
+
+  /* ── magnetic buttons ──────────────────────────────────────────────── */
+  var mags = [];
+  if (!RM) {
+    [].forEach.call(document.querySelectorAll("[data-mag]"), function (el) {
+      var m = { el: el, r: null, tx: 0, ty: 0, x: 0, y: 0, live: false };
+      el.addEventListener("pointerenter", function () { m.r = el.getBoundingClientRect(); m.live = true; });
+      el.addEventListener("pointermove", function (e) {
+        if (!m.r) return;
+        m.tx = (e.clientX - (m.r.left + m.r.width / 2)) * 0.3;
+        m.ty = (e.clientY - (m.r.top + m.r.height / 2)) * 0.4;
+      });
+      el.addEventListener("pointerleave", function () { m.tx = 0; m.ty = 0; });
+      mags.push(m);
+    });
+  }
+
+  /* ── each hero's own accent, read off its custom property once ─────── */
+  function accentOf(el) {
+    var v = getComputedStyle(el).getPropertyValue("--a").trim();
+    var n = parseInt(v.replace("#", ""), 16);
+    if (isNaN(n)) return [241, 235, 221];
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgba(c, a) { return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")"; }
+
+  /* ═══ the one WebGL context ═════════════════════════════════════════ */
+  var GL = null;           /* null = not tried, false = unavailable */
+  var PAL = { dark: [0.071, 0.145, 0.122], alt: [0.118, 0.227, 0.192] };
+  /* the fixed colours the shaders are allowed, plus one accent uniform per
+     design that is passed in from that design's own custom property */
+  var GLSL_PAL =
+    "const vec3 C_DARK=vec3(0.071,0.145,0.122);" +
+    "const vec3 C_ALT=vec3(0.118,0.227,0.192);" +
+    "const vec3 C_OND=vec3(0.945,0.922,0.867);" +
+    "const vec3 C_HI=vec3(0.400,0.878,0.690);" +
+    "uniform vec3 u_acc;";
+  var GLSL_NOISE =
+    "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}" +
+    "float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);" +
+    "float a=hash(i),b=hash(i+vec2(1.0,0.0)),c=hash(i+vec2(0.0,1.0)),d=hash(i+vec2(1.0,1.0));" +
+    "return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}" +
+    "float fbm(vec2 p){float v=0.0,a=0.5;" +
+    "v+=a*noise(p);p*=2.03;a*=0.5;" +
+    "v+=a*noise(p);p*=2.03;a*=0.5;" +
+    "v+=a*noise(p);return v;}";
+
+  function glBoot() {
+    if (GL !== null) return GL;
+    var cv = document.createElement("canvas");
+    cv.setAttribute("aria-hidden", "true");
+    var gl = null;
+    try {
+      gl = cv.getContext("webgl", { antialias: false, alpha: false, depth: false,
+                                    powerPreference: "low-power" });
+    } catch (e) { gl = null; }
+    if (!gl) { GL = false; return false; }
+    var quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    GL = { cv: cv, gl: gl, quad: quad, host: null };
+    if (window.__hx) window.__hx.contexts = 1;
+    return GL;
+  }
+  function glCompile(vs, fs) {
+    var gl = GL.gl;
+    function sh(t, src) {
+      var s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s);
+      return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+    }
+    var a = sh(gl.VERTEX_SHADER, vs), b = sh(gl.FRAGMENT_SHADER, fs);
+    if (!a || !b) return null;
+    var p = gl.createProgram();
+    gl.attachShader(p, a); gl.attachShader(p, b); gl.linkProgram(p);
+    return gl.getProgramParameter(p, gl.LINK_STATUS) ? p : null;
+  }
+  function glUniforms(p, names) {
+    var u = {}, gl = GL.gl;
+    for (var i = 0; i < names.length; i++) u[names[i]] = gl.getUniformLocation(p, "u_" + names[i]);
+    return u;
+  }
+  /* park the single canvas inside whichever GLSL hero is on screen */
+  function glHost(slot) {
+    if (!GL || GL.host === slot) return;
+    slot.appendChild(GL.cv);
+    GL.host = slot;
+  }
+  /* each shader gets the resolution it actually needs — these are soft
+     fields, and running the heavy two at two thirds is invisible */
+  var GLSCALE = { caustic: 0.62, truchet: 0.9, kaleido: 0.72, tunnel: 0.8 };
+  function glSize(slot, kind) {
+    var k = GLSCALE[kind] || 1;
+    var w = Math.max(1, Math.round(slot.clientWidth * DPR * k));
+    var h = Math.max(1, Math.round(slot.clientHeight * DPR * k));
+    if (GL.cv.width !== w || GL.cv.height !== h) { GL.cv.width = w; GL.cv.height = h; }
+    GL.gl.viewport(0, 0, w, h);
+    return [w, h];
+  }
+
+  /* ── the four fragment programs ────────────────────────────────────── */
+  var VS_TRI = "attribute vec2 a;void main(){gl_Position=vec4(a,0.0,1.0);}";
+  var HEAD = "precision mediump float;" +
+    "uniform vec2 u_res;uniform float u_t;uniform vec2 u_m;uniform float u_amp;uniform float u_sc;";
+
+  /* 02 BLOOM — a caustic web. The sampling point is folded back through
+     itself five times and the reciprocal of the distance accumulated, so
+     the light gathers into lines the way it does on the floor of a pool
+     rather than drifting into cloud. */
+  var FS_CAUSTIC = [HEAD, GLSL_PAL, GLSL_NOISE,
+    "void main(){",
+    " vec2 uv=gl_FragCoord.xy/u_res.xy;",
+    " vec2 p=(gl_FragCoord.xy-0.5*u_res.xy)/u_res.y;",
+    " vec2 c=u_m*vec2(0.6*u_res.x/u_res.y,-0.6);",
+    " float t=u_t*0.3;",
+    " vec2 q=(p-c*0.55)*(6.4+u_sc*4.4);",
+    " vec2 i=q;float acc=1.0;float inten=0.0046+u_sc*0.0022;",
+    " for(int n=0;n<5;n++){",
+    "  float tt=t*(1.0-(3.5/float(n+1)));",
+    "  i=q+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x));",
+    "  acc+=1.0/length(vec2(q.x/(sin(i.x+tt)/inten),q.y/(cos(i.y+tt)/inten)));",
+    " }",
+    " acc/=5.0;acc=1.17-pow(acc,1.4);",
+    " float w=clamp(pow(abs(acc),11.0),0.0,1.0);",
+    " vec3 col=mix(C_DARK,C_ALT,0.5*smoothstep(1.15,0.1,length(p-c)));",
+    " col=mix(col,u_acc,clamp(w*1.35,0.0,1.0)*0.84*u_amp);",
+    " col=mix(col,C_OND,clamp((w-0.55)*2.4,0.0,1.0)*0.42*u_amp);",
+    " float vg=smoothstep(1.5,0.2,length(uv-0.5)*1.72);",
+    " col*=0.42+0.58*vg;",
+    " gl_FragColor=vec4(col,1.0);}"
+  ].join("\n");
+
+  /* 04 ORCHID — Truchet tiling. Each cell picks one of two quarter-arc
+     pairs from a hash of its coordinates; the hash is re-seeded slowly so
+     the weave keeps rebuilding into new continuous paths. */
+  var FS_TRUCHET = [HEAD, GLSL_PAL, GLSL_NOISE,
+    "void main(){",
+    " vec2 uv=gl_FragCoord.xy/u_res.xy;",
+    " vec2 p=(gl_FragCoord.xy-0.5*u_res.xy)/u_res.y;",
+    " float rot=u_t*0.04+u_m.x*0.35;",
+    " float cs=cos(rot),sn=sin(rot);",
+    " p=mat2(cs,-sn,sn,cs)*p;",
+    " float sc=6.0+2.8*(0.5+0.5*sin(u_t*0.11))+u_sc*4.2;",
+    " vec2 g=p*sc;vec2 id=floor(g);vec2 f=fract(g)-0.5;",
+    " float seed=floor(u_t*0.22);",
+    " float h=hash(id+seed*13.7);",
+    " if(h<0.5) f.x=-f.x;",
+    " float d=min(length(f-vec2(0.5)),length(f+vec2(0.5)));",
+    " float line=abs(d-0.5);",
+    " float w=0.052+0.024*sin(u_t*0.5+id.x*1.7+id.y);",
+    " float m=1.0-smoothstep(w,w+0.035,line);",
+    " float glow=1.0-smoothstep(w,w+0.24,line);",
+    " vec2 c=u_m*vec2(0.55*u_res.x/u_res.y,-0.55);",
+    " float near=exp(-2.2*length(p-c));",
+    " vec3 col=mix(C_DARK,C_ALT,0.35+0.4*hash(id+seed*13.7+2.0));",
+    " col=mix(col,u_acc,m*(0.4+0.34*near)*u_amp);",
+    " col=mix(col,C_HI,glow*0.08*u_amp);",
+    " float vg=smoothstep(1.5,0.18,length(uv-0.5)*1.7);",
+    " col*=0.38+0.62*vg;",
+    " gl_FragColor=vec4(col,1.0);}"
+  ].join("\n");
+
+  /* 08 LAGOON — polar fold. The angle is folded into a wedge and a warped
+     noise field sampled inside it, so whatever the noise does is mirrored
+     all the way around. */
+  var FS_KALEIDO = [HEAD, GLSL_PAL, GLSL_NOISE,
+    "void main(){",
+    " vec2 uv=gl_FragCoord.xy/u_res.xy;",
+    " vec2 p=(gl_FragCoord.xy-0.5*u_res.xy)/u_res.y;",
+    " vec2 c=u_m*vec2(0.4*u_res.x/u_res.y,-0.4);",
+    " p-=c;",
+    " float a=atan(p.y,p.x),r=length(p);",
+    " float seg=6.0+6.0*(0.5+0.5*sin(u_t*0.11));",
+    " float k=6.2831853/seg;",
+    " a=mod(a,k);a=abs(a-k*0.5);",
+    " a+=u_t*0.05+u_sc*0.9;",
+    " vec2 q=vec2(cos(a),sin(a))*r;",
+    " float n=fbm(q*3.1+vec2(0.0,u_t*0.07));",
+    " float n2=fbm(q*6.4-vec2(u_t*0.05,0.0));",
+    " float ring=abs(fract(r*5.0-u_t*0.14)-0.5);",
+    " float line=1.0-smoothstep(0.05,0.16,ring);",
+    " vec3 col=mix(C_DARK,C_ALT,smoothstep(0.08,0.68,n));",
+    " col=mix(col,u_acc,smoothstep(0.4,0.88,n2)*0.76*u_amp);",
+    " col=mix(col,C_HI,line*0.24*u_amp*smoothstep(0.9,0.1,r));",
+    " col=mix(col,C_OND,smoothstep(0.03,0.0,r)*0.5);",
+    " float vg=smoothstep(1.5,0.16,length(uv-0.5)*1.7);",
+    " col*=0.44+0.56*vg;",
+    " gl_FragColor=vec4(col,1.0);}"
+  ].join("\n");
+
+  /* 10 CLARET — an inverse-radius tunnel. Depth is one over the distance
+     to the axis, which is exactly what perspective does to a corridor, so
+     the rings crowd toward the vanishing point without a march. */
+  var FS_TUNNEL = [HEAD, GLSL_PAL, GLSL_NOISE,
+    "void main(){",
+    " vec2 uv=gl_FragCoord.xy/u_res.xy;",
+    " vec2 p=(gl_FragCoord.xy-0.5*u_res.xy)/u_res.y;",
+    " vec2 c=u_m*vec2(0.3*u_res.x/u_res.y,-0.3);",
+    " p-=c;",
+    " float box=max(abs(p.x),abs(p.y));",
+    " float rr=mix(length(p),box,0.72)+0.055;",
+    " float z=0.45/rr;",
+    " float ang=atan(p.y,p.x)/6.2831853;",
+    " float t=u_t*0.32+u_sc*4.0;",
+    " float rings=abs(fract(z*0.85-t)-0.5);",
+    " float rib=abs(fract(ang*10.0+z*0.06)-0.5);",
+    " float wall=1.0-smoothstep(0.035,0.125,rings);",
+    " float fog=smoothstep(2.6,0.05,z);",
+    " float grain=noise(vec2(ang*40.0,z*3.0));",
+    " vec3 col=mix(C_DARK,C_ALT,0.2+0.68*(1.0-smoothstep(0.1,0.45,rib)));",
+    " col=mix(col,u_acc,wall*0.82*u_amp);",
+    " col=mix(col,C_HI,wall*(1.0-smoothstep(0.0,0.35,abs(rib-0.5)))*0.1*u_amp);",
+    " col*=0.42+0.58*fog;",
+    " col+=u_acc*smoothstep(3.4,6.4,z)*0.18*u_amp;",
+    " col*=0.94+0.06*grain;",
+    " gl_FragColor=vec4(col,1.0);}"
+  ].join("\n");
+
+  var GLPROG = {};
+  function glProg(kind) {
+    if (GLPROG[kind] !== undefined) return GLPROG[kind];
+    if (!glBoot()) return (GLPROG[kind] = false);
+    var gl = GL.gl;
+    var fs = kind === "caustic" ? FS_CAUSTIC : kind === "truchet" ? FS_TRUCHET
+           : kind === "kaleido" ? FS_KALEIDO : FS_TUNNEL;
+    var pr = glCompile(VS_TRI, fs);
+    if (!pr) return (GLPROG[kind] = false);
+    var rec = { prog: pr, attr: gl.getAttribLocation(pr, "a"),
+                u: glUniforms(pr, ["res", "t", "m", "amp", "sc", "acc"]) };
+    GLPROG[kind] = rec;
+    return rec;
+  }
+
+  function glDraw(kind, slot, st) {
+    var rec = glProg(kind);
+    if (!rec) return false;
+    var gl = GL.gl;
+    var wh = glSize(slot, kind);
+    gl.useProgram(rec.prog);
+    gl.clearColor(PAL.dark[0], PAL.dark[1], PAL.dark[2], 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.disable(gl.BLEND);
+    gl.bindBuffer(gl.ARRAY_BUFFER, GL.quad);
+    gl.enableVertexAttribArray(rec.attr);
+    gl.vertexAttribPointer(rec.attr, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(rec.u.res, wh[0], wh[1]);
+    gl.uniform1f(rec.u.t, st.t);
+    gl.uniform2f(rec.u.m, st.mx, st.my);
+    gl.uniform1f(rec.u.amp, st.amp);
+    gl.uniform1f(rec.u.sc, st.sc);
+    gl.uniform3f(rec.u.acc, st.acc[0] / 255, st.acc[1] / 255, st.acc[2] / 255);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    return true;
+  }
+
+  /* ═══ canvas-2d backgrounds ═════════════════════════════════════════ */
+  function fit(cv) {
+    var w = Math.max(1, Math.round(cv.clientWidth * DPR));
+    var h = Math.max(1, Math.round(cv.clientHeight * DPR));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    return [cv.width, cv.height];
+  }
+  /* alpha ramps built once, so no per-frame string building */
+  function ramp(c, lo, hi, n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(rgba(c, (lo + (hi - lo) * (i / (n - 1))).toFixed(3)));
+    return out;
+  }
+  var C_ALT = [30, 58, 49], C_OND = [241, 235, 221], C_DARK = [18, 37, 31];
+
+  /* 01 ROSEWOOD — contour map. Eight nested rings whose radius is four
+     sine terms of the angle, so they read as topography, not circles. */
+  function bgContour(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, cx = 0, cy = 0;
+    var accR = ramp(acc, 0.16, 0.66, 9), hiR = ramp(C_OND, 0.08, 0.3, 9);
+    function seed() { var d = fit(cv); W = d[0]; H = d[1]; cx = W * 0.5; cy = H * 0.5; }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var t = st.t * 0.00016;
+      var mx = st.has ? st.px * DPR : W * 0.5, my = st.has ? st.py * DPR : H * 0.5;
+      cx += ((W * 0.5 + (mx - W * 0.5) * 0.34) - cx) * 0.045;
+      cy += ((H * 0.5 + (my - H * 0.5) * 0.34) - cy) * 0.045;
+      var maxR = Math.sqrt(W * W + H * H) * 0.62;
+      var i, k, a, r, x, y, R;
+      g.lineWidth = 1.35 * DPR;
+      for (i = 0; i < 9; i++) {
+        R = maxR * (0.10 + i * 0.108) * (1 + st.sc * 0.10);
+        var p1 = i * 1.7 + t * 2.2, p2 = i * 0.9 - t * 1.7, p3 = i * 2.3 + t * 1.1;
+        g.beginPath();
+        for (k = 0; k <= 96; k++) {
+          a = (k / 96) * 6.2831853;
+          r = R * (1
+            + 0.115 * Math.sin(3 * a + p1)
+            + 0.072 * Math.sin(5 * a - p2)
+            + 0.046 * Math.sin(7 * a + p3)
+            + 0.030 * Math.sin(11 * a - p1 * 1.4));
+          x = cx + Math.cos(a) * r; y = cy + Math.sin(a) * r * 0.78;
+          if (k === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.closePath();
+        g.strokeStyle = (i % 3 === 0) ? hiR[i] : accR[i];
+        g.stroke();
+      }
+      /* the lead ring, thicker, so the field has a subject */
+      g.lineWidth = 2.1 * DPR;
+      g.strokeStyle = rgba(acc, 0.62);
+      g.beginPath();
+      var lead = maxR * (0.10 + (2 + (Math.sin(t * 3.1) * 0.5 + 0.5) * 5) * 0.108);
+      for (k = 0; k <= 96; k++) {
+        a = (k / 96) * 6.2831853;
+        r = lead * (1 + 0.115 * Math.sin(3 * a + t * 2.2) + 0.072 * Math.sin(5 * a - t * 1.7));
+        x = cx + Math.cos(a) * r; y = cy + Math.sin(a) * r * 0.78;
+        if (k === 0) g.moveTo(x, y); else g.lineTo(x, y);
+      }
+      g.closePath(); g.stroke();
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 03 EMBER — halftone screen. One path for the field, one for the crests,
+     so the whole grid costs two fills. */
+  function bgHalftone(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, cell = 1, cols = 0, rows = 0;
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      cell = Math.max(16, Math.round(Math.min(W, H) / 30));
+      cols = Math.ceil(W / cell) + 1; rows = Math.ceil(H / cell) + 1;
+    }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var t = st.t * 0.0011 * (1 + st.sc * 1.6);
+      var mx = st.has ? st.px * DPR : W * 0.5, my = st.has ? st.py * DPR : H * 0.4;
+      var bulge = 260 * DPR, b2 = bulge * bulge;
+      var half = cell * 0.5, maxR = cell * 0.4;
+      var i, j, x, y, v, r, dx, dy, d2;
+      g.beginPath();
+      var crest = [];
+      for (j = 0; j < rows; j++) {
+        y = j * cell + half;
+        for (i = 0; i < cols; i++) {
+          x = i * cell + half;
+          v = 0.5 + 0.42 * Math.sin(x * 0.011 + y * 0.006 - t * 1.7)
+                  + 0.28 * Math.sin(y * 0.017 - x * 0.004 + t * 1.1);
+          if (st.has) {
+            dx = x - mx; dy = y - my; d2 = dx * dx + dy * dy;
+            if (d2 < b2) v += (1 - d2 / b2) * 0.85;
+          }
+          if (v <= 0.06) continue;
+          r = Math.min(v, 1.35) * maxR;
+          if (v > 1.04) { crest.push(x, y, r); continue; }
+          g.moveTo(x + r, y);
+          g.arc(x, y, r, 0, 6.2831853);
+        }
+      }
+      g.fillStyle = rgba(C_OND, 0.13);
+      g.fill();
+      if (crest.length) {
+        g.beginPath();
+        for (i = 0; i < crest.length; i += 3) {
+          g.moveTo(crest[i] + crest[i + 2], crest[i + 1]);
+          g.arc(crest[i], crest[i + 1], crest[i + 2], 0, 6.2831853);
+        }
+        g.fillStyle = rgba(acc, 0.44);
+        g.fill();
+      }
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 05 BRASS — shard field. A jittered lattice triangulated into a couple
+     of hundred faces, each lit by a plane wave crossing the frame. */
+  function bgShards(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, NX = 19, NY = 13;
+    var base = [], pos = [], accR = ramp(acc, 0.03, 0.26, 14), altR = ramp(C_ALT, 0.14, 0.6, 14);
+    var jit = [];
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      base = []; pos = [];
+      for (var j = 0; j <= NY; j++) for (var i = 0; i <= NX; i++) {
+        var jx = (Math.random() - 0.5) * (W / NX) * 0.52;
+        var jy = (Math.random() - 0.5) * (H / NY) * 0.52;
+        base.push((i / NX) * W * 1.06 - W * 0.03 + jx, (j / NY) * H * 1.06 - H * 0.03 + jy);
+        pos.push(0, 0);
+        jit.push(Math.random() * 1.4);
+      }
+    }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var t = st.t * 0.0004;
+      var mx = st.has ? st.px * DPR : W * 0.5, my = st.has ? st.py * DPR : H * 0.5;
+      var pull = 190 * DPR, p2 = pull * pull;
+      var n = base.length / 2, i, j, bx, by, dx, dy, d2, k;
+      for (i = 0; i < n; i++) {
+        bx = base[i * 2]; by = base[i * 2 + 1];
+        var tx = bx + Math.sin(t * 1.3 + i * 0.7) * 6 * DPR;
+        var ty = by + Math.cos(t * 1.1 + i * 0.5) * 6 * DPR;
+        if (st.has) {
+          dx = bx - mx; dy = by - my; d2 = dx * dx + dy * dy;
+          if (d2 < p2 && d2 > 1) {
+            k = (1 - d2 / p2) * 26 * DPR / Math.sqrt(d2);
+            tx += dx * k; ty += dy * k;
+          }
+        }
+        pos[i * 2] += (tx - pos[i * 2]) * 0.12;
+        pos[i * 2 + 1] += (ty - pos[i * 2 + 1]) * 0.12;
+      }
+      var wa = t * 2.4, ca = Math.cos(0.7 + t * 0.4), sa = Math.sin(0.7 + t * 0.4);
+      var stride = NX + 1;
+      for (j = 0; j < NY; j++) for (i = 0; i < NX; i++) {
+        var a0 = (j * stride + i) * 2, a1 = a0 + 2, a2 = ((j + 1) * stride + i) * 2, a3 = a2 + 2;
+        drawTri(a0, a1, a2, jit[j * stride + i]); drawTri(a1, a3, a2, jit[(j + 1) * stride + i]);
+      }
+      g.lineWidth = DPR;
+      g.strokeStyle = rgba(C_OND, 0.05);
+      function drawTri(x1, x2, x3, jt) {
+        var mxx = (pos[x1] + pos[x2] + pos[x3]) / 3, myy = (pos[x1 + 1] + pos[x2 + 1] + pos[x3 + 1]) / 3;
+        var w = 0.5 + 0.5 * Math.sin((mxx * ca + myy * sa) * 0.0055 - wa + jt);
+        w = w * w;
+        var idx = (w * 13) | 0;
+        g.beginPath();
+        g.moveTo(pos[x1], pos[x1 + 1]);
+        g.lineTo(pos[x2], pos[x2 + 1]);
+        g.lineTo(pos[x3], pos[x3 + 1]);
+        g.closePath();
+        g.fillStyle = w > 0.7 ? accR[idx] : altR[idx];
+        g.fill();
+        g.stroke();
+      }
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 06 IRIS — radial warp streaks from a vanishing point that follows the
+     pointer, their length set by how fast you are scrolling. */
+  function bgStreaks(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, arr = [], vx = 0, vy = 0;
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      vx = W * 0.5; vy = H * 0.5;
+      arr = [];
+      var maxR = Math.sqrt(W * W + H * H) * 0.62;
+      for (var i = 0; i < 190; i++) {
+        arr.push({ a: Math.random() * 6.2831853, r: Math.pow(Math.random(), 0.55) * maxR,
+                   sp: 0.4 + Math.random() * 1.5, w: (0.5 + Math.random() * 1.5) * DPR,
+                   c: Math.random(), max: maxR });
+      }
+    }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var tx = st.has ? st.px * DPR : W * 0.5, ty = st.has ? st.py * DPR : H * 0.5;
+      vx += (tx - vx) * 0.05; vy += (ty - vy) * 0.05;
+      var len = 26 + st.sc * 150, spd = 0.55 + st.sc * 5.2;
+      var i, p, ca, sa, r2;
+      g.lineCap = "round";
+      for (i = 0; i < arr.length; i++) {
+        p = arr[i];
+        p.r += p.sp * spd * DPR;
+        if (p.r > p.max) { p.r = Math.random() * 26 * DPR; p.a = Math.random() * 6.2831853; }
+        ca = Math.cos(p.a); sa = Math.sin(p.a);
+        r2 = p.r + len * DPR * (0.35 + p.sp * 0.7);
+        g.lineWidth = p.w;
+        g.strokeStyle = p.c > 0.68 ? rgba(acc, 0.66) : p.c > 0.3 ? rgba(C_OND, 0.32) : rgba(acc, 0.24);
+        g.beginPath();
+        g.moveTo(vx + ca * p.r, vy + sa * p.r);
+        g.lineTo(vx + ca * r2, vy + sa * r2);
+        g.stroke();
+      }
+      var R = 190 * DPR;
+      var bl = g.createRadialGradient(vx, vy, 0, vx, vy, R);
+      bl.addColorStop(0, rgba(acc, 0.22));
+      bl.addColorStop(1, rgba(acc, 0));
+      g.fillStyle = bl;
+      g.fillRect(vx - R, vy - R, R * 2, R * 2);
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 07 JADE — thirty strings, each a damped spring the pointer plucks. */
+  function bgStrings(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, arr = [], N = 30;
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      arr = [];
+      for (var i = 0; i < N; i++) {
+        arr.push({ x: ((i + 0.5) / N) * W, d: 0, v: 0, ph: Math.random() * 6.28,
+                   k: 0.012 + Math.random() * 0.014, c: Math.random() });
+      }
+    }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var mx = st.px * DPR, my = st.py * DPR;
+      var sway = Math.sin(st.t * 0.00035) * (8 + st.sc * 46) * DPR;
+      var i, s, dx, f, mid, my2;
+      for (i = 0; i < arr.length; i++) {
+        s = arr[i];
+        if (st.has) {
+          dx = s.x - mx;
+          if (dx < 76 * DPR && dx > -76 * DPR) {
+            f = (1 - Math.abs(dx) / (76 * DPR));
+            s.v += (dx > 0 ? 1 : -1) * f * f * 2.6 * DPR;
+          }
+        }
+        s.v += -s.d * s.k;
+        s.v *= 0.965;
+        s.d += s.v;
+        mid = s.x + s.d + sway * Math.sin(i * 0.42 + st.t * 0.0004);
+        my2 = st.has ? clamp(my, H * 0.16, H * 0.84) : H * 0.5;
+        g.lineWidth = (0.7 + s.c * 1.1) * DPR;
+        g.strokeStyle = Math.abs(s.d) > 4 * DPR ? rgba(acc, Math.min(0.74, 0.2 + Math.abs(s.d) / (52 * DPR)))
+                                                : rgba(C_OND, 0.2 + s.c * 0.12);
+        g.beginPath();
+        g.moveTo(s.x, -10);
+        g.quadraticCurveTo(mid, my2, s.x, H + 10);
+        g.stroke();
+      }
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 09 VERDANT — rings on water. The pointer drops one when it moves; a
+     metronome drops one anyway, so the field is never still. */
+  function bgRipple(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, rings = [], beat = 0, lx = 0, ly = 0;
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      rings = [];
+      for (var i = 0; i < 13; i++)
+        rings.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 260 * DPR,
+                     max: (240 + Math.random() * 260) * DPR, a: Math.random() });
+    }
+    seed();
+    function add(x, y, seedv) {
+      if (rings.length > 44) rings.shift();
+      rings.push({ x: x, y: y, r: 2 * DPR, max: (200 + seedv * 320) * DPR, a: seedv });
+    }
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var mx = st.px * DPR, my = st.py * DPR;
+      if (st.has) {
+        var dx = mx - lx, dy = my - ly;
+        if (dx * dx + dy * dy > 420 * DPR * DPR) { add(mx, my, Math.random()); lx = mx; ly = my; }
+      }
+      beat += 1 + st.sc * 3;
+      if (beat > 20) { beat = 0; add(Math.random() * W, Math.random() * H, Math.random()); }
+      if (st.has) {
+        var WR = 260 * DPR;
+        var wake = g.createRadialGradient(mx, my, 0, mx, my, WR);
+        wake.addColorStop(0, rgba(acc, 0.13));
+        wake.addColorStop(0.55, rgba(acc, 0.04));
+        wake.addColorStop(1, rgba(acc, 0));
+        g.fillStyle = wake;
+        g.fillRect(mx - WR, my - WR, WR * 2, WR * 2);
+      }
+      var i, p, k;
+      g.lineWidth = 2.0 * DPR;
+      for (i = rings.length - 1; i >= 0; i--) {
+        p = rings[i];
+        p.r += (1.1 + p.a * 1.5) * (1 + st.sc * 1.9) * DPR;
+        k = 1 - p.r / p.max;
+        if (k <= 0) { rings.splice(i, 1); continue; }
+        g.strokeStyle = p.a > 0.5 ? rgba(acc, (k * 0.72).toFixed(3))
+                                  : rgba(C_OND, (k * 0.38).toFixed(3));
+        g.beginPath();
+        g.arc(p.x, p.y, p.r, 0, 6.2831853);
+        g.stroke();
+        if (p.r > 26 * DPR) {
+          g.strokeStyle = rgba(acc, (k * 0.2).toFixed(3));
+          g.beginPath();
+          g.arc(p.x, p.y, p.r * 0.72, 0, 6.2831853);
+          g.stroke();
+        }
+      }
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 11 CINDER — sixty-four bars, three sines and a bulge at the pointer. */
+  function bgBars(cv, acc) {
+    var g = cv.getContext("2d"), W = 0, H = 0, N = 64, bw = 1, hs = [];
+    function seed() {
+      var d = fit(cv); W = d[0]; H = d[1];
+      bw = W / N; hs = [];
+      for (var i = 0; i < N; i++) hs.push(0);
+    }
+    seed();
+    function step(st) {
+      g.clearRect(0, 0, W, H);
+      var t = st.t * 0.0009;
+      var mx = st.has ? st.px * DPR : -9999;
+      var lift = 0.16 + st.sc * 0.42;
+      var i, x, v, h, d, gap = bw * 0.22;
+      g.fillStyle = rgba(C_ALT, 0.62);
+      for (i = 0; i < N; i++) {
+        x = i * bw;
+        v = 0.5 + 0.24 * Math.sin(i * 0.31 + t * 1.9)
+                + 0.16 * Math.sin(i * 0.11 - t * 1.3)
+                + 0.12 * Math.sin(i * 0.72 + t * 2.7);
+        d = Math.abs(x + bw * 0.5 - mx);
+        if (d < 360 * DPR) v += (1 - d / (360 * DPR)) * 0.62;
+        v = (v - 0.32) * (0.9 + lift);
+        hs[i] += (clamp(v, 0.02, 1.2) * H * 0.86 - hs[i]) * 0.1;
+        h = hs[i];
+        g.fillRect(x + gap * 0.5, H - h, bw - gap, h);
+      }
+      g.fillStyle = rgba(acc, 0.72);
+      for (i = 0; i < N; i++) {
+        x = i * bw; h = hs[i];
+        g.fillRect(x + gap * 0.5, H - h - 2 * DPR, bw - gap, 2 * DPR);
+      }
+      g.fillStyle = rgba(acc, 0.09);
+      for (i = 0; i < N; i += 2) {
+        x = i * bw; h = hs[i];
+        g.fillRect(x + gap * 0.5, H - h, bw - gap, h * 0.5);
+      }
+      if (st.has) {
+        /* the playhead: a meter has one, and it is what the cursor moves */
+        var pg = g.createLinearGradient(mx - 90 * DPR, 0, mx + 90 * DPR, 0);
+        pg.addColorStop(0, rgba(acc, 0));
+        pg.addColorStop(0.5, rgba(acc, 0.16));
+        pg.addColorStop(1, rgba(acc, 0));
+        g.fillStyle = pg;
+        g.fillRect(mx - 90 * DPR, 0, 180 * DPR, H);
+        g.fillStyle = rgba(acc, 0.5);
+        g.fillRect(mx - DPR, 0, 2 * DPR, H);
+      }
+    }
+    return { step: step, resize: seed };
+  }
+
+  /* 12 AURORA — no canvas. Three blurred conic discs the compositor
+     rasterises once; after that only their transforms ever change. */
+  function bgAurora(host) {
+    var wrap = host, discs = host ? [].slice.call(host.children) : [];
+    var rot = [0, 0, 0], tgt = [0, 0];
+    function step(st) {
+      if (!wrap) return;
+      var t = st.t * 0.001;
+      tgt[0] += ((st.has ? (st.px / vw - 0.5) : 0) * 170 - tgt[0]) * 0.05;
+      tgt[1] += ((st.has ? (st.py / vh - 0.5) : 0) * 130 - tgt[1]) * 0.05;
+      wrap.style.transform = "translate3d(" + tgt[0].toFixed(2) + "px," + tgt[1].toFixed(2) + "px,0)";
+      for (var i = 0; i < discs.length; i++) {
+        var dir = i === 1 ? -1 : 1;
+        rot[i] = (t * (5.5 + i * 3.4) + st.sc * 46) * dir;
+        var s = 1 + 0.09 * Math.sin(t * (0.6 + i * 0.22) + i);
+        discs[i].style.transform =
+          "translate3d(" + (Math.sin(t * (0.3 + i * 0.14) + i) * (26 + i * 12)).toFixed(2) + "px," +
+          (Math.cos(t * (0.24 + i * 0.11) + i) * (20 + i * 10)).toFixed(2) + "px,0) rotate(" +
+          rot[i].toFixed(2) + "deg) scale(" + s.toFixed(3) + ")";
+      }
+    }
+    return { step: step, resize: function () {} };
+  }
+
+  /* ═══ which background belongs to which hero ════════════════════════ */
+  var GLKIND = { caustic: 1, truchet: 1, kaleido: 1, tunnel: 1 };
+
+  [].forEach.call(heroes, function (hero) {
+    var kind = hero.getAttribute("data-bg");
+    if (!kind) return;
+    var acc = accentOf(hero);
+    var rec = { kind: kind, hero: hero, amp: 0, acc: acc, sc: 0,
+                slot: hero.querySelector(".bgslot"),
+                still: hero.querySelector("[data-still]"),
+                cv: hero.querySelector("[data-c2d]") };
+    if (rec.cv) {
+      rec.impl = kind === "contour" ? bgContour(rec.cv, acc)
+               : kind === "halftone" ? bgHalftone(rec.cv, acc)
+               : kind === "shards" ? bgShards(rec.cv, acc)
+               : kind === "streaks" ? bgStreaks(rec.cv, acc)
+               : kind === "strings" ? bgStrings(rec.cv, acc)
+               : kind === "ripple" ? bgRipple(rec.cv, acc)
+               : kind === "bars" ? bgBars(rec.cv, acc) : null;
+    } else if (kind === "aurora") {
+      rec.impl = bgAurora(hero.querySelector("[data-au]"));
+    }
+    bgs[hero.id] = rec;
+  });
+
+  var ratioObs = new IntersectionObserver(function (rows) {
+    rows.forEach(function (r) {
+      for (var i = 0; i < regs.length; i++) if (regs[i].el === r.target) regs[i].ratio = r.intersectionRatio;
+    });
+  }, { threshold: [0, 0.12, 0.3, 0.5, 0.7, 0.9, 1] });
+  var seen = new IntersectionObserver(function (rows) {
+    rows.forEach(function (r) {
+      for (var i = 0; i < regs.length; i++) if (regs[i].el === r.target) regs[i].vis = r.isIntersecting;
+    });
+  }, { rootMargin: "45% 0px 45% 0px" });
+
+  /* ═══ the three-column showcase, shared ═════════════════════════════ */
+  function makeColumns(sel) {
+    var runs = document.querySelectorAll(sel + " [data-run]"), out = [];
+    [].forEach.call(runs, function (run) {
+      var kids = [].slice.call(run.children);
+      /* one clone of the whole set, so the wrap has nothing to give away */
+      kids.forEach(function (k) { run.appendChild(k.cloneNode(true)); });
+      out.push({ el: run, n: kids.length, span: 1, off: Math.random() * 200, vel: 0,
+                 dir: parseFloat(run.getAttribute("data-dir") || "1") });
+    });
+    return out;
+  }
+  function measureColumns(arr) {
+    for (var i = 0; i < arr.length; i++) {
+      var r = arr[i], k = r.el.children;
+      r.span = (k.length > r.n ? k[r.n].offsetTop - k[0].offsetTop : r.el.scrollHeight / 2) || 1;
+    }
+  }
+  function runColumn(r, off) {
+    var s = r.span;
+    var o = ((off % s) + s) % s;
+    r.el.style.transform = "translate3d(0," + (-o).toFixed(2) + "px,0)";
+  }
+
+  /* ═══ per-hero scroll and cursor behaviour ══════════════════════════ */
+  function q(s) { return document.querySelector(s); }
+
+  /* 01 ROSEWOOD — three columns full width behind the type, all up, one
+     speed for all three. Scroll only leans on that one speed. */
+  (function () {
+    var body = q("#e1 [data-body]"), cols = makeColumns("#e1"), off = 0;
+    var item = reg("#e1", function (s) {
+      body.style.transform = "translate3d(0," + (-s.out * vh * 0.24).toFixed(2) + "px,0)";
+      off += 0.5 + Math.abs(sv) * 0.5;
+      for (var i = 0; i < cols.length; i++) runColumn(cols[i], off);
+    });
+    if (item) item.onMeasure = function () { measureColumns(cols); };
+  })();
+
+  /* 02 BLOOM — the keyline fills; the drum turns on its own axis. Each
+     plate's place on the drum is written once, at measure; the only
+     per-frame write is the cylinder's own rotation. */
+  (function () {
+    var body = q("#e2 [data-body]"), key = q("#e2 [data-keyline]");
+    var drum = q("#e2 [data-drum]"), cyl = q("#e2 [data-cyl]");
+    var pls = document.querySelectorAll("#e2 [data-cyl] .pl");
+    var deg = q("#e2 [data-drumdeg]"), slow = 0, slowT = 0, ang = 0, lastD = -1;
+    if (drum && !RM) {
+      drum.addEventListener("pointerenter", function () { slowT = 1; });
+      drum.addEventListener("pointerleave", function () { slowT = 0; });
+    }
+    var item = reg("#e2", function (s) {
+      key.style.transform = "scaleX(" + s.out.toFixed(3) + ")";
+      body.style.transform = "translate3d(0," + (s.cen * -46).toFixed(2) + "px,0)";
+      slow += (slowT - slow) * 0.09;
+      ang += (0.26 + Math.abs(sv) * 0.55) * (1 - slow * 0.9);
+      cyl.style.transform = "translate3d(0," + (s.cen * 26).toFixed(1) + "px,0) rotateX(" +
+        (P.y * 6).toFixed(2) + "deg) rotateY(" + ang.toFixed(2) + "deg)";
+      var d = (((ang % 360) + 360) % 360) | 0;
+      if (deg && d !== lastD) { lastD = d; deg.textContent = ("00" + d).slice(-3) + "\u00b0"; }
+    });
+    function place() {
+      var R = Math.max(96, (drum ? drum.clientWidth : 300) * 0.46);
+      for (var i = 0; i < pls.length; i++) {
+        pls[i].style.transform = "rotateY(" + ((i / pls.length) * 360).toFixed(2) +
+          "deg) translateZ(" + R.toFixed(1) + "px)";
+      }
+    }
+    place();
+    if (item) item.onMeasure = place;
+  })();
+
+  /* 03 EMBER — one column down the left, two up the right, three rates. */
+  (function () {
+    var body = q("#e3 [data-body]");
+    var L = makeColumns("#e3 .e3-colsL"), R = makeColumns("#e3 .e3-colsR");
+    var cols = L.concat(R);
+    var rate = [0.42, 0.86, 0.58];
+    var meters = document.querySelectorAll("#e3 .e3-rate i span");
+    var item = reg("#e3", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -40).toFixed(2) + "px,0)";
+      for (var i = 0; i < cols.length; i++) {
+        var r = cols[i];
+        var step = (0.34 + Math.abs(sv) * 0.62) * rate[i] * r.dir;
+        r.off += step;
+        runColumn(r, r.off);
+        if (meters[i]) meters[i].style.transform = "scaleX(" + clamp(Math.abs(step) / 2.4, 0.06, 1).toFixed(3) + ")";
+      }
+    });
+    if (item) item.onMeasure = function () { measureColumns(cols); };
+  })();
+
+  /* 04 ORCHID — the corridor. Six plates on one z axis, coming forward
+     for ever; the whole corridor tips toward the pointer. */
+  (function () {
+    var body = q("#e4 [data-body]"), stage = q("#e4 [data-stage]");
+    var pls = document.querySelectorAll("#e4 [data-z]");
+    var SPAN = 2400, NEAR = 380, z = [], ang = [], hov = -1;
+    [].forEach.call(pls, function (el, i) {
+      z.push(NEAR - (i + 1) * (SPAN / pls.length));
+      ang.push(i * 2.399);
+      if (!RM) {
+        el.addEventListener("pointerenter", function () { hov = i; });
+        el.addEventListener("pointerleave", function () { hov = -1; });
+      }
+    });
+    var depth = q("#e4 [data-corrdepth]"), lastN = -1;
+    reg("#e4", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -34).toFixed(2) + "px,0)";
+      stage.style.transform = "rotateX(" + (P.y * -5).toFixed(2) + "deg) rotateY(" + (P.x * 7).toFixed(2) + "deg)";
+      var spd = 1.5 + Math.abs(sv) * 1.5;
+      var near = 0;
+      for (var i = 0; i < pls.length; i++) {
+        z[i] += spd;
+        if (z[i] > NEAR) z[i] -= SPAN;
+        var t = (z[i] + SPAN - NEAR) / SPAN;
+        var R = 860 + (hov === i ? 130 : 0);
+        var x = Math.cos(ang[i] + z[i] * 0.0011) * R;
+        var y = Math.sin(ang[i] + z[i] * 0.0011) * R * 0.6;
+        var op = clamp(t * 2.2, 0, 1) * clamp((NEAR - z[i]) / 300, 0, 1);
+        pls[i].style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px," + z[i].toFixed(1) + "px)";
+        pls[i].style.opacity = op.toFixed(3);
+        if (z[i] > -700) near++;
+      }
+      if (depth && near !== lastN) { lastN = near; depth.textContent = ("0" + near).slice(-2); }
+    });
+  })();
+
+  /* 05 BRASS — three columns on the left, middle reversed and widest, and
+     nothing moves unless the page does: the offset IS the scroll. */
+  (function () {
+    var body = q("#e5 [data-body]"), tier2 = q("#e5 [data-tier2]");
+    var cols = makeColumns("#e5"), rate = [0.8, 1.35, 0.55];
+    var scrub = q("#e5 [data-scrub] span");
+    var item = reg("#e5", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -40).toFixed(2) + "px,0)";
+      tier2.style.transform = "translate3d(0," + (-s.out * 46).toFixed(2) + "px,0)";
+      tier2.style.opacity = (1 - clamp(s.out * 2.1, 0, 1)).toFixed(3);
+      var base = (sy - s.top) + vh * 0.5;
+      for (var i = 0; i < cols.length; i++) {
+        var r = cols[i];
+        runColumn(r, base * rate[i] * r.dir);
+      }
+      if (scrub) scrub.style.transform = "translateX(" + (s.out * 60).toFixed(2) + "px)";
+    });
+    if (item) item.onMeasure = function () { measureColumns(cols); };
+  })();
+
+  /* 06 IRIS — the scroll pulls the focal plane from the far plate to the
+     near one. Blur and opacity are written only when the plane changes. */
+  (function () {
+    var body = q("#e6 [data-body]");
+    var pls = document.querySelectorAll("#e6 [data-rack] .pl");
+    var dots = document.querySelectorAll("#e6 .e6-focus i");
+    var hov = -1, cur = -1;
+    [].forEach.call(pls, function (el, i) {
+      if (RM) return;
+      el.addEventListener("pointerenter", function () { hov = i; });
+      el.addEventListener("pointerleave", function () { hov = -1; });
+    });
+    /* bake each plate's out-of-focus copy into a canvas, once. The image is
+       drawn 8% oversize so the blur has material to pull in at the edges. */
+    function bake() {
+      for (var i = 0; i < pls.length; i++) {
+        var cv = pls[i].querySelector("[data-soft]");
+        var im = pls[i].querySelector("img");
+        if (!cv || !im || !im.naturalWidth) continue;
+        var w = Math.max(1, Math.round(pls[i].clientWidth));
+        var h = Math.max(1, Math.round(pls[i].clientHeight));
+        if (cv.width === w && cv.height === h && cv.getAttribute("data-done")) continue;
+        cv.width = w; cv.height = h;
+        var g = cv.__g || (cv.__g = cv.getContext("2d"));
+        if (!g) continue;
+        try { g.filter = "blur(9px) saturate(0.24) contrast(1.08) brightness(0.64)"; } catch (e) {}
+        var sc = Math.max(w / im.naturalWidth, h / im.naturalHeight) * 1.08;
+        var dw = im.naturalWidth * sc, dh = im.naturalHeight * sc;
+        g.clearRect(0, 0, w, h);
+        g.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        cv.setAttribute("data-done", "1");
+      }
+    }
+    [].forEach.call(document.querySelectorAll("#e6 [data-rack] img"), function (im) {
+      if (!im.complete) im.addEventListener("load", function () { bake(); }, { once: true });
+    });
+    var item6 = reg("#e6", function (s) {
+      body.style.transform = "translate3d(" + (P.x * -7).toFixed(2) + "px," +
+        (s.cen * -50).toFixed(2) + "px,0)";
+      var idx = hov >= 0 ? hov : clamp(Math.floor(clamp(s.out, 0, 0.999) * 3), 0, 2);
+      if (idx === cur) return;
+      cur = idx;
+      for (var j = 0; j < pls.length; j++) {
+        var d = Math.abs(j - idx);
+        pls[j].classList.toggle("sharp", d === 0);
+        pls[j].style.opacity = d === 0 ? "0.96" : (0.66 - d * 0.16).toFixed(2);
+      }
+      for (var k = 0; k < dots.length; k++) dots[k].classList.toggle("on", k === idx);
+    });
+    if (item6) item6.onMeasure = function () {
+      for (var i = 0; i < pls.length; i++) {
+        var cv = pls[i].querySelector("[data-soft]");
+        if (cv) cv.removeAttribute("data-done");
+      }
+      bake();
+    };
+    bake();
+  })();
+
+  /* 07 JADE — the diagonal band. Three rates, one direction, and the band
+     itself drifts against the pointer. */
+  (function () {
+    var body = q("#e7 [data-body]"), band = q("#e7 [data-cols]");
+    var cols = makeColumns("#e7"), rate = [0.62, 1.0, 0.44];
+    var item = reg("#e7", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -42).toFixed(2) + "px,0)";
+      band.style.transform = "rotate(-11deg) translate3d(" + (P.x * -14).toFixed(2) + "px," +
+        (s.cen * 54 + P.y * -10).toFixed(2) + "px,0)";
+      for (var i = 0; i < cols.length; i++) {
+        var r = cols[i];
+        r.off += (0.5 + Math.abs(sv) * 0.55) * rate[i] * r.dir;
+        runColumn(r, r.off);
+      }
+    });
+    if (item) item.onMeasure = function () { measureColumns(cols); };
+  })();
+
+  /* 08 LAGOON — the split-flap board. Each row on its own clock, always
+     forward, and it holds while you point at it. */
+  (function () {
+    var body = q("#e8 [data-body]"), board = q("#e8 [data-board]");
+    var rows = document.querySelectorAll("#e8 [data-row]");
+    var state = q("#e8 [data-flapstate]"), held = false, wasHeld = null;
+    /* each row draws from its own three frames and no two rows share one, so
+       the board can never show the same plate twice at once */
+    var SEQ = [
+      [["media-4/01-rig-neon.jpg", "Rig"], ["media-4/13-studio-room.jpg", "Studio"], ["media-4/03-cine-lens.jpg", "Lens"]],
+      [["media-4/15-grade-desk.jpg", "Grade"], ["media-4/11-patch-bay.jpg", "Patch bay"], ["media-4/09-motion-wave.jpg", "Render"]],
+      [["media-4/12-on-location.jpg", "Location"], ["media-4/08-stage-red.jpg", "Stage"], ["media-4/05-camera-hands.jpg", "Body"]],
+      [["media-4/14-design-desk.jpg", "Desk"], ["media-4/16-storyboard.jpg", "Board"], ["media-4/10-slate-portrait.jpg", "Slate"]],
+      [["media-4/07-light-streaks.jpg", "Motion"], ["media-4/04-neon-camera.jpg", "Camera"], ["media-4/06-cine-hand.jpg", "Handheld"]]
+    ];
+    var R = [];
+    [].forEach.call(rows, function (el, i) {
+      R.push({ el: el, n: 0, acc: Math.random() * 900, period: 1900 + i * 420, i: 1, seq: SEQ[i],
+               f: el.querySelector(".face.f"), b: el.querySelector(".face.b") });
+    });
+    if (board && !RM) {
+      board.addEventListener("pointerenter", function () { held = true; });
+      board.addEventListener("pointerleave", function () { held = false; });
+    }
+    var last = 0;
+    reg("#e8", function (s, now) {
+      body.style.transform = "translate3d(0," + (s.cen * -44).toFixed(2) + "px,0)";
+      var dt = last ? Math.min(now - last, 48) : 16; last = now;
+      if (state && held !== wasHeld) { wasHeld = held; state.textContent = held ? "held" : "running"; }
+      if (held) return;
+      for (var i = 0; i < R.length; i++) {
+        var r = R[i];
+        r.acc += dt * (1 + Math.abs(sv) * 0.16);
+        if (r.acc < r.period) continue;
+        r.acc = 0;
+        r.n++;
+        r.el.style.transform = "rotateX(" + (r.n * 180) + "deg)";
+        /* the face that has just gone out of sight gets the next frame */
+        var hidden = (r.n % 2 === 1) ? r.f : r.b;
+        r.i = (r.i + 1) % r.seq.length;
+        var im = hidden.querySelector("img"), em = hidden.querySelector("em");
+        if (im) im.src = r.seq[r.i][0];
+        if (em) em.textContent = r.seq[r.i][1];
+      }
+    });
+  })();
+
+  /* 09 VERDANT — three centred columns on pure inertia. The scroll gives
+     them velocity; they coast down to nothing on their own. */
+  (function () {
+    var body = q("#e9 [data-body]"), cols = makeColumns("#e9");
+    var meter = q("#e9 [data-inertia] span"), vel = 0, off = 0;
+    var mul = [1, 0.72, 1.24];
+    var item = reg("#e9", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -26).toFixed(2) + "px,0)";
+      vel += (sv * 1.15 - vel) * 0.07;
+      vel *= 0.965;
+      off += vel;
+      for (var i = 0; i < cols.length; i++) runColumn(cols[i], off * mul[i] * cols[i].dir);
+      if (meter) meter.style.transform = "scaleX(" + clamp(Math.abs(vel) / 14, 0.02, 1).toFixed(3) + ")";
+    });
+    if (item) item.onMeasure = function () { measureColumns(cols); };
+  })();
+
+  /* 10 CLARET — the rostrum gate travels across one frame and pushes in;
+     the cursor trims the height. One transform on the plate, per frame. */
+  (function () {
+    var body = q("#e10 [data-body]");
+    var rost = q("#e10 [data-rost]"), img = q("#e10 [data-rostimg]");
+    var read = q("#e10 [data-rostpos]");
+    var W = 1, H = 1, gw = 1, gh = 1, last = "";
+    var item = reg("#e10", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -30).toFixed(2) + "px,0)";
+      var t = clamp(s.out, 0, 1);
+      /* the push-in is quantised: a scale written every frame would
+         re-rasterise a plate wider than the viewport sixty times a second */
+      var k = 1 + Math.round(t * 6) * 0.028;
+      var fx = 0.05 + t * 0.9;
+      var fy = clamp(0.5 + P.y * 0.4, 0.08, 0.92);
+      var x = -Math.max(0, W * k - gw) * fx;
+      var y = -Math.max(0, H * k - gh) * fy;
+      img.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0) scale(" +
+        k.toFixed(3) + ")";
+      if (read) {
+        var txt = ("0" + Math.round(fx * 100)).slice(-2) + " \u00b7 " + k.toFixed(2) + "\u00d7";
+        if (txt !== last) { last = txt; read.textContent = txt; }
+      }
+    });
+    if (item) item.onMeasure = function () {
+      if (!img || !rost) return;
+      W = img.offsetWidth || 1; H = img.offsetHeight || 1;
+      gw = rost.clientWidth || 1; gh = rost.clientHeight || 1;
+    };
+  })();
+
+  /* 11 CINDER — the accordion. The scroll steps which band is open;
+     pointing at one takes it over. */
+  (function () {
+    var body = q("#e11 [data-body]"), links = q("#e11 [data-links]");
+    var bands = document.querySelectorAll("#e11 [data-acc] .e11-band");
+    var hov = -1, cur = -1;
+    [].forEach.call(bands, function (el, i) {
+      if (RM) return;
+      el.addEventListener("pointerenter", function () { hov = i; });
+      el.addEventListener("pointerleave", function () { hov = -1; });
+    });
+    reg("#e11", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -40).toFixed(2) + "px,0)";
+      links.style.transform = "translate3d(0," + (-s.out * 34).toFixed(2) + "px,0)";
+      links.style.opacity = (1 - clamp(s.out * 2.4, 0, 1)).toFixed(3);
+      var idx = hov >= 0 ? hov : clamp(Math.floor(clamp(s.out, 0, 0.999) * 5), 0, 4);
+      if (idx === cur) return;
+      cur = idx;
+      for (var i = 0; i < bands.length; i++) bands[i].classList.toggle("on", i === idx);
+    });
+  })();
+
+  /* 12 AURORA — the grid is the scroll position: one cell per eighth. */
+  (function () {
+    var body = q("#e12 [data-body]");
+    var cells = document.querySelectorAll("#e12 [data-grid] .e12-cell");
+    var count = q("#e12 [data-fillcount]"), cur = -1;
+    reg("#e12", function (s) {
+      body.style.transform = "translate3d(0," + (s.cen * -36).toFixed(2) + "px,0)";
+      var n = Math.round(clamp(s.ratio * 1.18, 0, 1) * cells.length);
+      if (n === cur) return;
+      cur = n;
+      for (var i = 0; i < cells.length; i++) cells[i].classList.toggle("on", i < n);
+      if (count) count.textContent = String(n);
+    });
+  })();
+
+  /* ═══ the one loop ══════════════════════════════════════════════════ */
+  window.__hx = { frames: 0, contexts: 0, front: null };
+  var st = { out: 0, cen: 0, ratio: 0, top: 0, now: 0, t: 0, sc: 0, amp: 1,
+             px: 0, py: 0, mx: 0, my: 0, has: false, acc: [241, 235, 221] };
+
+  function stepBackground(rec, top, now) {
+    rec.amp += (1 - rec.amp) * 0.03;
+    st.px = P.has ? P.cx : vw * 0.5;
+    st.py = (P.has ? P.cy : vh * 0.5) + sy - top;   /* pointer, in the hero's own space */
+    st.has = P.has;
+    st.t = now;
+    st.amp = rec.amp;
+    st.sc = rec.sc;
+    st.acc = rec.acc;
+    if (GLKIND[rec.kind]) {
+      glHost(rec.slot);
+      st.mx = P.x * 0.9; st.my = -P.y * 0.9;
+      glDraw(rec.kind, rec.slot, { t: now * 0.001, mx: st.mx, my: st.my,
+                                   amp: rec.amp, sc: rec.sc, acc: rec.acc });
+    } else if (rec.impl) {
+      rec.impl.step(st);
+    }
+  }
+
+  function frame(now) {
+    sy = window.scrollY || window.pageYOffset || 0;
+    sv += ((sy - lastSy) - sv) * 0.22;
+    lastSy = sy;
+    P.x += (P.tx - P.x) * 0.075;
+    P.y += (P.ty - P.y) * 0.075;
+
+    var best = null, bestR = 0.1;
+    for (var i = 0; i < regs.length; i++) {
+      var it = regs[i];
+      if (it.ratio > bestR) { bestR = it.ratio; best = it; }
+      if (!it.vis || !it.fn) continue;
+      st.top = it.top;
+      st.out = clamp((sy - it.top) / vh, 0, 1);
+      st.cen = ((sy + vh / 2) - (it.top + it.h / 2)) / vh;
+      st.ratio = it.ratio;
+      st.now = now;
+      it.fn(st, now);
+    }
+    if (best) {
+      var rec = bgs[best.el.id];
+      if (rec) {
+        rec.sc = clamp(Math.abs(sv) / 30, 0, 1);
+        window.__hx.front = best.el.id;
+        stepBackground(rec, best.top, now);
+      }
+    }
+    for (var j = 0; j < mags.length; j++) {
+      var m = mags[j];
+      m.x += (m.tx - m.x) * 0.16;
+      m.y += (m.ty - m.y) * 0.16;
+      if (Math.abs(m.x) > 0.05 || Math.abs(m.y) > 0.05 || m.live) {
+        m.el.style.transform = "translate3d(" + m.x.toFixed(2) + "px," + m.y.toFixed(2) + "px,0)";
+      }
+    }
+    window.__hx.frames++;
+    requestAnimationFrame(frame);
+  }
+
+  /* one static frame per background, for reduced motion */
+  function paintStills() {
+    var ids = Object.keys(bgs);
+    st.px = vw * 0.5; st.py = vh * 0.42; st.has = false; st.t = 5200; st.amp = 1; st.sc = 0.24;
+    ids.forEach(function (id) {
+      var rec = bgs[id];
+      rec.amp = 1; rec.sc = 0.24;
+      st.acc = rec.acc;
+      if (GLKIND[rec.kind]) {
+        if (!glBoot()) return;
+        var still = rec.still;
+        if (!still) return;
+        /* draw into the shared context, then copy the pixels into this hero's
+           own 2d canvas — one context for all four, one frame each */
+        glHost(rec.slot);
+        var drew = glDraw(rec.kind, rec.slot, { t: 7.4, mx: 0.1, my: -0.05, amp: 1, sc: 0.2, acc: rec.acc });
+        if (!drew) return;
+        still.width = GL.cv.width; still.height = GL.cv.height;
+        still.hidden = false;
+        try { still.getContext("2d").drawImage(GL.cv, 0, 0); } catch (e) { still.hidden = true; }
+      } else if (rec.impl) {
+        for (var n = 0; n < 46; n++) { st.t = 5200 + n * 16; rec.impl.step(st); }
+      }
+    });
+    if (GL && GL.cv && GL.cv.parentNode) GL.cv.parentNode.removeChild(GL.cv);
+  }
+
+  window.addEventListener("resize", measure, { passive: true });
+  if (window.ResizeObserver) { new ResizeObserver(function () { measure(); }).observe(document.body); }
+  [].forEach.call(document.images, function (im) {
+    if (!im.complete) im.addEventListener("load", measure, { once: true });
+  });
+  window.addEventListener("load", function () { measure(); setTimeout(measure, 260); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); });
+  measure();
+  for (var qi = 0; qi < regs.length; qi++) { seen.observe(regs[qi].el); ratioObs.observe(regs[qi].el); }
+
+  if (RM) {
+    paintStills();
+  } else {
+    /* compile all four programs up front: a shader compiled mid-scroll is a
+       200ms frame, and it would land exactly as a hero comes into view */
+    ["caustic", "truchet", "kaleido", "tunnel"].forEach(function (k) { glProg(k); });
+    /* and give every canvas background one frame now, so its backing store is
+       allocated before it is ever scrolled to */
+    st.px = vw * 0.5; st.py = vh * 0.5; st.t = 0; st.sc = 0; st.amp = 0.2;
+    Object.keys(bgs).forEach(function (id) {
+      var r = bgs[id];
+      st.acc = r.acc;
+      if (r.impl) { try { r.impl.step(st); } catch (e) {} }
+    });
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
