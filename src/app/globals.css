@@ -38,6 +38,14 @@
 
 :root {
   color-scheme: light;
+  /* THE HEADER BAR'S GUTTER, mirroring `navContainer.gutter` in tokens.ts — the bar is the
+     one thing on the site that does not sit on `--spacing-gutter`, because it is held to
+     famysys.com's own header shell instead. It lives here rather than in `@theme` above
+     because it is not one of Tailwind's theme namespaces and generates no utility; the
+     bar itself takes it through `navShellStyle`, and the panels below take it from here so
+     a card's edges land on the bar's line rather than on the page's. Keep in step with
+     tokens.ts. */
+  --nav-gutter: 5vw;
 }
 
 body {
@@ -510,7 +518,22 @@ main > section.bg-ink + section.bg-ink::after {
      and the bracket before each label is what separates a label from the item before it.
      The bottom padding is the distance from the baseline to the underline. */
   padding: 0 0 4px;
-  font-size: 0.6875rem;
+  /* NOTHING IN THE BAR WRAPS. "Creative Services" and "Ways to Work With Us" are two
+     words and four words of uppercase at a fifth of an em of tracking, and both used to
+     break to a second line as the viewport came down towards the 1280 the inline lists
+     appear at — which pushed the wordmark off the centre line, since the bar's height is
+     set by its tallest item. `nowrap` is what forbids it, and the smaller size is what
+     leaves the two 1fr tracks room to hold the group at 1024, the narrowest width the
+     inline bar appears at, without the grid having to choose. Below 1024 both lists are
+     display:none and this stops applying. */
+  white-space: nowrap;
+  /* 10px. Half a point down from 10.5, and the half point is what buys the WORDMARK its
+     air at 1024: with the call to action back in the bar the six elements exactly filled
+     the line there, so the space either side of the mark fell to the 2rem floor — less
+     than the 42.5px between two nav items, which put the least air around the one thing
+     that should have the most. At 10px the run leaves about 30px of slack, and
+     `space-between` gives every pixel of it to the two gaps beside the mark. */
+  font-size: 0.625rem;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -582,7 +605,7 @@ main > section.bg-ink + section.bg-ink::after {
   transform: rotate(180deg);
 }
 
-/* THE BAR: LINKS EITHER SIDE OF A CENTRED WORDMARK.
+/* THE BAR: TWO PAGES, A CENTRED WORDMARK, TWO PAGES.
    ---------------------------------------------------------------------------
    Three tracks, `1fr auto 1fr`. The wordmark takes the middle one, so it sits on the
    viewport's centre line rather than wherever the two link groups happen to leave it —
@@ -590,14 +613,14 @@ main > section.bg-ink + section.bg-ink::after {
    between` on a flex row would give.
 
    Both `1fr` tracks have `auto` as their minimum, so a group wider than its share would
-   push the wordmark off centre rather than overflow. It does not come to that: the five
-   pages are split three left and two right BY WIDTH — see START_LINK_COUNT in Header.tsx
-   — which leaves the two sides within about 40px of each other at the 1280 the inline nav
-   appears at.
+   push the wordmark off centre rather than overflow. It does not come to that: the bar is
+   FIVE ELEMENTS — two pages, the wordmark, two pages — see START_LINK_COUNT in Header.tsx.
+   The pairing is by WIDTH, the longest label with the shortest, which leaves the two sides
+   within about 40px of each other at the 1280 the inline nav appears at. No label wraps at
+   any width above that; see `white-space` on `.nav-link`.
 
-   Below xl the two lists and the button pair are gone and the drawer trigger takes the
-   right track, so the wordmark stays centred with the Menu word balancing an empty left
-   track. */
+   Below lg the two lists are gone and the drawer trigger takes the right track, so the
+   wordmark stays centred with the Menu word balancing an empty left track. */
 .cnav {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -605,10 +628,48 @@ main > section.bg-ink + section.bg-ink::after {
   gap: clamp(1rem, 3vw, 2.75rem);
 }
 
+/* EVEN SPACING, AND THE WORDMARK LANDS ON THE CENTRE LINE ANYWAY.
+   ---------------------------------------------------------------------------
+   `1fr auto 1fr` puts the wordmark on the exact centre by giving the two outer tracks an
+   equal share — but each group is then anchored to its own outer edge, and the groups are
+   not the same width, so the whitespace around the mark was not the same on both sides.
+   Measured at 1440 before this change: 136px to the left of the wordmark and 299px to the
+   right. That is what read as bunched.
+
+   Three content-sized tracks with `space-between` instead. The free space is split
+   equally between the two gaps, so the space either side of the wordmark is EQUAL by
+   construction, and the run still starts and ends on the bar's own line.
+
+   THE MARK STAYS CENTRED — and it is the button that keeps it there. With even gaps the
+   wordmark sits wherever the two groups leave it, so its position is decided by
+   `left group` versus `right group + button`. Those come to within a few pixels of each
+   other: the two long labels on the left are balanced by two short ones plus the call to
+   action on the right. Measured, the mark lands within about 4px of the container's true
+   centre at all three widths. See the note on the centring decision in Header.tsx.
+
+   `gap` is the FLOOR, not the gap: `space-between` adds the free space on top of it. 2rem
+   is famysys.com's own `gap-8` between the pieces of its bar. */
+@media (min-width: 1024px) {
+  .cnav {
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    /* 1.75rem, the same 28px the items are separated by. It is a FLOOR: everywhere above
+       1024 there is free space and the real gap is far larger. At 1024 there is almost
+       none, and 2rem was enough to push the row past the line — which the grid resolved
+       by shrinking an `auto` track, and the track it took it out of was the wordmark's.
+       See `.cnav-wordmark`, which now refuses. */
+    gap: 1.75rem;
+  }
+}
+
 .cnav-links {
   display: flex;
   align-items: center;
-  gap: clamp(0.875rem, 2.2vw, 2.125rem);
+  /* 28px, flat — the gap famysys.com sets between its own nav items (`gap-7`), measured
+     rather than chosen, and the same at 1440, 1280 and 1024 the way it is there. It used
+     to be a clamp that ran from 14px to 34px, so the items closed up exactly as the bar
+     ran out of room, which is the opposite of what the spacing should do. */
+  gap: 1.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -618,13 +679,20 @@ main > section.bg-ink + section.bg-ink::after {
   grid-column: 1;
 }
 
-/* Inside `.cnav-end`, not a track of its own: the buttons and the drawer trigger share
-   the third column with it. */
+/* Inside `.cnav-end`, not a track of its own: the drawer trigger shares the third column
+   with it, and takes it over below lg. */
 .cnav-links--end {
   justify-content: flex-end;
 }
 
-.cnav-links li {
+/* DIRECT CHILDREN ONLY, and that `>` is load-bearing. A panel is rendered INSIDE the
+   list item that triggers it — see `renderEntry` in Header.tsx — so a descendant selector
+   here reaches every <li> in every open panel as well as the bar's own items. It did:
+   the panel's rows inherited the bar's dark-surface text colour and the bracket below was
+   drawn beside each of them in cream on cream, invisible but present. It stopped being
+   invisible the moment a panel put a list on a light ground that was meant to be read —
+   see `.nav-panel-aside-steps`. */
+.cnav-links > li {
   display: flex;
   align-items: center;
   gap: 0.72em;
@@ -644,7 +712,7 @@ main > section.bg-ink + section.bg-ink::after {
    Decorative in the strict sense — it distinguishes nothing. The chevron is still what
    says an item has a panel under it, and aria-expanded is still what says so to a screen
    reader. */
-.cnav-links li::before {
+.cnav-links > li::before {
   content: "";
   flex: none;
   width: 3px;
@@ -658,15 +726,15 @@ main > section.bg-ink + section.bg-ink::after {
   transition-timing-function: var(--ease-base);
 }
 
-.cnav-links li:hover::before,
-.cnav-links li:focus-within::before {
+.cnav-links > li:hover::before,
+.cnav-links > li:focus-within::before {
   opacity: 1;
   transform: scale(1.9);
   border-color: var(--color-accent-on-dark);
 }
 
 /* The three placements are EXPLICIT, and that is load-bearing rather than tidiness. Below
-   xl the two lists are `display: none`, which takes them out of the grid altogether — with
+   lg the two lists are `display: none`, which takes them out of the grid altogether — with
    auto-placement the wordmark would then fall into the first track and the drawer trigger
    into the second, putting the wordmark hard left and the Menu word beside it instead of
    at the edge. Naming the columns keeps the empty first track, so the wordmark stays on
@@ -677,29 +745,49 @@ main > section.bg-ink + section.bg-ink::after {
   flex: none;
   align-items: center;
   justify-self: center;
+  /* THE MARK IS NEVER SQUEEZED. `auto` grid tracks shrink below their content when the
+     row does not fit, and at 1024 — the narrowest width the inline bar appears at, and the
+     one where the row is at its tightest — the track this sits in was the one that gave:
+     the wordmark rendered 91.7px wide instead of 106px, a 13% horizontal squash of the
+     logo that nothing in the layout announced. `max-content` makes the track refuse, so a
+     row that will not fit overflows visibly and is caught rather than quietly distorting
+     the one element on the bar that must not change shape. */
+  min-width: max-content;
 }
 
+/* The last two pages and the call to action, as one group. The gap between them is
+   famysys.com's `clamp(1rem, 1.9vw, 1.75rem)` — 27.4px at 1440, 24.3px at 1280, 19.5px at
+   1024 — which is the value it puts between its own nav and its own header button. */
 .cnav-end {
   grid-column: 3;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: clamp(1rem, 2.5vw, 2.5rem);
+  gap: clamp(1rem, 1.9vw, 1.75rem);
 }
 
+/* The call to action's own slot. Hidden with the two link groups below lg, where the
+   drawer carries it instead as the button at the foot of the panel. */
 .cnav-actions {
   display: none;
   flex: none;
   align-items: center;
-  gap: 0.75rem;
 }
 
-/* The drawer trigger, and the only thing in the right track below xl. */
+/* The drawer trigger, and the only thing in the right track below lg. */
 .cnav-menu {
   flex: none;
 }
 
-@media (min-width: 1280px) {
+/* THE INLINE BAR NOW STARTS AT LG, NOT XL. It was xl because five page names, a filled
+   button and the wordmark needed the full container width and did not have it at 1280 —
+   at 1024 the two groups ran into each other and the wordmark came off the centre line.
+   Two of those elements are gone. Measured at 1024: the left group is 387px, the right
+   222px and the wordmark 106px in a 942px shell, which leaves 31px clear on the tighter
+   side and nothing wrapping. Below 1024 both groups still go and the drawer carries every
+   one of them; that is where they stop fitting, and 960 is where the wordmark would start
+   to move. */
+@media (min-width: 1024px) {
   .cnav-actions {
     display: flex;
   }
@@ -710,9 +798,10 @@ main > section.bg-ink + section.bg-ink::after {
 }
 
 /* The page names are long — "Ways to Work With Us", "Creative Services" — so the inline
-   lists need the full container width and only fit from xl up. Below that both groups go
-   and the drawer carries every one of them. */
-@media (max-width: 1279px) {
+   lists need most of the container width, and below 1024 they no longer have it. See the
+   measurements on `.cnav-menu` above for why the line is at 1024 rather than the 1280 it
+   used to be. */
+@media (max-width: 1023px) {
   .cnav-links {
     display: none;
   }
@@ -763,15 +852,18 @@ main > section.bg-ink + section.bg-ink::after {
 .nav-panel {
   position: absolute;
   top: 100%;
-  /* The gutter, not a copy of it. The panel's containing block is the header's inner
-     shell, so matching that shell's own padding is what keeps the card's edges on the
-     site's single container line at every width. ALL THREE PANELS take this now — the
-     56rem row of covers and the 22rem column of tier names both ended somewhere the
-     page's own edge does not, and a menu bar whose cards each stop at a different place
-     reads as three menus rather than one. What differs between them is their contents,
-     which is what was actually different: see `navPanelVariant` in NavPanel.tsx. */
-  left: var(--spacing-gutter);
-  right: var(--spacing-gutter);
+  /* THE BAR'S GUTTER, not the page's. The panel's containing block is the header's inner
+     shell, so matching that shell's own padding is what keeps a card's edges under the
+     first and last things on the bar. It used to be `--spacing-gutter` and had to change
+     with the bar: the shell moved onto famysys.com's line, and a panel left on the old
+     value opened 24px outboard of the label that triggered it at 1440.
+
+     ALL THREE PANELS take this — the 56rem row of covers and the 22rem column of tier
+     names both ended somewhere the bar's own edge does not, and a menu whose cards each
+     stop at a different place reads as three menus rather than one. What differs between
+     them is their contents: see `navPanelVariant` in NavPanel.tsx. */
+  left: var(--nav-gutter);
+  right: var(--nav-gutter);
   margin-top: 0.5rem;
   /* A cream card with the faintest warm wash pulled down from its top edge, rather than
      flat canvas. It is a 4% accent over the page ground — 1.03:1, far below anything a
@@ -1058,6 +1150,85 @@ main > section.bg-ink + section.bg-ink::after {
   border-top: 1px solid var(--color-accent-8);
 }
 
+/* THE ASIDE — HOW WE WORK, INSIDE THE WAYS TO WORK PANEL.
+   ---------------------------------------------------------------------------
+   It was a top-level item in the bar. The bar is five elements now — four page names
+   and the wordmark — so the process moved in here, under the four engagements and below
+   a hairline of its own.
+
+   It is given the weight of a block rather than of a link. Left: the name and the
+   approved line that says what the sequence is for. Middle: the five step names, which
+   are the sequence — this is the thing that makes the block read as a part of the panel
+   instead of a leftover link someone parked at the bottom. Right: the way through.
+
+   The numerals are a CSS counter on the <ol>, so they cannot disagree with the order of
+   the markup, and they are not content a screen reader has to hear twice — the list is
+   already ordered. */
+.nav-panel-aside {
+  border-top: 1px solid var(--color-accent-8);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: clamp(1.5rem, 3vw, 3rem);
+  row-gap: 1rem;
+}
+
+.nav-panel-aside-intro {
+  flex: 0 1 auto;
+}
+
+.nav-panel-aside-label {
+  color: var(--color-accent);
+}
+
+.nav-panel-aside-summary {
+  margin-top: 0.375rem;
+}
+
+/* The five names, in order, on one line from the width the panel first appears at. */
+.nav-panel-aside-steps {
+  counter-reset: nav-panel-step;
+  flex: 1 1 22rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem clamp(0.875rem, 1.6vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-graphite-70);
+}
+
+.nav-panel-aside-steps li {
+  counter-increment: nav-panel-step;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4375rem;
+  white-space: nowrap;
+}
+
+.nav-panel-aside-steps li::before {
+  content: counter(nav-panel-step, decimal-leading-zero);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
+.nav-panel-aside-link {
+  flex: none;
+}
+
+/* One hairline, not two. The aside already drew the rule that separates it from the
+   cards, so the panel's own footer link follows it as the next line of the same block
+   rather than opening a second fenced region under it. Beats the utility classes on the
+   element because this file is unlayered and Tailwind's utilities are not. */
+.nav-panel-aside + .nav-panel-footer {
+  border-top: 0;
+  margin-top: 1.25rem;
+  padding-top: 0;
+}
+
 .nav-panel-footer-link {
   position: relative;
   display: inline-block;
@@ -1159,13 +1330,34 @@ main > section.bg-ink + section.bg-ink::after {
   transform: translateY(0);
 }
 
-/* The one place on the bar where a fill is the only thing giving a control a boundary.
-   The accent fill the header CTA now carries reads 2.457:1 against ink, under the 3:1 that
-   1.4.11 puts on a boundary that identifies a control, so a hairline in accent-on-dark
-   (5.015:1) draws the edge the fill cannot. The fill, the text and the hover fill are all
-   exactly as briefed; only the outline is added. */
+/* THE BAR'S CALL TO ACTION.
+   ---------------------------------------------------------------------------
+   The accent-filled light primary, the same fill and canvas label the hero's own primary
+   button carries. The label reads 8.594:1 on that fill; the fill reads 1.837:1 against the
+   bar, under the 3:1 that 1.4.11 asks of a boundary that identifies a control, so the
+   hairline below draws the edge the fill cannot. Both rows are in `npm run check-colours`,
+   the second of them under AVOIDED, which is where the hairline's reason for existing
+   should be legible. The fill, the label and the hover are exactly as briefed; only the
+   outline is added. */
 .header-cta-primary {
   border: 1px solid var(--color-accent-on-dark);
+}
+
+/* THE BAR'S BUTTON IS SMALLER THAN THE HERO'S, and deliberately. `Button` ships
+   `px-6 py-3 text-small` — a 15px label in 24px of padding, about 204px wide for "Start a
+   Conversation" — and at that size the six elements stop holding one line at 1024, which
+   is the narrowest width the inline bar appears at. The colour, the shape and the rolling
+   label are untouched; only the size is the bar's own. This is furniture, and the hero's
+   button is the page's actual invitation. */
+.cnav-cta {
+  /* The horizontal padding scales because the row's spare width does. At 1440 there is
+     nearly 200px of slack either side of the wordmark and the button can be comfortable;
+     at 1024 there is almost none, and 17px of padding on each end was a third of what the
+     wordmark needed to stop being squeezed. Vertical padding and the label do not move —
+     the button keeps its height and its weight, and only its shoulders come in. */
+  padding: 0.5625rem clamp(0.6875rem, 1.18vw, 1.0625rem);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1564,8 +1756,25 @@ div.grid > *:nth-child(even).card-surface-dark {
   will-change: transform;
 }
 
+/* TWO LINES, NOT THREE. The headline is one sentence — "Creative production, without the
+   agency overhead." — and it is meant to break once, after the comma. At 4.8vw it broke
+   twice from 1600 all the way down, because the second half is the longer of the two: the
+   copy column is `min(72ch, 48vw)` and "without the agency overhead." needs the whole of
+   it. Measured, not guessed: two lines hold at or below 60px at 1440 and 52px at 1280, so
+   3.9vw clears both by about 4% and the 3.5rem ceiling holds the same break out to 2560,
+   where the column stops growing at 72ch and a larger size would only break it again.
+   1024 sets 40px and takes three lines, which is the width the brief allows it. */
 .hero-final-heading {
-  font-size: clamp(1.875rem, 4.8vw, 4.5rem);
+  font-size: clamp(1.875rem, 3.9vw, 3.5rem);
+  /* TWO EVEN LINES, not two lines. Left to itself the break fell after "without", which
+     is where the first line runs out of room rather than where the sentence divides:
+     616.5px against 440.7px at 1440, a 176px step that read as a ragged edge rather than
+     as a decision. `balance` makes the browser even the lines out, which puts the break at
+     the comma — the sentence's own joint. It is a progressive enhancement: a browser
+     without it wraps exactly as before and still gets two lines, so nothing regresses.
+     The measurement RevealHeading does to stagger the reveal happens after layout and is
+     unaffected by where the break lands. */
+  text-wrap: balance;
   line-height: 1.02;
   letter-spacing: -0.034em;
   font-weight: 400;
@@ -1633,6 +1842,7 @@ div.grid > *:nth-child(even).card-surface-dark {
    against ink, under the 3:1 that 1.4.11 puts on the boundary identifying a control, so
    the lightened accent (8.395:1) draws the edge the fill cannot. The fill, the label and
    the hover are exactly as designed; only the outline is added. See `.header-cta-primary`,
+   which is the bar's copy of the same arrangement at a smaller size,
    which solves the identical problem on the bar. */
 .hero-final-btn--primary {
   border: 1px solid var(--color-accent-on-dark);
@@ -2768,22 +2978,74 @@ div.grid > *:nth-child(even).card-surface-dark {
   transform: scaleX(1);
 }
 
-/* Footer links had no hover at all and sat at one flat canvas-80, which made a column of
-   nine of them read as a paragraph rather than as nine targets. Resting colour drops to
-   canvas-60 (5.450:1 on ink, comfortably over the text floor) so the column headings above
-   them can be full canvas and carry the hierarchy, and the hover lifts to canvas with a
-   3px nudge — the same colour-plus-shift the panel rows already use. */
+/* Footer links rest at canvas-60 (5.450:1 on ink, comfortably over the text floor) so the
+   column headings above them — the same value, but uppercase and tracked — read as
+   headings rather than as more list items; the hover lifts to full canvas.
+
+   COLOUR ONLY: no nudge, no lift, no scale. The 3px translate this used to carry was the
+   one thing in the footer that moved, and famysys.com's own footer moves nothing — its
+   links are `transition-colors duration-300` and that is all. 320ms is the nearest token
+   on this site to the parent's 300ms, and the easing is already identical: the parent's
+   `--ease-brand` and this site's `--ease-base` are both cubic-bezier(0.22, 1, 0.36, 1).
+
+   The 24px minimum hit area is the parent's too. These are 15px links stacked 14px apart,
+   which on a phone is a column of targets under the accessible minimum without it; the
+   negative block margin keeps the padding from opening the visual gaps back up. */
 .footer-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-block: -0.375rem;
+  padding-block: 0.375rem;
   color: var(--color-canvas-60);
-  transition-property: color, transform;
-  transition-duration: var(--duration-fast);
+  transition-property: color;
+  transition-duration: var(--duration-base);
   transition-timing-function: var(--ease-base);
 }
 
 .footer-link:hover {
   color: var(--color-canvas);
-  transform: translateX(3px);
+}
+
+/* A CONNECT name with no handle behind it yet — a <span>, not an anchor. It must not
+   offer a hover it cannot honour, and the cursor stays an arrow. */
+.footer-link--unlinked:hover {
+  color: var(--color-canvas-60);
+}
+
+/* THE ADMIN DOT — the last thing on the descriptor line.
+   Five pixels of canvas-10 on ink: present, and effectively invisible unless you know it
+   is there. Hover and keyboard focus both take it to accent-on-dark, the lightened accent
+   the palette keeps for exactly this — the brand accent itself measures 2.457:1 on ink
+   and would stay invisible on hover, which is the one moment it has to be seen.
+
+   The dot is 5px and its anchor is 24px, so the target is reachable without the mark
+   being large. `outline-offset` keeps the focus ring clear of the descriptor's letters. */
+.footer-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin-block: -0.375rem;
+  padding-block: 0.375rem;
+  outline-offset: 2px;
+}
+
+.footer-admin-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: var(--color-canvas-10);
+  transition-property: background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.footer-admin:hover .footer-admin-dot,
+.footer-admin:focus-visible .footer-admin-dot {
+  background-color: var(--color-accent-on-dark);
 }
 
 /* The address is the footer's one real call to action, so it is underlined at rest rather
@@ -2806,25 +3068,10 @@ div.grid > *:nth-child(even).card-surface-dark {
 @media (prefers-reduced-motion: reduce) {
   /* The seam is a boundary before it is an animation, so the accent segment is held OPEN
      rather than closed — an entry gesture that never arrives would take the marker with
-     it. The link nudge simply stops. */
+     it. Nothing else in the footer moves: its links and its admin dot change colour and
+     nothing more, which is motion-safe as it stands. */
   .footer-divider-accent {
     transform: scaleX(1);
-  }
-  .footer-link:hover {
-    transform: none;
-  }
-}
-
-/* §4.17 Footer accordions — same disclosure pattern as the mobile drawer.
-   Below md, panels collapse per the trigger's open state. At md+, every
-   column is always visible and the accordion buttons become inert headings. */
-.footer-accordion-panel[data-open="false"] {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .footer-accordion-panel[data-open="false"] {
-    display: block;
   }
 }
 
@@ -4344,55 +4591,6 @@ html {
   clip-path: inset(0 0 0 0);
 }
 
-/* The photograph settles from 1.06 as the frame opens, so the image is still moving when
-   the frame finishes and the two read as one gesture rather than as two effects. The
-   gallery's tiles keep their own 1.03 settle — see `.work-tile`. */
-.work-card .media-tile img {
-  transform: scale(1.06);
-  transition-property: transform;
-  transition-duration: 900ms;
-  transition-delay: var(--work-reveal-delay, 0ms);
-  transition-timing-function: var(--ease-base);
-}
-
-.work-card[data-revealed="true"] .media-tile img {
-  transform: scale(1);
-}
-
-/* A beat behind the frame — the picture arrives, then it is named. */
-.work-card-caption {
-  opacity: 0;
-  transform: translateY(12px);
-  transition-property: opacity, transform;
-  transition-duration: var(--duration-base);
-  transition-delay: calc(var(--work-reveal-delay, 0ms) + 260ms);
-  transition-timing-function: var(--ease-base);
-}
-
-.work-card[data-revealed="true"] .work-card-caption {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hover fires from the whole card, not from the media alone. The caption is part of the
-   card, and a tile that dropped its lift the moment the cursor crossed onto its own title
-   read as a bug. Same escalation the gallery's tiles already use. */
-.work-card:hover .media-tile {
-  border-color: var(--color-accent);
-  transform: translateY(-6px);
-}
-
-.work-card:hover .media-tile-chip {
-  background-color: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-/* Has to out-specify the settle above, or the settled 1 would win under the cursor and
-   the image would sit still on hover — the same trap `.work-tile` documents. */
-.work-card[data-revealed="true"]:hover .media-tile-media--scalable {
-  transform: scale(1.05);
-}
-
 /* ONE SHAPE FOR EVERY TILE, and the end of a long argument with itself.
 
    The ratios used to cycle per tile, and the spread that produced — a 3:4 tile is 731px
@@ -5299,3 +5497,639 @@ html {
   margin-top: 0;
 }
 
+
+/* ============================================================================
+   THE HOMEPAGE'S THREE IMAGERY-LED SECTIONS
+   ============================================================================
+   How We Work, Ways to Work With Us and Selected Creative Work, ported from the
+   approved exploration (docs/explorations/03-sections/set-C.html). One idea per
+   section: five frames that take the screen in turn, four tiles that open, eight
+   covers at full width. The pictures carry all three and the words step back.
+
+   TWO RULES GOVERN EVERYTHING BELOW, and they are the reason the markup is
+   shaped the way it is.
+
+   1. NO COPY SITS ON A PHOTOGRAPH. Every caption, name and sentence is inside a
+      fully opaque plate. A photograph is not a background whose contrast can be
+      measured once and relied on — the next image, or the next crop, moves it.
+
+   2. THE BASE STATE IS THE FINAL STATE. Everything down to the MOTION LAYER
+      heading renders the sections complete: every sentence on the page, every
+      panel open, no picture moving, no sticky. The motion layer is only ever
+      added ON TOP, scoped to `[data-motion="on"]`, which the three components
+      set once they have mounted and confirmed the reader has not asked for
+      reduced motion. So a reader who has asked for it needs nothing unwound,
+      and a page that never runs its JavaScript is finished rather than
+      half-revealed. See `useMotionLayer`.
+
+   Colour is entirely token-side: the exploration's inline values map one for one
+   onto the palette (forest to ink, sand to canvas, ivory to card, claret to
+   accent, rose to accent-on-dark, brass to accent-warm, forest-2 to section-alt),
+   so a change in colors.ts moves these three sections with the rest of the site.
+   The plates that have to match the section they sit in read `--section-ground`
+   rather than naming ink, so the seam alternation carries them too. */
+
+/* The band keeps the container line; everything under it runs to the viewport
+   edge. `container-type` on the two grids is what lets a plate inside a
+   half-width cell still measure the container inset against the FULL width —
+   `100%` inside `--container-inset` would otherwise resolve against the cell and
+   collapse to the bare gutter, leaving the tags 80px inside the heading above
+   them. `.frames` is deliberately not a query container: its children are
+   sticky, and containment is not a thing to put near that without a reason. */
+.imagery-section > .frames,
+.imagery-section > .tiles,
+.imagery-section > .covers {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+}
+
+.tiles,
+.covers {
+  container-type: inline-size;
+  /* The container line, measured against the grid rather than against the cell a
+     plate happens to sit in. Below the 80rem max width the second term goes
+     negative and this falls back to the bare gutter, exactly as
+     `--container-inset` does. */
+  --imagery-inset: max(
+    var(--spacing-gutter),
+    calc((100cqi - 80rem) / 2 + var(--spacing-gutter))
+  );
+}
+
+/* The eyebrow is accent on cream and the LIGHTENED accent on navy. The raw accent
+   manages 2.457:1 on ink and could not carry words there; accent-on-dark is
+   derived against full ink at 5.015:1 and can. Same substitution the focus ring
+   and the display accent both make, keyed off the same class. */
+.imagery-eyebrow {
+  color: var(--color-accent);
+}
+
+.surface-dark .imagery-eyebrow {
+  color: var(--color-accent-on-dark);
+}
+
+/* DEVIATION (set C, brand deviation 5): these three section headings are set in
+   Instrument Serif Italic rather than in Jost. Everywhere else on the site the
+   serif is an accent inside a Jost heading; here it is the heading, which is the
+   approved exploration's own device — a heading set this way reads as a caption
+   to the picture under it rather than as page furniture, which is the whole idea
+   of the set. It carries the surrounding text colour, NOT the accent: only the
+   numerals, the tier descriptor and the invitation take accent, so this is not
+   `.text-display-accent` and must not be folded into it. */
+.imagery-display {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.imagery-lede {
+  margin-top: 1.1rem;
+  max-width: 46ch;
+  color: var(--color-ink-70);
+}
+
+.surface-dark .imagery-lede {
+  color: var(--color-canvas-80);
+}
+
+/* ----------------------------------------------------------------------------
+   1 · HOW WE WORK — five full-bleed frames, each taking the screen in turn.
+   ---------------------------------------------------------------------------- */
+.frames {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.frame-step {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-section-alt);
+}
+
+.frame-shot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.frame-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.frame-veil {
+  display: none;
+}
+
+.frame-caption {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2.25rem);
+  align-items: baseline;
+  background-color: var(--section-ground, var(--color-ink));
+  padding: 1.5rem var(--container-inset);
+}
+
+.frame-numeral {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  color: var(--color-accent-on-dark);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  line-height: 0.9;
+  flex: none;
+}
+
+.frame-name {
+  font-size: clamp(1.35rem, 2.8vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+
+.frame-say {
+  margin-top: 0.6rem;
+  color: var(--color-canvas-80);
+  max-width: 52ch;
+}
+
+.frame-more {
+  display: none;
+}
+
+/* ----------------------------------------------------------------------------
+   2 · WAYS TO WORK WITH US — four pictures, a name on each, and nothing else
+   until a tile is opened.
+   ---------------------------------------------------------------------------- */
+.tiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  background-color: var(--section-ground, var(--color-canvas));
+}
+
+/* Each tile is its own query container, because the four are deliberately not the same
+   width — three equal tiers against a Custom tile half again as wide — and the panel that
+   opens inside one has to answer the CELL it is in rather than the viewport. This is also
+   what `--imagery-inset` resolves `100cqi` against inside a tile, which is what it should
+   always have been measuring: a plate inside a quarter-width cell has no business taking
+   the page's container inset. */
+.tile {
+  position: relative;
+  background-color: var(--color-ink);
+  overflow: hidden;
+  container-type: inline-size;
+  /* The plate's offset from the tile edge, and its own internal padding. The open panel
+     adds the two together for its inline padding, so the repeated name inside the panel
+     starts on exactly the vertical the name on the picture started on. */
+  --tile-inset: clamp(0.75rem, 4cqi, 1rem);
+  --tile-plate-pad: clamp(0.8rem, 3.5cqi, 1.25rem);
+}
+
+.tile-shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.tile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tile-hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  background-color: var(--color-ink);
+  color: var(--color-text-on-dark);
+  font: inherit;
+  padding: 1.25rem var(--imagery-inset);
+}
+
+.tile-name {
+  display: block;
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.tile-sign {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-accent-on-dark);
+}
+
+/* The partnership is the row's destination rather than its fourth option, and the
+   warm accent is what says so without a badge. */
+.tile[data-custom="true"] .tile-sign {
+  color: var(--color-accent-warm);
+}
+
+.tile-detail {
+  background-color: var(--color-card);
+  color: var(--color-ink);
+  padding: clamp(1.3rem, 2.6vw, 2rem) var(--imagery-inset) clamp(1.5rem, 3vw, 2.25rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* The name, repeated inside the open panel. The panel covers the plate it was
+   opened from, and an open panel has to say which tier it belongs to. Hidden in
+   the base state, where the plate is still above it. */
+.tile-who {
+  display: none;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.tile-desc {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  color: var(--color-accent);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.tile-sum {
+  color: var(--color-graphite);
+  max-width: 52ch;
+}
+
+.tile-facts {
+  margin: 0;
+  display: grid;
+  gap: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-ink-20);
+}
+
+.tile-facts dt {
+  color: var(--color-accent);
+  margin-bottom: 0.25rem;
+}
+
+.tile-facts dd {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-graphite);
+}
+
+.tile-invite {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  line-height: 1.15;
+  max-width: 24ch;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-ink-20);
+}
+
+.tile-go {
+  align-self: flex-start;
+  max-width: 100%;
+  background-color: var(--color-accent);
+  color: var(--color-card);
+  text-decoration: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.84rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tile-go:hover {
+  background-color: var(--color-primary-button-hover);
+}
+
+.tile-shut {
+  display: none;
+}
+
+/* ----------------------------------------------------------------------------
+   3 · SELECTED CREATIVE WORK — the covers at full width, two to a row with no
+   gutter between them.
+   ---------------------------------------------------------------------------- */
+.covers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cover {
+  position: relative;
+  background-color: var(--color-section-alt);
+}
+
+.cover-window {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 5 / 4;
+}
+
+.cover-image {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-tag {
+  background-color: var(--section-ground, var(--color-ink));
+  padding: 1.1rem var(--imagery-inset) 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.cover-numeral {
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  color: var(--color-accent-on-dark);
+  font-size: 1.35rem;
+  line-height: 1;
+  flex: none;
+}
+
+.cover-title {
+  font-size: 1.05rem;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+
+.cover-intent {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+  color: var(--color-canvas-80);
+}
+
+@media (min-width: 780px) {
+  .covers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Three equal tiers and a Custom tile a little over half again as wide, all on one
+   row, so the widest picture on the page is the partnership. */
+@media (min-width: 1040px) {
+  .tiles {
+    grid-template-columns: 1fr 1fr 1fr 1.6fr;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   MOTION LAYER. Added on top of everything above, never instead of it.
+   ---------------------------------------------------------------------------- */
+
+/* The caption sits at the TOP of the frame, not the foot: the next frame climbs
+   over this one from below, and a caption at the bottom would be the first thing
+   it covered. It clears the fixed header, which the exploration did not have to
+   account for and the site does — `--header-height` is published by Header.tsx
+   from its own measurement, so this cannot drift when the bar changes height. */
+.frames[data-motion="on"] .frame-step {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  will-change: transform;
+}
+
+.frames[data-motion="on"] .frame-shot {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+}
+
+.frames[data-motion="on"] .frame-image {
+  will-change: transform;
+}
+
+/* Opaque, and only its opacity is written: this is what darkens a covered frame
+   under the one arriving over it. A translucent scrim over a photograph would be
+   a different colour on every frame. */
+.frames[data-motion="on"] .frame-veil {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background-color: var(--section-ground, var(--color-ink));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.frames[data-motion="on"] .frame-caption {
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
+  margin: calc(var(--header-height, 5rem) + clamp(1.5rem, 5vh, 3.5rem)) 0 0 0;
+  padding: 1.1rem clamp(1.5rem, 3vw, 2.25rem);
+  max-width: min(92vw, 34rem);
+}
+
+/* The sentence is a SECOND opaque plate that rises out of the caption, so nothing
+   readable ever sits directly on the photograph. It stays in the accessibility
+   tree throughout — a reader on a screen reader gets all five sentences whether
+   or not anything has been hovered. */
+.frames[data-motion="on"] .frame-say {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 2px);
+  width: 100%;
+  margin: 0;
+  padding: 1.1rem clamp(1.5rem, 3vw, 2.25rem);
+  background-color: var(--section-ground, var(--color-ink));
+  color: var(--color-canvas-80);
+  max-width: none;
+  opacity: 0;
+  transform: translate3d(0, -10px, 0);
+  transition:
+    opacity 350ms var(--ease-base),
+    transform 450ms var(--ease-base);
+  pointer-events: none;
+}
+
+.frames[data-motion="on"] .frame-caption:hover .frame-say,
+.frames[data-motion="on"] .frame-caption:focus-within .frame-say,
+.frames[data-motion="on"] .frame-step[data-open="true"] .frame-say {
+  opacity: 1;
+  transform: none;
+}
+
+/* The sentence answers the pointer; this answers the keyboard and the touch
+   screen, which have no hover to give. */
+.frames[data-motion="on"] .frame-more {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-accent-on-dark);
+  background: none;
+  border: 0;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* The tiles are sized to the screen rather than to a ratio, so a tile has room
+   for its own detail once it is opened. */
+.tiles[data-motion="on"] .tile-shot {
+  aspect-ratio: auto;
+  height: min(80vh, 44rem);
+}
+
+.tiles[data-motion="on"] .tile-hit {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  background: none;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+}
+
+.tiles[data-motion="on"] .tile-plate {
+  background-color: var(--color-ink);
+  padding: var(--tile-plate-pad);
+  margin: var(--tile-inset);
+  transition: transform 400ms var(--ease-base);
+}
+
+.tiles[data-motion="on"] .tile-hit:hover .tile-plate {
+  transform: translate3d(0, -4px, 0);
+}
+
+.tiles[data-motion="on"] .tile-who {
+  display: block;
+}
+
+/* NO SCROLLBAR IN THE PANEL, and the padding is the reason it does not need one. It used
+   to take `--imagery-inset` — the page's container line — inside a cell a quarter of the
+   page wide, which left about 60px of measure: "Talk to us" broke over three lines, the
+   field labels over three more, and the whole panel overflowed into a scrollbar on both
+   axes. It takes the tile's own inset now, and the compact scale below takes care of the
+   rest, so the content fits the 84% the design gives it. */
+.tiles[data-motion="on"] .tile-detail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 84%;
+  overflow: hidden;
+  padding: calc(var(--tile-inset) + var(--tile-plate-pad));
+  gap: clamp(0.5rem, 1.8cqi, 0.85rem);
+  transform: translate3d(0, 101%, 0);
+  transition: transform 550ms var(--ease-base);
+  will-change: transform;
+}
+
+/* THE COMPACT SCALE. A tier's panel and the Custom partnership's panel hold the same kinds
+   of thing at very different widths, and one type scale cannot serve both: at the tier
+   width every line breaks three times and the panel runs past its own height. The three
+   equal tiers fall under this at every viewport the row appears at; the Custom tile, half
+   again as wide, never does. */
+@container (max-width: 30rem) {
+  .tiles[data-motion="on"] .tile-who {
+    font-size: clamp(1.05rem, 5.5cqi, 1.35rem);
+  }
+
+  .tiles[data-motion="on"] .tile-desc {
+    font-size: clamp(0.95rem, 4.6cqi, 1.15rem);
+  }
+
+  .tiles[data-motion="on"] .tile-sum {
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .tiles[data-motion="on"] .tile-facts {
+    gap: 0.65rem;
+    padding-top: 0.7rem;
+  }
+
+  /* The label is the worst offender at this width: at 0.2em of tracking "Typical work
+     includes" takes three lines on its own. */
+  .tiles[data-motion="on"] .tile-facts dt {
+    font-size: 0.625rem;
+    letter-spacing: 0.11em;
+  }
+
+  .tiles[data-motion="on"] .tile-facts dd {
+    font-size: 0.825rem;
+    line-height: 1.4;
+  }
+
+  .tiles[data-motion="on"] .tile-invite {
+    font-size: clamp(1rem, 4.8cqi, 1.25rem);
+  }
+
+  .tiles[data-motion="on"] .tile-go {
+    padding: 0.7rem 1.1rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+}
+
+.tiles[data-motion="on"] .tile[data-open="true"] .tile-detail {
+  transform: none;
+}
+
+.tiles[data-motion="on"] .tile[data-open="true"] .tile-hit {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.tiles[data-motion="on"] .tile-shut {
+  display: block;
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  color: var(--color-accent);
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Each cover sits in a window it is taller than, and the picture moves inside that
+   window as the page scrolls — the left column downward, the right column upward. */
+.covers[data-motion="on"] .cover-image {
+  height: 124%;
+  top: -12%;
+  will-change: transform;
+}
+
+.covers[data-motion="on"] .cover-tag {
+  position: relative;
+}
+
+/* THE INTENT LINE HIDES ONLY WHERE THERE IS A POINTER TO SUMMON IT WITH. A cover
+   carries no button of its own the way a process frame does, and eight focusable
+   articles carrying no action would be eight tab stops that go nowhere — so on a
+   touch screen and on a coarse pointer the line is simply on the page. */
+@media (hover: hover) and (pointer: fine) {
+  .covers[data-motion="on"] .cover-intent {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    transition:
+      opacity 300ms var(--ease-base),
+      transform 400ms var(--ease-base);
+  }
+
+  .covers[data-motion="on"] .cover:hover .cover-intent,
+  .covers[data-motion="on"] .cover:focus-within .cover-intent {
+    opacity: 1;
+    transform: none;
+  }
+}

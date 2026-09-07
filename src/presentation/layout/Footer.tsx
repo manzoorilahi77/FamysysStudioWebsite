@@ -1,11 +1,13 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import type { FooterContentView, MegaMenuColumnView, NavEntryView } from "../lib/viewModels";
+import type {
+  CtaView,
+  FooterContentView,
+  FooterSocialLinkView,
+  NavEntryView,
+} from "../lib/viewModels";
 import { shellStyle } from "../components/Container";
 import { Wordmark } from "../components/Wordmark";
-import { useInView } from "../hooks/useInView";
+import { FooterSeam } from "./FooterSeam";
 
 interface FooterProps {
   readonly entries: ReadonlyArray<NavEntryView>;
@@ -13,175 +15,189 @@ interface FooterProps {
 }
 
 /**
- * The footer's columns are the navigation's own panels, re-titled with the nav item they
- * hang off. Deriving them here rather than storing a second copy is what stops the footer
- * drifting away from the menu — there is only one source for both.
+ * A column of links under a small tracked heading. Three of them sit in the upper band,
+ * and they are `<nav>` elements rather than `<div>`s: each is a named group of
+ * destinations, which is what gives a screen reader "Explore", "Connect" and "Legal" as
+ * landmarks it can jump between instead of one undifferentiated list of eleven links.
  */
-function footerColumns(entries: ReadonlyArray<NavEntryView>): ReadonlyArray<MegaMenuColumnView> {
-  return entries
-    .filter((entry) => entry.panel.columns.length > 0 || entry.panel.features.length > 0)
-    .map((entry) => ({
-      title: entry.label,
-      items: [
-        ...entry.panel.columns.flatMap((column) => column.items),
-        ...entry.panel.features.map((feature) => ({ ...feature, description: "" })),
-      ],
-    }));
-}
-
-interface FooterColumnProps {
-  readonly column: MegaMenuColumnView;
-  readonly isOpen: boolean;
-  readonly onToggle: () => void;
-}
-
-function FooterColumn({ column, isOpen, onToggle }: FooterColumnProps) {
-  const panelId = `footer-panel-${column.title.toLowerCase().replace(/\s+/g, "-")}`;
-  const triggerId = `${panelId}-trigger`;
-
+function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border-b border-canvas-10 py-4 md:border-0 md:py-0">
-      {/* Full canvas, where this was canvas-80 and the links under it were canvas-80 too —
-          a heading and its list at one value is a paragraph, not a column. */}
-      <button
-        id={triggerId}
-        type="button"
-        aria-expanded={isOpen}
-        aria-controls={panelId}
-        onClick={onToggle}
-        className="label w-full text-left text-canvas md:pointer-events-none"
-      >
-        {column.title}
-      </button>
-      <ul id={panelId} data-open={isOpen} className="footer-accordion-panel mt-5 space-y-3">
-        {/* Keyed on href AND label, because an href alone is not unique here. The Ways to
-            Work panel is four tiers that all live on one page, so its four items share
-            `/ways-to-work-with-us` — and this column is derived from that panel. Keying on
-            href alone gave React four children with the same key, on every page, since the
-            footer is on all of them. NavPanel and MobileDrawer already key this way. */}
-        {column.items.map((item) => (
-          <li key={`${item.href}-${item.label}`}>
-            <Link href={item.href} className="footer-link text-small">
-              {item.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <nav aria-label={title}>
+      <p className="label text-canvas-60">{title}</p>
+      <ul className="mt-6 flex flex-col gap-3.5">{children}</ul>
+    </nav>
+  );
+}
+
+function FooterLink({ cta }: { cta: CtaView }) {
+  return (
+    <li>
+      <Link href={cta.href} className="footer-link text-small">
+        {cta.label}
+      </Link>
+    </li>
   );
 }
 
 /**
- * THE SEAM. Every page hands the footer a dark section — FinalCta on six routes,
- * ContactFormSection on the seventh — and the footer is ink as well, so the two used to
- * meet at nothing. The hairline, the accent segment drawn across it and the tonal lift
- * below are what make this a boundary; see `.site-footer` in globals.css for why it takes
- * three cues rather than one border.
- *
- * The observer sits on the divider rather than on the footer, so the wipe fires as the
- * seam itself arrives rather than whenever the footer happens to be 15% visible — which,
- * on a footer this tall, would be most of a screen too early.
+ * A CONNECT entry. With a handle it is a link that opens in a new tab; without one it is
+ * the name on its own — deliberately not an anchor. An `<a href="#">` would look and
+ * behave like a working link, scroll the reader to the top of the page when clicked, and
+ * announce itself to a screen reader as a destination that does not exist. The name alone
+ * says the same thing the parent's column says (the Studio is on these networks) without
+ * promising a page that has not been supplied.
  */
-function FooterSeam() {
-  const [ref, isInView] = useInView<HTMLDivElement>({ threshold: 0.9, once: true });
+function FooterSocialItem({ link }: { link: FooterSocialLinkView }) {
+  if (link.href === null) {
+    return (
+      <li>
+        <span className="footer-link text-small footer-link--unlinked">{link.label}</span>
+      </li>
+    );
+  }
 
   return (
-    <div ref={ref} className="footer-divider" data-drawn={isInView}>
-      <div className="mx-auto w-full" style={shellStyle}>
-        <span className="footer-divider-accent" aria-hidden="true" />
-      </div>
-    </div>
+    <li>
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="footer-link text-small"
+      >
+        {link.label}
+      </a>
+    </li>
   );
 }
 
+/**
+ * THE SITE FOOTER, SHAPED AGAINST famysys.com's OWN.
+ *
+ * Two bands, as the parent has them:
+ *
+ *   UPPER — the wordmark and the tagline on the left, then EXPLORE, CONNECT and LEGAL as
+ *   three columns of links on the right.
+ *
+ *   LOWER, under a hairline — "Get in touch" and the email address at display size on the
+ *   left; the copyright and the descriptor line, small and tracked, bottom-aligned on the
+ *   right.
+ *
+ * WHAT IS THE PARENT'S AND WHAT IS THE STUDIO'S. The structure, the column names and the
+ * lower band's arrangement are the parent's, deliberately — this is the same company and
+ * the two footers should read as one family. The ground is not: famysys.com's footer is
+ * cream, and this one is the Studio's own dark forest ink, so every value here comes from
+ * the canvas-on-ink scale rather than from the parent's ink-on-canvas one.
+ *
+ * WHAT IS MISSING, AND WHY IT IS MISSING RATHER THAN BORROWED. The parent's footer prints
+ * a postal address and links three social accounts. Both belong to the parent company,
+ * and nothing in the brief says the Studio shares either. So the address block does not
+ * render at all and the three network names carry no links — see the notes in
+ * marketing.content.ts and the entries in docs/content-todo.md. The alternative, printing
+ * the parent's address and pointing "LinkedIn" at the parent's profile, would be wrong on
+ * every page of the site rather than absent from it.
+ *
+ * EXPLORE IS DERIVED, NOT LISTED. It reads the navigation, from the same source the
+ * header reads, so the column cannot drift from the menu — and that includes the pages
+ * the BAR does not name. How We Work is one: it is not a top-level bar item any more, it
+ * is a block inside the Ways to Work With Us panel, and it is picked up here from that
+ * block rather than retyped, so the footer lists all six content pages either way.
+ *
+ * Only Contact is named in content, because it is not a navigation item at all — the bar
+ * used to reach it through a CTA button, which has been removed, and the drawer still
+ * does.
+ */
 export function Footer({ entries, footer }: FooterProps) {
-  const [openColumn, setOpenColumn] = useState<string | null>(null);
-  const columns = footerColumns(entries);
-  const hasBottomLinks = footer.legalLinks.length > 0 || footer.socialLinks.length > 0;
+  const exploreLinks: ReadonlyArray<CtaView> = [
+    ...entries.flatMap((entry) => [
+      { label: entry.label, href: entry.href, isExternal: false },
+      ...(entry.panel.asideHref && entry.panel.asideLabel
+        ? [{ label: entry.panel.asideLabel, href: entry.panel.asideHref, isExternal: false }]
+        : []),
+    ]),
+    footer.contactLink,
+  ];
 
   return (
     <footer className="site-footer surface-dark bg-ink">
       <FooterSeam />
 
       <div className="mx-auto w-full" style={shellStyle}>
-        {/* Twelve tracks, brand on four and the columns on the remaining seven with one
-            left as the channel between them. The brand block was one fifth of a five-track
-            grid before, which left the tagline breaking every four words against columns
-            that had room to spare. */}
-        <div className="grid gap-10 py-20 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-4">
-            <Wordmark alt="Famysys Studio" dark className="h-8" />
-            <p className="text-small mt-5 max-w-[34ch] text-canvas-60">{footer.tagline}</p>
-            <a href={`mailto:${footer.contactEmail}`} className="footer-email text-small mt-6">
-              {footer.contactEmail}
-            </a>
+        {/* Twelve tracks, five for the brand and seven for the columns — the parent's
+            split. The tagline is capped at 34ch so it breaks into three lines rather than
+            running the full five tracks and leaving a column of white beside the links. */}
+        <div className="grid grid-cols-12 gap-x-8 gap-y-12 pt-20 pb-12">
+          <div className="col-span-12 md:col-span-5">
+            <Link href="/" aria-label="Famysys Studio, home" className="inline-block">
+              <Wordmark alt="" dark className="h-8" />
+            </Link>
+            <p className="text-small mt-6 max-w-[34ch] text-canvas-60">{footer.tagline}</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3 md:gap-8 lg:col-span-7 lg:col-start-6">
-            {columns.map((column) => (
-              <FooterColumn
-                key={column.title}
-                column={column}
-                isOpen={openColumn === column.title}
-                onToggle={() =>
-                  setOpenColumn((current) => (current === column.title ? null : column.title))
-                }
-              />
-            ))}
+          {/* Two columns at 390 and three from md. Three across a phone would put "Ways to
+              Work With Us" — the longest label on the site — into a 100px track. */}
+          <div className="col-span-12 grid grid-cols-2 gap-x-8 gap-y-10 md:col-span-7 md:grid-cols-3">
+            <FooterColumn title="Explore">
+              {exploreLinks.map((link) => (
+                <FooterLink key={link.href} cta={link} />
+              ))}
+            </FooterColumn>
+
+            <FooterColumn title="Connect">
+              {footer.socialLinks.map((link) => (
+                <FooterSocialItem key={link.label} link={link} />
+              ))}
+            </FooterColumn>
+
+            <FooterColumn title="Legal">
+              {footer.legalLinks.map((link) => (
+                <FooterLink key={link.href} cta={link} />
+              ))}
+            </FooterColumn>
           </div>
         </div>
 
-        {/* The legal and social rows are both empty by design — no documents exist yet and
-            the brief supplies no handles, both recorded in marketing.content.ts. So this
-            bar is a copyright line on its own, and it is laid out as one rather than as a
-            three-up row with two holes in it: `justify-between` across an absent middle
-            and right is what makes an intentional absence look like a broken grid. */}
-        <div
-          className={`border-t border-canvas-10 py-8 ${
-            hasBottomLinks
-              ? "flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-              : ""
-          }`}
-        >
-          {/* THE FULL STOP IS THE DOOR TO /admin.
-              It has to read as punctuation and nothing else: no colour of its own, no
-              underline, no hover, and `cursor-text` so the pointer does not change into a
-              hand and give it away. Tailwind's preflight already makes an anchor inherit
-              its colour and text-decoration, so what is left is the cursor. It stays
-              focusable — a link nobody can tab to is worse than a link nobody notices,
-              and what it opens is a login, not the panel. Obscurity is not what keeps the
-              panel shut; the session check on every /admin route and every admin endpoint
-              is. This only keeps a door out of the footer's reading order. */}
-          <p className="text-small text-canvas-60">
-            &copy; {new Date().getFullYear()} Famysys Studio
-            <Link href="/admin" className="cursor-text" aria-label="Admin">
-              .
-            </Link>
-          </p>
-          {footer.legalLinks.length > 0 ? (
-            <div className="flex flex-wrap gap-6">
-              {footer.legalLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="footer-link text-small">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          ) : null}
-          {footer.socialLinks.length > 0 ? (
-            <div className="flex flex-wrap gap-6">
-              {footer.socialLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link text-small"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          ) : null}
+        {/* The lower band. `items-end` from sm so the copyright block sits on the same
+            baseline as the bottom of the address column rather than floating at its top. */}
+        <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-8 border-t border-canvas-10 pt-10 pb-12 sm:items-end">
+          <div>
+            <p className="label text-canvas-60">Get in touch</p>
+            <a
+              href={`mailto:${footer.contactEmail}`}
+              className="footer-email text-display-m mt-4"
+            >
+              {footer.contactEmail}
+            </a>
+            {footer.addressLines === null ? null : (
+              <address className="text-small mt-5 flex flex-col gap-0.5 text-canvas-60 not-italic">
+                {footer.addressLines.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </address>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2.5 sm:items-end sm:text-right">
+            <p className="label text-canvas-60">
+              &copy; {new Date().getFullYear()} Famysys Studio. All rights reserved.
+            </p>
+            {/* THE DOT AT THE END OF THIS LINE IS THE DOOR TO /admin.
+                It was the full stop after "Famysys Studio" before, which made the
+                punctuation of a sentence clickable; the parent puts a 5px dot at the end
+                of this same line, and that is both easier to hit and easier to leave
+                alone. At rest it is canvas-10 on ink — visible only if you know to look.
+                On hover and on keyboard focus it takes the dark-ground accent.
+
+                It keeps its accessible name and stays in the tab order: a link nobody can
+                reach is worse than a link nobody notices, and what it opens is a login
+                rather than the panel. Obscurity is not what keeps the panel shut — the
+                session check on every /admin route and endpoint is. */}
+            <p className="label flex items-center gap-2 text-canvas-60 sm:justify-end">
+              {footer.descriptor}
+              <Link href="/admin" aria-label="Admin" className="footer-admin group">
+                <span className="footer-admin-dot" aria-hidden="true" />
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

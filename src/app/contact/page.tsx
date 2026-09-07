@@ -5,8 +5,8 @@ import { GetPrimaryNavigation } from "../../application/navigation/GetPrimaryNav
 import { container } from "../../infrastructure/di/container";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { ContactFormSection } from "../../presentation/sections/ContactFormSection";
-import { ContactHero } from "../../presentation/sections/ContactHero";
+import { ContactFormSection } from "../../presentation/sections/contact/ContactFormSection";
+import { ContactHero } from "../../presentation/sections/contact/ContactHero";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
 import { pageMetadata } from "../../shared/site/metadata";
 

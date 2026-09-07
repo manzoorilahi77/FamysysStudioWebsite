@@ -74,6 +74,9 @@ export class DbServiceCatalogRepository implements ServiceCatalogRepository {
         eyebrow: page.text(pointer, "eyebrow"),
         process: {
           heading: page.text(pointer, "heading"),
+          // The reveal label belongs to the homepage's frames, which this page does not
+          // render; it is carried through from the shape rather than stored twice.
+          revealLabel: shape.processPointer.process.revealLabel,
           steps: steps.records.map((record) => ({
             title: steps.store.text(record.ownerKey, "title"),
             description: steps.store.text(record.ownerKey, "description"),

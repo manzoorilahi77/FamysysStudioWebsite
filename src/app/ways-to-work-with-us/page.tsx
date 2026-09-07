@@ -5,14 +5,14 @@ import { GetPrimaryNavigation } from "../../application/navigation/GetPrimaryNav
 import { container } from "../../infrastructure/di/container";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { CustomPartnershipBlock } from "../../presentation/sections/CustomPartnershipBlock";
-import { EngagementHero } from "../../presentation/sections/EngagementHero";
-import { Faq } from "../../presentation/sections/Faq";
-import { FinalCta } from "../../presentation/sections/FinalCta";
-import { HowToChoose } from "../../presentation/sections/HowToChoose";
-import { ScopingBlock } from "../../presentation/sections/ScopingBlock";
-import { TierBlock } from "../../presentation/sections/TierBlock";
-import { TierComparison } from "../../presentation/sections/TierComparison";
+import { CustomPartnershipBlock } from "../../presentation/sections/engagement/CustomPartnershipBlock";
+import { EngagementHero } from "../../presentation/sections/engagement/EngagementHero";
+import { Faq } from "../../presentation/sections/shared/Faq";
+import { FinalCta } from "../../presentation/sections/shared/FinalCta";
+import { HowToChoose } from "../../presentation/sections/engagement/HowToChoose";
+import { ScopingBlock } from "../../presentation/sections/engagement/ScopingBlock";
+import { TierBlock } from "../../presentation/sections/engagement/TierBlock";
+import { TierComparison } from "../../presentation/sections/engagement/TierComparison";
 import {
   toCustomPartnershipDetailView,
   toEngagementTierDetailView,

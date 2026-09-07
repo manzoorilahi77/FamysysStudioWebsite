@@ -5,12 +5,12 @@ import { GetSelectedWorkPage } from "../../application/portfolio/GetSelectedWork
 import { container } from "../../infrastructure/di/container";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { FinalCta } from "../../presentation/sections/FinalCta";
-import { WorkCapabilityLinks } from "../../presentation/sections/WorkCapabilityLinks";
-import { WorkFraming } from "../../presentation/sections/WorkFraming";
-import { WorkGallery } from "../../presentation/sections/WorkGallery";
-import { WorkHero } from "../../presentation/sections/WorkHero";
-import { WorkProgression } from "../../presentation/sections/WorkProgression";
+import { FinalCta } from "../../presentation/sections/shared/FinalCta";
+import { WorkCapabilityLinks } from "../../presentation/sections/work/WorkCapabilityLinks";
+import { WorkFraming } from "../../presentation/sections/work/WorkFraming";
+import { WorkGallery } from "../../presentation/sections/work/WorkGallery";
+import { WorkHero } from "../../presentation/sections/work/WorkHero";
+import { WorkProgression } from "../../presentation/sections/work/WorkProgression";
 import {
   toCaseStudyDetailView,
   toFooterContentView,

@@ -1,15 +1,21 @@
 import type { ReactNode } from "react";
-import { container as containerToken, spacing } from "../../shared/design/tokens";
+import {
+  container as containerToken,
+  navContainer as navContainerToken,
+  spacing,
+} from "../../shared/design/tokens";
 
 /**
  * THE SITE'S ONE CONTAINER LINE, as a bare style object.
  *
- * Everything that spans the page takes this: the header bar, every section (through
- * `Container` below) and the footer. That is the whole point of exporting it — the header
- * used to reconstruct the shell as `max-w-7xl px-6`, which matched the token's max width
- * but not its gutter, so a section's copy started 4px inside the wordmark at 390 and 64px
- * inside it at 1920. Two hand-kept copies of the same measurement will always drift; there
- * is now one, and a change to `spacing.gutter` moves the bar and the page together.
+ * Every section (through `Container` below) and the footer take this. The HEADER BAR no
+ * longer does: it was moved onto famysys.com's own header shell — see `navShellStyle`
+ * below — so the two lines have come apart on purpose, and the note there says by how much.
+ *
+ * The rest of the reason for exporting it stands. Sections used to reconstruct the shell
+ * by hand, which matched the token's max width but not its gutter, and copies of the same
+ * measurement always drift; there is one here, and a change to `spacing.gutter` moves
+ * every section and the footer together.
  *
  * A style object rather than a class because `spacing.gutter` is a `clamp()` — Tailwind has
  * no utility for it, and an arbitrary-value class would be a third copy of the string.
@@ -17,6 +23,18 @@ import { container as containerToken, spacing } from "../../shared/design/tokens
 export const shellStyle = {
   maxWidth: containerToken.maxWidth,
   paddingInline: spacing.gutter,
+} as const;
+
+/**
+ * THE HEADER BAR'S LINE, which is no longer the one above. See `navContainer` in
+ * tokens.ts for the measurements this reproduces and for what it costs — in short, the
+ * bar is now held to famysys.com's own header shell rather than to this site's page
+ * width, so at 1440 the bar's first label sits 40px outboard of a section's first
+ * character. Nothing but the header takes this.
+ */
+export const navShellStyle = {
+  maxWidth: navContainerToken.maxWidth,
+  paddingInline: navContainerToken.gutter,
 } as const;
 
 interface ContainerProps {

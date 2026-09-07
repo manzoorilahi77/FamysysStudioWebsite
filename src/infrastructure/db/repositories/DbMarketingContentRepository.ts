@@ -92,6 +92,7 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
     const [store, steps] = await Promise.all([this.home(), collectionRecordStore("process-steps")]);
     return {
       heading: store.text("home:how-we-work", "heading"),
+      revealLabel: store.text("home:how-we-work", "reveal-button"),
       steps: steps.records.map((record) => ({
         title: steps.store.text(record.ownerKey, "title"),
         description: steps.store.text(record.ownerKey, "description"),
@@ -106,6 +107,8 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
     return {
       heading: store.text(owner, "heading"),
       body: store.text(owner, "body"),
+      openLabel: store.text(owner, "open-button"),
+      closeLabel: store.text(owner, "close-button"),
       tiers,
       custom,
     };
@@ -142,18 +145,23 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
   }
 
   /**
-   * The legal and social lists are empty and stay empty: the brief supplies neither, and
-   * an invented privacy policy link is worse than no link. They are shown read-only in
-   * the panel with that reason, so there is nothing to read here.
+   * The two strings an editor can change are read from the store; everything else in the
+   * footer is STRUCTURE, and structure is a code change rather than an edit.
+   *
+   * The Contact link, the legal column and the three social names are fixed shapes — a
+   * fourth social network or a third legal document needs markup, not a row in a table.
+   * The address and the descriptor are copy, but neither is the client's yet: the address
+   * is null until one is confirmed and the descriptor is drafted pending approval, and
+   * putting either in the panel would invite an editor to fill it in without the question
+   * behind it ever being asked. They move into the store when the answers arrive.
    */
   async getFooterContent(): Promise<FooterContent> {
     const store = await this.home();
     const owner = "home:footer";
     return {
+      ...(await this.structure.getFooterContent()),
       tagline: store.text(owner, "tagline"),
       contactEmail: store.text(owner, "contact-email"),
-      legalLinks: [],
-      socialLinks: [],
     };
   }
 }

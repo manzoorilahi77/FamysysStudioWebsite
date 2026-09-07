@@ -5,14 +5,14 @@ import { GetPrimaryNavigation } from "../../application/navigation/GetPrimaryNav
 import { container } from "../../infrastructure/di/container";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { AboutApproach } from "../../presentation/sections/AboutApproach";
-import { AboutBuilding } from "../../presentation/sections/AboutBuilding";
-import { AboutHero } from "../../presentation/sections/AboutHero";
-import { AboutInputs } from "../../presentation/sections/AboutInputs";
-import { BeliefStatement } from "../../presentation/sections/BeliefStatement";
-import { FinalCta } from "../../presentation/sections/FinalCta";
-import { PartOfFamysys } from "../../presentation/sections/PartOfFamysys";
-import { WhereWereGoing } from "../../presentation/sections/WhereWereGoing";
+import { AboutApproach } from "../../presentation/sections/about/AboutApproach";
+import { AboutBuilding } from "../../presentation/sections/about/AboutBuilding";
+import { AboutHero } from "../../presentation/sections/about/AboutHero";
+import { AboutInputs } from "../../presentation/sections/about/AboutInputs";
+import { BeliefStatement } from "../../presentation/sections/about/BeliefStatement";
+import { FinalCta } from "../../presentation/sections/shared/FinalCta";
+import { PartOfFamysys } from "../../presentation/sections/about/PartOfFamysys";
+import { WhereWereGoing } from "../../presentation/sections/about/WhereWereGoing";
 import {
   toAboutHeroView,
   toApproachBlockView,

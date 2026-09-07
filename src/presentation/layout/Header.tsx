@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { NavEntryView, NavigationMenuView } from "../lib/viewModels";
 import { Button } from "../components/Button";
-import { shellStyle } from "../components/Container";
+import { navShellStyle } from "../components/Container";
 import { Wordmark } from "../components/Wordmark";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { NavPanel } from "./NavPanel";
@@ -16,12 +16,14 @@ const OPEN_INTENT_MS = 120;
 /** Grace on the way out, so the diagonal from trigger to panel does not close it. */
 const CLOSE_GRACE_MS = 160;
 /**
- * How many of the five pages sit to the LEFT of the centred wordmark. Three, not two,
- * because the split has to balance by width rather than by count: "Ways to Work With Us"
- * is the longest label on the site and belongs with the two short ones, which leaves the
- * two grid tracks within about 40px of each other at 1280.
+ * How many of the four pages sit to the LEFT of the centred wordmark. Two, and two to the
+ * right — the bar is five elements now, and it is symmetrical by count as well as by
+ * width: the longest label on the site, "Ways to Work With Us", is paired with the
+ * shortest, "About". At 1024, the narrowest width the inline bar appears at, that leaves
+ * 31px clear between the left group and the wordmark and nothing wrapping. See the
+ * `entries` order in navigation.content.ts, which is what decides the pair.
  */
-const START_LINK_COUNT = 3;
+const START_LINK_COUNT = 2;
 
 interface HeaderProps {
   readonly navigation: NavigationMenuView;
@@ -60,10 +62,18 @@ function Chevron() {
 }
 
 /**
- * LINKS EITHER SIDE OF A CENTRED WORDMARK. Three grid tracks — see `.cnav` in
- * globals.css. The five pages are split three and two BY WIDTH rather than by count, and
- * each item carries a bracket marker before its label. Below xl both groups collapse into
- * the drawer and the wordmark stays on the centre line with the Menu trigger opposite it.
+ * FIVE ELEMENTS, CENTRED: two pages, the wordmark, two pages. Three grid tracks — see
+ * `.cnav` in globals.css — with two items in each of the outer two. Each item carries a
+ * bracket marker before its label, and the three that have panels carry a chevron as
+ * well. Below lg both groups collapse into the drawer and the wordmark stays on the centre
+ * line with the Menu trigger opposite it. The bar used to collapse at xl; with two fewer
+ * elements in it, it now holds down to 1024 — see `.cnav-menu` in globals.css.
+ *
+ * WHAT CAME OUT. The "Start a Conversation" button, which was the only thing in the bar
+ * that was not a page and the reason the right track was heavier than the left; and How We
+ * Work, which is now a block inside the Ways to Work With Us panel — see `NavPanelAside`.
+ * /contact is still reached from the drawer's own button, from the footer, and from the
+ * closing call to action every page ends on.
  *
  * TRANSPARENT AT THE TOP, SOLID INK ONCE SCROLLED. Past 80px the bar fills with ink and
  * takes its canvas-10 hairline, and it stays that way; at scroll 0 it is transparent so
@@ -288,21 +298,20 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
         />
       )}
 
-      {/* THE BAR: links either side of a centred wordmark.
+      {/* THE BAR: two pages, the wordmark, two pages.
 
           Three grid tracks, `1fr auto 1fr`, so the wordmark sits on the viewport's centre
-          line rather than wherever the two link groups happen to leave it. The split is
-          three items left and two right BY WIDTH, not by count — "Ways to Work With Us"
-          is the longest label on the site, and putting it with the two short ones leaves
-          the two sides within about 40px of each other at 1280, which is what keeps both
-          tracks inside the shell. The buttons ride in the right track, pushed to its end.
+          line rather than wherever the two link groups happen to leave it. Two items on
+          each side, paired BY WIDTH — the longest label with the shortest — which is what
+          keeps both tracks inside the shell down to 1024. The right track now carries the
+          link group and, below lg, the drawer trigger; nothing else rides in it.
 
           The whole bar is one <nav>. Two would need two names, and there is one
           navigation here that happens to be drawn in two pieces. */}
       <div
         data-header-bar
         className="relative mx-auto w-full py-4"
-        style={shellStyle}
+        style={navShellStyle}
       >
         <nav
           ref={navRef}
@@ -326,20 +335,24 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
           <div className="cnav-end">
             <ul className="cnav-links cnav-links--end">{endLinks.map(renderEntry)}</ul>
 
-            {/* The two buttons take the tones the brief names, which cut across the
-                component's own dark/light split: the CTA is the ACCENT-filled light
-                primary (canvas text at 8.594:1 on the fill) and the ghost is the DARK
-                one (canvas-40 border, canvas text), because it is the ghost that has to
-                sit on ink and the CTA that has to carry the accent.
-                `.header-cta-primary` adds the hairline that gives the accent fill a
-                perceivable edge against the bar — see globals.css. */}
+            {/* THE CALL TO ACTION, at the right end of the bar. The ACCENT-filled light
+                primary — the same fill and the same canvas label the hero's own primary
+                button carries, which is what the client asked it to match. The label
+                reads 8.594:1 on that fill, well over the 4.5:1 it needs; the FILL reads
+                1.837:1 against the bar, under the 3:1 that 1.4.11 puts on a boundary
+                identifying a control, which is why `.header-cta-primary` draws a hairline
+                in the lightened accent at 9.661:1. Both numbers come from
+                `npm run check-colours`, which carries a row for each.
+
+                `.cnav-cta` is what makes it the BAR's button rather than the hero's: the
+                same colour and shape at a smaller size, because at the hero's 15px label
+                and 24px padding the six elements no longer hold one line at 1024. */}
             <div className="cnav-actions">
-              <Button cta={navigation.signIn} variant="ghost" dark rollOnHover />
               <Button
                 cta={navigation.primaryCta}
                 variant="primary"
                 rollOnHover
-                className="header-cta-primary"
+                className="header-cta-primary cnav-cta"
               />
             </div>
 
@@ -362,7 +375,6 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         entries={navigation.primaryLinks}
-        signIn={navigation.signIn}
         primaryCta={navigation.primaryCta}
         panelId="mobile-drawer"
         triggerId="mobile-drawer-trigger"

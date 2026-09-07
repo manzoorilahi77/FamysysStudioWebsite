@@ -111,7 +111,10 @@ export function homeSections(
       title: "How We Work",
       summary: homepage.process.heading,
       updatedAt,
-      values: [field("Heading", homepage.process.heading, processHome("heading"))],
+      values: [
+        field("Heading", homepage.process.heading, processHome("heading")),
+        field("Reveal button", homepage.process.revealLabel, processHome("revealLabel")),
+      ],
       lists: [
         readOnlyList(
           "Steps",
@@ -128,6 +131,8 @@ export function homeSections(
       values: [
         field("Heading", homepage.waysToWork.heading, waysToWorkHome("heading")),
         field("Body", homepage.waysToWork.body, waysToWorkHome("body")),
+        field("Open button", homepage.waysToWork.openLabel, waysToWorkHome("openLabel")),
+        field("Close button", homepage.waysToWork.closeLabel, waysToWorkHome("closeLabel")),
       ],
       lists: [
         readOnlyList(
@@ -215,14 +220,24 @@ export function homeSections(
         field("Tagline", homepage.footer.tagline, footer("tagline")),
         field("Contact email", homepage.footer.contactEmail, footer("contactEmail")),
         readOnly(
+          "Postal address",
+          homepage.footer.addressLines?.join(", ") ?? "Not shown",
+          "No address is printed. The parent company's Richmond, TX address is on famysys.com; whether the Studio operates from it has not been confirmed, and an address is something a reader may act on physically. Confirm the address and it goes in — as a structural change, not an edit.",
+        ),
+        readOnly(
+          "Descriptor line",
+          homepage.footer.descriptor,
+          "Drafted, pending approval. The line under the copyright — the Studio's equivalent of the parent's 'AI-Native Digital Engineering Partner'. It becomes editable here once the client has approved a wording.",
+        ),
+        readOnly(
           "Legal links",
           String(homepage.footer.legalLinks.length),
-          "Deliberately empty: no privacy policy or terms document exists yet, and a link to a document that does not exist is worse than no link. Adding one is a structural change, not an edit.",
+          "Terms & Conditions and Privacy Policy, matching the parent's footer. Both currently 404: neither /terms nor /privacy exists on this site yet. The links are in place so they work the moment the documents are published — until then this is a known, tracked gap in docs/content-todo.md.",
         ),
         readOnly(
           "Social links",
           String(homepage.footer.socialLinks.length),
-          "Deliberately empty: the brief supplies no social handles. Adding one is a structural change, not an edit.",
+          "LinkedIn, X and GitHub are listed but link nowhere: the brief supplies no Studio handles, and the only accounts that exist belong to the parent company. Supply the Studio's handles and each name gets its destination.",
         ),
       ],
     }),

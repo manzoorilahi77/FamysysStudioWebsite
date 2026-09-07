@@ -135,7 +135,10 @@ substitute.
 3. **Application**: add the new field to `GetHomepageContent` (or a dedicated use case if the
    section has its own data source), and update `FakeMarketingContentRepository` +
    `GetHomepageContent.test.ts` to cover it.
-4. **Presentation**: build the section component under `src/presentation/sections/`, composed
+4. **Presentation**: build the section component under `src/presentation/sections/<page>/` —
+   the folders are one per page (`home/`, `about/`, `contact/`, `services/`, `process/`,
+   `work/`, `engagement/`), plus `shared/` for the three sections more than one page renders
+   (`Faq`, `FinalCta`, `HowWeWork`) — composed
    from the shared primitives in `src/presentation/components/` (`Section`, `Container`,
    `SectionHeader`, `Button`, `Reveal`). Use `<Section dark>` for a dark-surface section — see the
    token table below for which text/border colors are safe on `bg-ink` vs `bg-canvas`. If the

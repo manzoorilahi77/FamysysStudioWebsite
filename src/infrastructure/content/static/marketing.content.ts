@@ -70,7 +70,18 @@ const HERO_BANDS: ReadonlyArray<HeroBandSource> = [
 
 export const heroContent: HeroContent = {
   heading: "Creative production, without the agency overhead.",
-  body: "Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.",
+  // TODO(client): SHORTENED FROM THE BRIEF, pending approval — the one string in this file
+  // that is not the client's verbatim copy. The brief's sentence is 183 characters and set
+  // four lines under the headline at every width, which is a paragraph where the hero wants
+  // a line. This is 111, the longest that holds TWO lines from 390 up to 2560 (112 breaks
+  // to three at 390 — measured, not estimated).
+  //
+  // Every idea in the original survives, in the client's own words: the five deliverables
+  // are verbatim, so are "a flexible creative team" and "at better value". What went is
+  // "produced by" (now "from") and the clause "that helps businesses create high-quality
+  // content efficiently and", which restated the list it followed. The full original is
+  // kept in docs/content-todo.md so a reviewer can compare the two.
+  body: "Design, video, AI-powered content, motion and product visuals — from a flexible creative team, at better value.",
   primaryCta: createCta("Start a Conversation", "/contact"),
   secondaryCta: createCta("Explore Our Services", "/creative-services"),
   supportingLine: "Project-based when you need it. Ongoing when you need more.",
@@ -149,6 +160,10 @@ export const differentiatorBlock: DifferentiatorBlock = {
 
 export const processBlock: ProcessBlock = {
   heading: "From idea to finished creative.",
+  // TODO(client): expanded copy — draft, pending approval. The homepage's five frames
+  // show a step's numeral and name on the picture and keep its sentence behind them; this
+  // is the button that opens the sentence where there is no pointer to hover with.
+  revealLabel: "What happens here",
   steps: [
     {
       title: "Understand",
@@ -180,6 +195,10 @@ export const processBlock: ProcessBlock = {
 export const waysToWorkBlock: WaysToWorkBlock = {
   heading: "Flexible ways to work with Famysys Studio.",
   body: "Whether you need one creative asset or an ongoing production partner, we can adapt to your requirements.",
+  // TODO(client): expanded copy — draft, pending approval. The two words the homepage's
+  // four tiles need: one on the picture, one inside the panel it opens.
+  openLabel: "Open",
+  closeLabel: "Close",
   tiers: [
     {
       name: "Launch",
@@ -359,16 +378,43 @@ export const footerContent: FooterContent = {
   // central-idea sentence, not new copy.
   tagline:
     "A professional creative production partner — combining human creativity, AI and efficient production.",
-  contactEmail: "hello@famysys.com", // TODO(client): confirm the real contact address
-  // TODO(client): NO LEGAL LINKS UNTIL THE DOCUMENTS EXIST. These were
-  // createCta("Privacy policy", "/privacy") and createCta("Terms of use", "/terms"),
-  // and both 404ed from every page on the site. /contact completes the seven content
-  // pages, so these were the last dead links left, and a link to a policy that does not
-  // exist is worse than no link — on a page that asks for someone's name, company and
-  // email, a broken "Privacy policy" is the wrong thing to be broken. Restore both the
-  // moment the client supplies the text. See docs/content-todo.md.
-  legalLinks: [],
-  socialLinks: [], // TODO(client): no social handles supplied in the brief
+  // TODO(client): THIS IS THE PARENT'S ADDRESS, NOT CONFIRMED AS THE STUDIO'S.
+  // hello@famysys.com is the address on famysys.com's own contact page. The Studio may
+  // share the mailbox or may have its own; nothing in the brief says which, and the
+  // footer prints it on all seven pages, so this is the single most-published unconfirmed
+  // string on the site. See docs/content-todo.md.
+  contactEmail: "hello@famysys.com",
+  contactLink: createCta("Contact", "/contact"),
+  // TODO(client): NO POSTAL ADDRESS UNTIL ONE IS CONFIRMED. The parent's footer prints
+  // 10193 W Grand Parkway S., Ste. 103-229, Richmond, TX 77407, United States. Whether
+  // the Studio operates from that address is not stated anywhere in the brief, and an
+  // address is the one piece of footer content a reader may act on physically — post,
+  // couriers, a visit. Null renders no address block at all rather than the parent's.
+  addressLines: null,
+  // TODO(client): drafted, pending approval. The parent's line is "AI-Native Digital
+  // Engineering Partner", which describes an engineering firm; this is its Studio
+  // equivalent, built from the brief's own three terms — human creativity, AI, efficient
+  // production — and from "creative production partner", which is the client's phrase.
+  descriptor: "AI-Enabled Creative Production Partner",
+  // TODO(client): THE DOCUMENTS DO NOT EXIST YET. /terms and /privacy are not routes on
+  // this site, so both links 404 until the pages are built — a deliberate, flagged
+  // regression from the previous state, where the footer carried no legal row at all.
+  // The parent's footer has this column and the Studio's structure now matches it; what
+  // is missing is the two documents. Either supply them or the column comes back out.
+  // See docs/content-todo.md.
+  legalLinks: [
+    createCta("Terms & Conditions", "/terms"),
+    createCta("Privacy Policy", "/privacy"),
+  ],
+  // TODO(client): NO HANDLES SUPPLIED. The three names match the parent's column so the
+  // structure is the parent's, but every href is null — deliberately, because the only
+  // accounts that exist are the parent company's, and pointing the Studio's footer at
+  // them would send a reader to a different business. See docs/content-todo.md.
+  socialLinks: [
+    { label: "LinkedIn", href: null },
+    { label: "X", href: null },
+    { label: "GitHub", href: null },
+  ],
 };
 
 /**

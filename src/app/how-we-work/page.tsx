@@ -6,12 +6,12 @@ import { container } from "../../infrastructure/di/container";
 import { ProcessOverview } from "../../presentation/components/ProcessOverview";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { Faq } from "../../presentation/sections/Faq";
-import { FinalCta } from "../../presentation/sections/FinalCta";
-import { ProcessHero } from "../../presentation/sections/ProcessHero";
-import { ProcessStepBlock } from "../../presentation/sections/ProcessStepBlock";
-import { ScopeAndRevisions } from "../../presentation/sections/ScopeAndRevisions";
-import { WorkedExample } from "../../presentation/sections/WorkedExample";
+import { Faq } from "../../presentation/sections/shared/Faq";
+import { FinalCta } from "../../presentation/sections/shared/FinalCta";
+import { ProcessHero } from "../../presentation/sections/process/ProcessHero";
+import { ProcessStepBlock } from "../../presentation/sections/process/ProcessStepBlock";
+import { ScopeAndRevisions } from "../../presentation/sections/process/ScopeAndRevisions";
+import { WorkedExample } from "../../presentation/sections/process/WorkedExample";
 import {
   toFaqBlockView,
   toFooterContentView,

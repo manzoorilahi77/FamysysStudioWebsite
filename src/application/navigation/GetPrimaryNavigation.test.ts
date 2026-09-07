@@ -8,7 +8,6 @@ import { GetPrimaryNavigation } from "./GetPrimaryNavigation";
 function fixtureMenu(): NavigationMenu {
   return {
     primaryLinks: [{ link: createCta("Services", "/services"), panel: EMPTY_NAV_PANEL }],
-    signIn: createCta("Sign in", "/sign-in"),
     primaryCta: createCta("Book a call", "/contact"),
   };
 }

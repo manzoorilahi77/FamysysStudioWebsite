@@ -1,5 +1,36 @@
 # Content To Confirm Before Launch
 
+> ## Shortened, pending approval: the homepage hero's sub-heading
+>
+> This is the only string in `marketing.content.ts` that is **not** the client's verbatim copy, and
+> it is recorded here because that file's rule is that content changes come from the brief, not from
+> the codebase. It was changed at the client's spoken request — the sentence was setting four lines
+> under the headline and they asked for two.
+>
+> **The brief's sentence** (183 characters):
+>
+> > Design, video, AI-powered content, motion and product visuals — produced by a flexible creative
+> > team that helps businesses create high-quality content efficiently and at better value.
+>
+> **On the page now** (111 characters):
+>
+> > Design, video, AI-powered content, motion and product visuals — from a flexible creative team, at
+> > better value.
+>
+> **What was kept, and what went.** The five deliverables are verbatim. So are "a flexible creative
+> team" and "at better value". Two things changed: "produced by" became "from", and the clause "that
+> helps businesses create high-quality content efficiently and" was dropped, because it restates the
+> list immediately before it — the five items ARE the high-quality content, and the headline above
+> already carries the efficiency claim as "without the agency overhead".
+>
+> **Why 111 and not more.** The hero's copy column is capped at 44ch, and 111 characters is the
+> longest string that holds two lines at every width from 390 to 2560. 112 breaks to three lines at
+> 390. Measured in a browser across nine widths, not estimated — so a longer replacement needs
+> re-measuring, and a shorter one is always safe.
+>
+> Either approve this wording or supply a replacement of about 110 characters.
+
+
 > ## Drafted, pending approval: the homepage FAQ heading
 >
 > The brief supplies seven questions and answers for the homepage and **no heading for the section
@@ -20,7 +51,7 @@
 > to sound like somebody wrote it. All three still share the "Questions" eyebrow, which is what
 > keeps them a family.
 >
-> **The client still owns this line.** It is the default in `src/presentation/sections/Faq.tsx`
+> **The client still owns this line.** It is the default in `src/presentation/sections/shared/Faq.tsx`
 > (`heading`); inner pages pass their own and never inherit it. Approve it, replace it, or drop it
 > — but it is no longer a blocker, because what is on the page is now a sentence rather than a
 > ticket number.
@@ -71,13 +102,13 @@ numeral beside it is the band's position and is not editable. **Real production 
 one-for-one**: the accordion sizes every band itself (`object-fit: cover`), so a replacement needs
 no particular ratio. Rewrite the `alt` alongside the file.
 
-| Slot                     | Label         | Shows                                             |
-| ------------------------ | ------------- | ------------------------------------------------- |
-| `hero-band-camera.jpg`   | Camera & rig  | Camera rig filming a performer under coloured light |
-| `hero-band-colour.jpg`   | Colour        | Colourist's desk, a grade open across two displays  |
-| `hero-band-content.jpg`  | Content       | Clapperboard held up at the start of a take         |
-| `hero-band-design.jpg`   | Design        | Designer's desk, creative-suite icons on a tablet   |
-| `hero-band-motion.jpg`   | Motion        | Motion graphic of a wave form in long light trails  |
+| Slot                    | Label        | Shows                                               |
+| ----------------------- | ------------ | --------------------------------------------------- |
+| `hero-band-camera.jpg`  | Camera & rig | Camera rig filming a performer under coloured light |
+| `hero-band-colour.jpg`  | Colour       | Colourist's desk, a grade open across two displays  |
+| `hero-band-content.jpg` | Content      | Clapperboard held up at the start of a take         |
+| `hero-band-design.jpg`  | Design       | Designer's desk, creative-suite icons on a tablet   |
+| `hero-band-motion.jpg`  | Motion       | Motion graphic of a wave form in long light trails  |
 
 > **Provenance not recorded.** These five came from `docs/explorations/01-heroes/media-4/`, which the
 > approved hero design referenced, and that folder carries no source manifest — so unlike every
@@ -131,6 +162,28 @@ photograph chosen to suggest the subject.
 This remains the single largest gap: the section presents eight pieces of work that do not exist,
 now illustrated with photography that is not the studio's. Either the pieces get produced, or the
 section ships with fewer entries, or it waits.
+
+### Three interface words on the homepage (§4, §5)
+
+File: `src/infrastructure/content/static/marketing.content.ts`
+
+The three imagery-led sections need three words the brief does not supply, because the brief
+describes copy and these are affordances: the button that opens a process step's sentence where
+there is no pointer to hover with, and the two words on the engagement tiles.
+
+| Where             | String            |
+| ----------------- | ----------------- |
+| `processBlock`    | What happens here |
+| `waysToWorkBlock` | Open              |
+| `waysToWorkBlock` | Close             |
+
+**They are drafted, and they live in the approved module.** That combination matters for the
+generated inventories below: `scripts/generate-content-todo.mjs` treats any string that appears
+verbatim in `marketing.content.ts` as the client's own, so these three are counted as approved
+there and will not appear in any generated table — including the `/selected-work` detail panel's
+own "Close", which stopped being listed the moment this one existed. They belong in the same
+review pass as everything else on this page. Each carries a `TODO(client)` comment at its
+definition.
 
 ### Creative Services page (§/creative-services)
 
@@ -873,7 +926,7 @@ If the manager wants any of it kept somewhere, these are the honest homes:
 
 <!-- generated: selected-work drafted copy — do not edit by hand, run `pnpm docs:content-todo` -->
 
-**51 drafted strings**, against 57 read from the client's own
+**50 drafted strings**, against 58 read from the client's own
 content modules and therefore not up for review here. Regenerate with
 `pnpm docs:content-todo` after any edit to `selected-work.content.ts`.
 
@@ -916,7 +969,6 @@ content modules and therefore not up for review here. Regenerate with
 | detail › whyLabel                                           | Why this piece                                                                                                                                                                                      |
 | detail › capabilitiesLabel                                  | Capabilities it exercises                                                                                                                                                                           |
 | detail › mediaSlotLabel                                     | Where the finished piece will sit                                                                                                                                                                   |
-| detail › closeLabel                                         | Close                                                                                                                                                                                               |
 | progression › eyebrow                                       | The order                                                                                                                                                                                           |
 | progression › heading                                       | Why these eight, and why in this order.                                                                                                                                                             |
 | progression › body                                          | The list is not a menu. It runs from proving the studio can shoot at all to proving it can finish at a level worth commissioning, and each group answers the question the group before it raises.   |
@@ -1151,8 +1203,10 @@ nothing beneath it. **The only way to reach the Studio from this page right now 
 form** — which, per the warning at the top of this file, delivers nowhere.
 
 Note the inconsistency this leaves: the **footer** still shows `hello@famysys.com` on every
-page, including this one, from before `/contact` existed. Whatever is decided should be
-applied to both.
+page, including this one, and the rebuilt footer now sets it at display size in its lower
+band — so the parent's address is the most prominent contact detail on the site while this
+page's own "reach us directly" block stays empty. Whatever is decided should be applied to
+both.
 
 **What is needed:** the Studio's own email address, and a phone number or a decision not to
 publish one.
@@ -1230,13 +1284,12 @@ Submit button reads **"Send inquiry"**, as the parent's does.
 
 <!-- generated: contact drafted copy — do not edit by hand, run `pnpm docs:content-todo` -->
 
-**27 drafted strings**, against 5 read from the client's own
+**26 drafted strings**, against 6 read from the client's own
 content modules and therefore not up for review here. Regenerate with
 `pnpm docs:content-todo` after any edit to `contact.content.ts`.
 
 | Where                          | Drafted string                                                                                                                                                                                  |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| hero › eyebrow                 | Contact                                                                                                                                                                                         |
 | hero › heading                 | Start with what you want made, not how to make it.                                                                                                                                              |
 | hero › body                    | Tell us what you are trying to create, who it is for and roughly when you need it. If it is work we should take, you will hear back from the person who would direct it — not a sales sequence. |
 | form › heading                 | Tell us about the work                                                                                                                                                                          |
@@ -1268,19 +1321,21 @@ content modules and therefore not up for review here. Regenerate with
 
 ## Copy the brief does not supply
 
-| Item                         | Where                                                 | What is needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FAQ section heading          | `src/presentation/sections/Faq.tsx`                   | The brief gives seven Q&As but no heading for the section. It now renders a deliberately conspicuous placeholder — eyebrow "Questions", heading `TODO(client)` — so the section has the same shape as every other one and the gap cannot ship unnoticed. **This string is visible on the page.**                                                                                                                                                                                                                                                      |
-| The Differentiator eyebrow   | `marketing.content.ts` (`differentiatorBlock`)        | Every other section opens eyebrow-heading-body; this one has no eyebrow string in the brief, so it opens on the heading instead. `leadIn` is not a substitute — it is a sentence ending in a colon that introduces the four cards, and it is set as one above them. Supply an eyebrow or confirm the section opens without one.                                                                                                                                                                                                                       |
-| Footer tagline               | `marketing.content.ts` (`footerContent.tagline`)      | Currently reuses the brief's own central-idea sentence. Not new copy, but not written for the footer either — confirm or replace.                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Contact email                | `marketing.content.ts` (`footerContent.contactEmail`) | `hello@famysys.com` is a placeholder. Confirm the real address.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Social links                 | `marketing.content.ts` (`footerContent.socialLinks`)  | The brief supplies no handles, so the list is empty and no social row renders. Supply handles or confirm there are none.                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Legal pages                  | `marketing.content.ts` (`footerContent.legalLinks`)   | Privacy policy and Terms of use **are no longer linked**. Neither page nor its text exists, and once `/contact` completed the site they were the last two dead links on it — a 404 behind "Privacy policy" is the wrong thing to be broken on a site whose form asks for a name, a company and an email. `legalLinks` is now an empty array and the footer renders no legal row. Supply the two documents and both links go back.                                                                                                                     |
-| Tier field labels duplicated | `WaysToWork.tsx` (homepage)                           | "Ideal for" and "Typical work includes" are now exported from `marketing.content.ts` as `TIER_FIELD_LABELS`, and `/ways-to-work-with-us` reads them from there. The homepage section still carries them as component literals: `presentation/` may not import `infrastructure/` under the boundary rules, so removing that duplication means threading them through as props from `app/page.tsx`. A homepage change, deliberately not made while building an inner page.                                                                              |
-| Two forms, two field sets    | `DemoForm.tsx` and `ContactForm.tsx`                  | The closing form on every page asks four questions (full name, work email, company, company size); `/contact` asks eight, matching famysys.com's own contact form. Both were drafted, neither is in the brief. Confirm both, or decide the short form should ask the same eight.                                                                                                                                                                                                                                                                      |
-| Company-size bands           | `CompanySize.ts`                                      | Now the four famysys.com uses — **1–50 · 50–200 · 200–1,000 · 1,000+**. They REPLACED a five-band set (1-10 / 11-50 / 51-200 / 201-500 / 500+) that the previous build invented, so the closing form's dropdown changed too. Two overlapping vocabularies would have made the answers un-comparable between the two forms, and neither set was ever confirmed. Confirm the four.                                                                                                                                                                      |
-| "Your role" options          | `ContactRole.ts`                                      | **Founder / Owner · Marketing Lead · Brand or Creative Lead · Content or Social Lead · Agency or Partner · Other.** NOT the parent's list, which is CEO / COO / CFO / CIO-CTO / VP / Other and is shaped for an enterprise IT buyer approving an engineering engagement. The Studio sells creative production to marketing and brand owners, often at companies with no C-suite to route through; reusing the parent's would have pushed most real senders into "Other". This is a read of who the Studio expects to hear from, and needs confirming. |
-| Demo form reply commitment   | `DemoForm.tsx` (success message)                      | "Someone from Famysys Studio will reply **within one business day**" is an operational promise, not placeholder copy. Confirm the studio can hold that turnaround, or loosen the wording.                                                                                                                                                                                                                                                                                                                                                             |
+| Item                         | Where                                                 | What is needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FAQ section heading          | `src/presentation/sections/shared/Faq.tsx`            | The brief gives seven Q&As but no heading for the section. It now renders a deliberately conspicuous placeholder — eyebrow "Questions", heading `TODO(client)` — so the section has the same shape as every other one and the gap cannot ship unnoticed. **This string is visible on the page.**                                                                                                                                                                                                                                                                                                                                                                                          |
+| The Differentiator eyebrow   | `marketing.content.ts` (`differentiatorBlock`)        | Every other section opens eyebrow-heading-body; this one has no eyebrow string in the brief, so it opens on the heading instead. `leadIn` is not a substitute — it is a sentence ending in a colon that introduces the four cards, and it is set as one above them. Supply an eyebrow or confirm the section opens without one.                                                                                                                                                                                                                                                                                                                                                           |
+| Footer tagline               | `marketing.content.ts` (`footerContent.tagline`)      | Currently reuses the brief's own central-idea sentence. Not new copy, but not written for the footer either — confirm or replace.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Contact email                | `marketing.content.ts` (`footerContent.contactEmail`) | `hello@famysys.com` is **the parent's address**, taken from famysys.com's own contact page. The footer now sets it at display size in the lower band, so it is the most prominent single string on the page after the wordmark. Confirm the Studio's own address, or confirm it shares this mailbox.                                                                                                                                                                                                                                                                                                                                                                                      |     |
+| Postal address               | `marketing.content.ts` (`footerContent.addressLines`) | famysys.com's footer prints **10193 W Grand Parkway S., Ste. 103-229, Richmond, TX 77407, United States**. Whether the Studio operates from that address is not stated anywhere in the brief, and an address is the one piece of footer content a reader may act on physically — post, couriers, a visit. `addressLines` is `null` and **no address block renders**; the footer's lower band is the email alone until one is confirmed.                                                                                                                                                                                                                                                   |
+| Footer descriptor line       | `marketing.content.ts` (`footerContent.descriptor`)   | **"AI-Enabled Creative Production Partner"** — drafted, pending approval. It sits under the copyright, and it is the Studio's answer to the parent's "AI-Native Digital Engineering Partner". Built from the brief's own three terms (human creativity, AI, efficient production) and from "creative production partner", which is the client's phrase, but the arrangement is ours. **Visible on every page.**                                                                                                                                                                                                                                                                           |
+| Social handles               | `marketing.content.ts` (`footerContent.socialLinks`)  | The footer's CONNECT column now lists **LinkedIn, X and GitHub**, matching famysys.com's, but **none of the three links anywhere** — each renders as a name with no destination. The only accounts that exist belong to the parent company, and pointing the Studio's footer at them would send a reader to a different business. Supply the Studio's handles, or confirm the column should come out. **Visible on every page.**                                                                                                                                                                                                                                                          |     |
+| Legal pages                  | `marketing.content.ts` (`footerContent.legalLinks`)   | **BROKEN LINKS, ON PURPOSE, ON ALL SEVEN PAGES.** The rebuilt footer matches famysys.com's structure, which has a LEGAL column linking Terms & Conditions and Privacy Policy — so both links are now in place and both 404, because `/terms` and `/privacy` do not exist here. This reverses an earlier decision to carry no legal row at all rather than ship dead links, and it is the highest-cost item on this list after the contact form: a site whose forms ask for a name, a company and an email is linking a privacy policy that is not there. Supply the two documents (or say the column comes out) — `internalLinks.test.ts` holds the exemption open and names both routes. |     |
+| Tier field labels duplicated | `WaysToWork.tsx` (homepage)                           | "Ideal for" and "Typical work includes" are now exported from `marketing.content.ts` as `TIER_FIELD_LABELS`, and `/ways-to-work-with-us` reads them from there. The homepage section still carries them as component literals: `presentation/` may not import `infrastructure/` under the boundary rules, so removing that duplication means threading them through as props from `app/page.tsx`. A homepage change, deliberately not made while building an inner page.                                                                                                                                                                                                                  |
+| Two forms, two field sets    | `DemoForm.tsx` and `ContactForm.tsx`                  | The closing form on every page asks four questions (full name, work email, company, company size); `/contact` asks eight, matching famysys.com's own contact form. Both were drafted, neither is in the brief. Confirm both, or decide the short form should ask the same eight.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Company-size bands           | `CompanySize.ts`                                      | Now the four famysys.com uses — **1–50 · 50–200 · 200–1,000 · 1,000+**. They REPLACED a five-band set (1-10 / 11-50 / 51-200 / 201-500 / 500+) that the previous build invented, so the closing form's dropdown changed too. Two overlapping vocabularies would have made the answers un-comparable between the two forms, and neither set was ever confirmed. Confirm the four.                                                                                                                                                                                                                                                                                                          |
+| "Your role" options          | `ContactRole.ts`                                      | **Founder / Owner · Marketing Lead · Brand or Creative Lead · Content or Social Lead · Agency or Partner · Other.** NOT the parent's list, which is CEO / COO / CFO / CIO-CTO / VP / Other and is shaped for an enterprise IT buyer approving an engineering engagement. The Studio sells creative production to marketing and brand owners, often at companies with no C-suite to route through; reusing the parent's would have pushed most real senders into "Other". This is a read of who the Studio expects to hear from, and needs confirming.                                                                                                                                     |
+| Demo form reply commitment   | `DemoForm.tsx` (success message)                      | "Someone from Famysys Studio will reply **within one business day**" is an operational promise, not placeholder copy. Confirm the studio can hold that turnaround, or loosen the wording.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Routes — all seven content pages now exist
 
@@ -1298,8 +1353,10 @@ content module against them, so the next dead link fails the test suite rather t
 to be clicked. The browser pass re-checks the same thing against the running build: 468
 links across the seven pages, every internal target resolving 200.
 
-`/privacy` and `/terms` still do not exist and are **no longer linked** — see the legal-pages
-row above.
+`/privacy` and `/terms` still do not exist, and as of the footer rebuild they **are linked
+again** from every page — see the legal-pages row above. They are the only two internal
+links on the site that do not resolve, and `internalLinks.test.ts` names both in a
+`PENDING_ROUTES` exemption so the gap is stated rather than silent.
 
 ## Deliberately absent
 

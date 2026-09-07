@@ -223,10 +223,53 @@ export function NavPanel({ panel, isOpen, onClose, panelId, triggerId }: NavPane
           </ul>
         ) : null}
 
+        {/* THE ASIDE. One panel carries one: How We Work, under the four engagements.
+
+            It is a block rather than a link because it replaced a top-level bar item, and
+            a page demoted to a line of link text at the bottom of someone else's menu is a
+            page on its way to being forgotten. So it names itself, says what the sequence
+            is for, and lists the five steps — the same five the homepage renders, read
+            from the same constant — before it offers the link.
+
+            The steps are an ordered list and the numerals are drawn by CSS from the list's
+            own counter, so the order a reader sees is the order the markup has rather than
+            five hand-written numbers that can disagree with it. */}
+        {panel.asideHref && panel.asideLabel ? (
+          <div
+            className="nav-panel-aside mt-6 px-3 pt-5"
+            style={revealStyle((panel.columns.length + panel.features.length) * COLUMN_STAGGER_MS)}
+          >
+            <div className="nav-panel-aside-intro">
+              <p className="label nav-panel-aside-label">{panel.asideLabel}</p>
+              <p className="nav-panel-aside-summary text-body font-medium text-ink">
+                {panel.asideSummary}
+              </p>
+            </div>
+            <ol className="nav-panel-aside-steps text-small">
+              {(panel.asideSteps ?? []).map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <Link
+              href={panel.asideHref}
+              className="nav-panel-aside-link nav-panel-footer-link text-small font-medium text-accent"
+              onClick={onClose}
+            >
+              {panel.asideLinkLabel}
+              <span className="nav-panel-footer-arrow" aria-hidden="true">
+                {" "}
+                &rarr;
+              </span>
+            </Link>
+          </div>
+        ) : null}
+
         {panel.footerHref && panel.footerLabel ? (
           <div
             className="nav-panel-footer mt-6 px-3 pt-5"
-            style={revealStyle((panel.columns.length + panel.features.length) * COLUMN_STAGGER_MS)}
+            style={revealStyle(
+              (panel.columns.length + panel.features.length + 1) * COLUMN_STAGGER_MS,
+            )}
           >
             <Link
               href={panel.footerHref}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { CtaView, NavEntryView } from "../lib/viewModels";
 import { Button } from "../components/Button";
 import { useFocusTrap } from "../hooks/useFocusTrap";
@@ -12,7 +12,6 @@ interface MobileDrawerProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly entries: ReadonlyArray<NavEntryView>;
-  readonly signIn: CtaView;
   readonly primaryCta: CtaView;
   readonly panelId: string;
   readonly triggerId: string;
@@ -32,7 +31,6 @@ export function MobileDrawer({
   isOpen,
   onClose,
   entries,
-  signIn,
   primaryCta,
   panelId,
   triggerId,
@@ -87,8 +85,17 @@ export function MobileDrawer({
           Close
         </button>
       </div>
-      {/* The three panels collapse into accordion groups here — same content, same
-          disclosure ARIA, one open at a time. Items without a panel stay plain links. */}
+      {/* The two panels collapse into accordion groups here — same content, same
+          disclosure ARIA, one open at a time. Items without a panel stay plain links.
+
+          HOW WE WORK IS A TOP-LEVEL ROW HERE, not a block inside the Ways to Work group
+          the way it is on the bar. What demoted it on the bar was width — five page names
+          either side of a centred wordmark do not fit on one line — and the drawer has no
+          width problem: it is a column, and a row costs it nothing but 3rem of scroll. So
+          the page keeps a one-tap route on a phone rather than becoming something a reader
+          has to expand another item to find. It is rendered from the SAME aside the panel
+          renders, immediately after the entry that carries it, so the two surfaces cannot
+          disagree about where it lives. */}
       <nav aria-label="Mobile" className="flex flex-col gap-2 px-6">
         {entries.map((entry, index) => {
           const isGroupOpen = openGroup === entry.href;
@@ -102,98 +109,120 @@ export function MobileDrawer({
             transform: isOpen ? "translateY(0)" : "translateY(8px)",
           };
 
+          const aside =
+            entry.panel.asideHref && entry.panel.asideLabel
+              ? { href: entry.panel.asideHref, label: entry.panel.asideLabel }
+              : null;
+
           return (
-            <div key={entry.href} className="border-b border-ink-8 py-3">
-              {hasPanel(entry) ? (
-                <>
-                  {/* Split row: the name goes to the page, the chevron opens the group.
+            <Fragment key={entry.href}>
+              <div className="border-b border-ink-8 py-3">
+                {hasPanel(entry) ? (
+                  <>
+                    {/* Split row: the name goes to the page, the chevron opens the group.
                       One control cannot do both — tapping "Creative Services" has to reach
                       Creative Services, and the group still has to expand. The chevron
                       carries the disclosure ARIA and its own name, because on its own it
                       would announce as an unlabelled button. */}
-                  <div className="flex items-center justify-between gap-4" style={revealStyle}>
-                    <Link
-                      href={entry.href}
-                      onClick={onClose}
-                      className="text-display-s font-medium text-ink"
-                    >
-                      {entry.label}
-                    </Link>
-                    <button
-                      id={groupTriggerId}
-                      type="button"
-                      className="shrink-0 p-2 text-ink-70"
-                      aria-expanded={isGroupOpen}
-                      aria-controls={groupPanelId}
-                      aria-label={`Show ${entry.label} links`}
-                      onClick={() => setOpenGroup(isGroupOpen ? null : entry.href)}
-                    >
-                      <svg
-                        className="faq-chevron"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        aria-hidden="true"
+                    <div className="flex items-center justify-between gap-4" style={revealStyle}>
+                      <Link
+                        href={entry.href}
+                        onClick={onClose}
+                        className="text-display-s font-medium text-ink"
                       >
-                        <path
-                          d="M5 7.5L10 12.5L15 7.5"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <div
-                    id={groupPanelId}
-                    role="region"
-                    aria-labelledby={groupTriggerId}
-                    data-open={isGroupOpen}
-                    inert={!isGroupOpen}
-                    className="faq-panel"
-                  >
-                    <div className="faq-panel-inner">
-                      <ul className="mt-3 space-y-2 pb-3 pl-2">
-                        {panelLinks(entry).map((item) => (
-                          <li key={`${item.href}-${item.label}`}>
-                            <Link href={item.href} className="text-body text-ink" onClick={onClose}>
-                              {item.label}
-                            </Link>
-                          </li>
-                        ))}
-                        {entry.panel.footerHref && entry.panel.footerLabel ? (
-                          <li>
-                            <Link
-                              href={entry.panel.footerHref}
-                              className="inline-link text-small font-medium text-accent"
-                              onClick={onClose}
-                            >
-                              {entry.panel.footerLabel} &rarr;
-                            </Link>
-                          </li>
-                        ) : null}
-                      </ul>
+                        {entry.label}
+                      </Link>
+                      <button
+                        id={groupTriggerId}
+                        type="button"
+                        className="shrink-0 p-2 text-ink-70"
+                        aria-expanded={isGroupOpen}
+                        aria-controls={groupPanelId}
+                        aria-label={`Show ${entry.label} links`}
+                        onClick={() => setOpenGroup(isGroupOpen ? null : entry.href)}
+                      >
+                        <svg
+                          className="faq-chevron"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M5 7.5L10 12.5L15 7.5"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <Link
-                  href={entry.href}
-                  onClick={onClose}
-                  className="text-display-s block font-medium text-ink"
-                  style={revealStyle}
-                >
-                  {entry.label}
-                </Link>
-              )}
-            </div>
+                    <div
+                      id={groupPanelId}
+                      role="region"
+                      aria-labelledby={groupTriggerId}
+                      data-open={isGroupOpen}
+                      inert={!isGroupOpen}
+                      className="faq-panel"
+                    >
+                      <div className="faq-panel-inner">
+                        <ul className="mt-3 space-y-2 pb-3 pl-2">
+                          {panelLinks(entry).map((item) => (
+                            <li key={`${item.href}-${item.label}`}>
+                              <Link
+                                href={item.href}
+                                className="text-body text-ink"
+                                onClick={onClose}
+                              >
+                                {item.label}
+                              </Link>
+                            </li>
+                          ))}
+                          {entry.panel.footerHref && entry.panel.footerLabel ? (
+                            <li>
+                              <Link
+                                href={entry.panel.footerHref}
+                                className="inline-link text-small font-medium text-accent"
+                                onClick={onClose}
+                              >
+                                {entry.panel.footerLabel} &rarr;
+                              </Link>
+                            </li>
+                          ) : null}
+                        </ul>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href={entry.href}
+                    onClick={onClose}
+                    className="text-display-s block font-medium text-ink"
+                    style={revealStyle}
+                  >
+                    {entry.label}
+                  </Link>
+                )}
+              </div>
+              {aside ? (
+                <div className="border-b border-ink-8 py-3">
+                  <Link
+                    href={aside.href}
+                    onClick={onClose}
+                    className="text-display-s block font-medium text-ink"
+                    style={revealStyle}
+                  >
+                    {aside.label}
+                  </Link>
+                </div>
+              ) : null}
+            </Fragment>
           );
         })}
       </nav>
       <div className="mt-6 flex flex-col gap-3 px-6 pb-10">
-        <Button cta={signIn} variant="ghost" />
         <Button cta={primaryCta} variant="primary" />
       </div>
     </div>

@@ -17,13 +17,11 @@ import type { Differentiator } from "../../domain/marketing/entities/Differentia
 import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
 import type { WhyFamysysBlock } from "../../domain/marketing/entities/WhyFamysysBlock";
 import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
-import type { FooterContent } from "../../domain/marketing/entities/FooterContent";
-import type { HeroBand, HeroContent } from "../../domain/marketing/entities/HeroContent";
 import type {
-  CustomPartnership,
-  EngagementTier,
-  WaysToWorkBlock,
-} from "../../domain/marketing/entities/EngagementTier";
+  FooterContent,
+  FooterSocialLink,
+} from "../../domain/marketing/entities/FooterContent";
+import type { HeroBand, HeroContent } from "../../domain/marketing/entities/HeroContent";
 import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuColumn";
 import type {
   NavEntry,
@@ -87,6 +85,13 @@ export interface NavPanelView {
   // the branching this file forbids. Only the three items with panels carry a footer.
   readonly footerLabel: string | undefined;
   readonly footerHref: string | undefined;
+  // The aside block, flattened the same way and for the same reason. One panel has one —
+  // How We Work, under Ways to Work With Us. See `NavPanelAside`.
+  readonly asideLabel: string | undefined;
+  readonly asideSummary: string | undefined;
+  readonly asideSteps: ReadonlyArray<string> | undefined;
+  readonly asideLinkLabel: string | undefined;
+  readonly asideHref: string | undefined;
 }
 
 export interface NavEntryView extends CtaView {
@@ -95,7 +100,6 @@ export interface NavEntryView extends CtaView {
 
 export interface NavigationMenuView {
   readonly primaryLinks: ReadonlyArray<NavEntryView>;
-  readonly signIn: CtaView;
   readonly primaryCta: CtaView;
 }
 
@@ -156,30 +160,6 @@ export interface WhyFamysysBlockView {
   readonly heading: string;
   readonly body: string;
   readonly reasons: ReadonlyArray<ValuePillarView>;
-}
-
-export interface EngagementTierView {
-  readonly name: string;
-  readonly descriptor: string;
-  readonly summary: string;
-  readonly idealFor: string;
-  readonly typicalWork: string;
-  readonly cta: CtaView;
-}
-
-export interface CustomPartnershipView {
-  readonly name: string;
-  readonly descriptor: string;
-  readonly summary: string;
-  readonly invitation: string;
-  readonly cta: CtaView;
-}
-
-export interface WaysToWorkBlockView {
-  readonly heading: string;
-  readonly body: string;
-  readonly tiers: ReadonlyArray<EngagementTierView>;
-  readonly custom: CustomPartnershipView;
 }
 
 export interface FaqItemView {
@@ -297,11 +277,20 @@ export interface DirectionBlockView {
   readonly media: MediaView;
 }
 
+export interface FooterSocialLinkView {
+  readonly label: string;
+  /** null while the client has not supplied the handle — the name renders, unlinked. */
+  readonly href: string | null;
+}
+
 export interface FooterContentView {
   readonly tagline: string;
   readonly contactEmail: string;
+  readonly contactLink: CtaView;
+  readonly addressLines: ReadonlyArray<string> | null;
+  readonly descriptor: string;
   readonly legalLinks: ReadonlyArray<CtaView>;
-  readonly socialLinks: ReadonlyArray<CtaView>;
+  readonly socialLinks: ReadonlyArray<FooterSocialLinkView>;
 }
 
 export function toCtaView(cta: Cta): CtaView {
@@ -339,6 +328,11 @@ function toNavPanelView(panel: NavPanel): NavPanelView {
     features: panel.features.map(toNavPanelFeatureView),
     footerLabel: panel.footerLink?.label.value,
     footerHref: panel.footerLink?.href.value,
+    asideLabel: panel.aside?.label,
+    asideSummary: panel.aside?.summary,
+    asideSteps: panel.aside?.steps,
+    asideLinkLabel: panel.aside?.link.label.value,
+    asideHref: panel.aside?.link.href.value,
   };
 }
 
@@ -349,7 +343,6 @@ function toNavEntryView(entry: NavEntry): NavEntryView {
 export function toNavigationMenuView(navigation: NavigationMenu): NavigationMenuView {
   return {
     primaryLinks: navigation.primaryLinks.map(toNavEntryView),
-    signIn: toCtaView(navigation.signIn),
     primaryCta: toCtaView(navigation.primaryCta),
   };
 }
@@ -419,36 +412,6 @@ export function toWhyFamysysBlockView(block: WhyFamysysBlock): WhyFamysysBlockVi
       description: reason.description,
       media: toMediaView(reason.media),
     })),
-  };
-}
-
-function toEngagementTierView(tier: EngagementTier): EngagementTierView {
-  return {
-    name: tier.name,
-    descriptor: tier.descriptor,
-    summary: tier.summary,
-    idealFor: tier.idealFor,
-    typicalWork: tier.typicalWork,
-    cta: toCtaView(tier.cta),
-  };
-}
-
-function toCustomPartnershipView(custom: CustomPartnership): CustomPartnershipView {
-  return {
-    name: custom.name,
-    descriptor: custom.descriptor,
-    summary: custom.summary,
-    invitation: custom.invitation,
-    cta: toCtaView(custom.cta),
-  };
-}
-
-export function toWaysToWorkBlockView(block: WaysToWorkBlock): WaysToWorkBlockView {
-  return {
-    heading: block.heading,
-    body: block.body,
-    tiers: block.tiers.map(toEngagementTierView),
-    custom: toCustomPartnershipView(block.custom),
   };
 }
 
@@ -535,12 +498,19 @@ export function toServicesHeroView(hero: ServicesHero): ServicesHeroView {
   };
 }
 
+function toFooterSocialLinkView(link: FooterSocialLink): FooterSocialLinkView {
+  return { label: link.label, href: link.href?.value ?? null };
+}
+
 export function toFooterContentView(footer: FooterContent): FooterContentView {
   return {
     tagline: footer.tagline,
     contactEmail: footer.contactEmail,
+    contactLink: toCtaView(footer.contactLink),
+    addressLines: footer.addressLines,
+    descriptor: footer.descriptor,
     legalLinks: footer.legalLinks.map(toCtaView),
-    socialLinks: footer.socialLinks.map(toCtaView),
+    socialLinks: footer.socialLinks.map(toFooterSocialLinkView),
   };
 }
 

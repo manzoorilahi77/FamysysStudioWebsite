@@ -31,8 +31,36 @@ import { useReducedMotion } from "./useReducedMotion";
 const BAR_COUNT = 64;
 /** Fraction of a bar's width left empty between one bar and the next. */
 const BAR_GAP_RATIO = 0.22;
-/** Tallest a bar may draw, as a fraction of the canvas height. */
-const BAR_CEILING = 0.86;
+/** How the wave is scaled into the canvas height before the ceiling is applied. */
+const BAR_SCALE = 0.86;
+/**
+ * THE CEILING. The bars used to be free to reach 0.86 of the hero — about 126px from the
+ * top of a 900px viewport, with the fixed bar occupying the first 80 — so on a fast scroll
+ * with the pointer high the tallest of them ran into the navigation, which reads as the
+ * background hitting the furniture rather than as a meter.
+ *
+ * The ceiling is measured, not guessed: the tallest bar stops level with the TOP EDGE OF
+ * THE FIRST BAND of the accordion on the right, which is the highest thing in the hero
+ * that is not the bar itself and sits comfortably below it. Measured on the same schedule
+ * as everything else here — load, resize, fonts, and the section's own box — never per
+ * frame.
+ *
+ * It is a CLAMP, not a scale. The wave, the bulge under the pointer and the scroll lift
+ * are all computed exactly as before and only the RESULT is cut, so a bar below the
+ * ceiling still answers the cursor and the scroll with its full range; what changes is
+ * that the ones that would have gone over now sit level at the line, which is what a meter
+ * hitting its limit does anyway.
+ */
+const BAR_CEILING_FALLBACK = 0.86;
+/**
+ * How low the measured ceiling may go, as a fraction of the canvas height. Below 900px the
+ * accordion moves UNDER the copy and lies along the bottom of the hero, so its first band's
+ * top edge is a quarter of the way up and would flatten the meter to a strip. The bars pass
+ * behind the accordion at that width — it is painted over them — so the floor is what keeps
+ * the field reading as a level meter on a phone. There is no navigation to run into down
+ * there: half the hero's height clears the bar several times over.
+ */
+const BAR_CEILING_FLOOR = 0.5;
 /** How fast a bar chases its target height, per frame — this is what reads as inertia. */
 const BAR_EASE = 0.1;
 /** Height of the accent cap sitting on each bar, in CSS pixels. */
@@ -117,6 +145,8 @@ interface MeterFrame {
 interface Meter {
   readonly step: (frame: MeterFrame) => void;
   readonly resize: () => void;
+  /** The tallest a bar may draw, in CSS pixels. See `BAR_CEILING_FALLBACK`. */
+  readonly setCeiling: (cssPixels: number) => void;
 }
 
 /**
@@ -131,6 +161,7 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
   let height = 0;
   let barWidth = 1;
   let heights: number[] = [];
+  let ceiling = Number.POSITIVE_INFINITY;
 
   function resize(): void {
     const nextWidth = Math.max(1, Math.round(canvas.clientWidth * pixelRatio));
@@ -171,7 +202,7 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
         level += (1 - distance / reach) * BULGE_GAIN;
       }
       level = (level - 0.32) * (0.9 + lift);
-      const target = clamp(level, 0.02, 1.2) * height * BAR_CEILING;
+      const target = Math.min(clamp(level, 0.02, 1.2) * height * BAR_SCALE, ceiling);
       const current = heights[index] ?? 0;
       const next = current + (target - current) * BAR_EASE;
       heights[index] = next;
@@ -216,8 +247,33 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
     }
   }
 
+  function setCeiling(cssPixels: number): void {
+    ceiling = cssPixels * pixelRatio;
+  }
+
   resize();
-  return { step, resize };
+  return { step, resize, setCeiling };
+}
+
+/**
+ * The tallest a bar may draw in this layout, in CSS pixels: the distance from the bottom
+ * of the hero up to the top edge of the accordion's first band. Falls back to the flat
+ * fraction if the accordion is not in the DOM — which it is not on the frame before the
+ * bands mount, and would not be at all if the hero were ever rendered without them.
+ *
+ * Read from the DOM by class, the same way the two magnetic buttons are found. The bands
+ * are laid out by CSS at four different sizes across two breakpoints, so measuring the one
+ * that is actually on screen is the only thing that stays true at every width.
+ */
+function measureCeiling(section: HTMLElement): number {
+  const sectionRect = section.getBoundingClientRect();
+  const band = section.querySelector<HTMLElement>(".hero-final-band");
+  const floor = sectionRect.height * BAR_CEILING_FLOOR;
+  if (!band) {
+    return sectionRect.height * BAR_CEILING_FALLBACK;
+  }
+  const available = sectionRect.bottom - band.getBoundingClientRect().top;
+  return clamp(available, floor, sectionRect.height * BAR_CEILING_FALLBACK);
 }
 
 export interface HeroMotion {
@@ -264,7 +320,10 @@ export function useHeroMotion(bandCount: number): HeroMotion {
     );
 
     if (prefersReducedMotion) {
-      // One settled frame, then nothing. No listeners, no loop, no scroll response.
+      // One settled frame, then nothing. No listeners, no loop, no scroll response — but
+      // the ceiling still applies: a still meter running into the navigation is the same
+      // defect held permanently.
+      meter.setCeiling(measureCeiling(section));
       for (let index = 0; index < STILL_WARMUP_FRAMES; index += 1) {
         meter.step({
           time: STILL_START_MS + index * STILL_WARMUP_STEP_MS,
@@ -313,6 +372,7 @@ export function useHeroMotion(bandCount: number): HeroMotion {
       top = rect.top + window.scrollY;
       height = rect.height;
       meter.resize();
+      meter.setCeiling(measureCeiling(element));
     }
 
     function handlePointerMove(event: PointerEvent): void {

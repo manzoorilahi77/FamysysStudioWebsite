@@ -23,6 +23,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    // Keeps the build cache out of the repository root — it is generated, not configuration,
+    // and node_modules/.cache is where the rest of the toolchain already writes theirs.
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo",
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"]

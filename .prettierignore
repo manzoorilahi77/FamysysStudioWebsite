@@ -2,3 +2,7 @@ node_modules
 .next
 coverage
 pnpm-lock.yaml
+
+# design artifacts — kept exactly as they were produced
+docs/explorations
+docs/spec

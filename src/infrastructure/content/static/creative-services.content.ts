@@ -228,6 +228,10 @@ export const creativeServicesPage: CreativeServicesPage = {
     // for this page, so the sequence here can never drift from the homepage's.
     process: {
       heading: "Five steps, the same on every service.",
+      // The reveal label belongs to the homepage's frames, which this page does not
+      // render — it is carried through from the same source rather than restated, so
+      // there is still exactly one definition of it.
+      revealLabel: processBlock.revealLabel,
       steps: processBlock.steps,
     },
     cta: createCta("See how we work", "/how-we-work"),

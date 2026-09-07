@@ -223,6 +223,25 @@ export const spacing = {
 
 export const container = { maxWidth: "80rem" } as const; // 1280px
 
+/**
+ * THE BAR'S OWN LINE — the one thing on the site that does NOT take `container` above.
+ *
+ * MEASURED FROM famysys.com, at the client's direction, rather than chosen. Its header
+ * shell is `max-width: 1408px` with `padding-inline: 5vw`, which resolves to a content
+ * line 88px from each edge at 1440 (1264px wide), 64px at 1280 (1152px) and 51.2px at
+ * 1024 (921.6px). The two values below reproduce that exactly.
+ *
+ * WHAT THIS COSTS, stated plainly because it undoes something the header was built to do:
+ * `container` is 80rem with a 3rem gutter, so at 1440 a section's first character sits at
+ * 128px and the bar's first label now sits at 88px. Above 1408 the bar is WIDER than the
+ * page; between about 1100 and 1408 it is narrower. The two lines no longer coincide at
+ * any width, which is the trade the parent site itself does not make — famysys.com runs
+ * one shell for its bar and its sections alike. Matching its bar while keeping our own
+ * page width is what pulls them apart. Changing `container` to these numbers would put
+ * them back together and match famysys.com everywhere, and would relayout all seven pages.
+ */
+export const navContainer = { maxWidth: "88rem", gutter: "5vw" } as const; // 1408px
+
 export const focusRing = {
   color: color.accent,
   width: "2px",

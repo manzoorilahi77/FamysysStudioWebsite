@@ -86,6 +86,7 @@ function fixtureDifferentiator(): DifferentiatorBlock {
 function fixtureProcessBlock(): ProcessBlock {
   return {
     heading: "From idea to finished creative.",
+    revealLabel: "What happens here",
     steps: [
       { title: "Understand", description: "We understand what you're trying to communicate." },
       { title: "Create", description: "We develop the concept." },
@@ -100,6 +101,8 @@ function fixtureWaysToWork(): WaysToWorkBlock {
   return {
     heading: "Flexible ways to work with Famysys Studio.",
     body: "Whether you need one creative asset or an ongoing production partner.",
+    openLabel: "Open",
+    closeLabel: "Close",
     tiers: [
       {
         name: "Launch",
@@ -176,8 +179,11 @@ function fixtureFooterContent(): FooterContent {
   return {
     tagline: "A professional creative production partner.",
     contactEmail: "hello@famysys.com",
+    contactLink: createCta("Contact", "/contact"),
+    addressLines: null,
+    descriptor: "AI-Enabled Creative Production Partner",
     legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
-    socialLinks: [],
+    socialLinks: [{ label: "LinkedIn", href: null }],
   };
 }
 

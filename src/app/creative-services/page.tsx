@@ -6,12 +6,12 @@ import { container } from "../../infrastructure/di/container";
 import { CapabilityIndex } from "../../presentation/components/CapabilityIndex";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { CapabilityBlock } from "../../presentation/sections/CapabilityBlock";
-import { EngagementPointer } from "../../presentation/sections/EngagementPointer";
-import { Faq } from "../../presentation/sections/Faq";
-import { FinalCta } from "../../presentation/sections/FinalCta";
-import { HowWeWork } from "../../presentation/sections/HowWeWork";
-import { ServicesHero } from "../../presentation/sections/ServicesHero";
+import { CapabilityBlock } from "../../presentation/sections/services/CapabilityBlock";
+import { EngagementPointer } from "../../presentation/sections/services/EngagementPointer";
+import { Faq } from "../../presentation/sections/shared/Faq";
+import { FinalCta } from "../../presentation/sections/shared/FinalCta";
+import { HowWeWork } from "../../presentation/sections/shared/HowWeWork";
+import { ServicesHero } from "../../presentation/sections/services/ServicesHero";
 import {
   toCapabilityDetailView,
   toCtaView,

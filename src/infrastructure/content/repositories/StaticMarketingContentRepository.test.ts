@@ -162,18 +162,42 @@ describe("StaticMarketingContentRepository", () => {
   });
 
   /**
-   * The footer linked "Privacy policy" at /privacy and "Terms of use" at /terms, and
-   * neither page exists. They were the last two dead links on the site once /contact
-   * completed the seven content pages, and a link to a privacy policy that 404s is the
-   * wrong thing to be broken on a site whose form asks for a name, a company and an
-   * email. The links come back when the documents do — see docs/content-todo.md.
+   * THIS TEST USED TO ASSERT THE OPPOSITE, and the reversal is the point.
+   *
+   * The footer carried no legal row at all, because "Privacy policy" at /privacy and
+   * "Terms of use" at /terms both 404ed and a broken privacy link is the wrong thing to
+   * be broken on a site whose forms ask for a name, a company and an email. The footer
+   * rebuild takes famysys.com's structure, which HAS that column, so the two links are
+   * back and both still 404 — a defect held open deliberately, with the documents named
+   * as the fix in docs/content-todo.md.
+   *
+   * What this asserts is that the state is the one that was chosen: exactly two links, at
+   * exactly the two routes the pending-route exemption in internalLinks.test.ts names. A
+   * third dead link, or a different route, is a mistake rather than the decision.
    */
-  it("links to no legal page until the documents exist", async () => {
+  it("links the two legal pages the documents have not been written for yet", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const footer = await repository.getFooterContent();
 
-    expect(footer.legalLinks).toEqual([]);
+    expect(footer.legalLinks.map((link) => link.label.toString())).toEqual([
+      "Terms & Conditions",
+      "Privacy Policy",
+    ]);
+    expect(footer.legalLinks.map((link) => link.href.value)).toEqual(["/terms", "/privacy"]);
     expect(footer.contactEmail.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * The address is the one footer field where a wrong value is a factual claim about
+   * where a business is, so its absence is asserted rather than left to a reading of the
+   * content file. Null means the footer prints no address block at all.
+   */
+  it("prints no postal address until one is confirmed for the Studio", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const footer = await repository.getFooterContent();
+
+    expect(footer.addressLines).toBeNull();
   });
 });
