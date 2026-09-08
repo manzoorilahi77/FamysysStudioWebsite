@@ -1,8 +1,13 @@
-import { GetCmsDashboard } from "../../../application/cms/GetCmsDashboard";
-import { adminContainer } from "../../../infrastructure/di/adminContainer";
-import { DashboardScreen } from "../../../presentation/admin/views/DashboardScreen";
+import { redirect } from "next/navigation";
 
-export default async function AdminDashboardRoute() {
-  const dashboard = await new GetCmsDashboard(adminContainer.cms).execute();
-  return <DashboardScreen dashboard={dashboard} />;
+/**
+ * There is no dashboard.
+ *
+ * There was one, and it counted things: seven pages, eight collections, fifty-five files. None of
+ * those numbers was a question anyone had, and it was a screen between the editor and the work.
+ * /admin goes to the homepage's editor, which is where someone opening this panel almost always
+ * means to be.
+ */
+export default function AdminRoot() {
+  redirect("/admin/pages/home");
 }

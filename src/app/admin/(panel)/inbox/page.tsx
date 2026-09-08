@@ -1,8 +1,8 @@
 import { GetInquiries } from "../../../../application/cms/GetInquiries";
 import { adminContainer } from "../../../../infrastructure/di/adminContainer";
-import { InquiriesScreen } from "../../../../presentation/admin/views/InquiriesScreen";
+import { InboxScreen } from "../../../../presentation/admin/views/InboxScreen";
 
-export default async function AdminInquiriesRoute() {
+export default async function AdminInboxRoute() {
   const inquiries = await new GetInquiries(adminContainer.cms).execute();
-  return <InquiriesScreen inquiries={inquiries} />;
+  return <InboxScreen inquiries={inquiries} />;
 }

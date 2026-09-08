@@ -22,9 +22,18 @@ import type { WaysToWorkBlock } from "../../../domain/marketing/entities/Engagem
 import type { WhyFamysysBlock } from "../../../domain/marketing/entities/WhyFamysysBlock";
 import type { WhatWeDoIntro } from "../../../domain/marketing/repositories/MarketingContentRepository";
 
-// The hero's accordion: five bands, one open at a time, standing for the five things the
-// studio actually does. Five and not eight — the strip is a column beside the headline
-// rather than a wall behind it, and a sixth band leaves no open band tall enough to read.
+// The hero's accordion: six bands, one open at a time, standing for the six services the
+// studio sells — the same six /creative-services sets out, in the same order the page does
+// not depend on. Six and not eight: the strip is a column beside the headline rather than
+// a wall behind it.
+//
+// IT WAS FIVE, and the note here said a sixth would leave no open band tall enough to read.
+// That was true of the strip it was written against, which stopped growing at 520px: six
+// bands there gave the open one 267px and each closed one 48px. The strip now runs to 58%
+// of the viewport height — 626px at 1080 — where six bands give the open one 288px, more
+// than the five ever had, and each closed one 63px against a 24px label. The band that was
+// missing is the one the studio's own thesis names, and the right-hand side had a strip of
+// empty ground under it that a sixth band is the honest way to fill.
 //
 // Aspect ratio is `3:4` on every band because the accordion sizes them itself: a band is
 // a flex child of a fixed-height column and its image is `object-fit: cover`. The value
@@ -66,6 +75,15 @@ const HERO_BANDS: ReadonlyArray<HeroBandSource> = [
     label: "Content",
     alt: "A clapperboard held up at the start of a take.",
   },
+  {
+    // The one band whose picture is not a `hero-band-` file: /creative-services already
+    // carries a frame for this service and its alt text is the client's own description of
+    // it, so the band takes both rather than inventing a sixth stock image to say the same
+    // thing. See `imageFile`/`imageAlt` for AI Video in creative-services.content.ts.
+    file: "service-ai-video",
+    label: "AI",
+    alt: "A presenter in a grey jacket, standing to camera in front of an orange wall.",
+  },
 ];
 
 export const heroContent: HeroContent = {
@@ -100,7 +118,7 @@ export const whatWeDoIntro: WhatWeDoIntro = {
   intro: {
     eyebrow: "Our capabilities",
     heading: "One creative partner for your ongoing content needs.",
-    body: "From a single promotional video to an ongoing stream of marketing content, Famysys Studio brings creative thinking, production expertise and AI-enabled workflows together under one roof.",
+    body: "One video or an ongoing content stream — creative thinking, production expertise and AI workflows, under one roof.",
   },
   cta: createCta("Explore All Services", "/creative-services"),
 };
@@ -117,7 +135,7 @@ function differentiatorImage(file: string, alt: string): MediaRef {
 
 export const differentiatorBlock: DifferentiatorBlock = {
   heading: "The right mix of creativity, technology and people.",
-  body: "AI has changed how creative work can be produced. But great creative work still requires judgment, storytelling, design sense and human quality control.",
+  body: "AI changed how creative work gets made. It still takes judgment, storytelling and human quality control.",
   leadIn: "At Famysys Studio, we combine:",
   elements: [
     {
@@ -155,7 +173,7 @@ export const differentiatorBlock: DifferentiatorBlock = {
       ),
     },
   ],
-  closingStatement: "AI is our production advantage — not our identity.",
+  closingStatement: "AI is our production advantage not our identity",
 };
 
 export const processBlock: ProcessBlock = {
@@ -271,7 +289,7 @@ function reasonImage(file: string, alt: string): MediaRef {
 
 export const whyFamysysBlock: WhyFamysysBlock = {
   heading: "Professional creative support. Without unnecessary overhead.",
-  body: "We believe businesses shouldn't have to choose between expensive agencies and inconsistent freelancers. Famysys Studio is being built to provide a third option: a flexible, technology-enabled creative production team that can grow with your requirements.",
+  body: "A third option between costly agencies and inconsistent freelancers — a flexible production team that grows with you.",
   reasons: [
     {
       title: "Flexible",

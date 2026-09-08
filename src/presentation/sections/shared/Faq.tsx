@@ -142,7 +142,35 @@ function FaqRow({
  * a hover state on it as well would say a second time what the expanded panel underneath
  * it is already saying.
  */
-export function Faq({
+/**
+ * THE SWITCH. Hidden at the client's direction, on every page at once and for now only.
+ *
+ * Four pages render this section — the homepage, /creative-services, /how-we-work and
+ * /ways-to-work-with-us — and all four calls are left exactly as they were, so unhiding is
+ * this one boolean and no page changes. Commenting the four call sites out instead would
+ * mean four edits to reverse, four sets of unused imports to re-add, and four chances to
+ * bring one back and forget another.
+ *
+ * NOTHING ELSE POINTS AT IT. There is no FAQ jump link, no anchor and no `FAQPage`
+ * structured data anywhere in the site, so hiding the section leaves nothing dangling:
+ * the questions simply stop being rendered. The content, the use cases and the CMS rows
+ * are all untouched and the client can still edit them in the panel.
+ */
+const FAQ_ENABLED = false;
+
+/**
+ * A thin gate in front of the section, rather than an early return inside it. The hooks
+ * below have to run unconditionally, so switching the section off from within would mean
+ * mounting an observer and a piece of state for markup that is never returned.
+ */
+export function Faq(props: FaqProps) {
+  if (!FAQ_ENABLED) {
+    return null;
+  }
+  return <FaqSection {...props} />;
+}
+
+function FaqSection({
   faq,
   eyebrow = "Questions",
   heading = "The questions that come up first.",

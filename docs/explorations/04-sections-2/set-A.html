@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sections, set A — the numerals and the split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#F2EDE1; --dark:#12251F; --card:#FCF8EE;
+  --ink:#16241E; --ink-dark:#F1EBDD; --muted:#212B25;
+  --claret:#7E1B33; --rose:#F0A8B8; --gold:#D6A03C; --mint:#66E0B0;
+  --alt:#1E3A31; --warm:#E5DCCA;
+  --sans:"Jost","Helvetica Neue",Arial,sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --gut:clamp(1.5rem,5vw,5rem);
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);font-weight:300;
+  font-size:clamp(1rem,.95rem + .2vw,1.1rem);line-height:1.55;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h2,h3,p,ol,ul,figure{margin:0}
+ol,ul{list-style:none;padding:0}
+em{font-family:var(--serif);font-style:italic;font-weight:400}
+
+/* ---- file strip ---------------------------------------------------- */
+.strip{padding:1rem var(--gut);border-bottom:1px solid rgba(22,36,30,.14);
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* ---- shared section furniture -------------------------------------- */
+.sec{padding:clamp(4.5rem,10vw,9rem) var(--gut)}
+.eyebrow{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.6rem}
+.head{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:clamp(1.5rem,4vw,4.5rem);align-items:end}
+.head h2{font-weight:300;letter-spacing:-.025em;line-height:1.02;
+  font-size:clamp(2.1rem,5.4vw,4.2rem);max-width:15ch}
+.head-body{font-size:clamp(1rem,.95rem + .3vw,1.18rem);max-width:46ch}
+
+/* ==== 1 · WHAT WE DO ================================================= */
+.wwd{background:var(--page);color:var(--ink)}
+.wwd .eyebrow{color:var(--claret)}
+.wwd .head-body{color:var(--muted)}
+.wwd-body{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);
+  gap:clamp(1.5rem,5vw,5rem);margin-top:clamp(3rem,7vw,6rem)}
+
+.rail{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;
+  justify-content:center;gap:2.5rem}
+.numerals{position:relative;height:.82em;font-size:clamp(8rem,23vw,23rem);
+  font-weight:200;line-height:.82;letter-spacing:-.05em;
+  transform:translate3d(0,var(--drift,0px),0);will-change:transform}
+.numeral{position:absolute;inset:0;display:block;color:var(--claret);
+  opacity:0;transform:translate3d(0,26%,0);
+  transition:opacity .5s var(--ease),transform .7s var(--ease)}
+.numeral.is-before{transform:translate3d(0,-26%,0)}
+.numeral.is-on{opacity:1;transform:translate3d(0,0,0)}
+.rail-label{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  height:1.2em;position:relative}
+.rail-label span{position:absolute;left:0;top:0;opacity:0;transform:translate3d(0,.5em,0);
+  transition:opacity .45s var(--ease),transform .55s var(--ease);white-space:nowrap}
+.rail-label span.is-on{opacity:1;transform:none}
+.spine{display:flex;gap:.5rem;align-items:center}
+.spine i{display:block;width:2.4rem;height:2px;background:var(--muted);opacity:.28;
+  transform-origin:left center;transition:transform .55s var(--ease),opacity .45s var(--ease)}
+.spine i.is-on{opacity:1;background:var(--claret);transform:scaleX(1.9)}
+
+.caps{display:flex;flex-direction:column}
+.cap{margin-left:var(--in,0);padding:clamp(2rem,4vw,3rem) 0;min-height:33vh;
+  display:flex;flex-direction:column;justify-content:center;
+  border-top:1px solid rgba(22,36,30,.16);
+  transform:translate3d(0,0,0);transition:transform .6s var(--ease)}
+.cap:last-child{border-bottom:1px solid rgba(22,36,30,.16)}
+.cap-n{font-size:.72rem;letter-spacing:.2em;color:var(--claret);opacity:.5;
+  transition:opacity .45s var(--ease)}
+.cap-t{font-weight:300;letter-spacing:-.02em;line-height:1.04;margin-top:.7rem;
+  font-size:clamp(1.5rem,3.4vw,2.7rem);color:var(--ink);opacity:.42;
+  transform:translate3d(0,0,0);
+  transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.cap-d{margin-top:.9rem;max-width:44ch;color:var(--muted);
+  opacity:0;transform:translate3d(0,.7rem,0);
+  transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.cap.is-on{transform:translate3d(-1.1rem,0,0)}
+.cap.is-on .cap-n{opacity:1}
+.cap.is-on .cap-t{opacity:1;transform:translate3d(.9rem,0,0)}
+.cap.is-on .cap-d{opacity:1;transform:translate3d(.9rem,0,0)}
+
+.wwd-cta{display:inline-flex;align-items:center;gap:.7rem;margin-top:clamp(2.5rem,5vw,4rem);
+  font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--claret);
+  text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:.4rem}
+.wwd-cta i{display:block;width:2.2rem;height:1px;background:currentColor;
+  transform-origin:left;transition:transform .4s var(--ease)}
+.wwd-cta:hover i{transform:scaleX(1.5)}
+
+/* ==== 2 · THE DIFFERENTIATOR ======================================== */
+.diff{background:var(--dark);color:var(--ink-dark)}
+.diff .eyebrow{color:var(--rose)}
+.diff .head-body{color:var(--ink-dark);opacity:.85}
+.lead-in{margin-top:clamp(2.5rem,5vw,4rem);font-family:var(--serif);font-style:italic;
+  font-size:clamp(1.3rem,2.6vw,2rem);color:var(--rose)}
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  gap:clamp(1.5rem,5vw,4.5rem);margin-top:clamp(1.5rem,4vw,3rem)}
+
+.stage{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+.stage-in{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--alt)}
+.frame{position:absolute;inset:0;opacity:0;transform:translate3d(0,0,0) scale(1.06);
+  transition:opacity .8s var(--ease),transform 1.1s var(--ease);will-change:transform,opacity}
+.frame.is-on{opacity:1;transform:translate3d(0,0,0) scale(1)}
+.frame img{width:100%;height:100%;object-fit:cover}
+.panel{position:absolute;left:0;bottom:0;max-width:min(30rem,84%);
+  padding:clamp(1.1rem,2vw,1.7rem) clamp(1.2rem,2.2vw,2rem);
+  opacity:0;transform:translate3d(0,1.4rem,0);
+  transition:opacity .55s var(--ease) .12s,transform .7s var(--ease) .12s}
+.frame.is-on .panel{opacity:1;transform:translate3d(0,0,0)}
+.panel h3{font-size:clamp(1.15rem,1.9vw,1.5rem);font-weight:400;letter-spacing:-.01em}
+.panel p{margin-top:.5rem;font-size:clamp(.92rem,.9rem + .15vw,1.02rem);line-height:1.5}
+.frame[data-i="0"] .panel{background:var(--rose);color:var(--dark)}
+.frame[data-i="1"] .panel{background:var(--mint);color:var(--dark)}
+.frame[data-i="2"] .panel{background:var(--gold);color:var(--dark)}
+.frame[data-i="3"] .panel{background:var(--claret);color:var(--ink-dark)}
+.sweep{position:absolute;top:0;bottom:0;left:0;width:140%;transform:translate3d(-115%,0,0);
+  pointer-events:none;background:var(--rose)}
+.sweep.go{animation:sweep .68s var(--ease) both}
+@keyframes sweep{from{transform:translate3d(-115%,0,0)}to{transform:translate3d(115%,0,0)}}
+
+.els{display:flex;flex-direction:column;justify-content:center}
+.el{padding:clamp(1.6rem,3.4vw,2.6rem) 0;min-height:34vh;display:flex;flex-direction:column;
+  justify-content:center;border-top:1px solid rgba(241,235,221,.18);
+  transform:translate3d(0,0,0);transition:transform .6s var(--ease)}
+.el:last-child{border-bottom:1px solid rgba(241,235,221,.18)}
+.el-n{font-size:.72rem;letter-spacing:.2em;opacity:.5;transition:opacity .45s var(--ease)}
+.el-t{margin-top:.6rem;font-weight:300;letter-spacing:-.02em;line-height:1.05;
+  font-size:clamp(1.4rem,3vw,2.4rem);color:var(--ink-dark);opacity:.52;
+  transition:opacity .5s var(--ease)}
+.el-bar{margin-top:1rem;height:2px;width:100%;max-width:9rem;background:currentColor;
+  transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+.el.is-on{transform:translate3d(1rem,0,0)}
+.el.is-on .el-n{opacity:1}
+.el.is-on .el-t{opacity:1}
+.el.is-on .el-bar{transform:scaleX(1)}
+.el[data-i="0"]{color:var(--rose)} .el[data-i="1"]{color:var(--mint)}
+.el[data-i="2"]{color:var(--gold)} .el[data-i="3"]{color:var(--rose)}
+.grid-only{display:block}
+
+/* ---- the closing statement ----------------------------------------- */
+.thesis{margin:clamp(5rem,12vw,11rem) calc(var(--gut) * -1) 0;background:var(--alt);
+  padding:clamp(4rem,9vw,8rem) clamp(1.5rem,5vw,4rem);text-align:center}
+.thesis-bars{display:flex;justify-content:center;gap:.6rem;margin-bottom:clamp(2rem,4vw,3.2rem)}
+.thesis-bars i{display:block;width:clamp(2.2rem,5vw,4rem);height:3px;
+  transform:scaleX(0);transform-origin:center;transition:transform .7s var(--ease)}
+.thesis-bars i:nth-child(1){background:var(--rose)}
+.thesis-bars i:nth-child(2){background:var(--mint)}
+.thesis-bars i:nth-child(3){background:var(--gold)}
+.thesis-bars i:nth-child(4){background:var(--claret)}
+.thesis.in .thesis-bars i{transform:scaleX(1)}
+.thesis.in .thesis-bars i:nth-child(2){transition-delay:.08s}
+.thesis.in .thesis-bars i:nth-child(3){transition-delay:.16s}
+.thesis.in .thesis-bars i:nth-child(4){transition-delay:.24s}
+.thesis-line{font-size:clamp(2rem,6.2vw,5rem);line-height:1.06;letter-spacing:-.03em;
+  font-weight:200;color:var(--ink-dark);max-width:20ch;margin:0 auto}
+.thesis-line em{color:var(--rose)}
+.w{display:inline-block;margin-right:.05em;opacity:0;transform:translate3d(0,.55em,0);
+  transition:opacity .6s var(--ease),transform .8s var(--ease)}
+.thesis.in .w{opacity:1;transform:translate3d(0,0,0)}
+
+/* ---- narrow ---------------------------------------------------------- */
+@media (max-width:900px){
+  .head{grid-template-columns:1fr}
+  .wwd-body,.split{grid-template-columns:1fr}
+  .rail{position:static;height:auto;flex-direction:row;align-items:center;
+    justify-content:flex-start;gap:1.5rem}
+  .numerals{font-size:clamp(4.5rem,20vw,7rem)}
+  .rail-label,.spine{display:none}
+  .cap{margin-left:0;min-height:0}
+  .cap.is-on,.cap.is-on .cap-t,.cap.is-on .cap-d{transform:none}
+  .cap-d{opacity:1;transform:none}
+  .cap-t{opacity:1}
+  .stage{position:static;height:auto}
+  .el{min-height:0}
+  .el.is-on{transform:none}
+}
+
+/* ---- reduced motion: everything final, nothing hidden ---------------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .rail{display:none}
+  .wwd-body{grid-template-columns:1fr}
+  .cap{margin-left:0;min-height:0;transform:none;display:grid;
+    grid-template-columns:auto minmax(0,1fr);column-gap:clamp(1rem,3vw,2.5rem);align-items:start}
+  .cap-n{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.02em;opacity:1;grid-row:1/3;
+    line-height:1;margin-top:.1em}
+  .cap-t,.cap-d{opacity:1;transform:none;margin-top:0}
+  .cap-d{margin-top:.6rem}
+  .split{grid-template-columns:1fr}
+  .stage{position:static;height:auto;display:block}
+  .stage-in{aspect-ratio:auto;overflow:visible;background:none}
+  .grid-only{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));
+    gap:clamp(1rem,2.5vw,1.8rem)}
+  .frame{position:relative;inset:auto;opacity:1;transform:none}
+  .frame img{height:auto;aspect-ratio:4/3}
+  .panel{position:relative;opacity:1;transform:none;max-width:none}
+  .sweep{display:none}
+  .els{display:none}
+  .w{opacity:1;transform:none}
+  .thesis-bars i{transform:scaleX(1)}
+}
+</style>
+</head>
+<body>
+
+<div class="strip">
+  <span>Explorations · 04-sections-2 · set A</span>
+  <span>What We Do · The Differentiator</span>
+</div>
+
+<!-- ============ 1 · WHAT WE DO ============ -->
+<section class="sec wwd" id="what-we-do">
+  <div class="head">
+    <div>
+      <p class="eyebrow">Our capabilities</p>
+      <h2>One creative partner for your <em>ongoing content</em> needs.</h2>
+    </div>
+    <p class="head-body">From a single promotional video to an ongoing stream of marketing content, Famysys Studio brings creative thinking, production expertise and AI-enabled workflows together under one roof.</p>
+  </div>
+
+  <div class="wwd-body">
+    <div class="rail" aria-hidden="true">
+      <div class="numerals" id="numerals">
+        <span class="numeral" data-i="0">01</span>
+        <span class="numeral" data-i="1">02</span>
+        <span class="numeral" data-i="2">03</span>
+        <span class="numeral" data-i="3">04</span>
+        <span class="numeral" data-i="4">05</span>
+        <span class="numeral" data-i="5">06</span>
+      </div>
+      <div class="rail-label" id="raillabel">
+        <span data-i="0">Creative Design</span>
+        <span data-i="1">Video Production &amp; Editing</span>
+        <span data-i="2">AI Video &amp; Virtual Presenters</span>
+        <span data-i="3">Explainer &amp; Training Videos</span>
+        <span data-i="4">Motion Graphics &amp; Advanced Creative</span>
+        <span data-i="5">Product &amp; Brand Visuals</span>
+      </div>
+      <div class="spine" id="spine"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <ol class="caps" id="caps">
+      <li class="cap" data-i="0" style="--in:0rem">
+        <span class="cap-n">01</span>
+        <h3 class="cap-t">Creative Design</h3>
+        <p class="cap-d">Social creatives, marketing collateral, presentations, brochures, banners and digital assets.</p>
+      </li>
+      <li class="cap" data-i="1" style="--in:4rem">
+        <span class="cap-n">02</span>
+        <h3 class="cap-t">Video Production &amp; Editing</h3>
+        <p class="cap-d">UGC editing, Reels, Shorts, promotional videos, business videos and content repurposing.</p>
+      </li>
+      <li class="cap" data-i="2" style="--in:1.5rem">
+        <span class="cap-n">03</span>
+        <h3 class="cap-t">AI Video &amp; Virtual Presenters</h3>
+        <p class="cap-d">AI-generated videos, virtual presenters, AI UGC, visual storytelling and AI-assisted production.</p>
+      </li>
+      <li class="cap" data-i="3" style="--in:6rem">
+        <span class="cap-n">04</span>
+        <h3 class="cap-t">Explainer &amp; Training Videos</h3>
+        <p class="cap-d">Business explainers, training content, course videos, onboarding and instructional content.</p>
+      </li>
+      <li class="cap" data-i="4" style="--in:2.5rem">
+        <span class="cap-n">05</span>
+        <h3 class="cap-t">Motion Graphics &amp; Advanced Creative</h3>
+        <p class="cap-d">Motion graphics, animated typography, visual effects, compositing and creative enhancements.</p>
+      </li>
+      <li class="cap" data-i="5" style="--in:0rem">
+        <span class="cap-n">06</span>
+        <h3 class="cap-t">Product &amp; Brand Visuals</h3>
+        <p class="cap-d">Product visuals, lifestyle imagery, promotional assets, campaign visuals and AI-assisted brand content.</p>
+      </li>
+    </ol>
+  </div>
+
+  <a class="wwd-cta" href="#">Explore All Services <i></i></a>
+</section>
+
+<!-- ============ 2 · THE DIFFERENTIATOR ============ -->
+<section class="sec diff" id="differentiator">
+  <div class="head">
+    <div>
+      <p class="eyebrow">Why us</p>
+      <h2>The right mix of creativity, technology <em>and people</em>.</h2>
+    </div>
+    <p class="head-body">AI has changed how creative work can be produced. But great creative work still requires judgment, storytelling, design sense and human quality control.</p>
+  </div>
+
+  <p class="lead-in">At Famysys Studio, we combine:</p>
+
+  <div class="split">
+    <div class="stage">
+      <div class="stage-in">
+        <div class="grid-only" id="frames">
+          <figure class="frame" data-i="0">
+            <img src="../../../public/media/element-01.jpg" alt="A hand holding a stylus over a tablet, resting on printed digital-painting artwork.">
+            <figcaption class="panel">
+              <h3>Human Creativity</h3>
+              <p>Ideas, storytelling, art direction and creative judgment.</p>
+            </figcaption>
+          </figure>
+          <figure class="frame" data-i="1">
+            <img src="../../../public/media/element-02.jpg" alt="An ultrawide monitor on a studio desk showing a design tool full of layout artboards.">
+            <figcaption class="panel">
+              <h3>Intelligent AI Workflows</h3>
+              <p>AI used where it genuinely improves speed, flexibility and production possibilities.</p>
+            </figcaption>
+          </figure>
+          <figure class="frame" data-i="2">
+            <img src="../../../public/media/element-03.jpg" alt="Overhead view of an editor working at a three-screen workstation in a darkened room.">
+            <figcaption class="panel">
+              <h3>Professional Production</h3>
+              <p>Design, editing, motion, compositing and finishing.</p>
+            </figcaption>
+          </figure>
+          <figure class="frame" data-i="3">
+            <img src="../../../public/media/element-04.jpg" alt="A tidy desk with a laptop and monitor, both showing content dashboards, in daylight.">
+            <figcaption class="panel">
+              <h3>Efficient Delivery</h3>
+              <p>Structured workflows designed to deliver quality without unnecessary agency overhead.</p>
+            </figcaption>
+          </figure>
+        </div>
+        <span class="sweep" id="sweep" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <ol class="els" id="els">
+      <li class="el" data-i="0"><span class="el-n">01</span><h3 class="el-t">Human Creativity</h3><span class="el-bar"></span></li>
+      <li class="el" data-i="1"><span class="el-n">02</span><h3 class="el-t">Intelligent AI Workflows</h3><span class="el-bar"></span></li>
+      <li class="el" data-i="2"><span class="el-n">03</span><h3 class="el-t">Professional Production</h3><span class="el-bar"></span></li>
+      <li class="el" data-i="3"><span class="el-n">04</span><h3 class="el-t">Efficient Delivery</h3><span class="el-bar"></span></li>
+    </ol>
+  </div>
+
+  <div class="thesis" id="thesis">
+    <div class="thesis-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <p class="thesis-line"><span class="w">AI</span> <span class="w">is</span> <span class="w">our</span> <span class="w">production</span> <span class="w">advantage</span> <span class="w">—</span> <em><span class="w">not</span> <span class="w">our</span> <span class="w">identity.</span></em></p>
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var caps     = Array.prototype.slice.call(document.querySelectorAll(".cap"));
+  var numerals = Array.prototype.slice.call(document.querySelectorAll(".numeral"));
+  var labels   = Array.prototype.slice.call(document.querySelectorAll(".rail-label span"));
+  var ticks    = Array.prototype.slice.call(document.querySelectorAll(".spine i"));
+  var numGroup = document.getElementById("numerals");
+  var wwdBody  = document.querySelector(".wwd-body");
+
+  var els    = Array.prototype.slice.call(document.querySelectorAll(".el"));
+  var frames = Array.prototype.slice.call(document.querySelectorAll(".frame"));
+  var sweep  = document.getElementById("sweep");
+  var thesis = document.getElementById("thesis");
+
+  var SWEEP_TINTS = ["#F0A8B8", "#66E0B0", "#D6A03C", "#7E1B33"];
+  var ANCHOR = 0.46;      // share of viewport height the selection line sits at
+  var DRIFT_RANGE = 34;   // px of parallax on the numeral stack
+  var LERP = 0.09;
+
+  var capIndex = -1, elIndex = -1;
+  var capPinned = null, elPinned = null;
+  var drift = 0, driftTarget = 0;
+  var thesisIn = false;
+
+  function nearest(nodes, line) {
+    var best = 0, bestDist = Infinity;
+    for (var i = 0; i < nodes.length; i++) {
+      var r = nodes[i].getBoundingClientRect();
+      var d = Math.abs(r.top + r.height / 2 - line);
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    return best;
+  }
+
+  function setCap(i) {
+    capIndex = i;
+    for (var n = 0; n < caps.length; n++) {
+      caps[n].classList.toggle("is-on", n === i);
+      if (ticks[n]) ticks[n].classList.toggle("is-on", n === i);
+      if (labels[n]) labels[n].classList.toggle("is-on", n === i);
+      if (numerals[n]) {
+        numerals[n].classList.toggle("is-on", n === i);
+        numerals[n].classList.toggle("is-before", n < i);
+      }
+    }
+  }
+
+  function setEl(i) {
+    var previous = elIndex;
+    elIndex = i;
+    for (var n = 0; n < els.length; n++) {
+      els[n].classList.toggle("is-on", n === i);
+      frames[n].classList.toggle("is-on", n === i);
+    }
+    if (previous !== -1 && sweep) {   // the change wipes rather than cuts
+      sweep.style.background = SWEEP_TINTS[i] || SWEEP_TINTS[0];
+      sweep.classList.remove("go");
+      void sweep.offsetWidth;
+      sweep.classList.add("go");
+    }
+  }
+
+  // The pointer overrides the scroll position while the cursor is on a row.
+  function pin(nodes, set) {
+    nodes.forEach(function (node, i) {
+      node.addEventListener("pointerenter", function () { set(i); });
+      node.addEventListener("pointerleave", function () { set(null); });
+    });
+  }
+  pin(caps, function (i) { capPinned = i; });
+  pin(els, function (i) { elPinned = i; });
+
+  if (reduce) {   // final state, nothing hidden, no loop
+    setCap(0);
+    for (var n = 0; n < els.length; n++) {
+      els[n].classList.add("is-on");
+      frames[n].classList.add("is-on");
+    }
+    elIndex = 0;
+    thesis.classList.add("in");
+    return;
+  }
+
+  function tick() {
+    var line = window.innerHeight * ANCHOR;
+
+    var wantCap = capPinned === null ? nearest(caps, line) : capPinned;
+    if (wantCap !== capIndex) setCap(wantCap);
+
+    var wantEl = elPinned === null ? nearest(els, line) : elPinned;
+    if (wantEl !== elIndex) setEl(wantEl);
+
+    // Numeral parallax: 0..1 across the list's travel through the viewport.
+    var b = wwdBody.getBoundingClientRect();
+    var span = b.height + window.innerHeight;
+    var p = span > 0 ? (window.innerHeight - b.top) / span : 0;
+    driftTarget = (Math.min(1, Math.max(0, p)) - 0.5) * 2 * DRIFT_RANGE;
+    drift += (driftTarget - drift) * LERP;
+    numGroup.style.setProperty("--drift", drift.toFixed(2) + "px");
+
+    if (!thesisIn && thesis.getBoundingClientRect().top < window.innerHeight * 0.82) {
+      thesisIn = true;
+      thesis.classList.add("in");
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  setCap(0);
+  setEl(0);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import prettier from "prettier";
-import type { ContentEdit } from "../../domain/cms/repositories/CmsRepository";
+import type { ContentPointer } from "../../domain/cms/entities/ContentPointer";
 import { describePointer } from "../../domain/cms/entities/ContentPointer";
 import { CONTENT_FILE } from "./contentSources";
 import { locateLiteral, parseContent, toStringLiteral } from "./contentAst";
@@ -32,6 +32,18 @@ import { locateLiteral, parseContent, toStringLiteral } from "./contentAst";
  * process dies between two renames, one file is updated and the other is not. Both are
  * still valid TypeScript and the site still builds; the second edit is simply not there.
  */
+
+/**
+ * ONE STRING LITERAL, AND WHAT IT IS TO BECOME.
+ *
+ * Deliberately not the repository's `FileEdit`. The writer knows about files and spans and
+ * nothing else: an owner key is a database concept and would be an unused property here, which
+ * is how a module starts accumulating a second job.
+ */
+export interface FileEdit {
+  readonly pointer: ContentPointer;
+  readonly value: string;
+}
 
 const CONTENT_ROOT = "src/infrastructure/content/static";
 
@@ -64,13 +76,13 @@ function resolveContentFile(file: string): string {
 }
 
 function groupByFile(
-  edits: ReadonlyArray<ContentEdit>,
-): ReadonlyMap<string, ReadonlyArray<ContentEdit>> {
+  edits: ReadonlyArray<FileEdit>,
+): ReadonlyMap<string, ReadonlyArray<FileEdit>> {
   return edits.reduce((byFile, edit) => {
     const existing = byFile.get(edit.pointer.file) ?? [];
     byFile.set(edit.pointer.file, [...existing, edit]);
     return byFile;
-  }, new Map<string, ReadonlyArray<ContentEdit>>());
+  }, new Map<string, ReadonlyArray<FileEdit>>());
 }
 
 /**
@@ -82,7 +94,7 @@ function groupByFile(
 function applyToText(
   fileName: string,
   original: string,
-  edits: ReadonlyArray<ContentEdit>,
+  edits: ReadonlyArray<FileEdit>,
 ): string {
   return edits.reduce((text, edit) => {
     const located = locateLiteral(parseContent(fileName, text), edit.pointer);
@@ -91,7 +103,7 @@ function applyToText(
 }
 
 /** Guarantee 3's read-back: the file, as it is about to be written, says what we meant. */
-function verify(fileName: string, text: string, edits: ReadonlyArray<ContentEdit>): void {
+function verify(fileName: string, text: string, edits: ReadonlyArray<FileEdit>): void {
   const source = parseContent(fileName, text);
   for (const edit of edits) {
     const located = locateLiteral(source, edit.pointer);
@@ -122,7 +134,7 @@ function writeAtomically(target: string, text: string): void {
 }
 
 export class ContentFileWriter {
-  async apply(edits: ReadonlyArray<ContentEdit>): Promise<void> {
+  async apply(edits: ReadonlyArray<FileEdit>): Promise<void> {
     if (edits.length === 0) {
       return;
     }

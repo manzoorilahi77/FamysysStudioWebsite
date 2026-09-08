@@ -79,7 +79,7 @@ function fixtureDifferentiator(): DifferentiatorBlock {
       },
       { title: "Efficient Delivery", description: "Structured workflows.", media: fixtureMedia() },
     ],
-    closingStatement: "AI is our production advantage — not our identity.",
+    closingStatement: "AI is our production advantage not our identity",
   };
 }
 

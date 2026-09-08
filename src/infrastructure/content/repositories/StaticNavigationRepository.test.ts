@@ -13,7 +13,7 @@ describe("StaticNavigationRepository", () => {
     // action is still on the menu; it is the mobile drawer that renders it now, not the
     // bar.
     expect(menu.primaryLinks).toHaveLength(4);
-    expect(menu.primaryCta.label.toString()).toBe("Start a Conversation");
+    expect(menu.primaryCta.label.toString()).toBe("Contact");
   });
 
   it("links every page of the real 7-page site", async () => {

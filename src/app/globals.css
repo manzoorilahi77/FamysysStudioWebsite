@@ -22,29 +22,32 @@
 
   --radius-sm: 0.25rem;
 
-  --spacing-gutter: clamp(1.5rem, 4vw, 3rem);
+  /* THE PAGE'S GUTTER IS NOW THE BAR'S GUTTER. It was `clamp(1.5rem, 4vw, 3rem)` against
+     an 80rem page while the header ran 5vw against 88rem, so the two lines were 16px apart
+     at 1920 and 40px apart at 1440 — close enough to look like a mistake and far enough to
+     see. Keep in step with `spacing.gutter` in shared/design/tokens.ts. */
+  --spacing-gutter: 5vw;
   /* The distance from a FULL-BLEED element's edge to the container line — what a
      full-width band needs so its contents land on the same vertical as everything inside
-     `Container`. Below the 80rem max width the container is only inset by the gutter, so
+     `Container`. Below the 88rem max width the container is only inset by the gutter, so
      the second term goes negative and `max()` falls back to the gutter. The `100%` stays
      unresolved through the variable and is measured against whichever element finally uses
      it, which is what lets one declaration serve both a section seam and a nav strip.
-     Keep 80rem in step with `container.maxWidth` in shared/design/tokens.ts. */
-  --container-inset: max(var(--spacing-gutter), calc((100% - 80rem) / 2 + var(--spacing-gutter)));
-  --spacing-section: clamp(4.5rem, 10vh, 8.5rem);
-  --spacing-section-dark: clamp(6.5rem, 14vh, 12rem);
-  --spacing-statement: clamp(8rem, 18vh, 15rem);
+     Keep 88rem in step with `container.maxWidth` in shared/design/tokens.ts. */
+  --container-inset: max(var(--spacing-gutter), calc((100% - 88rem) / 2 + var(--spacing-gutter)));
+  --spacing-section: clamp(3.5rem, 8vh, 7rem);
+  --spacing-section-dark: clamp(4.5rem, 10.5vh, 9rem);
+  --spacing-statement: clamp(6rem, 14vh, 12rem);
 }
 
 :root {
   color-scheme: light;
-  /* THE HEADER BAR'S GUTTER, mirroring `navContainer.gutter` in tokens.ts — the bar is the
-     one thing on the site that does not sit on `--spacing-gutter`, because it is held to
-     famysys.com's own header shell instead. It lives here rather than in `@theme` above
-     because it is not one of Tailwind's theme namespaces and generates no utility; the
-     bar itself takes it through `navShellStyle`, and the panels below take it from here so
-     a card's edges land on the bar's line rather than on the page's. Keep in step with
-     tokens.ts. */
+  /* THE HEADER BAR'S GUTTER, mirroring `navContainer.gutter` in tokens.ts. It is the same
+     5vw `--spacing-gutter` now carries — the page came to the bar rather than the other
+     way round — but it is still named separately, because the panels take their edges from
+     the BAR's line and that is a fact about the bar. It lives here rather than in `@theme`
+     above because it is not one of Tailwind's theme namespaces and generates no utility.
+     Keep in step with tokens.ts. */
   --nav-gutter: 5vw;
 }
 
@@ -268,6 +271,66 @@ body {
   .reveal-word-inner,
   .reveal-word[data-visible="true"] .reveal-word-inner {
     transform: none;
+  }
+}
+
+/* SCRUBBED WORDS. `--lit` is written per word by the caller's frame task — 0 before the
+   word has arrived, 1 once it has — so the sentence assembles under the scroll instead of
+   playing once when it enters. Only opacity and a transform read it, and neither is
+   transitioned: the scroll position IS the timeline, and easing it would put the words
+   behind the reader's own hand.
+
+   `--lit` defaults to 1. A word that nothing ever writes to is simply present, which is
+   what the no-JavaScript and reduced-motion states get. */
+.reveal-word[data-scrub] {
+  opacity: calc(0.04 + 0.96 * var(--lit, 1));
+  /* The clip has to close at the bottom for the rise below to be a rise. The inherited
+     rule opens it 0.5em at the top for ascenders and descenders, which is still what the
+     pitch needs; only the floor is the word's own baseline. */
+  clip-path: inset(-0.55em -0.25em 0 -0.2em);
+}
+
+/* THE ARRIVAL, in four parts off one number.
+   ---------------------------------------------------------------------------
+   It was a 0.42em nudge and a fade, which is a word appearing rather than a word
+   arriving. Each word now:
+
+     RISES out of the clip — 108%, so it starts wholly below its own line and wipes
+     up into it rather than sliding a fraction of its height;
+     PITCHES onto the baseline — rotateX from 72deg about the word's own bottom edge,
+     with its own perspective so each tips about itself rather than sharing a vanishing
+     point that would skew the outer words of a line;
+     COMES INTO FOCUS — 5px of blur resolving to none;
+     and FADES UP from 0.04.
+
+   All four read `--lit`, which the caller's frame task writes per word and eases, so the
+   whole thing is one timeline under the reader's hand. None of it is transitioned: the
+   scroll position IS the timeline, and easing it in CSS as well would put the words behind
+   the hand moving them.
+
+   THE COST IS PAINT, NOT LAYOUT. `transform` and `opacity` are composited; the blur is a
+   filter, so it repaints the word but moves nothing on the page. Eight words on one line
+   is what that is affordable for — this is the page's one centred sentence, not a
+   treatment for every heading, which is why it lives behind `data-scrub` and an opt-in
+   prop rather than in `.reveal-word`.
+
+   `--lit` defaults to 1. A word that nothing ever writes to is simply present, upright and
+   in focus, which is what the no-JavaScript state gets. */
+.reveal-word[data-scrub] .reveal-word-inner {
+  transform: perspective(680px) translateY(calc((1 - var(--lit, 1)) * 108%))
+    rotateX(calc((1 - var(--lit, 1)) * 72deg));
+  transform-origin: 50% 100%;
+  filter: blur(calc((1 - var(--lit, 1)) * 5px));
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-word[data-scrub] {
+    opacity: 1;
+  }
+  .reveal-word[data-scrub] .reveal-word-inner {
+    transform: none;
+    filter: none;
   }
 }
 
@@ -533,9 +596,14 @@ main > section.bg-ink + section.bg-ink::after {
      than the 42.5px between two nav items, which put the least air around the one thing
      that should have the most. At 10px the run leaves about 30px of slack, and
      `space-between` gives every pixel of it to the two gaps beside the mark. */
-  font-size: 0.625rem;
+  /* 12px. It was 10 — half a point under the label step — to keep the six elements on
+     one line at 1024 with the old call to action in the bar. That label is now "Contact"
+     rather than "Start a Conversation", which gives back about 90px, and the run has room
+     to be read at a normal size again. Tracking eases off a little because 0.2em on 12px
+     is wider than 0.2em on 10px by exactly the amount that would spend the slack. */
+  font-size: 0.75rem;
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-canvas-80);
   transition-property: color;
@@ -653,23 +721,34 @@ main > section.bg-ink + section.bg-ink::after {
   .cnav {
     grid-template-columns: auto auto auto;
     justify-content: space-between;
-    /* 1.75rem, the same 28px the items are separated by. It is a FLOOR: everywhere above
-       1024 there is free space and the real gap is far larger. At 1024 there is almost
-       none, and 2rem was enough to push the row past the line — which the grid resolved
-       by shrinking an `auto` track, and the track it took it out of was the wordmark's.
-       See `.cnav-wordmark`, which now refuses. */
-    gap: 1.75rem;
+    /* The same gap the items take, as a FLOOR: everywhere above 1024 there is free space
+       and the real gap either side of the wordmark is far larger. At 1024 there is almost
+       none, and anything above this was enough to push the row past the line — which the
+       grid resolved by shrinking an `auto` track, and the track it took it out of was the
+       wordmark's. See `.cnav-wordmark`, which now refuses. */
+    gap: var(--nav-item-gap);
   }
+}
+
+/* ONE GAP FOR THE WHOLE BAR, and that is the point of the variable rather than the
+   number. Every space between two things on the bar — item to item, and the last item to
+   the call to action — now resolves to the SAME value at the same width. It did not: the
+   items sat on a flat 28px while `.cnav-end` ran `clamp(1rem, 1.9vw, 1.75rem)`, so the
+   button was 28px off the links at 1920, 24.3px at 1280 and 19.5px at 1024. The row read
+   as evenly spaced up to the last item and then tightened, which is exactly the kind of
+   unevenness that is felt before it is seen.
+
+   It grows a little with the viewport now, where the old value was flat: 24px at 1024,
+   where the row is at its tightest and every pixel is spoken for, up to 36px at 2250 and
+   above. */
+:root {
+  --nav-item-gap: clamp(1.5rem, 1.6vw, 2.25rem);
 }
 
 .cnav-links {
   display: flex;
   align-items: center;
-  /* 28px, flat — the gap famysys.com sets between its own nav items (`gap-7`), measured
-     rather than chosen, and the same at 1440, 1280 and 1024 the way it is there. It used
-     to be a clamp that ran from 14px to 34px, so the items closed up exactly as the bar
-     ran out of room, which is the opposite of what the spacing should do. */
-  gap: 1.75rem;
+  gap: var(--nav-item-gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -755,15 +834,25 @@ main > section.bg-ink + section.bg-ink::after {
   min-width: max-content;
 }
 
-/* The last two pages and the call to action, as one group. The gap between them is
-   famysys.com's `clamp(1rem, 1.9vw, 1.75rem)` — 27.4px at 1440, 24.3px at 1280, 19.5px at
-   1024 — which is the value it puts between its own nav and its own header button. */
+/* THE MARK GROWS WITH THE BAR. It was a flat 32px at every width — set on the element as
+   Tailwind's `h-8` — which on a 1408px shell left the one thing at the centre of the bar
+   smaller than the space around it. The floor is that same 32px and it holds to 1230,
+   which covers 1024 where the row is at its tightest and the wordmark is the track that
+   would otherwise be squeezed; from there it opens to 44px at 1920. `flex: none` on the
+   anchor and `max-content` above are what stop the grid taking the growth back. */
+.cnav-mark {
+  height: clamp(2rem, 2.3vw, 2.75rem);
+}
+
+/* The last two pages and the call to action, as one group — separated by the SAME gap
+   that separates one page from the next, so the button is spaced like a member of the row
+   rather than like an afterthought bolted to its end. See `--nav-item-gap`. */
 .cnav-end {
   grid-column: 3;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: clamp(1rem, 1.9vw, 1.75rem);
+  gap: var(--nav-item-gap);
 }
 
 /* The call to action's own slot. Hidden with the two link groups below lg, where the
@@ -1350,13 +1439,17 @@ main > section.bg-ink + section.bg-ink::after {
    label are untouched; only the size is the bar's own. This is furniture, and the hero's
    button is the page's actual invitation. */
 .cnav-cta {
-  /* The horizontal padding scales because the row's spare width does. At 1440 there is
-     nearly 200px of slack either side of the wordmark and the button can be comfortable;
-     at 1024 there is almost none, and 17px of padding on each end was a third of what the
-     wordmark needed to stop being squeezed. Vertical padding and the label do not move —
-     the button keeps its height and its weight, and only its shoulders come in. */
-  padding: 0.5625rem clamp(0.6875rem, 1.18vw, 1.0625rem);
-  font-size: 0.6875rem;
+  /* BOTH AXES SCALE NOW, where only the shoulders did. At 79x38 the button was the
+     smallest thing on a bar whose other elements had just grown, and it is the one element
+     on it that is a control rather than a link — it has to look like something to press.
+     Every value below keeps its old figure at the 1024 floor, where the row is at its
+     tightest and the wordmark is the track that gives, and opens up from there: 100x44 at
+     1920 against the 79x38 it was.
+
+     The vertical padding is flat because the button's height should not chase the
+     viewport once it is comfortable; the label and the shoulders are what grow. */
+  padding: 0.75rem clamp(0.6875rem, 1.35vw, 1.375rem);
+  font-size: clamp(0.6875rem, 0.66vw, 0.8125rem);
   letter-spacing: 0.08em;
 }
 
@@ -1752,7 +1845,13 @@ div.grid > *:nth-child(even).card-surface-dark {
 .hero-final-body {
   position: relative;
   z-index: 8;
-  width: min(72ch, 48vw);
+  /* 80ch, where it was 72ch. Above about 1500 the `ch` term is what binds, so the column
+     stopped growing while the section did not — and a column that stops growing is what
+     caps the headline, since the headline's size is decided by what still holds two lines
+     in it. At 1920 this is 768px against 691px, which is what lets the ceiling below rise;
+     it leaves 316px clear between the copy and the accordion, so the two columns are no
+     nearer each other than they were. Nothing moves at 1440 or under, where 48vw binds. */
+  width: min(80ch, 48vw);
   will-change: transform;
 }
 
@@ -1761,11 +1860,22 @@ div.grid > *:nth-child(even).card-surface-dark {
    twice from 1600 all the way down, because the second half is the longer of the two: the
    copy column is `min(72ch, 48vw)` and "without the agency overhead." needs the whole of
    it. Measured, not guessed: two lines hold at or below 60px at 1440 and 52px at 1280, so
-   3.9vw clears both by about 4% and the 3.5rem ceiling holds the same break out to 2560,
-   where the column stops growing at 72ch and a larger size would only break it again.
-   1024 sets 40px and takes three lines, which is the width the brief allows it. */
+   3.9vw clears both by about 4%. 1024 sets 40px and takes three lines, which is the width
+   the brief allows it.
+
+   THE CEILING IS 4.25rem, NOT 3.5rem. Below 1435 the vw term is what binds, so this
+   changes one thing only: the headline on a wide screen. At 1920 it was 56px with 323px of
+   empty ground under the whole copy block — the size was set by a cap chosen for a
+   narrower column and the type stayed small while the section grew.
+
+   68px HOLDS TWO LINES ONLY BECAUSE THE COLUMN GREW WITH IT. Measured against the old 72ch
+   column, 64px and up broke to three at every width from 1680 to 2560 and 60px was the
+   most it would take. In the 80ch column above, 68px is two lines at 1920 and at 2560, and
+   1440 and under are untouched at 56px and 50px. The two values move together: raising
+   this ceiling without the column, or narrowing the column without lowering this, puts the
+   headline on three lines. */
 .hero-final-heading {
-  font-size: clamp(1.875rem, 3.9vw, 3.5rem);
+  font-size: clamp(1.875rem, 3.9vw, 4.25rem);
   /* TWO EVEN LINES, not two lines. Left to itself the break fell after "without", which
      is where the first line runs out of room rather than where the sentence divides:
      616.5px against 440.7px at 1440, a 176px step that read as a ragged edge rather than
@@ -1781,8 +1891,19 @@ div.grid > *:nth-child(even).card-surface-dark {
   color: var(--color-canvas);
 }
 
+/* THE COPY COLUMN'S RHYTHM. Every step below was raised by about a third.
+   ---------------------------------------------------------------------------
+   Measured at 1920x1080 before the change: the four elements stood 26px, 32px and 26px
+   apart inside a block 339px tall, sitting in a section 1080px tall with 323px of empty
+   ground below it and as much above. Four things touching each other in the middle of an
+   otherwise empty screen — the block read as one dense object rather than as a headline,
+   a sentence, two invitations and a footnote. The hero has the room; the copy was not
+   taking any of it.
+
+   The steps are `vh`-based, so they open where there is height to open into and close on
+   a short laptop where the hero is already tight. */
 .hero-final-sub {
-  margin-top: clamp(1rem, 2.4vh, 1.625rem);
+  margin-top: clamp(1.125rem, 3.2vh, 2.5rem);
   max-width: 44ch;
   font-weight: 300;
   font-size: clamp(0.875rem, 1.24vw, 1.0625rem);
@@ -1791,14 +1912,16 @@ div.grid > *:nth-child(even).card-surface-dark {
 }
 
 .hero-final-cta {
-  margin-top: clamp(1.25rem, 3vh, 2rem);
+  /* The largest of the three steps, because this is the joint the block turns on: above it
+     is what the studio says, below it is what the reader can do. */
+  margin-top: clamp(1.5rem, 4.2vh, 3.25rem);
   display: flex;
   flex-wrap: wrap;
   gap: 0.8125rem;
 }
 
 .hero-final-sup {
-  margin-top: clamp(1rem, 2.4vh, 1.625rem);
+  margin-top: clamp(1.125rem, 3.2vh, 2.5rem);
   font-size: 0.71875rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1888,7 +2011,11 @@ div.grid > *:nth-child(even).card-surface-dark {
   top: 50%;
   transform: translateY(-50%);
   width: clamp(13.75rem, 28vw, 26.25rem);
-  height: clamp(18.75rem, 58vh, 32.5rem);
+  /* The ceiling was 32.5rem, which bound from 897px of viewport height up — so on any
+     ordinary desktop the strip stopped growing less than two thirds of the way down the
+     hero and left the rest of the right-hand side empty. 40rem lets the 58vh term carry to
+     1103px tall, which covers the screens the section is actually read on. */
+  height: clamp(18.75rem, 58vh, 40rem);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -2075,528 +2202,207 @@ div.grid > *:nth-child(even).card-surface-dark {
   }
 }
 
-/* Why Famysys — five cards in a 3 + 2 grid, and almost none of it is new CSS. The card
-   surface, the clip-curtain reveal, the numeral going accent and scaling, and the cursor
-   glow are all §2's, reused by class rather than reimplemented: see .card-surface,
-   .capability-reveal, .capability-numeral and .capability-glow. Two things here are its
-   own — the mark, and the title's shift.
-
-   The mark is drawn twice from one definition. `.reason-icon-ghost` is the resting state
-   in ink-12, the same value the numeral rests at; `.reason-icon-draw` is the accent copy
-   stacked exactly on top of it, dashed out of sight until the card is hovered. Every
-   subpath carries `pathLength="1"`, so one dasharray value draws a circle and a 15-unit
-   line at the same rate — no per-path length constants, and adding a subpath to a mark
-   needs no CSS at all. */
-.reason-icon {
-  display: block;
-  color: var(--color-accent);
-}
-
-.reason-icon svg {
-  display: block;
-  overflow: visible;
-}
-
-.reason-icon-ghost {
-  color: var(--color-ink-12);
-}
-
-/* No positioning: the two groups are siblings in one SVG, so they already share a
-   coordinate space and register exactly. The accent copy is second in DOM order, which is
-   what puts it on top. */
-.reason-icon-draw {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition-property: stroke-dashoffset;
-  transition-duration: 400ms;
-  transition-timing-function: var(--ease-base);
-}
-
-/* The draw is an ARRIVAL now, not a hover reward. It fired on hover when each reason was a
-   card, which meant the mark was never drawn for anyone reading with a keyboard, on a
-   phone, or simply not pointing at it — five marks that most readers only ever saw as a
-   ghost. It runs off the row's own observer instead, a beat after the numeral. */
-.reason-row[data-visible="true"] .reason-icon-draw {
-  stroke-dashoffset: 0;
-  transition-delay: 320ms;
-}
-
 /* ---------------------------------------------------------------------------
-   Why Famysys — the ledger
+   §6 Why Famysys — a rail of five, drawn sideways as the page scrolls down
    ---------------------------------------------------------------------------
-   Five equal statements, laid out as five equal rows on one spine. No card, no fill, no
-   shadow: the numeral opens the row, a rule separates it from the next, the mark closes it
-   on the right, and the type does the rest. The section this replaced was a 3 + 2 grid of
-   bordered boxes, which claimed a grouping the content does not have and repeated the
-   shape of the What We Do grid two sections above it.
-   ------------------------------------------------------------------------ */
-/* THE PINNED STAGE.
-   ---------------------------------------------------------------------------
-   From lg up this section holds still while a track several screens tall passes it, and
-   each scroll beat replaces the reason on the stage — frame, numeral, title and statement
-   together. It is `position: sticky` and nothing else: no scroll event is cancelled, so
-   the scrollbar, PageDown, Home/End and find-in-page all still work. `useScrollSequence`
-   owns the decision and writes `data-pinned`, because it takes two facts to make it —
-   wide enough, and motion not reduced — and only the hook can see both.
+   The five qualities sit on one row wider than the screen. The stage holds still
+   and the row travels across it, a card rising as it passes the middle and its
+   picture leaning inside its own window against the travel.
 
-   Unpinned the track is an ordinary div and the section is the ledger: five rows on a
-   spine, which is what a phone gets, and what anyone who has asked for less motion gets.
+   WHAT THIS REPLACES, AND WHY. A Z-axis corridor, ported from an exploration
+   built on a dark ground where distance reads as a card fading toward black.
+   This section is cream: the same fade is a card washing out to the page, so the
+   far cards did not read as far away, they read as half-loaded — and three of the
+   five were invisible at any moment while most of the screen sat empty. Depth
+   here comes from scale, lift and parallax instead, and a row that fills the
+   frame leaves no empty ground to explain.
 
-   The two share every rule below this one. Only the handful under
-   `[data-pinned="true"]` differ. */
-.reason-track[data-pinned="true"] {
-  height: var(--reason-track-height);
+   NO COPY ON A PHOTOGRAPH: the plate is beneath the picture, fully opaque, and
+   carries its own text colours.
+
+   THE BASE STATE IS THE FINAL STATE — everything down to the MOTION LAYER
+   heading renders five plain cards in a grid. See `useMotionLayer`. */
+
+.rail-track {
+  margin-top: clamp(2rem, 5vh, 3.5rem);
 }
 
-.reason-track[data-pinned="true"] .reason-stage {
-  position: sticky;
-  top: var(--header-height, 5rem);
-  display: flex;
-  align-items: center;
-  min-height: calc(100svh - var(--header-height, 5rem));
-  /* Air above and below. Without it the stage's content measured exactly the height of the
-     stage — 817px of content in 817px of stage on a 900px viewport — so the frame's bottom
-     edge sat on the section's, and a stage with no margin around it reads as content that
-     did not fit rather than as content that was placed. */
-  padding-block: clamp(1.5rem, 5vh, 3.5rem);
-}
-
-.reason-track[data-pinned="true"] .reason-stage > * {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* The stage carries one reason at a time, so the five rows stack in a single grid cell
-   instead of running down the page. Stacked rather than swapped in and out of the DOM: the
-   outgoing reason has to be able to leave while the incoming one arrives, and a row that
-   has been unmounted cannot animate. The cell is as tall as the tallest of the five, so
-   nothing below it moves as the statements change length. */
-.reason-track[data-pinned="true"] .reason-rows {
-  display: grid;
-}
-
-.reason-track[data-pinned="true"] .reason-row {
-  grid-area: 1 / 1;
-  padding-block: 0;
-  padding-left: 0;
-  opacity: 0;
-  transform: translateY(28px);
-  transition-property: opacity, transform;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-  pointer-events: none;
-}
-
-.reason-track[data-pinned="true"] .reason-row[data-current="true"] {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* No separators and no spine on the stage: there is one row on it, and a rule above a
-   single row separates it from nothing. The frame is not sticky there either — the stage
-   it sits in already is, and a sticky box inside a sticky box has nothing left to travel
-   against. */
-.reason-track[data-pinned="true"] .reason-rule,
-.reason-track[data-pinned="true"] .reason-row:last-child::after,
-.reason-track[data-pinned="true"] .reason-spine {
-  display: none;
-}
-
-/* `relative`, NOT `static`. The frame stops sticking on the stage — the stage it sits in
-   already does, and a sticky box inside a sticky box has nothing left to travel against —
-   but it must stay a positioned element, because the five stacked images are
-   `position: absolute; inset: 0` against it. Setting `static` here handed them the
-   viewport as their containing block and every image went full-bleed behind the type. */
-.reason-track[data-pinned="true"] .reason-media {
-  position: relative;
-  /* `top` is still the sticky offset, and on a relatively positioned box it is a plain
-     nudge — it pushed the frame 99px down the stage and out of line with the copy. */
-  top: auto;
-}
-
-/* Centred against the frame on the stage, where there is one reason and two columns of
-   very different heights; top-aligned in the ledger, where five rows have to line up.
-
-   The frame also takes a wider column than it does in the ledger — six tracks against
-   five. The stage is a full viewport with one statement on it, and the picture is the half
-   of that statement worth giving the extra track to. */
-@media (min-width: 1024px) {
-  .reason-track[data-pinned="true"] .reason-layout {
-    align-items: center;
-  }
-}
-
-/* Tighter than the ledger's `mt-16`. On the stage the heading and the reason are the only
-   two things present, and 4rem of channel between them on a viewport that also has to hold
-   a photograph is 4rem taken off the photograph. */
-.reason-track[data-pinned="true"] .reason-layout {
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
-}
-
-/* The frame is capped against the VIEWPORT, not the column. Its width comes from the grid
-   and its height from the 4:3 ratio, so on a short screen the ratio alone would push the
-   stage past the fold — 444px of frame under a 370px header on a 900px viewport left its
-   bottom edge exactly on the stage's. The cap only binds where it has to: at 1440 the
-   column gives 352px of frame against a 396px cap, so nothing is cropped there, and the
-   image is `object-fit: cover` where it does bind. */
-.reason-track[data-pinned="true"] .reason-media {
-  max-height: min(44vh, 26rem);
-}
-
-/* Five marks, one per reason, filled as each is passed. Hidden unless pinned — the ledger
-   has its spine, and two answers to the same question is one too many. */
-.reason-steps {
-  display: none;
-}
-
-.reason-track[data-pinned="true"] .reason-steps {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: clamp(2rem, 4vh, 3.5rem);
+.rail {
+  max-width: 88rem;
+  margin: clamp(2rem, 5vh, 3.5rem) auto 0;
+  /* The container line. Capped at 88rem, `--container-inset`'s 100% resolves against the
+     cap, so this comes out as the bare gutter — the same content edge the header above it
+     takes from `Container`. */
+  padding-inline: var(--container-inset);
   list-style: none;
-  padding: 0;
-}
-
-.reason-step {
-  width: 2.75rem;
-  height: 2px;
-  background-color: var(--color-ink-12);
-  transition-property: background-color, transform;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-  transform-origin: left center;
-}
-
-.reason-step[data-state="done"] {
-  background-color: var(--color-ink-20);
-}
-
-.reason-step[data-state="current"] {
-  background-color: var(--color-accent);
-  transform: scaleY(2);
-}
-
-/* THE FRAME AND THE LEDGER.
-   Stacked below lg, side by side above it. The frame is sticky in both — on a phone it
-   holds under the header while the rows pass beneath it, which is the only way a reader on
-   a small screen sees more than the first reason's image. */
-.reason-layout {
   display: grid;
-  gap: 2.5rem;
-  align-items: start;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
 }
 
-@media (min-width: 1024px) {
-  .reason-layout {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 0;
-  }
-  .reason-media {
-    grid-column: 1 / span 5;
-  }
-  .reason-list {
-    grid-column: 7 / span 6;
-  }
-}
-
-.reason-media {
-  position: sticky;
-  top: calc(var(--header-height, 5rem) + 1rem);
+.rail-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-ground, var(--color-card));
+  /* The card is a LIGHT object whatever ground it sits on, so it pins its own text rather
+     than inheriting the section's — on the dark section the cream would otherwise land on
+     cream. Everything inside it is measured against the card, not against the section. */
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
   overflow: hidden;
-  border: 1px solid var(--color-ink-8);
-  border-radius: var(--radius-sm);
-  /* 16:9 on a phone, where a 4:3 frame would take a third of the viewport for the whole
-     section; 4:3 from md, where there is room for the picture to be worth showing. */
-  aspect-ratio: 16 / 9;
+}
+
+.rail-window {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  /* Inside the card, so it holds to the card's own ramp rather than to the section's. */
   background-color: var(--color-ink-6);
 }
 
-@media (min-width: 768px) {
-  .reason-media {
-    aspect-ratio: 4 / 3;
-  }
-}
-
-/* Every image is in the same box, one on top of the other, and only opacity and transform
-   move — no layout, no reflow, nothing that could shift the ledger beside it while the
-   page is scrolling. */
-.reason-media-item {
+.rail-image {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transform: scale(1.06);
-  transition-property: opacity, transform;
-  /* Two very different durations on purpose. The cross-fade is quick, because a slow one
-     leaves two photographs half visible at once; the scale is slow enough to read as drift
-     rather than as a zoom, which is what gives a still frame the feel of footage. */
-  transition-duration: 520ms, 7000ms;
-  transition-timing-function: var(--ease-base), linear;
-}
-
-.reason-media-item[data-current="true"] {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Named, so the frame and the row cannot be read as unrelated. Opaque accent fill for the
-   reason every chip on this site carries one: nothing can measure text sitting on a
-   photograph, so the fill is what the colour is checked against — canvas on accent,
-   5.107:1. */
-.reason-media-chip {
-  position: absolute;
-  left: 1rem;
-  bottom: 1rem;
-  max-width: calc(100% - 2rem);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-  background-color: var(--color-accent);
-  color: var(--color-canvas);
-  padding: 0.35rem 0.8rem;
-  border-radius: 9999px;
-}
-
-.reason-list {
-  position: relative;
-}
-
-/* THE SPINE. A hairline down the left of the list with an accent fill that tracks how far
-   the reader has travelled — scroll-linked and continuous, not five discrete states. The
-   fill is a scaleY on a full-height element rather than an animated height, so it stays on
-   the compositor and never triggers layout while the page is scrolling. */
-.reason-spine {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 1px;
-  background-color: var(--color-ink-12);
-  overflow: hidden;
-}
-
-.reason-spine-fill {
-  display: block;
+  width: 100%;
   height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.rail-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+}
+
+/* The mark the near card draws, in place of the numeral a row of peers must not
+   carry. Present and drawn in the base state; the motion layer is what makes it
+   answer to position. */
+.rail-mark {
+  display: block;
+  width: 2.75rem;
+  height: 2px;
   background-color: var(--color-accent);
-  transform-origin: top center;
-  /* No transition on the transform: the value is already following the scroll frame by
-     frame, and easing it would make the line lag the page it is reporting on. */
+  transform-origin: left;
 }
 
-.reason-rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.rail-say {
+  color: var(--color-ink-70);
 }
 
-/* Stacked below md, but the numeral and the mark share the top line: the mark is the row's
-   closing punctuation, and left under the copy on its own it read as a stray icon rather
-   than as the end of the row. */
-.reason-row {
+/* ---------------------------------------------------------------------------
+   §6 MOTION LAYER — the grid becomes a row, and the row travels
+   ---------------------------------------------------------------------------
+   The stage is `position: sticky` inside a taller track, so the page keeps
+   scrolling at exactly the rate the reader asks for. `overflow-x: clip` keeps the
+   row's overhang off the page's scrollbar; it sits on the sticky element ITSELF,
+   never on an ancestor, which would stand the stickiness down — and `clip` rather
+   than `hidden`, which would make the stage a scroll container of its own and put
+   the row behind a second scrollbar. */
+
+.rail-track[data-motion="on"] {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.5rem;
-  padding-block: clamp(1.75rem, 3.2vw, 2.75rem);
-  /* The indent is padding on the row, not on the list, so the rule below can start at the
-     row's border box — which is the spine. A rule that stopped short of it would leave the
-     ledger's corner open and the spine reading as a stray line beside the list. */
-  padding-left: clamp(1.25rem, 2.6vw, 2.5rem);
+  height: var(--rail-track-height);
+  margin-top: 0;
 }
 
-/* The rule belongs to the row below it, and it DRAWS — left to right, as the row arrives,
-   the same gesture §4's process rail makes. It is a pseudo-element rather than a border so
-   it can be scaled; a border cannot be transformed on its own. */
-.reason-rule {
-  position: absolute;
+/* ONE SCREEN. The stage holds the heading and the row together and is exactly a
+   viewport tall, so nothing about the section is ever off the top while the row is
+   travelling. The top padding clears the fixed bar; `justify-content: center` puts the
+   remaining air below the cards rather than above the heading. */
+.rail-track[data-motion="on"] .rail-stage {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: var(--color-ink-12);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition-property: transform;
-  transition-duration: 700ms;
-  transition-timing-function: var(--ease-base);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-block: calc(var(--header-height, 5rem) + clamp(0.75rem, 2vh, 1.5rem))
+    clamp(1rem, 3vh, 2rem);
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
-.reason-row[data-visible="true"] .reason-rule {
-  transform: scaleX(1);
+/* The row takes whatever height the heading leaves, and the cards stretch into it —
+   which is what lets the picture be sized by the screen instead of by a ratio. Without
+   `flex: 1` here the row is only as tall as its content, the window has nothing to grow
+   into and every card collapses to its plate. `min-height: 0` because a flex item's
+   default floor is its content, and the picture must be allowed to give way. */
+.rail-track[data-motion="on"] .rail {
+  max-width: none;
+  margin: clamp(1.25rem, 3.5vh, 2.5rem) 0 0;
+  padding-inline: var(--container-inset);
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: clamp(1rem, 2.2vw, 2rem);
+  align-items: stretch;
+  will-change: transform;
 }
 
-/* The ledger closes. Without this the last row's copy simply stops in the middle of the
-   section and the spine runs past it to nothing — a table with no bottom edge. */
-.reason-row:last-child::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background-color: var(--color-ink-12);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition-property: transform;
-  transition-duration: 700ms;
-  transition-delay: 260ms;
-  transition-timing-function: var(--ease-base);
+.rail-track[data-motion="on"] .rail-card {
+  flex: 0 0 auto;
+  width: clamp(13rem, 22vw, 21rem);
+  will-change: transform;
 }
 
-.reason-row:last-child[data-visible="true"]::after {
-  transform: scaleX(1);
+/* The card is sized to the screen, not to a ratio: the picture gives up whatever the
+   plate under it needs so that heading, row and plate all fit one viewport together. */
+.rail-track[data-motion="on"] .rail-window {
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-/* Decorative, and sized to be the thing the eye lands on first: ink-20 is the same value
-   the numerals rest at everywhere else on the site. It goes accent while the row is
-   pointed at, which is the row's only hover state that changes colour. */
-.reason-numeral {
-  color: var(--color-ink-20);
-  transition-property: color;
-  transition-duration: var(--duration-hover);
-  transition-timing-function: var(--ease-base);
+/* `--near` is written per card by the frame task: 1 on the centre line, 0 at the
+   edges of the stage. It drives the rule, so a card draws its mark as it comes in
+   and lets it go as it leaves — a transform, so nothing here costs a layout. The
+   card ground never changes: swapping it on a winner left the first and last card
+   permanently unlit, since neither can reach the middle of a row that sits flush
+   with the frame at both ends. */
+.rail-track[data-motion="on"] .rail-mark {
+  transform: scaleX(var(--near, 1));
 }
 
-.reason-row:hover .reason-numeral,
-.reason-row[data-current="true"] .reason-numeral {
-  color: var(--color-accent);
-}
-
-/* Hover and current share the accent numeral on purpose: hovering a row IS reading it, and
-   inventing a second colour so the two states could be told apart would be a distinction
-   without a difference — the frame beside the ledger is already showing which row it is. */
-
-/* The title wipes in from the left behind the numeral rather than fading: a fade would
-   have four rows of the section doing the same thing as everything else on the page, and
-   the wipe is what makes the row read as being written rather than as appearing. */
-.reason-title {
-  clip-path: inset(0 100% 0 0);
-  transition-property: clip-path, transform;
-  transition-duration: 700ms, var(--duration-hover);
-  transition-delay: 140ms, 0ms;
-  transition-timing-function: var(--ease-base);
-}
-
-.reason-row[data-visible="true"] .reason-title {
-  clip-path: inset(0 0 0 0);
-}
-
-.reason-row:hover .reason-title {
-  transform: translateX(6px);
-}
-
-.reason-body {
-  opacity: 0;
-  transform: translateY(10px);
-  transition-property: opacity, transform;
-  transition-duration: var(--duration-base);
-  transition-delay: 260ms;
-  transition-timing-function: var(--ease-base);
-}
-
-.reason-row[data-visible="true"] .reason-body {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reason-numeral-slot {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.reason-title {
-  grid-column: 1 / -1;
-  grid-row: 2;
-}
-
-.reason-body {
-  grid-column: 1 / -1;
-  grid-row: 3;
-}
-
-.reason-mark {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
-  opacity: 0;
-  transition-property: opacity;
-  transition-duration: var(--duration-base);
-  transition-delay: 260ms;
-  transition-timing-function: var(--ease-base);
-}
-
-.reason-row[data-visible="true"] .reason-mark {
-  opacity: 1;
-}
-
-/* From md the row is a real ledger line: numeral, title, statement, mark. The numeral
-   column is fixed rather than fluid so all five numerals share one left edge and one
-   right edge — a proportional column would set them at five slightly different widths and
-   the spine would stop reading as a spine. */
-/* From md the row is numeral, copy, mark. The copy stacks rather than running in its own
-   column: the ledger now shares the width with the frame, and a title column beside a
-   description column inside six tracks gives both of them about twenty characters a line.
-   The numeral column is fixed rather than fluid so all five numerals share one left edge
-   and one right edge — a proportional column sets them at five slightly different widths
-   and the spine stops reading as a spine. */
-@media (min-width: 768px) {
-  .reason-row {
-    grid-template-columns: 4.75rem minmax(0, 1fr) 2rem;
-    align-items: start;
-    column-gap: clamp(1.25rem, 2.4vw, 2rem);
-    row-gap: 0.5rem;
-  }
-  .reason-numeral-slot {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-  }
-  .reason-title {
-    grid-column: 2;
-    grid-row: 1;
-    /* Optically aligned to the numeral's cap height rather than to its box: the numeral is
-       display-l and the title display-s, so two boxes sharing a top edge do not share a
-       first line. */
-    padding-top: 0.6rem;
-  }
-  .reason-body {
-    grid-column: 2;
-    grid-row: 2;
-  }
-  .reason-mark {
-    grid-column: 3;
-    grid-row: 1;
-    padding-top: 0.75rem;
-  }
-}
-
+/* Safety net: if the preference flips after load, the rail stands down and the
+   five return to the grid they render as without it. */
 @media (prefers-reduced-motion: reduce) {
-  /* Final state throughout: the rules are drawn, the titles are open, the marks are
-     inked. The delays are cleared as well as the durations — the global rule collapses
-     durations only, and a 320ms delay on a zero-length transition is still 320ms of
-     nothing happening. */
-  .reason-rule,
-  .reason-row:last-child::after,
-  .reason-title,
-  .reason-body,
-  .reason-mark,
-  .reason-icon-draw,
-  .reason-row[data-visible="true"] .reason-icon-draw {
-    transition-delay: 0ms;
+  .rail-track[data-motion="on"] {
+    height: auto;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
   }
-  .reason-row:hover .reason-title {
+  .rail-track[data-motion="on"] .rail-stage {
+    position: static;
+    height: auto;
+    display: block;
+    padding-block: 0;
+    overflow: visible;
+  }
+  .rail-track[data-motion="on"] .rail {
+    max-width: 88rem;
+    margin: clamp(2rem, 5vh, 3.5rem) auto 0;
+    padding-inline: var(--container-inset);
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+    transform: none !important;
+  }
+  .rail-track[data-motion="on"] .rail-window {
+    aspect-ratio: 4 / 5;
+    flex: none;
+  }
+  .rail-track[data-motion="on"] .rail-card {
+    width: auto;
+    transform: none !important;
+    background-color: var(--card-ground, var(--color-card));
+    border-color: var(--color-hairline);
+  }
+  .rail-track[data-motion="on"] .rail-image {
+    transform: none !important;
+  }
+  .rail-track[data-motion="on"] .rail-mark {
     transform: none;
-  }
-  /* No drift. The frame still cross-fades — swapping the image is information, not
-     decoration — but the 7s scale is exactly the kind of ambient movement the setting is
-     asking to be rid of, so the current frame simply sits at 1. */
-  .reason-media-item,
-  .reason-media-item[data-current="true"] {
-    transform: none;
-  }
-  .reason-icon-draw {
-    stroke-dashoffset: 0;
   }
 }
 
@@ -3435,199 +3241,391 @@ div.grid > *:nth-child(even).card-surface-dark {
 }
 
 /* ---------------------------------------------------------------------------
-   §3 The Differentiator — the frame closes in
+   §3 The Differentiator — one stage, four frames, and a list that chooses
    ---------------------------------------------------------------------------
-   The card is a two-track flex column whose split moves on hover: the image gives up
-   height and the panel takes exactly what it releases. Total card height never changes.
+   Ported from docs/explorations/04-sections-2/set-A.html. Colour is entirely
+   token-side: the exploration's four inline tints map one for one onto the
+   palette — rose to accent-on-dark, mint to accent-highlight, gold to
+   accent-warm, claret to accent — so a change in colors.ts moves this section
+   with the rest of the site.
 
-   This replaces an overlay. The panel used to be `position: absolute`, 65% tall, parked
-   38.46% of its own height below the card and sliding flush on hover — so it covered the
-   image rather than displacing it, and it was sized for its hover content in BOTH states.
-   That is where both pockets came from: one under the resting title, and another still
-   there after hovering.
+   1. NO COPY SITS ON A PHOTOGRAPH. Each frame's title and sentence are on a
+      fully opaque coloured panel, and every one of the four is measured:
+      ink on rose 8.395:1, on mint 9.811:1, on gold 6.834:1, and cream on
+      claret 8.447:1. A photograph is not a background whose contrast can be
+      measured once and relied on.
 
-   HOW THE SPLIT IS DRIVEN, and why it is not two fixed percentages.
+   2. THE BASE STATE IS THE FINAL STATE. Everything down to the MOTION LAYER
+      heading renders the section complete: the four frames are a plain grid
+      with their panels open, nothing sticky, nothing hidden, nothing moving.
+      The motion layer is only ever added ON TOP, scoped to
+      `[data-motion="on"]`, which Differentiator.tsx sets once it has mounted
+      and confirmed the reader has not asked for reduced motion.
+      See `useMotionLayer`.
 
-   The brief specifies 62/38 at rest and 40/60 on hover, and also that the resting panel be
-   "exactly what the title needs, nothing more". Measured against the real content, those
-   two cannot both hold: a resting panel that exactly fits the title and a hover panel that
-   exactly fits title-plus-descriptor stand in a ~2.1:1 ratio, not the 60:38 (1.58:1) the
-   percentages assume, and the ratio itself moves with viewport because title and descriptor
-   line counts flip at different widths. Pinning 38% therefore re-creates the pocket the
-   brief is asking to remove — measured at 33px of empty panel at 1440 and 60px at 1024,
-   against the 62px the overlay had.
+   3. THE SEQUENCE IS THE POINT. Image, then panel, then wipe. The picture
+      cross-fades over 800ms while scaling out of 1.06; the panel follows it up
+      120ms later; the bar in the incoming tint wipes across last. Change the
+      delays and the change stops reading as a transition and starts reading as
+      three things happening at once. */
 
-   So the panel is sized by its content and the media takes the remainder. The descriptor
-   sits in a grid track that animates `0fr -> 1fr`, which is the one property in the whole
-   mechanic: the panel grows by exactly the descriptor's height, the media is `flex: 1` and
-   shrinks by exactly the same amount, and the boundary between them is one edge with one
-   transition behind it. Zero dead space in both states, at every width, with no per-
-   breakpoint arithmetic to keep true.
+/* IT LIVES IN THE LEFT COLUMN NOW, above the stage and inside the element that
+   sticks — see the motion layer. It sat above the split and scrolled away with the
+   section heading, so from the second element on, the stage was a photograph held on
+   the screen with nothing left saying what it was a photograph of. The margin below is
+   the gap to the picture; the gap ABOVE is the split's, so the two are not added
+   together. */
+.element-lead-in {
+  margin: 0 0 clamp(1rem, 2vw, 1.6rem);
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  line-height: 1.2;
+  /* The lightened accent, not the raw one: accent on ink is 2.457:1 and could not
+     carry a sentence there. This measures 8.395:1. */
+  color: var(--color-accent-on-dark);
+}
 
-   The card heights below are then chosen so the resulting split lands near the brief's
-   numbers. Hover comes out close (≈57/43 image-to-panel at 1440 against a target of
-   40/60); rest comes out tighter than 62/38, because a one- or two-line title genuinely
-   needs less than 38% and giving it 38% is the pocket again.
+.element-split {
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
 
-   The image scales with its box (`object-fit: cover` inside an `overflow: hidden` frame)
-   rather than being uncovered from behind something, so the shrink reads as the frame
-   closing in on the picture. */
-
-.element-card {
+.element-stage-inner {
   position: relative;
+}
+
+.element-frames {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: clamp(1rem, 2.5vw, 1.8rem);
+}
+
+.element-frame {
+  margin: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: var(--radius-sm);
 }
 
-/* The remainder of the card, whatever the panel is not using. `min-height: 0` because a
-   flex child otherwise refuses to shrink below its content's intrinsic height, and the
-   image would hold the split open. */
-.element-media {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
+.element-frame-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
-/* Exactly its content, in both states. Nothing here is a percentage. */
+/* Opaque in both states and at every tint — this is the backing the copy sits on. */
 .element-panel {
-  flex: 0 0 auto;
+  padding: clamp(1.1rem, 2vw, 1.7rem) clamp(1.2rem, 2.2vw, 2rem);
 }
 
-/* A definite card height, not a `min-height`. With only a floor the card grew to whatever
-   the image's intrinsic size and the panel's hidden descriptor happened to need — 364px at
-   1440 against a 16rem floor — and the surplus went straight into the pocket.
-
-   Non-monotonic on purpose. 1024–1279 is the tallest band because it is the first to go
-   four-across while the container is still viewport-bound, which makes it the narrowest
-   the cards ever are (~218px), where the descriptor runs to four lines. From 1280 the
-   container caps at 80rem, the columns settle around 264–276px and three lines is enough. */
-@media (min-width: 768px) {
-  .element-card {
-    height: 15.5rem;
-  }
+.element-panel-say {
+  margin-top: 0.5rem;
 }
 
-@media (min-width: 1024px) {
-  .element-card {
-    height: 22rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  .element-card {
-    height: 17.5rem;
-  }
-}
-
-/* The row's three fills — accent, card, warm — in the order ElementCard documents.
-   Charcoal on ink measures 1.047:1 and would have been an invisible card; each of these
-   separates from the ink ground and carries its text over the 4.5:1 floor. Ratios are in
-   ElementCard.tsx and enforced by `npm run check-colours`.
-
-   White text on the accent panel rather than cream: on this fill it is 5.768:1 against
-   the cream's 5.107:1, and the card family is now white, so the panel text matching the
-   card fill is what makes the four read as one set. */
-.element-panel--accent {
-  background-color: var(--color-accent);
-  color: var(--color-card);
-}
-
-.element-panel--card {
-  background-color: var(--color-card);
+/* One tint per element, in the order the four run. Claret is the only one dark
+   enough to need the cream text; the other three take ink. */
+.element-frame[data-tint="0"] .element-panel {
+  background-color: var(--color-accent-on-dark);
   color: var(--color-ink);
 }
-
-.element-panel--warm {
+.element-frame[data-tint="1"] .element-panel {
+  background-color: var(--color-accent-highlight);
+  color: var(--color-ink);
+}
+.element-frame[data-tint="2"] .element-panel {
   background-color: var(--color-accent-warm);
   color: var(--color-ink);
 }
+.element-frame[data-tint="3"] .element-panel {
+  background-color: var(--color-accent);
+  color: var(--color-text-on-dark);
+}
 
-/* The one animated property in the card. A grid track interpolating `0fr -> 1fr` is how
-   CSS expresses "animate to the content's own height" without anybody having to know what
-   that height is — which is what lets the same rule serve a two-line descriptor and a
-   four-line one, at every breakpoint, with no measurement. */
-.element-description-slot {
+/* Neither exists until the motion layer does: with no stage to wipe across and no
+   selection to make, a bar and a list of names are both furniture for a mechanic
+   that is not running. */
+.element-sweep,
+.element-names {
+  display: none;
+}
+
+/* THE THESIS. The Differentiator's last sentence, on the Differentiator's own ground.
+
+   It has been a full-bleed band in a second colour and then a light strip, and both read
+   as a section after this one rather than the end of it — which is the one thing it must
+   not be. It carries no ground of its own now and no rules above it: what sets it apart is
+   the air around it and its being the only centred thing on the page. */
+.element-thesis {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding-inline: var(--container-inset);
+  text-align: center;
+}
+
+.element-thesis-line {
+  max-width: 24ch;
+  margin: 0 auto;
+  /* A sentence being read, not a headline announcing a section. At 5rem it was three lines
+     of 80px that owned the screen. */
+  font-size: clamp(1.55rem, 3.4vw, 2.9rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 300;
+  color: var(--color-text-on-dark);
+}
+
+/* ---------------------------------------------------------------------------
+   §3 MOTION LAYER — added on top of the readable state above, never unwinding it
+   ------------------------------------------------------------------------ */
+
+.element-split[data-motion="on"] {
   display: grid;
-  grid-template-rows: 0fr;
-  transition-property: grid-template-rows;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(1.5rem, 5vw, 4.5rem);
 }
 
-@media (min-width: 768px) {
-  .element-card:hover .element-description-slot,
-  .element-card:focus-within .element-description-slot {
-    grid-template-rows: 1fr;
-  }
+/* THE LEFT COLUMN STICKS AS ONE — the lead-in and the picture together, not the picture
+   alone. Whatever is inside this element is what stays on the screen while the names
+   travel past it, and the sentence that introduces the four belongs there: it is the only
+   thing on the section that says what the four ARE.
+
+   The stage is its own height, not the viewport's, and it sticks below the bar rather
+   than under it. A 100vh stage holding a 4:3 picture is ~220px of empty ground above the
+   image and the same below — the single largest hole in the section — and it also left
+   the list barely taller than the stage, so the sticking was a 324px stutter. Sized to
+   its content, the same list gives it around 1,000px to hold still in even with the
+   lead-in inside it; `travelRef` in Differentiator.tsx measures that window rather than
+   assuming it, so adding to this column shortens the bands instead of breaking them. */
+.element-split[data-motion="on"] .element-stage {
+  position: sticky;
+  top: clamp(6rem, 14vh, 9rem);
+  align-self: start;
 }
 
-/* The clipper is the grid item, and it carries NO padding of its own. That distinction is
-   worth the extra element: a `0fr` track sizes the item's content box to zero, but padding
-   on that same item still paints, so a gap declared here would leave a 12px sliver of open
-   panel at rest — a small version of exactly the bug being fixed. The gap therefore lives
-   on the text inside, where the clip eats it along with the text.
-
-   `min-height: 0` is what lets the track actually reach zero. */
-.element-description-clip {
-  min-height: 0;
+.element-split[data-motion="on"] .element-stage-inner {
+  width: 100%;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
+  background-color: var(--color-section-alt);
 }
 
-/* The 120ms delay is on the hover rule only, never the base. Entering, the text waits for
-   the panel to have made room. Leaving, the rule stops applying and the delay goes with
-   it, so the descriptor fades at once as the panel closes — a one-directional delay is
-   what makes the reverse read as clean rather than as text loitering in a shrinking box. */
-.element-description {
-  padding-top: 0.75rem;
+/* Four frames in one box, one on top of another. Every image is rendered once and
+   cross-faded in place: swapping a single `src` would restart the download on each
+   change and flash the stage empty between elements, and there are only four. */
+.element-split[data-motion="on"] .element-frames {
+  display: block;
+}
+
+.element-split[data-motion="on"] .element-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
   opacity: 0;
-  transition-property: opacity;
-  transition-duration: var(--duration-base);
+  transform: translate3d(0, 0, 0) scale(1.06);
+  transition-property: opacity, transform;
+  transition-duration: 800ms, 1100ms;
+  transition-timing-function: var(--ease-base);
+  will-change: transform, opacity;
+}
+
+.element-split[data-motion="on"] .element-frame[data-current="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.element-split[data-motion="on"] .element-frame-image {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+/* The panel raises a beat after the picture has begun — 120ms, which is enough to
+   read as "and then this" and not enough to read as a second event. */
+.element-split[data-motion="on"] .element-panel {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  max-width: min(30rem, 84%);
+  opacity: 0;
+  transform: translate3d(0, 1.4rem, 0);
+  transition-property: opacity, transform;
+  transition-duration: 550ms, 700ms;
+  transition-delay: 120ms;
   transition-timing-function: var(--ease-base);
 }
 
-@media (min-width: 768px) {
-  .element-card:hover .element-description,
-  .element-card:focus-within .element-description {
-    opacity: 1;
-    transition-delay: 120ms;
+.element-split[data-motion="on"] .element-frame[data-current="true"] .element-panel {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* The wipe, in the incoming element's own tint. Decorative and inert. */
+.element-split[data-motion="on"] .element-sweep {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 140%;
+  transform: translate3d(-115%, 0, 0);
+  pointer-events: none;
+}
+
+.element-sweep[data-tint="0"] {
+  background-color: var(--color-accent-on-dark);
+}
+.element-sweep[data-tint="1"] {
+  background-color: var(--color-accent-highlight);
+}
+.element-sweep[data-tint="2"] {
+  background-color: var(--color-accent-warm);
+}
+.element-sweep[data-tint="3"] {
+  background-color: var(--color-accent);
+}
+
+.element-sweep--go {
+  animation: element-sweep 680ms var(--ease-base) both;
+}
+
+@keyframes element-sweep {
+  from {
+    transform: translate3d(-115%, 0, 0);
+  }
+  to {
+    transform: translate3d(115%, 0, 0);
   }
 }
 
-/* Below md the hover does not exist, so nothing may depend on it. The card is a plain
-   content-height stack — deliberately NOT stretched to a shared row height: in one column
-   the four cards never sit beside each other, so equal heights buy nothing visible, and
-   the only place the surplus could go is the panel, which would be the pocket again. */
-@media (max-width: 767px) {
-  .element-card {
-    height: auto;
+/* THE NAMES. Buttons, not list items: the keyboard and the touch screen have no
+   hover to select with, and the selection is what puts an element's sentence on
+   the stage. Focusing one selects it, so tabbing the list walks the four frames. */
+.element-split[data-motion="on"] .element-names {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* THE ROW carries the height; the BUTTON inside it carries only its own words. That
+   split is the whole point: the row has to be tall, because its height is what gives the
+   stage something to hold still against, and a button filling it would mean the picture
+   changed whenever the pointer crossed 400px of empty ground beside the list. Hovering
+   the name changes the picture. Hovering the gap does not. */
+.element-name {
+  display: flex;
+  align-items: center;
+  /* Four rows less the stage and its sticky offset is the distance the stage holds for,
+     and that distance is cut into one band per element. At 34vh the window came out
+     shorter than the sequence needed and the stage let go around the third name. */
+  min-height: 48vh;
+  border-top: 1px solid var(--color-hairline-on-dark);
+}
+
+.element-name:last-child {
+  border-bottom: 1px solid var(--color-hairline-on-dark);
+}
+
+.element-name-button {
+  /* Sized to its content, never to the row. See `.element-name` above. */
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: auto;
+  max-width: 100%;
+  padding: 0.35rem 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  transform: translate3d(0, 0, 0);
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.element-name-numeral {
+  display: block;
+  color: var(--color-canvas-40);
+  transition-property: color;
+  transition-duration: 450ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.element-name-title {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-canvas-60);
+  transition-property: color;
+  transition-duration: 500ms;
+  transition-timing-function: var(--ease-base);
+}
+
+.element-name-bar {
+  display: block;
+  margin-top: 1rem;
+  height: 2px;
+  width: 9rem;
+  max-width: 100%;
+  flex: none;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition-property: transform;
+  transition-duration: 600ms;
+  transition-timing-function: var(--ease-base);
+}
+
+/* The list bar takes the element's tint, EXCEPT the fourth: claret is 2.457:1 on
+   this ground and would be an invisible rule. It borrows rose, which is the same
+   substitution `.text-display-accent` makes on a dark surface. The panel on the
+   stage keeps the real claret, because it is a fill with its own text on it and
+   not a mark on the section ground. */
+.element-name-button[data-tint="0"] .element-name-bar,
+.element-name-button[data-tint="3"] .element-name-bar {
+  background-color: var(--color-accent-on-dark);
+}
+.element-name-button[data-tint="1"] .element-name-bar {
+  background-color: var(--color-accent-highlight);
+}
+.element-name-button[data-tint="2"] .element-name-bar {
+  background-color: var(--color-accent-warm);
+}
+
+.element-name-button[data-current="true"] {
+  transform: translate3d(1rem, 0, 0);
+}
+.element-name-button[data-current="true"] .element-name-numeral,
+.element-name-button[data-current="true"] .element-name-title {
+  color: var(--color-text-on-dark);
+}
+.element-name-button[data-current="true"] .element-name-bar {
+  transform: scaleX(1);
+}
+
+/* Below 900 the split is one column: the stage stops sticking and the names sit
+   under it as an ordinary list, so a phone gets a picture and four taps rather
+   than a 4:3 stage trying to hold still inside a section that is not tall enough
+   for it to hold still in. */
+@media (max-width: 900px) {
+  .element-split[data-motion="on"] {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .element-media {
-    flex: 0 0 auto;
-    aspect-ratio: 4 / 3;
+  .element-split[data-motion="on"] .element-stage {
+    position: static;
   }
-  .element-description-slot {
-    grid-template-rows: 1fr;
-    transition-property: none;
+  .element-name {
+    min-height: 0;
   }
-  .element-description {
-    opacity: 1;
+  .element-name-button[data-current="true"] {
+    transform: none;
   }
 }
 
-/* Reduced motion gets the hover state as the resting state: the descriptor track is open,
-   the text is visible, and there is nothing left to animate between. */
-@media (prefers-reduced-motion: reduce) {
-  .element-description-slot {
-    grid-template-rows: 1fr;
-    transition-property: none;
-  }
-  .element-description {
-    opacity: 1;
-    transition-property: none;
-  }
-}
 
 /* ---------------------------------------------------------------------------
    §4 How We Work — the rule draws itself, then the steps activate on scroll
@@ -3889,7 +3887,7 @@ html {
 /* The bar itself bleeds edge to edge — it is a divider under a full-width header — but its
    links sit on the container line, so the first service name starts on the same vertical as
    the page copy below it rather than out at the viewport gutter. `--container-inset`
-   collapses to the plain gutter under 80rem, which is also what the scrolling strip wants. */
+   collapses to the plain gutter under 88rem, which is also what the scrolling strip wants. */
 .capability-index-list {
   display: flex;
   gap: 0.25rem;
@@ -5338,7 +5336,7 @@ html {
 
 @media (min-width: 1024px) {
   .about-bleed-left {
-    margin-left: calc(-1 * max(var(--spacing-gutter), (100vw - 80rem) / 2 + var(--spacing-gutter)));
+    margin-left: calc(-1 * max(var(--spacing-gutter), (100vw - 88rem) / 2 + var(--spacing-gutter)));
   }
 
   .about-frame--bleed {
@@ -5536,22 +5534,32 @@ html {
    collapse to the bare gutter, leaving the tags 80px inside the heading above
    them. `.frames` is deliberately not a query container: its children are
    sticky, and containment is not a thing to put near that without a reason. */
+/* The pictures start straight under the header. This used to hold them
+   `clamp(2.5rem, 6vh, 4rem)` clear of it, and because the media runs full-bleed while the
+   header is inside the container, that gap read as a band of section ground laid between
+   the two rather than as breathing room. The section's own top padding is what gives the
+   header its air; the media does not need a second helping under it. */
 .imagery-section > .frames,
 .imagery-section > .tiles,
 .imagery-section > .covers {
-  margin-top: clamp(2.5rem, 6vh, 4rem);
+  margin-top: 0;
 }
 
-.tiles,
-.covers {
+/* The covers grid is the one of the three that is not full-bleed, so it needs the air
+   the others get from being edge to edge. */
+.imagery-section > .covers {
+  margin-top: clamp(2.5rem, 6vh, 4.5rem);
+}
+
+.tiles {
   container-type: inline-size;
   /* The container line, measured against the grid rather than against the cell a
-     plate happens to sit in. Below the 80rem max width the second term goes
+     plate happens to sit in. Below the 88rem max width the second term goes
      negative and this falls back to the bare gutter, exactly as
      `--container-inset` does. */
   --imagery-inset: max(
     var(--spacing-gutter),
-    calc((100cqi - 80rem) / 2 + var(--spacing-gutter))
+    calc((100cqi - 88rem) / 2 + var(--spacing-gutter))
   );
 }
 
@@ -5608,7 +5616,15 @@ html {
 .frame-step {
   position: relative;
   overflow: hidden;
-  background-color: var(--color-section-alt);
+  /* What shows for the instant before the photograph paints — the section's own ground,
+     so it is never a tone of its own. A tint of the ink ramp was tried here and over
+     cream it is a faintly darker cream, which is a second colour on the page for the
+     length of one image load. */
+  background-color: var(--section-ground, var(--color-canvas));
+}
+
+.surface-dark .frame-step {
+  background-color: var(--section-ground, var(--color-ink));
 }
 
 .frame-shot {
@@ -5631,14 +5647,24 @@ html {
   display: flex;
   gap: clamp(1rem, 3vw, 2.25rem);
   align-items: baseline;
-  background-color: var(--section-ground, var(--color-ink));
+  /* The plate matches the section it sits in, so the seam alternation carries it. The
+     FALLBACK is what makes it work on either ground: `--section-ground` is only set by
+     the seam for the second and later section of a run, so the first one falls through
+     to here — and this section is the first cream one of its run. */
+  background-color: var(--section-ground, var(--color-canvas));
   padding: 1.5rem var(--container-inset);
+}
+
+.surface-dark .frame-caption {
+  background-color: var(--section-ground, var(--color-ink));
 }
 
 .frame-numeral {
   font-family: var(--font-display-accent);
   font-style: italic;
-  color: var(--color-accent-on-dark);
+  /* Raw accent on cream is 5.107:1; the lightened one is 1.634:1 there and would be a
+     ghost. The same substitution `.text-display-accent` makes, in the same direction. */
+  color: var(--color-accent);
   font-size: clamp(2.25rem, 5vw, 3.75rem);
   line-height: 0.9;
   flex: none;
@@ -5651,10 +5677,18 @@ html {
   font-weight: 400;
 }
 
+.surface-dark .frame-numeral {
+  color: var(--color-accent-on-dark);
+}
+
 .frame-say {
   margin-top: 0.6rem;
-  color: var(--color-canvas-80);
+  color: var(--color-ink-70);
   max-width: 52ch;
+}
+
+.surface-dark .frame-say {
+  color: var(--color-canvas-80);
 }
 
 .frame-more {
@@ -5708,8 +5742,11 @@ html {
   text-align: left;
   border: 0;
   cursor: pointer;
-  background-color: var(--color-ink);
-  color: var(--color-text-on-dark);
+  /* A LIGHT plate on the photograph, not a dark one. Fully opaque either way — the rule
+     is that no copy sits on a picture without a backing — but cream reads as a label laid
+     on the image rather than as a hole punched through it. Ink on it measures 15.170:1. */
+  background-color: var(--color-card);
+  color: var(--color-ink);
   font: inherit;
   padding: 1.25rem var(--imagery-inset);
 }
@@ -5724,13 +5761,26 @@ html {
 .tile-sign {
   display: block;
   margin-top: 0.5rem;
-  color: var(--color-accent-on-dark);
+  /* The raw accent, since the plate is light now: on cream it is 9.466:1 where the
+     lightened one is 1.634:1. */
+  color: var(--color-accent);
 }
 
 /* The partnership is the row's destination rather than its fourth option, and the
    warm accent is what says so without a badge. */
+/* THE DESTINATION TILE. The warm accent as the plate's FILL rather than as its word: on
+   a light plate gold text is 2.212:1 and unreadable, while as a ground it holds ink at
+   6.834:1 and still marks this tile out from the three above it. Its sign drops to ink
+   too — the raw accent on gold is under the floor.
+
+   Stated for the base surface here and again for the motion layer below, because that
+   layer moves the fill from the button to the plate inside it. */
+.tile[data-custom="true"] .tile-hit {
+  background-color: var(--color-accent-warm);
+}
+
 .tile[data-custom="true"] .tile-sign {
-  color: var(--color-accent-warm);
+  color: var(--color-ink);
 }
 
 .tile-detail {
@@ -5816,23 +5866,47 @@ html {
 }
 
 /* ----------------------------------------------------------------------------
-   3 · SELECTED CREATIVE WORK — the covers at full width, two to a row with no
-   gutter between them.
-   ---------------------------------------------------------------------------- */
+   3 · SELECTED CREATIVE WORK — eight pieces in two staggered columns, on the
+   container line.
+   ----------------------------------------------------------------------------
+   It was eight covers at full bleed, two to a row with no gutter, each panning
+   inside a window it was taller than: one moving surface with the photographs
+   welded edge to edge and the captions inset by hand to reach the page's line.
+   This is the approved design instead — separate pieces, a real gap between the
+   columns, the right column dropped by most of a frame, and the whole grid held
+   to `--container-inset`, which is the header bar's line.
+
+   Everything below is the FINAL, READABLE STATE: eight pictures with their
+   captions under them, nothing hidden and nothing waiting on a pointer. The mask
+   that uncovers them lives in the motion layer and does not exist without it. */
 .covers {
+  /* The container line. `100%` inside `--container-inset` resolves against the
+     section here, which is the full page width, so this lands on exactly the
+     vertical `Container` gives the heading above it. */
+  padding-inline: var(--container-inset);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 4vw, 4rem);
+  row-gap: clamp(2.5rem, 7vh, 5rem);
 }
 
 .cover {
   position: relative;
-  background-color: var(--color-section-alt);
 }
 
 .cover-window {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 5 / 4;
+  /* 4:3 on every frame, so eight photographs of eight different shapes read as one
+     set. The picture covers, so none of them is distorted to get there. */
+  aspect-ratio: 4 / 3;
+  /* The section's own ground, so a frame waiting for its image never shows a colour
+     the section does not already have. */
+  background-color: var(--section-ground, var(--color-canvas));
+}
+
+.surface-dark .cover-window {
+  background-color: var(--section-ground, var(--color-section-alt));
 }
 
 .cover-image {
@@ -5844,40 +5918,61 @@ html {
   object-fit: cover;
 }
 
+/* No ground of its own any more. The caption used to be a plate that had to repaint
+   the section colour, because the covers it sat between were full-bleed and touching;
+   with a real gap on every side it is simply text on the section. */
 .cover-tag {
-  background-color: var(--section-ground, var(--color-ink));
-  padding: 1.1rem var(--imagery-inset) 1.5rem;
+  margin-top: 1.3rem;
   display: flex;
-  gap: 1rem;
+  gap: 1.1rem;
   align-items: baseline;
 }
 
 .cover-numeral {
   font-family: var(--font-display-accent);
   font-style: italic;
-  color: var(--color-accent-on-dark);
-  font-size: 1.35rem;
+  /* Raw accent on cream is 5.107:1; the lightened one is 1.634:1 there. Same swap the
+     display accent makes, in the same direction. */
+  color: var(--color-accent);
+  font-size: 1.4rem;
   line-height: 1;
   flex: none;
 }
 
 .cover-title {
-  font-size: 1.05rem;
-  line-height: 1.2;
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  line-height: 1.18;
   letter-spacing: 0.01em;
   font-weight: 400;
 }
 
+.surface-dark .cover-numeral {
+  color: var(--color-accent-on-dark);
+}
+
 .cover-intent {
-  margin-top: 0.35rem;
-  font-size: 0.92rem;
+  margin-top: 0.4rem;
+  font-size: 0.94rem;
+  color: var(--color-ink-70);
+}
+
+.surface-dark .cover-intent {
   color: var(--color-canvas-80);
 }
 
+/* THE STAGGER. Two columns from 780 up, and the second of every pair dropped by most
+   of a frame — which is what stops four rows of two reading as a table. Below 780 the
+   grid is one column and the offset goes with it, since a stagger needs two columns
+   to be staggered against. */
 @media (min-width: 780px) {
   .covers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .cover:nth-child(even) {
+    margin-top: clamp(2rem, 7vw, 7rem);
+  }
+
   .tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5927,16 +6022,27 @@ html {
   display: block;
   position: absolute;
   inset: 0;
-  background-color: var(--section-ground, var(--color-ink));
+  background-color: var(--section-ground, var(--color-canvas));
   opacity: 0;
   pointer-events: none;
+}
+
+.surface-dark .frames[data-motion="on"] .frame-veil {
+  background-color: var(--section-ground, var(--color-ink));
 }
 
 .frames[data-motion="on"] .frame-caption {
   position: relative;
   z-index: 2;
   align-self: flex-start;
-  margin: calc(var(--header-height, 5rem) + clamp(1.5rem, 5vh, 3.5rem)) 0 0 0;
+  /* On the container line, not against the viewport edge. The plate is a floating box
+     here rather than the full-width bar it is in the base state, so the inset has to be a
+     margin — and a percentage margin resolves against the CONTAINING BLOCK, which is the
+     full-bleed frame, so `--container-inset` lands on the same vertical as the heading
+     above it. Using it as padding on the plate itself would measure the 100% against the
+     plate's own 34rem and collapse to the bare gutter. */
+  margin: calc(var(--header-height, 5rem) + clamp(1.5rem, 5vh, 3.5rem)) 0 0
+    var(--container-inset);
   padding: 1.1rem clamp(1.5rem, 3vw, 2.25rem);
   max-width: min(92vw, 34rem);
 }
@@ -5952,8 +6058,8 @@ html {
   width: 100%;
   margin: 0;
   padding: 1.1rem clamp(1.5rem, 3vw, 2.25rem);
-  background-color: var(--section-ground, var(--color-ink));
-  color: var(--color-canvas-80);
+  background-color: var(--section-ground, var(--color-canvas));
+  color: var(--color-ink-70);
   max-width: none;
   opacity: 0;
   transform: translate3d(0, -10px, 0);
@@ -5961,6 +6067,10 @@ html {
     opacity 350ms var(--ease-base),
     transform 450ms var(--ease-base);
   pointer-events: none;
+}
+
+.surface-dark .frames[data-motion="on"] .frame-more {
+  color: var(--color-accent-on-dark);
 }
 
 .frames[data-motion="on"] .frame-caption:hover .frame-say,
@@ -5972,10 +6082,15 @@ html {
 
 /* The sentence answers the pointer; this answers the keyboard and the touch
    screen, which have no hover to give. */
+.surface-dark .frames[data-motion="on"] .frame-say {
+  background-color: var(--section-ground, var(--color-ink));
+  color: var(--color-canvas-80);
+}
+
 .frames[data-motion="on"] .frame-more {
   display: block;
   margin-top: 0.5rem;
-  color: var(--color-accent-on-dark);
+  color: var(--color-accent);
   background: none;
   border: 0;
   font-family: inherit;
@@ -6001,10 +6116,17 @@ html {
 }
 
 .tiles[data-motion="on"] .tile-plate {
-  background-color: var(--color-ink);
+  background-color: var(--color-card);
   padding: var(--tile-plate-pad);
   margin: var(--tile-inset);
   transition: transform 400ms var(--ease-base);
+}
+
+/* See THE DESTINATION TILE above. Restated here because the motion layer carries the
+   fill on the plate rather than on the button, and this has to come after the rule it
+   overrides — the two match on specificity, so order is what decides. */
+.tiles[data-motion="on"] .tile[data-custom="true"] .tile-plate {
+  background-color: var(--color-accent-warm);
 }
 
 .tiles[data-motion="on"] .tile-hit:hover .tile-plate {
@@ -6082,6 +6204,53 @@ html {
   }
 }
 
+/* THE OPEN PANEL IS A WASH, NOT A PLATE — at the client's direction, so the picture
+   is still there behind what it says.
+   ---------------------------------------------------------------------------
+   ONLY IN THE MOTION LAYER, because only here does the panel lie OVER the photograph.
+   In the base state it is a block in normal flow under the picture, and there is
+   nothing behind it to show through but the section's own ground, so it stays the
+   opaque plate it was.
+
+   THE ALPHA IS NOT A TASTE DECISION. The rule this section is built on is that no copy
+   sits on a picture without a backing whose contrast can be measured, and a translucent
+   backing can be measured — against the worst pixel a photograph is able to put under
+   it, which is pure black. At 82% the cream composites to #CFCCC3 over black, and every
+   colour the panel uses clears the 4.5:1 floor against THAT, not against an average:
+
+     ink 9.95:1 · accent 6.21:1 · graphite 9.04:1
+
+   So the reading is safe over any photograph, including one we have not chosen yet.
+   Below about 70% it stops being: the accent — the italic descriptor and the two field
+   labels — is the first colour to go.
+
+   The blur is legibility of a different kind. It costs nothing in contrast, since the
+   numbers above already assume the worst case, but it turns the detail behind the words
+   into a wash so the eye is not reading text against a fence or a keyboard. Where it is
+   not supported the panel is simply the measured translucent cream. */
+.tiles[data-motion="on"] .tile-detail {
+  background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(0.85);
+  -webkit-backdrop-filter: blur(14px) saturate(0.85);
+}
+
+/* THE DESTINATION TILE GETS ITS OWN WASH. The partnership is not the row's fourth
+   option and its panel should not look like the other three's — the same argument the
+   gold plate already makes, carried into the open state.
+
+   It is the cream warmed 24% toward the gold, NOT the gold itself. Gold at this alpha
+   holds ink at 4.68:1 and drops the accent — the descriptor and the field labels — well
+   under the floor, which would mean re-colouring half the panel to keep one background.
+   Warming the cream instead reads as unmistakably the warm tile and leaves every colour
+   in the panel working: ink 8.40:1, accent 5.24:1, graphite 7.63:1, all against black. */
+.tiles[data-motion="on"] .tile[data-custom="true"] .tile-detail {
+  background-color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent-warm) 24%, var(--color-card)) 82%,
+    transparent
+  );
+}
+
 .tiles[data-motion="on"] .tile[data-open="true"] .tile-detail {
   transform: none;
 }
@@ -6102,34 +6271,59 @@ html {
   cursor: pointer;
 }
 
-/* Each cover sits in a window it is taller than, and the picture moves inside that
-   window as the page scrolls — the left column downward, the right column upward. */
+/* THE MASK. A solid panel of the section's own ground laid over each frame, which
+   slides DOWN off it as the frame comes up the viewport — so a piece is uncovered
+   rather than faded up, and what arrives is the photograph at full strength instead
+   of a half-transparent one part-way through a fade.
+
+   It does not exist without the motion layer: `display: none` in the base state above
+   is what leaves the eight pieces simply present with the script blocked or the
+   preference set. Only its transform is ever written. */
+.cover-veil {
+  display: none;
+}
+
+.covers[data-motion="on"] .cover-veil {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-color: var(--section-ground, var(--color-canvas));
+  will-change: transform;
+}
+
+.surface-dark .covers[data-motion="on"] .cover-veil {
+  background-color: var(--section-ground, var(--color-section-alt));
+}
+
+/* The picture is oversized under the mask so it can rise 6% and settle 6% larger
+   without either move exposing an edge of the frame. */
 .covers[data-motion="on"] .cover-image {
-  height: 124%;
-  top: -12%;
+  height: 112%;
+  top: -6%;
   will-change: transform;
 }
 
 .covers[data-motion="on"] .cover-tag {
-  position: relative;
+  will-change: transform, opacity;
 }
 
-/* THE INTENT LINE HIDES ONLY WHERE THERE IS A POINTER TO SUMMON IT WITH. A cover
-   carries no button of its own the way a process frame does, and eight focusable
-   articles carrying no action would be eight tab stops that go nowhere — so on a
-   touch screen and on a coarse pointer the line is simply on the page. */
-@media (hover: hover) and (pointer: fine) {
-  .covers[data-motion="on"] .cover-intent {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0);
-    transition:
-      opacity 300ms var(--ease-base),
-      transform 400ms var(--ease-base);
+/* Safety net: if the preference flips after load, the mask stands down where it is
+   and the pieces stay uncovered rather than staying behind a panel that has stopped
+   being written to. */
+@media (prefers-reduced-motion: reduce) {
+  .covers[data-motion="on"] .cover-veil {
+    display: none;
   }
 
-  .covers[data-motion="on"] .cover:hover .cover-intent,
-  .covers[data-motion="on"] .cover:focus-within .cover-intent {
-    opacity: 1;
-    transform: none;
+  .covers[data-motion="on"] .cover-image {
+    height: 100%;
+    top: 0;
+    transform: none !important;
+  }
+
+  .covers[data-motion="on"] .cover-tag {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

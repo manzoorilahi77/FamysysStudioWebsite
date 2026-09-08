@@ -96,18 +96,36 @@ function FooterSocialItem({ link }: { link: FooterSocialLinkView }) {
  * the parent's address and pointing "LinkedIn" at the parent's profile, would be wrong on
  * every page of the site rather than absent from it.
  *
- * EXPLORE IS DERIVED, NOT LISTED. It reads the navigation, from the same source the
- * header reads, so the column cannot drift from the menu — and that includes the pages
- * the BAR does not name. How We Work is one: it is not a top-level bar item any more, it
- * is a block inside the Ways to Work With Us panel, and it is picked up here from that
- * block rather than retyped, so the footer lists all six content pages either way.
+ * THE PAGE COLUMNS ARE DERIVED, NOT LISTED. They read the navigation, from the same
+ * source the header reads, so they cannot drift from the menu — and that includes the
+ * pages the BAR does not name. How We Work is one: it is not a top-level bar item any
+ * more, it is a block inside the Ways to Work With Us panel, and it is picked up here from
+ * that block rather than retyped, so the footer lists all six content pages either way.
  *
  * Only Contact is named in content, because it is not a navigation item at all — the bar
  * used to reach it through a CTA button, which has been removed, and the drawer still
  * does.
+ *
+ * SIX PAGES, TWO COLUMNS OF THREE, SPLIT BY WHAT THEY ARE. It was one column called
+ * "Explore" holding all six, which ran twice the height of Connect and Legal beside it and
+ * said nothing about the pages except that they exist. SERVICES is what the studio sells
+ * and how buying it works; STUDIO is who is selling and the proof — the work, the company,
+ * the way in. A reader looking for a price and a reader looking for a portfolio are not
+ * the same reader, and one heading over six links helped neither.
  */
+/**
+ * Which side of the split a page falls on, BY ROUTE rather than by label. The labels come
+ * from the CMS and the client can rewrite any of them; the routes are the site's own and
+ * cannot be edited into the wrong column.
+ *
+ * A page not named here goes to SERVICES, which is the safer default: a new top-level page
+ * is far more likely to be something the studio does than another way of describing the
+ * studio itself. Add its route here when it is not.
+ */
+const STUDIO_HREFS: ReadonlySet<string> = new Set(["/selected-work", "/about", "/contact"]);
+
 export function Footer({ entries, footer }: FooterProps) {
-  const exploreLinks: ReadonlyArray<CtaView> = [
+  const pageLinks: ReadonlyArray<CtaView> = [
     ...entries.flatMap((entry) => [
       { label: entry.label, href: entry.href, isExternal: false },
       ...(entry.panel.asideHref && entry.panel.asideLabel
@@ -116,6 +134,8 @@ export function Footer({ entries, footer }: FooterProps) {
     ]),
     footer.contactLink,
   ];
+  const serviceLinks = pageLinks.filter((link) => !STUDIO_HREFS.has(link.href));
+  const studioLinks = pageLinks.filter((link) => STUDIO_HREFS.has(link.href));
 
   return (
     <footer className="site-footer surface-dark bg-ink">
@@ -126,7 +146,7 @@ export function Footer({ entries, footer }: FooterProps) {
             split. The tagline is capped at 34ch so it breaks into three lines rather than
             running the full five tracks and leaving a column of white beside the links. */}
         <div className="grid grid-cols-12 gap-x-8 gap-y-12 pt-20 pb-12">
-          <div className="col-span-12 md:col-span-5">
+          <div className="col-span-12 md:col-span-5 xl:col-span-4">
             <Link href="/" aria-label="Famysys Studio, home" className="inline-block">
               <Wordmark alt="" dark className="h-8" />
             </Link>
@@ -134,10 +154,30 @@ export function Footer({ entries, footer }: FooterProps) {
           </div>
 
           {/* Two columns at 390 and three from md. Three across a phone would put "Ways to
-              Work With Us" — the longest label on the site — into a 100px track. */}
-          <div className="col-span-12 grid grid-cols-2 gap-x-8 gap-y-10 md:col-span-7 md:grid-cols-3">
-            <FooterColumn title="Explore">
-              {exploreLinks.map((link) => (
+              Work With Us" — the longest label on the site — into a 100px track.
+
+              FOUR TRACKS FROM XL, with Explore taking two of them. Explore lists all six
+              content pages against Connect's three and Legal's two, so as one stack it ran
+              twice the height of the columns beside it and the band's whole right side was
+              a single tall ladder. Split three and three it matches them.
+
+              The extra track has to come from somewhere: the brand block gives one up at
+              the same breakpoint, five twelfths to four. That is what buys each column
+              184px at 1440 and 165px at 1280 — enough for "Ways to Work With Us", the
+              longest label on the site at 143px, to hold one line. On the three tracks
+              this had, a fourth column would have been 141px at 1280 and wrapped it.
+
+              Below xl the four columns wrap onto two rows rather than being squeezed:
+              three across at 1024, two at 390. */}
+          <div className="col-span-12 grid grid-cols-2 gap-x-8 gap-y-10 md:col-span-7 md:grid-cols-3 xl:col-span-8 xl:grid-cols-4">
+            <FooterColumn title="Services">
+              {serviceLinks.map((link) => (
+                <FooterLink key={link.href} cta={link} />
+              ))}
+            </FooterColumn>
+
+            <FooterColumn title="Studio">
+              {studioLinks.map((link) => (
                 <FooterLink key={link.href} cta={link} />
               ))}
             </FooterColumn>

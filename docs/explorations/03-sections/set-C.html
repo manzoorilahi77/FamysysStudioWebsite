@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Famysys Studio — Sections, set C: Imagery leads</title>
+<meta name="description" content="Set C of five section explorations: How We Work as five full-bleed frames that take the screen in turn, Ways to Work as four image tiles that open, Selected Work as eight covers at full width.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   Set C — the same three homepage sections as sets A and B, redesigned
+   so the pictures carry them and the words step back. One idea per
+   section: five frames that take the screen in turn, four tiles that
+   open, eight covers at full width.
+
+   None of set A's devices (a pinned step sequence, a horizontal tier
+   rail, a scroll-scrubbed mask) and none of set B's (a Z-axis
+   corridor, a fanning deck, a cursor-repelled field) reappears here.
+
+   Two rules govern everything below. Text sits on a photograph only
+   inside an opaque plate, because a photograph is not a background
+   whose contrast can be measured once. And --muted is 1.07:1 on the
+   dark ground, so it appears on the light plates only.
+   ------------------------------------------------------------------ */
+:root{
+  --sand:#F2EDE1;      /* pageBackground  */
+  --forest:#12251F;    /* darkBackground  */
+  --ivory:#FCF8EE;     /* cardBackground  */
+  --ink:#16241E;       /* textOnLight     */
+  --paper:#F1EBDD;     /* textOnDark      */
+  --muted:#212B25;     /* textMuted — light plates only */
+  --claret:#7E1B33;    /* accentPrimary   */
+  --rose:#F0A8B8;      /* accentOnDark    */
+  --brass:#D6A03C;     /* accentWarm      */
+  --jade:#66E0B0;      /* accentHighlight */
+  --forest-2:#1E3A31;  /* sectionAlt      */
+  --sand-2:#E5DCCA;    /* sectionWarm     */
+
+  --paper-2:rgba(241,235,221,.72);   /* ~7.6:1 on --forest */
+  --rule-dark:rgba(241,235,221,.20);
+  --rule-light:rgba(22,36,30,.18);
+
+  --sans:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --pad:clamp(1.25rem,4.5vw,5rem);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--forest);color:var(--paper);
+  font-family:var(--sans);font-size:clamp(1rem,.94rem + .2vw,1.08rem);
+  line-height:1.55;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;font-weight:400}
+p{margin:0}
+img{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+/* The whole set is set in the serif italic at display sizes and in Jost
+   everywhere else, so a heading reads as a caption to the picture under
+   it rather than as a block of page furniture. */
+.display{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(2rem,5vw,4rem);line-height:1.02;letter-spacing:-.01em;
+  text-wrap:balance;
+}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:500;margin:0 0 1.1rem;color:var(--rose);
+}
+.lede{margin-top:1.1rem;max-width:46ch;color:var(--paper-2)}
+.band{padding:clamp(3.5rem,9vh,7rem) var(--pad) clamp(2rem,5vh,3.5rem);max-width:1440px;margin:0 auto}
+
+.plate{
+  background:var(--forest);color:var(--paper);
+  padding:1rem var(--pad);display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule-dark);
+}
+.plate b{font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}
+.plate span{color:var(--paper-2);font-size:.86rem}
+
+/* ==================================================================
+   1 · HOW WE WORK — five full-bleed frames, each taking the screen in
+   turn. Only the numeral and the step name are on the picture; the
+   sentence is behind them until the frame is hovered or focused.
+   ================================================================== */
+.frames{position:relative}
+.frame-step{position:relative;overflow:hidden;background:var(--forest-2)}
+.frame-step .shot{position:relative;aspect-ratio:16/10;overflow:hidden}
+.frame-step .shot img{width:100%;height:100%;object-fit:cover}
+.frame-step .dim{display:none}
+.caption{
+  display:flex;gap:clamp(1rem,3vw,2.25rem);align-items:baseline;
+  background:var(--forest);padding:1.5rem var(--pad);
+}
+.caption .no{
+  font-family:var(--serif);font-style:italic;color:var(--rose);
+  font-size:clamp(2.25rem,5vw,3.75rem);line-height:.9;flex:none;
+}
+.caption h3{font-size:clamp(1.35rem,2.8vw,2.1rem);line-height:1.05;letter-spacing:-.015em}
+.caption .say{margin-top:.6rem;color:var(--paper-2);max-width:52ch}
+.caption .more{display:none}
+
+/* ==================================================================
+   2 · WAYS TO WORK WITH US — four pictures, a name on each, and
+   nothing else until a tile is opened.
+   ================================================================== */
+.s-ways{background:var(--sand);color:var(--ink)}
+.s-ways .eyebrow{color:var(--claret)}
+.s-ways .lede{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;background:var(--sand)}
+.tile{position:relative;background:var(--forest);overflow:hidden}
+.tile .shot{position:relative;aspect-ratio:4/3;overflow:hidden}
+.tile .shot img{width:100%;height:100%;object-fit:cover}
+.tile-hit{
+  display:block;width:100%;text-align:left;border:0;cursor:pointer;
+  background:var(--forest);color:var(--paper);font:inherit;
+  padding:1.25rem var(--pad);
+}
+.tile-hit .name{font-size:clamp(1.35rem,2.6vw,2rem);line-height:1;letter-spacing:-.015em;display:block}
+.tile-hit .sign{
+  display:block;margin-top:.5rem;font-size:.72rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--rose);
+}
+.tile.custom .tile-hit .sign{color:var(--brass)}
+.detail{
+  background:var(--ivory);color:var(--ink);
+  padding:clamp(1.3rem,2.6vw,2rem) var(--pad) clamp(1.5rem,3vw,2.25rem);
+  display:flex;flex-direction:column;gap:.85rem;
+}
+/* The name is repeated inside the open panel: the panel covers the plate it
+   was opened from, and an open panel has to say which tier it belongs to. */
+.detail .who{display:none;font-size:clamp(1.25rem,2.2vw,1.7rem);line-height:1;letter-spacing:-.015em}
+.detail .desc{font-family:var(--serif);font-style:italic;color:var(--claret);font-size:1.2rem;line-height:1.2}
+.detail .sum{color:var(--muted);max-width:52ch}
+.detail dl{margin:0;display:grid;gap:.9rem;padding-top:.9rem;border-top:1px solid var(--rule-light)}
+.detail dt{
+  font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--claret);font-weight:500;margin-bottom:.25rem;
+}
+.detail dd{margin:0;font-size:.9rem;line-height:1.45;color:var(--muted)}
+.detail .invite{
+  font-family:var(--serif);font-style:italic;font-size:clamp(1.2rem,2.4vw,1.7rem);
+  line-height:1.15;max-width:24ch;padding-top:.9rem;border-top:1px solid var(--rule-light);
+}
+.detail .go{
+  align-self:flex-start;background:var(--claret);color:var(--ivory);text-decoration:none;
+  padding:.8rem 1.5rem;font-size:.84rem;letter-spacing:.1em;text-transform:uppercase;
+}
+.detail .go:hover{background:#6A1029}
+.detail .shut{display:none}
+
+/* ==================================================================
+   3 · SELECTED CREATIVE WORK — the covers at full width, two to a row
+   with no gutter between them. The reference and the title are a small
+   plate in the corner; the intent line waits for a hover.
+   ================================================================== */
+.s-work{background:var(--forest)}
+.covers{display:grid;grid-template-columns:minmax(0,1fr)}
+.piece{position:relative;background:var(--forest-2)}
+.piece .win{position:relative;overflow:hidden;aspect-ratio:5/4}
+.piece .win img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover}
+.tag{
+  background:var(--forest);padding:1.1rem var(--pad) 1.5rem;
+  display:flex;gap:1rem;align-items:baseline;
+}
+.tag .no{font-family:var(--serif);font-style:italic;color:var(--rose);font-size:1.35rem;line-height:1;flex:none}
+.tag h3{font-size:1.05rem;line-height:1.2;letter-spacing:.01em;font-weight:400}
+.tag .intent{margin-top:.35rem;font-size:.92rem;color:var(--paper-2)}
+
+.tail{padding:clamp(3rem,8vh,6rem) var(--pad);max-width:1440px;margin:0 auto;color:var(--paper-2)}
+
+@media (min-width:780px){
+  .covers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Three equal tiers and a Custom tile a little over half again as wide,
+   all on one row, so the widest picture is the partnership. */
+@media (min-width:1040px){
+  .tiles{grid-template-columns:1fr 1fr 1fr 1.6fr}
+}
+
+/* ==================================================================
+   MOTION LAYER. Everything above is the final, readable state: every
+   sentence is on the page, every tile is open, nothing is waiting on a
+   pointer. The class below is added by script only when the reader has
+   not asked for reduced motion, and it is what turns the three
+   sections into frames that take the screen, tiles that open, and
+   windows the pictures move inside.
+   ================================================================== */
+html.motion .frames{position:relative}
+/* The caption sits at the top of the frame, not the bottom: the next
+   frame climbs over this one from below, and a caption at the foot would
+   be the first thing it covered. */
+html.motion .frame-step{
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  will-change:transform;
+}
+html.motion .frame-step .shot{position:absolute;inset:0;aspect-ratio:auto}
+html.motion .frame-step .shot img{will-change:transform}
+html.motion .frame-step .dim{
+  display:block;position:absolute;inset:0;background:var(--forest);
+  opacity:0;pointer-events:none;
+}
+html.motion .caption{
+  position:relative;z-index:2;align-self:flex-start;
+  margin:clamp(1.5rem,5vh,3.5rem) 0 0 0;padding:1.1rem clamp(1.5rem,3vw,2.25rem);
+  max-width:min(92vw,34rem);cursor:default;
+}
+/* The sentence is a second opaque plate that rises out of the caption,
+   so nothing readable ever sits directly on the photograph. */
+html.motion .caption .say{
+  position:absolute;left:0;top:calc(100% + 2px);width:100%;
+  margin:0;padding:1.1rem clamp(1.5rem,3vw,2.25rem);
+  background:var(--forest);color:var(--paper-2);max-width:none;
+  opacity:0;transform:translate3d(0,-10px,0);
+  transition:opacity .35s var(--ease),transform .45s var(--ease);
+  pointer-events:none;
+}
+html.motion .caption:hover .say,
+html.motion .caption:focus-within .say,
+html.motion .caption.is-open .say{opacity:1;transform:none}
+html.motion .caption .more{
+  display:block;margin-top:.5rem;font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--rose);background:none;border:0;
+  font-family:inherit;padding:0;cursor:pointer;
+}
+
+/* The tiles are sized to the screen rather than to a ratio, so a tile has
+   room for its own detail once it is opened. */
+html.motion .tile .shot{aspect-ratio:auto;height:min(80vh,44rem)}
+html.motion .tile-hit{
+  position:absolute;inset:0;height:100%;background:none;
+  display:flex;align-items:flex-end;padding:0;
+}
+html.motion .tile-hit .plate-in{
+  background:var(--forest);padding:1rem 1.25rem;margin:1rem;
+  transition:transform .4s var(--ease);
+}
+html.motion .tile-hit:hover .plate-in{transform:translate3d(0,-4px,0)}
+html.motion .detail .who{display:block}
+html.motion .detail{
+  position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow:auto;
+  transform:translate3d(0,101%,0);
+  transition:transform .55s var(--ease);
+  will-change:transform;
+}
+html.motion .tile.is-open .detail{transform:none}
+html.motion .tile.is-open .tile-hit{pointer-events:none;opacity:0}
+html.motion .detail .shut{
+  display:block;align-self:flex-start;background:none;border:0;font:inherit;
+  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--claret);
+  padding:0;cursor:pointer;
+}
+
+/* Each cover sits in a window it is taller than, and the picture moves
+   inside that window as the page scrolls — the left column downward,
+   the right column upward. */
+html.motion .piece .win img{height:124%;top:-12%;will-change:transform}
+html.motion .tag{position:relative}
+html.motion .tag .intent{
+  opacity:0;transform:translate3d(0,6px,0);
+  transition:opacity .3s var(--ease),transform .4s var(--ease);
+}
+html.motion .piece:hover .tag .intent,
+html.motion .piece:focus-within .tag .intent{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  html.motion .frame-step{position:static;height:auto;display:block}
+  html.motion .frame-step .shot{position:relative;inset:auto;aspect-ratio:16/10}
+  html.motion .caption{margin:0;padding:1.5rem var(--pad);max-width:none}
+  html.motion .caption .say{position:static;opacity:1;transform:none;padding:0;margin-top:.6rem}
+  html.motion .caption .more,html.motion .detail .shut{display:none}
+  html.motion .tile-hit{position:static;height:auto;padding:1.25rem var(--pad);display:block}
+  html.motion .tile-hit .plate-in{margin:0;padding:0;background:none}
+  html.motion .detail{position:static;transform:none;max-height:none}
+  html.motion .detail .who{display:none}
+  html.motion .piece .win img{height:100%;top:0;transform:none!important}
+  html.motion .tag .intent{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="plate">
+  <b>Sections — set C</b>
+  <span>Imagery leads, text recedes. One idea per section: five frames that take the screen, four tiles that open, eight covers at full width.</span>
+</div>
+
+<!-- 1 · HOW WE WORK ============================================== -->
+<section class="s-flow">
+  <div class="band">
+    <p class="eyebrow">How We Work</p>
+    <h2 class="display">From idea to finished creative.</h2>
+  </div>
+
+  <div class="frames" id="frames">
+
+    <article class="frame-step">
+      <div class="shot">
+        <img src="../../../public/media/process-understand.jpg" alt="Two people talking across a table, each with an open notebook and a pen.">
+      </div>
+      <div class="dim"></div>
+      <div class="caption" tabindex="0">
+        <span class="no">01</span>
+        <div>
+          <h3>Understand</h3>
+          <p class="say">We understand what you&rsquo;re trying to communicate, who it&rsquo;s for and what success looks like.</p>
+          <button class="more" type="button">What happens here</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="frame-step">
+      <div class="shot">
+        <img src="../../../public/media/process-create.jpg" alt="A hand-drawn storyboard in a notebook: boxed frames of stick figures with handwritten captions beneath them." loading="lazy">
+      </div>
+      <div class="dim"></div>
+      <div class="caption" tabindex="0">
+        <span class="no">02</span>
+        <div>
+          <h3>Create</h3>
+          <p class="say">We develop the concept, script, design direction or production approach.</p>
+          <button class="more" type="button">What happens here</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="frame-step">
+      <div class="shot">
+        <img src="../../../public/media/process-produce.jpg" alt="A film crew on a lit soundstage, with an overhead lighting rig, a camera crane and monitors at floor level." loading="lazy">
+      </div>
+      <div class="dim"></div>
+      <div class="caption" tabindex="0">
+        <span class="no">03</span>
+        <div>
+          <h3>Produce</h3>
+          <p class="say">Our team combines creative tools, AI and human production expertise to build the content.</p>
+          <button class="more" type="button">What happens here</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="frame-step">
+      <div class="shot">
+        <img src="../../../public/media/process-refine.jpg" alt="A hand pointing a pen at a monitor filled with image thumbnails, on a studio desk beside a laptop." loading="lazy">
+      </div>
+      <div class="dim"></div>
+      <div class="caption" tabindex="0">
+        <span class="no">04</span>
+        <div>
+          <h3>Refine</h3>
+          <p class="say">We review, refine and incorporate feedback within the agreed scope.</p>
+          <button class="more" type="button">What happens here</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="frame-step">
+      <div class="shot">
+        <img src="../../../public/media/process-deliver.jpg" alt="A laptop showing a grid of finished frames, with downloaded audio and video files listed along the bottom of the screen." loading="lazy">
+      </div>
+      <div class="dim"></div>
+      <div class="caption" tabindex="0">
+        <span class="no">05</span>
+        <div>
+          <h3>Deliver</h3>
+          <p class="say">You receive polished, platform-ready creative assets.</p>
+          <button class="more" type="button">What happens here</button>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- 2 · WAYS TO WORK WITH US ===================================== -->
+<section class="s-ways">
+  <div class="band">
+    <p class="eyebrow">Ways to Work With Us</p>
+    <h2 class="display">Flexible ways to work with Famysys Studio.</h2>
+    <p class="lede">Whether you need one creative asset or an ongoing production partner, we can adapt to your requirements.</p>
+  </div>
+
+  <div class="tiles" id="tiles">
+
+    <article class="tile">
+      <div class="shot"><img src="../../../public/media/tier-launch.jpg" alt="A single studio light on a stand in a small room, with a desk and monitor out of focus behind it." loading="lazy"></div>
+      <button class="tile-hit" type="button" aria-expanded="false" aria-controls="tier-launch">
+        <span class="plate-in"><span class="name">Launch</span><span class="sign">Open</span></span>
+      </button>
+      <div class="detail" id="tier-launch">
+        <h3 class="who">Launch</h3>
+        <p class="desc">Essential Content</p>
+        <p class="sum">For businesses looking to establish or refresh their regular creative output.</p>
+        <dl>
+          <div><dt>Ideal for</dt><dd>Small businesses, local businesses, startups and growing brands.</dd></div>
+          <div><dt>Typical work includes</dt><dd>Social creatives, short-form content, promotional assets and basic video production.</dd></div>
+        </dl>
+        <a class="go" href="/contact">Talk to us</a>
+        <button class="shut" type="button">Close</button>
+      </div>
+    </article>
+
+    <article class="tile">
+      <div class="shot"><img src="../../../public/media/tier-grow.jpg" alt="A phone mounted on a tripod recording video in a shop, its timer running on screen." loading="lazy"></div>
+      <button class="tile-hit" type="button" aria-expanded="false" aria-controls="tier-grow">
+        <span class="plate-in"><span class="name">Grow</span><span class="sign">Open</span></span>
+      </button>
+      <div class="detail" id="tier-grow">
+        <h3 class="who">Grow</h3>
+        <p class="desc">Growth Content</p>
+        <p class="sum">For businesses that need a more consistent flow of video and creative content.</p>
+        <dl>
+          <div><dt>Ideal for</dt><dd>Growing businesses, brands, training companies and businesses actively investing in digital marketing.</dd></div>
+          <div><dt>Typical work includes</dt><dd>Short-form video, UGC editing, AI-assisted video, social creatives, motion and content adaptations.</dd></div>
+        </dl>
+        <a class="go" href="/contact">Talk to us</a>
+        <button class="shut" type="button">Close</button>
+      </div>
+    </article>
+
+    <article class="tile">
+      <div class="shot"><img src="../../../public/media/tier-scale.jpg" alt="Hands drawing an illustration on a tablet with a stylus, a laptop open behind them." loading="lazy"></div>
+      <button class="tile-hit" type="button" aria-expanded="false" aria-controls="tier-scale">
+        <span class="plate-in"><span class="name">Scale</span><span class="sign">Open</span></span>
+      </button>
+      <div class="detail" id="tier-scale">
+        <h3 class="who">Scale</h3>
+        <p class="desc">Advanced Creative</p>
+        <p class="sum">For businesses with larger or more sophisticated ongoing creative requirements.</p>
+        <dl>
+          <div><dt>Ideal for</dt><dd>Established businesses, B2B companies, product brands and marketing teams.</dd></div>
+          <div><dt>Typical work includes</dt><dd>Advanced video, explainers, training content, motion graphics, product visuals and multi-format creative production.</dd></div>
+        </dl>
+        <a class="go" href="/contact">Talk to us</a>
+        <button class="shut" type="button">Close</button>
+      </div>
+    </article>
+
+    <article class="tile custom">
+      <div class="shot"><img src="../../../public/media/tier-custom.jpg" alt="Two people at a studio table comparing printed frames and colour swatches." loading="lazy"></div>
+      <button class="tile-hit" type="button" aria-expanded="false" aria-controls="tier-custom">
+        <span class="plate-in"><span class="name">Custom Creative Partnership</span><span class="sign">Open</span></span>
+      </button>
+      <div class="detail" id="tier-custom">
+        <h3 class="who">Custom Creative Partnership</h3>
+        <p class="desc">Your flexible creative production team.</p>
+        <p class="sum">For businesses that need ongoing creative support across multiple formats and services.</p>
+        <p class="invite">Tell us what you need. We&rsquo;ll help structure the right production model.</p>
+        <a class="go" href="/contact">Talk to us about your requirements</a>
+        <button class="shut" type="button">Close</button>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- 3 · SELECTED CREATIVE WORK =================================== -->
+<section class="s-work">
+  <div class="band">
+    <p class="eyebrow">Selected Creative Work</p>
+    <h2 class="display">Selected Creative Work</h2>
+    <p class="lede">A growing collection of work created by Famysys Studio across design, video, AI-powered production and creative content.</p>
+  </div>
+
+  <div class="covers" id="covers">
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-01.jpg" alt="A cinema lens photographed close up against a dark background." loading="lazy"></div>
+      <div class="tag"><span class="no">01</span><div><h3>Famysys Studio Capability Film</h3><p class="intent">Show what the Studio itself can do.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-02.jpg" alt="A small team working together at laptops around a table." loading="lazy"></div>
+      <div class="tag"><span class="no">02</span><div><h3>Famysys IT Services Portfolio Film</h3><p class="intent">B2B/corporate credibility.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-03.jpg" alt="A plated dish being served at a restaurant table." loading="lazy"></div>
+      <div class="tag"><span class="no">03</span><div><h3>Food / Restaurant Creative Campaign</h3><p class="intent">Multiple AI videos + social creatives.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-04.jpg" alt="Social media apps in a folder on a phone screen." loading="lazy"></div>
+      <div class="tag"><span class="no">04</span><div><h3>UGC Transformation</h3><p class="intent">Raw footage &rarr; finished professional content.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-05.jpg" alt="A business portrait of a presenter against a plain background." loading="lazy"></div>
+      <div class="tag"><span class="no">05</span><div><h3>Synthesia Business Explainer</h3><p class="intent">Show presenter + visual storytelling.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-06.jpg" alt="A speaker addressing a seated group in a training room." loading="lazy"></div>
+      <div class="tag"><span class="no">06</span><div><h3>Training Video Series</h3><p class="intent">Show scalable training production.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-07.jpg" alt="A white smartwatch photographed on a plain grey background." loading="lazy"></div>
+      <div class="tag"><span class="no">07</span><div><h3>Product Visual Campaign</h3><p class="intent">Product imagery &rarr; lifestyle &rarr; promotional content.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="win"><img src="../../../public/media/case-08.jpg" alt="A multi-monitor editing rig with colourful graphics on screen." loading="lazy"></div>
+      <div class="tag"><span class="no">08</span><div><h3>Motion Graphics Showcase</h3><p class="intent">Demonstrate progression toward premium creative.</p></div></div>
+    </article>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // The stylesheet's base state is the final state — every sentence on the
+  // page, every tile open, no picture moving. The motion layer is only ever
+  // added on top of it, so a reader who has asked for reduced motion needs
+  // nothing unwound.
+  if (!window.matchMedia("(prefers-reduced-motion: no-preference)").matches) return;
+
+  document.documentElement.classList.add("motion");
+
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  /* 1 · five frames that take the screen in turn */
+  var steps = Array.prototype.slice.call(document.querySelectorAll("#frames .frame-step"))
+    .map(function (el) {
+      return { el: el, img: el.querySelector("img"), dim: el.querySelector(".dim") };
+    });
+  var COVER_LIFT = 0.055;   // how far a covered frame settles back
+  var COVER_DIM = 0.62;     // how far it darkens under the next one
+  var ENTER_PAN = 7;        // percent the picture rises as its frame arrives
+
+  /* 2 · tiles that open */
+  var tiles = Array.prototype.slice.call(document.querySelectorAll("#tiles .tile"));
+
+  /* 3 · covers moving inside their windows */
+  var pieces = Array.prototype.slice.call(document.querySelectorAll("#covers .piece"))
+    .map(function (el, i) {
+      return { win: el.querySelector(".win"), img: el.querySelector("img"), dir: i % 2 === 0 ? 1 : -1 };
+    });
+  var PAN = 9;              // percent of travel inside the window
+
+  var vh = 0;
+  function measure() { vh = window.innerHeight; }
+
+  function update() {
+    // Read every rect this frame needs before writing a single style, so no
+    // write invalidates a later read.
+    var stepTops = steps.map(function (s) { return s.el.getBoundingClientRect().top; });
+    var winRects = pieces.map(function (p) { return p.win.getBoundingClientRect(); });
+
+    for (var i = 0; i < steps.length; i++) {
+      // A frame is sticky, so its own top pins at 0; how far the NEXT frame
+      // has climbed over it is what says how far back this one should sit.
+      var nextTop = i + 1 < steps.length ? stepTops[i + 1] : vh;
+      var covered = clamp((vh - nextTop) / vh, 0, 1);
+      var arriving = clamp((vh - stepTops[i]) / vh, 0, 1);
+
+      steps[i].el.style.transform = "scale(" + (1 - COVER_LIFT * covered).toFixed(4) + ")";
+      steps[i].dim.style.opacity = (COVER_DIM * covered).toFixed(3);
+      steps[i].img.style.transform =
+        "translate3d(0," + ((1 - arriving) * ENTER_PAN).toFixed(2) + "%,0)";
+    }
+
+    for (var j = 0; j < pieces.length; j++) {
+      var r = winRects[j];
+      if (r.bottom < 0 || r.top > vh) continue;
+      // Where the window's own centre sits in the viewport, from 1 at the
+      // bottom edge to -1 at the top.
+      var centre = (r.top + r.height / 2 - vh / 2) / (vh / 2);
+      pieces[j].img.style.transform =
+        "translate3d(0," + (clamp(centre, -1, 1) * PAN * pieces[j].dir).toFixed(2) + "%,0)";
+    }
+  }
+
+  /* Opening a tile. One is open at a time: a tile that is already covered by
+     its own detail has nothing left to show. */
+  function setOpen(tile, open) {
+    tile.classList.toggle("is-open", open);
+    tile.querySelector(".tile-hit").setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  tiles.forEach(function (tile) {
+    tile.querySelector(".tile-hit").addEventListener("click", function () {
+      var wasOpen = tile.classList.contains("is-open");
+      tiles.forEach(function (t) { setOpen(t, false); });
+      setOpen(tile, !wasOpen);
+    });
+    tile.querySelector(".shut").addEventListener("click", function () {
+      setOpen(tile, false);
+      tile.querySelector(".tile-hit").focus();
+    });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    tiles.forEach(function (t) { setOpen(t, false); });
+  });
+
+  /* The step sentence answers the pointer, and the button under it answers
+     the keyboard and the touch screen, which have no hover to give. */
+  Array.prototype.forEach.call(document.querySelectorAll("#frames .caption"), function (cap) {
+    cap.querySelector(".more").addEventListener("click", function () {
+      cap.classList.toggle("is-open");
+    });
+  });
+
+  // One loop for all three sections. Scroll and resize only mark the frame
+  // dirty; nothing measures or styles outside this rAF.
+  var dirty = true;
+  function invalidate() { dirty = true; }
+  function frame() {
+    if (dirty) { dirty = false; update(); }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("scroll", invalidate, { passive: true });
+  window.addEventListener("resize", function () { measure(); invalidate(); });
+  window.addEventListener("load", function () { measure(); invalidate(); });
+
+  measure();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

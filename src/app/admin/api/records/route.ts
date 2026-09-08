@@ -1,6 +1,6 @@
 import { CreateCmsRecord, DeleteCmsRecord } from "../../../../application/cms/ManageCmsRecords";
 import { adminContainer } from "../../../../infrastructure/di/adminContainer";
-import { contentChanged } from "../../revalidate";
+import { structureChanged } from "../../revalidate";
 import { hasAdminSession, unauthorised } from "../../session";
 
 /**
@@ -52,7 +52,7 @@ export async function POST(request: Request): Promise<Response> {
     title,
     summary,
   });
-  if (result.ok) contentChanged();
+  if (result.ok) structureChanged();
   return json(result, result.ok ? 200 : 422);
 }
 
@@ -71,6 +71,6 @@ export async function DELETE(request: Request): Promise<Response> {
   }
 
   const result = await new DeleteCmsRecord(adminContainer.cms).execute(collectionId, recordId);
-  if (result.ok) contentChanged();
+  if (result.ok) structureChanged();
   return json(result, result.ok ? 200 : 422);
 }

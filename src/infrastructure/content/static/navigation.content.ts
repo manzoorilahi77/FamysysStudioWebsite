@@ -155,5 +155,5 @@ export const navigationContent: NavigationMenu = {
   // wordmark — and a filled button in the right track was the thing that made the two
   // sides uneven. The call to action still belongs to the menu: the MOBILE DRAWER ends
   // with it, and the footer and every page's closing block carry /contact besides.
-  primaryCta: createCta("Start a Conversation", "/contact"),
+  primaryCta: createCta("Contact", "/contact"),
 };

@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Famysys Studio — Logo behaviour, set A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@100..900&display=swap" rel="stylesheet" />
+<style>
+/* ------------------------------------------------------------------ *
+ * Fixed palette. Nothing here invents a colour.
+ * textMuted (#212B25) is 1.07:1 on dark and is never used on dark.
+ * ------------------------------------------------------------------ */
+:root {
+  --page-background:   #F2EDE1;
+  --dark-background:   #12251F;
+  --card-background:   #FCF8EE;
+  --text-on-light:     #16241E;
+  --text-on-dark:      #F1EBDD;
+  --text-muted:        #212B25;
+  --accent-primary:    #7E1B33;
+  --accent-on-dark:    #F0A8B8;
+  --accent-warm:       #D6A03C;
+  --accent-highlight:  #66E0B0;
+  --section-alt:       #1E3A31;
+  --section-warm:      #E5DCCA;
+
+  --font-sans: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+
+  /* The two logo boxes. Everything about the travel is derived from these. */
+  --brand-slot-width: 152px;
+  --hero-slot-width: clamp(230px, 31vw, 430px);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: auto; }
+
+body {
+  margin: 0;
+  background: var(--page-background);
+  color: var(--text-on-light);
+  font-family: var(--font-sans);
+  font-weight: 350;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------------ *
+ * Page furniture — the intro card and the closing card. Neither is
+ * part of the comparison; they only frame it.
+ * ------------------------------------------------------------------ */
+.sheet {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 6rem 1.75rem;
+}
+.sheet h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.04;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  margin: 0 0 1rem;
+}
+.sheet h1 em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+.sheet p {
+  max-width: 46rem;
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  margin: 0 0 0.9rem;
+  color: var(--text-muted);
+}
+.sheet .eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-bottom: 1.4rem;
+}
+.sheet ol {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+  border-top: 1px solid rgba(22, 36, 30, 0.16);
+  padding-top: 1.4rem;
+}
+.sheet ol li {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+.sheet ol li b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--text-on-light);
+  min-width: 2.4rem;
+}
+.sheet ol li span {
+  font-weight: 500;
+  color: var(--text-on-light);
+  min-width: 9.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * A variant block. Taller than the viewport so the sticky stage has
+ * scroll room underneath it and the docked logo can be looked at.
+ * ------------------------------------------------------------------ */
+.variant {
+  position: relative;
+  height: 230vh;
+  background: var(--dark-background);
+}
+.variant + .variant { border-top: 1px solid rgba(241, 235, 221, 0.09); }
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dark-background);
+  color: var(--text-on-dark);
+  isolation: isolate;
+}
+
+/* The bar meter. Painted, never laid out. */
+.meter {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+}
+.stage::after {
+  /* Keeps the copy readable where the tallest bars run behind it. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    rgba(18, 37, 31, 0.94) 0%,
+    rgba(18, 37, 31, 0.78) 42%,
+    rgba(18, 37, 31, 0.2) 74%,
+    rgba(18, 37, 31, 0) 100%
+  );
+}
+
+.variant-tag {
+  position: absolute;
+  left: 1.75rem;
+  bottom: 1.5rem;
+  z-index: 30;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-highlight);
+}
+.variant-tag b {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.variant-tag i {
+  font-style: normal;
+  color: rgba(241, 235, 221, 0.6);
+  letter-spacing: 0.14em;
+}
+
+/* ------------------------------------------------------------------ *
+ * Navigation. The brand slot is empty at scroll 0 — the logo element
+ * lives inside it but is transformed out into the hero, so the arrival
+ * is the logo returning to its own resting transform.
+ * ------------------------------------------------------------------ */
+.masthead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 1.75rem;
+  border-bottom: 1px solid rgba(241, 235, 221, 0.1);
+  overflow: visible;
+}
+/* The bar sits on its own layer. A backdrop-filter on .masthead itself
+   risks clipping the logo while it is scaled out into the hero. */
+.masthead::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(18, 37, 31, 0.55);
+  backdrop-filter: blur(6px);
+}
+.brand-slot {
+  position: relative;
+  width: var(--brand-slot-width);
+  aspect-ratio: 320 / 100;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.masthead nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1.6rem;
+  align-items: center;
+}
+.masthead nav a {
+  color: rgba(241, 235, 221, 0.82);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+.masthead nav a:hover { color: var(--accent-highlight); }
+.masthead .nav-cta {
+  border: 1px solid rgba(241, 235, 221, 0.34);
+  border-radius: 999px;
+  padding: 0.45rem 1.05rem;
+  color: var(--text-on-dark);
+}
+@media (max-width: 1080px) { .masthead nav a.opt { display: none; } }
+@media (max-width: 720px) { .masthead nav { display: none; } }
+
+/* ------------------------------------------------------------------ *
+ * Hero body. Identical in all six.
+ * ------------------------------------------------------------------ */
+.hero {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  padding: 5rem 1.75rem 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: center;
+}
+
+.copy { max-width: 40rem; }
+
+/* The logo's parking space in the hero. It is always in the flow and
+   always this size, so nothing under it moves when the logo leaves. */
+.hero-slot {
+  width: var(--hero-slot-width);
+  aspect-ratio: 320 / 100;
+  margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.copy h2 {
+  font-size: clamp(1.9rem, 3.5vw, 3.1rem);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+  font-weight: 300;
+  margin: 0 0 1.1rem;
+  color: var(--text-on-dark);
+}
+.copy h2 em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent-on-dark);
+}
+.copy .lede {
+  font-size: clamp(0.98rem, 1.2vw, 1.12rem);
+  line-height: 1.55;
+  color: rgba(241, 235, 221, 0.86);
+  margin: 0 0 1.8rem;
+  max-width: 34rem;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.3rem; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.78rem 1.55rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn.primary { background: var(--accent-highlight); color: var(--text-on-light); font-weight: 500; }
+.btn.secondary { border: 1px solid rgba(241, 235, 221, 0.36); color: var(--text-on-dark); }
+.supporting {
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  color: rgba(241, 235, 221, 0.62);
+  margin: 0;
+}
+
+/* The accordion. Five bands, one open, driven by the same scroll
+   progress in every variant so it is never the thing that differs. */
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: min(30rem, 62vh);
+  align-self: center;
+}
+.band {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 2.6rem;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: flex-grow 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid rgba(241, 235, 221, 0.12);
+}
+.band.open { flex-grow: 5.4; }
+.band img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  transition: opacity 620ms ease;
+}
+.band.open img { opacity: 0.9; }
+.band span {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.6rem;
+  z-index: 2;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+  text-shadow: 0 1px 6px rgba(18, 37, 31, 0.9);
+}
+.band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(18, 37, 31, 0) 44%, rgba(18, 37, 31, 0.86) 100%);
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; align-content: center; gap: 1.4rem; }
+  .accordion { flex-direction: row; height: 7rem; }
+  .band.open { flex-grow: 3.4; }
+  .band span { writing-mode: horizontal-tb; font-size: 0.6rem; }
+}
+
+/* ------------------------------------------------------------------ *
+ * The logo itself. One element per variant. It sits in the masthead's
+ * brand slot and is pushed out to the hero by a transform, so the
+ * docked state is the identity transform and cannot drift.
+ * ------------------------------------------------------------------ */
+.logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  transform-origin: 0 0;
+  overflow: visible;
+  will-change: transform;
+  pointer-events: none;
+}
+.brand-slot { perspective: 1000px; }
+
+/* Trail ghosts, variant 04 only. Same geometry, driven from the same
+   transform the live logo just used. */
+.ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  transform-origin: 0 0;
+  overflow: visible;
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion. No travel, no scale, no cursor tracking, no trail:
+ * the header logo renders in place at its normal size and the hero
+ * simply has no large logo.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .hero-slot { display: none; }
+  .logo { transform: none !important; }
+  .ghost { display: none !important; }
+  .band { transition: none; }
+  .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="sheet">
+  <p class="eyebrow">Famysys Studio · exploration 05 · set A</p>
+  <h1>Six heroes. One variable: <em>what the logo does.</em></h1>
+  <p>Everything else is held constant — the same headline, subhead, calls to action, supporting
+     line, navigation, right-hand accordion and bar-meter background appear in all six. The only
+     thing that changes from one to the next is the logo's behaviour, so the comparison is
+     between behaviours rather than between hero designs.</p>
+  <p>Every variant is scroll-driven: the logo's position and scale are read from the scroll
+     offset each frame, so scrolling back up reverses the motion exactly. The logo lives in the
+     masthead's brand slot and is displaced into the hero by a transform, which means the docked
+     state <em>is</em> the identity transform — it cannot arrive short, arrive late, or double up.</p>
+  <ol>
+    <li><b>01</b><span>Draw</span>The mark builds itself from its own outline, and unbuilds on the way up.</li>
+    <li><b>02</b><span>Disassemble</span>Four parts with different weights separate, travel, and re-lock.</li>
+    <li><b>03</b><span>Mask</span>The lockup is a window onto the work, and the work keeps moving.</li>
+    <li><b>04</b><span>Trail</span>The logo sheds echoes; scroll speed sets how long the trail reads.</li>
+    <li><b>05</b><span>Type collapse</span>Tracking, weight and fold resolve into the compact lockup.</li>
+    <li><b>06</b><span>Magnetic</span>Spring-loaded lean toward the cursor, before and after docking.</li>
+  </ol>
+</header>
+
+<main id="variants"></main>
+
+<footer class="sheet">
+  <p class="eyebrow">Notes</p>
+  <p>Each hero has roughly a viewport and a quarter of scroll room beneath it, so the docked
+     lockup can be looked at without the next hero arriving. One shared animation frame loop
+     drives the whole page and only the hero currently on screen computes anything.</p>
+  <p>Fonts are Jost and Instrument Serif Italic. Imagery is the site's existing
+     <code>public/media/</code> set, referenced in place — nothing new was added.</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ================================================================ *
+   * SHARED CONSTANTS
+   * ================================================================ */
+
+  var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var XLINK_NS = "http://www.w3.org/1999/xlink";
+
+  /* The logo's own coordinate system. Everything the six variants do is
+     expressed in these units, so the six are literally the same lockup. */
+  var VB_W = 320;
+  var VB_H = 100;
+
+  /* The mark: a light square with two dark squares set into opposite
+     quadrants, meeting at the centre. Written as paths rather than rects
+     so getTotalLength() is available for the draw variant. */
+  var MARK = {
+    outer: "M0,6 H88 V94 H0 Z",
+    topRight: "M44,13 H81 V50 H44 Z",
+    bottomLeft: "M7,50 H44 V87 H7 Z"
+  };
+
+  var WORD = "Famysys";
+  var SUB = "STUDIO";
+  var WORD_X = 104;
+  var WORD_BASELINE = 57;
+  var WORD_SIZE = 46;
+  var SUB_BASELINE = 84;
+  var SUB_SIZE = 14;
+  var SUB_TRACKING = 4.4;
+
+  var INK = "#F1EBDD";      /* textOnDark */
+  var VOID_ = "#12251F";    /* darkBackground */
+  var GLOW = "#66E0B0";     /* accentHighlight */
+
+  /* Where in the block the logo finishes its travel. Below this the
+     stage is still pinned, so the docked lockup is visible at rest. */
+  var TRAVEL_FRACTION = 0.72;
+
+  /* ================================================================ *
+   * SMALL HELPERS
+   * ================================================================ */
+
+  function clamp(value, low, high) {
+    return value < low ? low : value > high ? high : value;
+  }
+
+  function smoothstep(t) {
+    return t * t * (3 - 2 * t);
+  }
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function svgEl(name, attributes) {
+    var node = document.createElementNS(SVG_NS, name);
+    if (attributes) {
+      for (var key in attributes) {
+        if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+          node.setAttribute(key, attributes[key]);
+        }
+      }
+    }
+    return node;
+  }
+
+  function rgba(hex, alpha) {
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+  }
+
+  /* ================================================================ *
+   * THE FIXED HERO
+   *
+   * Built from one template so the five things that are supposed to be
+   * identical across the six cannot drift apart by hand.
+   * ================================================================ */
+
+  var NAV = [
+    { label: "Creative Services", optional: false },
+    { label: "Selected Work", optional: false },
+    { label: "How We Work", optional: true },
+    { label: "Ways to Work With Us", optional: true },
+    { label: "About", optional: true }
+  ];
+
+  var BANDS = [
+    { file: "hero-band-camera", label: "Camera & rig", alt: "A camera rig filming a performer under coloured light." },
+    { file: "hero-band-colour", label: "Colour", alt: "A colourist's desk with a grade open across two displays." },
+    { file: "hero-band-motion", label: "Motion", alt: "A motion graphic of a wave form rendered in long light trails." },
+    { file: "hero-band-design", label: "Design", alt: "A designer's desk with creative-suite app icons on a tablet." },
+    { file: "hero-band-content", label: "Content", alt: "A clapperboard held up at the start of a take." }
+  ];
+
+  var MEDIA = "../../../public/media/";
+
+  function buildStage(number, name) {
+    var block = document.createElement("section");
+    block.className = "variant";
+    block.setAttribute("aria-label", number + " " + name);
+
+    var navMarkup = NAV.map(function (item) {
+      return '<a href="#" class="' + (item.optional ? "opt" : "") + '">' + item.label + "</a>";
+    }).join("");
+
+    var bandMarkup = BANDS.map(function (band, index) {
+      return (
+        '<div class="band' + (index === 0 ? " open" : "") + '">' +
+        '<img src="' + MEDIA + band.file + '.jpg" alt="' + band.alt + '" loading="lazy" decoding="async" />' +
+        "<span>" + band.label + "</span></div>"
+      );
+    }).join("");
+
+    block.innerHTML =
+      '<div class="stage">' +
+        '<canvas class="meter" aria-hidden="true"></canvas>' +
+        '<header class="masthead">' +
+          '<div class="brand-slot"></div>' +
+          "<nav>" + navMarkup + '<a href="#" class="nav-cta">Contact</a></nav>' +
+        "</header>" +
+        '<div class="hero">' +
+          '<div class="copy">' +
+            '<div class="hero-slot" aria-hidden="true"></div>' +
+            "<h2>Creative production, <em>without the agency overhead.</em></h2>" +
+            '<p class="lede">Design, video, AI-powered content, motion and product visuals — from a ' +
+              "flexible creative team, at better value.</p>" +
+            '<div class="actions">' +
+              '<a class="btn primary" href="#">Start a Conversation</a>' +
+              '<a class="btn secondary" href="#">Explore Our Services</a>' +
+            "</div>" +
+            '<p class="supporting">Project-based when you need it. Ongoing when you need more.</p>' +
+          "</div>" +
+          '<div class="accordion">' + bandMarkup + "</div>" +
+        "</div>" +
+        '<div class="variant-tag"><b>' + number + "</b><i>" + name + "</i></div>" +
+      "</div>";
+
+    return block;
+  }
+
+  /* ================================================================ *
+   * THE BAR METER
+   *
+   * The site's own hero ground: sixty-four bars, three sine terms, a
+   * bulge under the pointer and a lift that answers scroll speed. One
+   * canvas per hero, but only the hero on screen ever paints.
+   * ================================================================ */
+
+  var BAR_COUNT = 64;
+  var BAR_GAP_RATIO = 0.22;
+  var BAR_SCALE = 0.86;
+  var BAR_CEILING = 0.74;
+  var BAR_EASE = 0.1;
+  var BAR_CAP_PX = 2;
+  var BULGE_REACH_PX = 210;
+  var BULGE_GAIN = 0.34;
+  var PLAYHEAD_REACH_PX = 130;
+  var LIFT_FLOOR = 0.02;
+  var LIFT_RANGE = 0.5;
+
+  function createMeter(canvas) {
+    var context = canvas.getContext("2d");
+    var heights = new Array(BAR_COUNT);
+    var width = 0;
+    var height = 0;
+    var ratio = 1;
+    var barWidth = 0;
+
+    for (var seed = 0; seed < BAR_COUNT; seed += 1) heights[seed] = 0;
+
+    function resize() {
+      ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = Math.round(canvas.clientWidth * ratio);
+      height = Math.round(canvas.clientHeight * ratio);
+      if (width <= 0 || height <= 0) return;
+      canvas.width = width;
+      canvas.height = height;
+      barWidth = width / BAR_COUNT;
+    }
+
+    function draw(time, pointerX, scrollSpeed) {
+      if (width <= 0 || height <= 0) return;
+      context.clearRect(0, 0, width, height);
+
+      var phase = time * 0.0009;
+      var pointer = pointerX === null ? Number.NEGATIVE_INFINITY : pointerX * ratio;
+      var lift = LIFT_FLOOR + scrollSpeed * LIFT_RANGE;
+      var gap = barWidth * BAR_GAP_RATIO;
+      var reach = BULGE_REACH_PX * ratio;
+      var ceiling = height * BAR_CEILING;
+      var index;
+      var barHeight;
+
+      context.fillStyle = rgba("#1E3A31", 0.72);
+      for (index = 0; index < BAR_COUNT; index += 1) {
+        var x = index * barWidth;
+        var level =
+          0.5 +
+          0.24 * Math.sin(index * 0.31 + phase * 1.9) +
+          0.16 * Math.sin(index * 0.11 - phase * 1.3) +
+          0.12 * Math.sin(index * 0.72 + phase * 2.7);
+        var distance = Math.abs(x + barWidth * 0.5 - pointer);
+        if (distance < reach) level += (1 - distance / reach) * BULGE_GAIN;
+        level = (level - 0.32) * (0.9 + lift);
+        var target = Math.min(clamp(level, 0.02, 1.2) * height * BAR_SCALE, ceiling);
+        var next = heights[index] + (target - heights[index]) * BAR_EASE;
+        heights[index] = next;
+        context.fillRect(x + gap * 0.5, height - next, barWidth - gap, next);
+      }
+
+      /* The cap is what turns a column into a reading on a meter. */
+      context.fillStyle = rgba(GLOW, 0.5);
+      for (index = 0; index < BAR_COUNT; index += 1) {
+        barHeight = heights[index];
+        context.fillRect(
+          index * barWidth + gap * 0.5,
+          height - barHeight - BAR_CAP_PX * ratio,
+          barWidth - gap,
+          BAR_CAP_PX * ratio
+        );
+      }
+
+      context.fillStyle = rgba(GLOW, 0.07);
+      for (index = 0; index < BAR_COUNT; index += 2) {
+        barHeight = heights[index];
+        context.fillRect(index * barWidth + gap * 0.5, height - barHeight, barWidth - gap, barHeight * 0.5);
+      }
+
+      if (pointerX !== null) {
+        var glow = PLAYHEAD_REACH_PX * ratio;
+        var gradient = context.createLinearGradient(pointer - glow, 0, pointer + glow, 0);
+        gradient.addColorStop(0, rgba(GLOW, 0));
+        gradient.addColorStop(0.5, rgba(GLOW, 0.13));
+        gradient.addColorStop(1, rgba(GLOW, 0));
+        context.fillStyle = gradient;
+        context.fillRect(pointer - glow, 0, glow * 2, height);
+      }
+    }
+
+    function warm() {
+      resize();
+      for (var step = 0; step < 90; step += 1) draw(1400 + step * 16, null, 0);
+    }
+
+    return { resize: resize, draw: draw, warm: warm };
+  }
+
+  /* ================================================================ *
+   * LOGO CONSTRUCTION
+   *
+   * Every variant starts from the same lockup and then reshapes only
+   * what its behaviour needs. `measureText` runs once the fonts have
+   * settled so STUDIO can be right-aligned to the wordmark's real edge
+   * rather than to a guess.
+   * ================================================================ */
+
+  function newLogoSvg(className) {
+    var svg = svgEl("svg", {
+      "class": className,
+      viewBox: "0 0 " + VB_W + " " + VB_H,
+      xmlns: SVG_NS,
+      "aria-hidden": "true",
+      focusable: "false"
+    });
+    svg.style.overflow = "visible";
+    return svg;
+  }
+
+  function markPaths(fillOuter, fillInner) {
+    return [
+      svgEl("path", { d: MARK.outer, fill: fillOuter }),
+      svgEl("path", { d: MARK.topRight, fill: fillInner }),
+      svgEl("path", { d: MARK.bottomLeft, fill: fillInner })
+    ];
+  }
+
+  function wordText(extra) {
+    var node = svgEl("text", {
+      x: WORD_X,
+      y: WORD_BASELINE,
+      "font-family": "Jost, sans-serif",
+      "font-size": WORD_SIZE,
+      "font-weight": 500,
+      "letter-spacing": "-0.5",
+      fill: INK
+    });
+    node.textContent = WORD;
+    if (extra) for (var key in extra) node.setAttribute(key, extra[key]);
+    return node;
+  }
+
+  function subText(extra) {
+    var node = svgEl("text", {
+      x: WORD_X,
+      y: SUB_BASELINE,
+      "font-family": "Jost, sans-serif",
+      "font-size": SUB_SIZE,
+      "font-weight": 500,
+      "letter-spacing": SUB_TRACKING,
+      fill: INK
+    });
+    node.textContent = SUB;
+    if (extra) for (var key in extra) node.setAttribute(key, extra[key]);
+    return node;
+  }
+
+  /* STUDIO sits right-aligned to the wordmark's right edge. The edge is
+     measured, not assumed, because Jost's advance widths are not known
+     until the webfont has actually loaded. */
+  function alignSub(word, sub) {
+    if (!word || !sub || typeof word.getComputedTextLength !== "function") return;
+    var right = WORD_X + word.getComputedTextLength();
+    var track = parseFloat(sub.getAttribute("letter-spacing")) || 0;
+    sub.setAttribute("text-anchor", "end");
+    /* letter-spacing puts a trailing gap after the final glyph, so the
+       anchor has to be pushed out by exactly that much to line up. */
+    sub.setAttribute("x", right + track);
+  }
+
+  /* ================================================================ *
+   * VARIANT 01 · DRAW
+   *
+   * The mark is stroked, not filled, at rest in the hero: three closed
+   * paths whose dash offset is a function of scroll. As the lockup
+   * travels up, the outline retracts along its own length while the
+   * fill of the SAME paths rises underneath it, so what docks in the
+   * header is the solid mark. Scrolling back re-opens the drawing along
+   * exactly the same path lengths. The load-in is a one-shot that only
+   * gates the drawing; it never moves anything.
+   * ================================================================ */
+
+  function buildDraw(svg) {
+    /* Two layers of the same geometry, not two logos: an outline that is
+       dash-drawn, and the ink that floods over it behind a hard wipe.
+       An opacity crossfade was tried first and read as grey mud through
+       the middle of the travel, because a half-opaque light square over
+       a dark ground is neither the mark nor its outline. */
+    var lineGroup = svgEl("g", { fill: "none", stroke: GLOW, "stroke-linejoin": "round" });
+    var linePaths = [
+      svgEl("path", { d: MARK.outer, "stroke-width": 1.5 }),
+      svgEl("path", { d: MARK.topRight, "stroke-width": 1.2 }),
+      svgEl("path", { d: MARK.bottomLeft, "stroke-width": 1.2 })
+    ];
+    linePaths.forEach(function (path) { lineGroup.appendChild(path); });
+
+    var lineWipeId = uid("line-wipe");
+    var lineClip = svgEl("clipPath", { id: lineWipeId, clipPathUnits: "userSpaceOnUse" });
+    var lineWipe = svgEl("rect", { x: WORD_X - 5, y: 0, width: VB_W, height: VB_H });
+    lineWipe.style.transformOrigin = (WORD_X - 5) + "px 0px";
+    lineClip.appendChild(lineWipe);
+    lineGroup.appendChild(lineClip);
+
+    var lineType = svgEl("g", { "clip-path": "url(#" + lineWipeId + ")" });
+    var lineWord = wordText({ fill: "none", stroke: GLOW, "stroke-width": 0.6 });
+    var lineSub = subText({ fill: "none", stroke: GLOW, "stroke-width": 0.4 });
+    lineType.appendChild(lineWord);
+    lineType.appendChild(lineSub);
+    lineGroup.appendChild(lineType);
+    svg.appendChild(lineGroup);
+
+    var inkWipeId = uid("ink-wipe");
+    var inkClip = svgEl("clipPath", { id: inkWipeId, clipPathUnits: "userSpaceOnUse" });
+    var inkWipe = svgEl("rect", { x: -6, y: -6, width: VB_W + 12, height: VB_H + 12 });
+    inkWipe.style.transformOrigin = "-6px 0px";
+    inkClip.appendChild(inkWipe);
+    svg.appendChild(inkClip);
+
+    var inkGroup = svgEl("g", { "clip-path": "url(#" + inkWipeId + ")" });
+    markPaths(INK, VOID_).forEach(function (path) { inkGroup.appendChild(path); });
+    var inkWord = wordText({});
+    var inkSub = subText({});
+    inkGroup.appendChild(inkWord);
+    inkGroup.appendChild(inkSub);
+    svg.appendChild(inkGroup);
+
+    var lengths = [];
+
+    function calibrate() {
+      lengths = linePaths.map(function (path) {
+        var total = path.getTotalLength();
+        path.style.strokeDasharray = total;
+        return total;
+      });
+      alignSub(lineWord, lineSub);
+      alignSub(inkWord, inkSub);
+    }
+
+    function apply(state) {
+      var intro = state.intro;
+      var solid = state.eased;
+      var markIntro = clamp(intro / 0.62, 0, 1);
+      var wordIntro = clamp((intro - 0.38) / 0.62, 0, 1);
+
+      /* The outline retracts along its own length in the back half of
+         the travel, after the ink has started to cover it. */
+      var retract = clamp((solid - 0.4) / 0.6, 0, 1);
+      var drawn = markIntro * (1 - retract * 0.92);
+      for (var index = 0; index < linePaths.length; index += 1) {
+        /* Each path starts a little after the one before it, so the mark
+           reads as three strokes rather than one simultaneous flash. */
+        var stagger = clamp((drawn - index * 0.06) / (1 - index * 0.06), 0, 1);
+        linePaths[index].style.strokeDashoffset = (1 - stagger) * lengths[index];
+      }
+      lineWipe.style.transform = "scaleX(" + Math.max(0.001, wordIntro * (1 - retract * 0.92)) + ")";
+
+      /* The ink floods left to right. At progress 0 it has no width at
+         all, so the hero shows the outline and nothing else. */
+      var flood = clamp((solid - 0.08) / 0.5, 0, 1) * markIntro;
+      inkWipe.style.transform = "scaleX(" + Math.max(0.0001, smoothstep(flood)) + ")";
+    }
+
+    return { calibrate: calibrate, apply: apply };
+  }
+
+  var uidCount = 0;
+  function uid(prefix) {
+    uidCount += 1;
+    return prefix + "-" + uidCount;
+  }
+
+  /* ================================================================ *
+   * VARIANT 02 · DISASSEMBLE
+   *
+   * Four parts, four weights. Separation is sin(pi * p^k): zero at both
+   * ends of the travel and widest in the middle, so the lockup is whole
+   * in the hero, whole in the header, and only ever apart in between.
+   * The exponent k is the part's weight — the heavy ground square peaks
+   * late and barely moves, the light STUDIO line peaks early and throws
+   * itself furthest.
+   * ================================================================ */
+
+  function buildDisassemble(svg) {
+    var parts = [];
+
+    function addPart(node, config) {
+      var group = svgEl("g", {});
+      group.appendChild(node);
+      svg.appendChild(group);
+      parts.push({
+        group: group,
+        dx: config.dx,
+        dy: config.dy,
+        spin: config.spin,
+        weight: config.weight,
+        cx: config.cx,
+        cy: config.cy,
+        arriveX: config.arriveX,
+        arriveY: config.arriveY,
+        separation: 0
+      });
+      return group;
+    }
+
+    var marks = markPaths(INK, VOID_);
+    /* Heavy: the ground square carries the mark and behaves like it.
+       Its throw is kept short because the lockup sits against the left
+       gutter and a long one takes it off the edge of the stage. */
+    addPart(marks[0], { dx: -9, dy: 15, spin: -5, weight: 1.55, cx: 44, cy: 50, arriveX: -70, arriveY: 60 });
+    addPart(marks[1], { dx: 32, dy: -24, spin: 13, weight: 0.85, cx: 62, cy: 31, arriveX: 90, arriveY: -70 });
+    addPart(marks[2], { dx: -22, dy: 27, spin: -14, weight: 0.9, cx: 25, cy: 68, arriveX: -60, arriveY: 90 });
+
+    /* The two inner squares are darkBackground cut into a light ground:
+       the instant they leave it they are dark on dark and vanish. They
+       get an outline that exists only while they are detached, so the
+       assembled lockup is unchanged and the loose parts still read. */
+    var loose = [marks[1], marks[2]];
+    loose.forEach(function (path) {
+      path.setAttribute("stroke", GLOW);
+      path.setAttribute("stroke-width", 1.4);
+      path.setAttribute("stroke-opacity", 0);
+    });
+
+    var word = wordText({});
+    var sub = subText({});
+    /* Light: the type is the least massive thing in the lockup. */
+    addPart(word, { dx: 40, dy: -14, spin: 2.4, weight: 0.68, cx: 190, cy: 44, arriveX: 150, arriveY: -30 });
+    addPart(sub, { dx: 58, dy: 20, spin: -3.6, weight: 0.5, cx: 240, cy: 80, arriveX: 190, arriveY: 46 });
+
+    function calibrate() {
+      alignSub(word, sub);
+    }
+
+    function apply(state) {
+      var settle = 1 - smoothstep(state.intro);
+      var p = state.progress;
+      for (var index = 0; index < parts.length; index += 1) {
+        var part = parts[index];
+        /* p^weight keeps the endpoints exact — 0^k is 0 and 1^k is 1 —
+           while sliding where the part is furthest out. */
+        var separation = Math.sin(Math.PI * Math.pow(p, part.weight));
+        var x = part.dx * separation + part.arriveX * settle;
+        var y = part.dy * separation + part.arriveY * settle;
+        var angle = part.spin * separation + part.spin * 2.2 * settle;
+        part.group.setAttribute(
+          "transform",
+          "translate(" + x.toFixed(3) + "," + y.toFixed(3) + ") " +
+          "rotate(" + angle.toFixed(3) + "," + part.cx + "," + part.cy + ")"
+        );
+        part.group.setAttribute("opacity", (1 - settle * 0.9).toFixed(3));
+        part.separation = separation;
+      }
+      /* Both loose squares share the ground square's own separation for
+         their outline, so the outline appears exactly as the mark opens. */
+      var opening = Math.max(parts[1].separation, parts[2].separation, settle);
+      loose[0].setAttribute("stroke-opacity", opening.toFixed(3));
+      loose[1].setAttribute("stroke-opacity", opening.toFixed(3));
+    }
+
+    return { calibrate: calibrate, apply: apply };
+  }
+
+  /* ================================================================ *
+   * VARIANT 03 · MASK
+   *
+   * The lockup is a hole. One image sits behind the whole logo and the
+   * mark and letterforms are the only places it shows. The pan is taken
+   * from the block's raw scroll offset rather than from the clamped
+   * travel progress, so the image is still moving after the logo has
+   * finished docking.
+   *
+   * A hairline in accentHighlight is kept around the shapes: over the
+   * bar meter, a photographic fill alone would lose its edge.
+   * ================================================================ */
+
+  function buildMask(svg) {
+    var maskId = uid("mask");
+    var mask = svgEl("mask", { id: maskId, maskUnits: "userSpaceOnUse", x: -40, y: -40, width: VB_W + 80, height: VB_H + 80 });
+
+    var maskMark = markPaths("#FFFFFF", "#000000");
+    maskMark.forEach(function (path) { mask.appendChild(path); });
+    var maskWord = wordText({ fill: "#FFFFFF" });
+    var maskSub = subText({ fill: "#FFFFFF" });
+    mask.appendChild(maskWord);
+    mask.appendChild(maskSub);
+    svg.appendChild(mask);
+
+    var window_ = svgEl("g", { mask: "url(#" + maskId + ")" });
+    /* Deep enough that the pan never runs off the end of the picture. */
+    var image = svgEl("image", {
+      x: -260,
+      y: -230,
+      width: 900,
+      height: 600,
+      preserveAspectRatio: "xMidYMid slice",
+      opacity: 0.9,
+      href: MEDIA + "hero-band-motion.jpg"
+    });
+    image.setAttributeNS(XLINK_NS, "xlink:href", MEDIA + "hero-band-motion.jpg");
+    /* A light body under the picture. Without it the lockup disappears
+       wherever the frame behind it happens to be dark, and over a dark
+       ground that is most of the frame. */
+    var backing = svgEl("rect", { x: -40, y: -40, width: VB_W + 80, height: VB_H + 80, fill: INK });
+    window_.appendChild(backing);
+    window_.appendChild(image);
+    svg.appendChild(window_);
+
+    /* The edge. Same geometry, stroked only — it is what keeps the
+       lockup readable where the photograph goes dark. */
+    var edge = svgEl("g", { fill: "none", stroke: GLOW, "stroke-opacity": 0.9 });
+    markPaths("none", "none").forEach(function (path) {
+      path.setAttribute("stroke-width", 1.5);
+      edge.appendChild(path);
+    });
+    var edgeWord = wordText({ fill: "none", stroke: GLOW, "stroke-width": 0.7 });
+    var edgeSub = subText({ fill: "none", stroke: GLOW, "stroke-width": 0.5 });
+    edge.appendChild(edgeWord);
+    edge.appendChild(edgeSub);
+    svg.appendChild(edge);
+
+    function calibrate() {
+      alignSub(maskWord, maskSub);
+      alignSub(edgeWord, edgeSub);
+    }
+
+    function apply(state) {
+      /* `state.pan` keeps rising past the dock, so the picture behind
+         the letterforms carries on travelling once the logo is still. */
+      var x = -state.pan * 300;
+      var y = -state.pan * 120 + Math.sin(state.pan * 2.1) * 18;
+      var zoom = 1 + state.pan * 0.14;
+      image.setAttribute(
+        "transform",
+        "translate(" + x.toFixed(2) + "," + y.toFixed(2) + ") scale(" + zoom.toFixed(4) + ")"
+      );
+      /* Fading the intro in makes the window read as opening rather than
+         as an image that was always there. */
+      window_.setAttribute("opacity", smoothstep(clamp(state.intro / 0.7, 0, 1)).toFixed(3));
+    }
+
+    return { calibrate: calibrate, apply: apply };
+  }
+
+  /* ================================================================ *
+   * VARIANT 04 · TRAIL
+   *
+   * A pool of nine ghosts. One is stamped whenever the scroll has moved
+   * the logo more than a set distance since the last stamp, so the
+   * spacing between ghosts is the distance the reader covered between
+   * frames: a fast flick lays them far apart and the trail reads long,
+   * a slow drag lays them almost on top of each other and it reads
+   * short. Each ghost then decays on its own clock.
+   * ================================================================ */
+
+  var GHOST_COUNT = 9;
+  var GHOST_LIFE_MS = 520;
+  var GHOST_STAMP_GAP = 0.009;
+
+  function buildTrail(svg, slot) {
+    var group = svgEl("g", {});
+    markPaths(INK, VOID_).forEach(function (path) { group.appendChild(path); });
+    var word = wordText({});
+    var sub = subText({});
+    group.appendChild(word);
+    group.appendChild(sub);
+    svg.appendChild(group);
+
+    var ghosts = [];
+    for (var index = 0; index < GHOST_COUNT; index += 1) {
+      var ghost = newLogoSvg("ghost");
+      var ghostGroup = svgEl("g", { opacity: 0.9 });
+      markPaths(GLOW, VOID_).forEach(function (path) { ghostGroup.appendChild(path); });
+      var ghostWord = wordText({ fill: GLOW });
+      var ghostSub = subText({ fill: GLOW });
+      ghostGroup.appendChild(ghostWord);
+      ghostGroup.appendChild(ghostSub);
+      ghost.appendChild(ghostGroup);
+      slot.insertBefore(ghost, slot.firstChild);
+      ghosts.push({ el: ghost, word: ghostWord, sub: ghostSub, born: -1, transform: "", visible: false });
+    }
+
+    var cursor = 0;
+    var lastStampProgress = null;
+
+    function calibrate() {
+      alignSub(word, sub);
+      ghosts.forEach(function (ghost) { alignSub(ghost.word, ghost.sub); });
+    }
+
+    function apply(state) {
+      var now = state.time;
+
+      if (!state.docked || state.moving) {
+        if (lastStampProgress === null) lastStampProgress = state.progress;
+        if (Math.abs(state.progress - lastStampProgress) > GHOST_STAMP_GAP) {
+          var ghost = ghosts[cursor];
+          cursor = (cursor + 1) % GHOST_COUNT;
+          ghost.born = now;
+          ghost.transform = state.transform;
+          ghost.el.style.transform = state.transform;
+          ghost.visible = true;
+          lastStampProgress = state.progress;
+        }
+      }
+
+      for (var index = 0; index < GHOST_COUNT; index += 1) {
+        var item = ghosts[index];
+        if (!item.visible) continue;
+        var age = (now - item.born) / GHOST_LIFE_MS;
+        if (age >= 1) {
+          item.el.style.opacity = 0;
+          item.visible = false;
+          continue;
+        }
+        var fade = 1 - age;
+        item.el.style.opacity = (fade * fade * 0.4).toFixed(3);
+      }
+    }
+
+    function rest() {
+      for (var index = 0; index < GHOST_COUNT; index += 1) {
+        ghosts[index].el.style.opacity = 0;
+        ghosts[index].visible = false;
+      }
+    }
+
+    return { calibrate: calibrate, apply: apply, rest: rest };
+  }
+
+  /* ================================================================ *
+   * VARIANT 05 · TYPE COLLAPSE
+   *
+   * Every letter is its own element, placed at the x it occupies in the
+   * finished header lockup and centred on its own advance. The travel
+   * then works on type rather than on the picture of type: tracking
+   * opens, alternate letters lift and rotate out of the line, and the
+   * weight thins — all of which resolve to nothing at the dock, where
+   * the letters are already sitting at their final positions.
+   *
+   * Because each letter is anchored at its own centre, changing the
+   * weight grows the glyph about that centre instead of reflowing the
+   * line, so the spacing stays under the transform's control.
+   * ================================================================ */
+
+  function buildTypeCollapse(svg) {
+    var group = svgEl("g", {});
+    markPaths(INK, VOID_).forEach(function (path) { group.appendChild(path); });
+    svg.appendChild(group);
+
+    /* Hidden rulers. They exist only to be measured. */
+    var wordRuler = wordText({ opacity: 0, "aria-hidden": "true" });
+    var subRuler = subText({ opacity: 0, "aria-hidden": "true" });
+    svg.appendChild(wordRuler);
+    svg.appendChild(subRuler);
+
+    var wordLetters = [];
+    var subLetters = [];
+
+    function layout(ruler, text, baseline, size, target, extra) {
+      while (target.length) target.pop();
+      var previous = 0;
+      for (var index = 0; index < text.length; index += 1) {
+        var end = ruler.getSubStringLength(0, index + 1);
+        var start = index === 0 ? 0 : previous;
+        var centre = (start + end) / 2;
+        var node = svgEl("text", {
+          x: 0,
+          y: baseline,
+          "font-family": "Jost, sans-serif",
+          "font-size": size,
+          "text-anchor": "middle",
+          fill: INK
+        });
+        node.textContent = text.charAt(index);
+        node.style.transformOrigin = "0px 0px";
+        svg.appendChild(node);
+        target.push({ node: node, x: extra.originX + centre, index: index, count: text.length, baseline: baseline });
+        node.setAttribute("x", extra.originX + centre);
+        previous = end;
+      }
+    }
+
+    function calibrate() {
+      wordLetters.forEach(function (item) { svg.removeChild(item.node); });
+      subLetters.forEach(function (item) { svg.removeChild(item.node); });
+      wordLetters.length = 0;
+      subLetters.length = 0;
+
+      alignSub(wordRuler, subRuler);
+      var wordWidth = wordRuler.getComputedTextLength();
+      var subWidth = subRuler.getComputedTextLength();
+      var subTrack = parseFloat(subRuler.getAttribute("letter-spacing")) || 0;
+      /* subRuler is end-anchored after alignSub, so its left edge is its
+         anchor minus its own measured width. */
+      var subOriginX = (WORD_X + wordWidth + subTrack) - subWidth;
+
+      layout(wordRuler, WORD, WORD_BASELINE, WORD_SIZE, wordLetters, { originX: WORD_X });
+      layout(subRuler, SUB, SUB_BASELINE, SUB_SIZE, subLetters, { originX: subOriginX });
+    }
+
+    function apply(state) {
+      var open = 1 - smoothstep(state.eased);
+      var entry = 1 - smoothstep(state.intro);
+      var spread = open + entry * 0.5;
+      var index;
+      var item;
+
+      for (index = 0; index < wordLetters.length; index += 1) {
+        item = wordLetters[index];
+        /* Biased rather than centred: opening symmetrically walks the
+           first letters back into the mark, which is the one place in
+           the lockup with no room. This holds the left edge and lets the
+           word grow into the space on its right. */
+        var fromCentre = index - (item.count - 1) / 2 + 1.1;
+        var dx = fromCentre * 4.4 * spread;
+        var dy = (index % 2 === 0 ? -1 : 1) * 3.4 * spread;
+        var rotate = (index % 2 === 0 ? -1 : 1) * 7 * spread;
+        item.node.setAttribute(
+          "transform",
+          "translate(" + dx.toFixed(2) + "," + dy.toFixed(2) + ") " +
+          "rotate(" + rotate.toFixed(2) + "," + item.x.toFixed(2) + "," + item.baseline + ")"
+        );
+        item.node.style.fontWeight = Math.round(lerp(560, 250, open));
+      }
+
+      for (index = 0; index < subLetters.length; index += 1) {
+        item = subLetters[index];
+        /* STUDIO tracks the other way: it is already letter-spaced, so
+           it closes up rather than opening as the lockup gets small. */
+        var subDx = (index - (item.count - 1) / 2) * 3.2 * spread;
+        item.node.setAttribute("transform", "translate(" + subDx.toFixed(2) + ",0)");
+        item.node.style.fontWeight = Math.round(lerp(560, 300, open));
+        item.node.setAttribute("opacity", (1 - entry).toFixed(3));
+      }
+    }
+
+    return { calibrate: calibrate, apply: apply };
+  }
+
+  /* ================================================================ *
+   * VARIANT 06 · MAGNETIC
+   *
+   * A critically-underdamped spring per axis. The target is where the
+   * pointer is relative to the lockup's centre; the integrator carries
+   * velocity, so the logo overshoots and settles rather than following.
+   * The lean survives the dock at a reduced amplitude, which is the
+   * point — the header lockup is still a live object.
+   *
+   * The lean composes into the same transform string as the travel:
+   * translate to the hero, scale, then rotate about the lockup's own
+   * centre so the tilt is a tilt and not a swing about a corner.
+   * ================================================================ */
+
+  var SPRING_K = 0.11;
+  var SPRING_DAMP = 0.78;
+
+  function buildMagnetic(svg) {
+    var group = svgEl("g", {});
+    markPaths(INK, VOID_).forEach(function (path) { group.appendChild(path); });
+    var word = wordText({});
+    var sub = subText({});
+    group.appendChild(word);
+    group.appendChild(sub);
+    svg.appendChild(group);
+
+    var state = { x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0, vrx: 0, vry: 0 };
+
+    function calibrate() {
+      alignSub(word, sub);
+    }
+
+    /* Returns the extra transform, appended by the runtime after scale. */
+    function lean(frame) {
+      var amplitude = lerp(30, 9, frame.eased);
+      var tiltAmplitude = lerp(11, 5, frame.eased);
+      var targetX = 0;
+      var targetY = 0;
+      var targetRx = 0;
+      var targetRy = 0;
+
+      if (frame.pointerX !== null && frame.logoCentre) {
+        var reach = Math.max(360, window.innerWidth * 0.34);
+        var offsetX = clamp((frame.pointerX - frame.logoCentre.x) / reach, -1, 1);
+        var offsetY = clamp((frame.pointerY - frame.logoCentre.y) / reach, -1, 1);
+        targetX = offsetX * amplitude;
+        targetY = offsetY * amplitude * 0.6;
+        targetRy = offsetX * tiltAmplitude;
+        targetRx = -offsetY * tiltAmplitude;
+      }
+
+      state.vx = (state.vx + (targetX - state.x) * SPRING_K) * SPRING_DAMP;
+      state.vy = (state.vy + (targetY - state.y) * SPRING_K) * SPRING_DAMP;
+      state.vrx = (state.vrx + (targetRx - state.rx) * SPRING_K) * SPRING_DAMP;
+      state.vry = (state.vry + (targetRy - state.ry) * SPRING_K) * SPRING_DAMP;
+      state.x += state.vx;
+      state.y += state.vy;
+      state.rx += state.vrx;
+      state.ry += state.vry;
+
+      return {
+        x: state.x,
+        y: state.y,
+        /* Applied about the lockup's own centre in slot pixels. */
+        suffix:
+          " rotateX(" + state.rx.toFixed(3) + "deg) rotateY(" + state.ry.toFixed(3) + "deg)"
+      };
+    }
+
+    return { calibrate: calibrate, apply: function () {}, lean: lean };
+  }
+
+  /* ================================================================ *
+   * VARIANT RUNTIME
+   *
+   * One object per hero. Geometry is measured on load, on resize and
+   * once the fonts settle — never per frame. Everything written per
+   * frame is a transform, an opacity or a paint into the canvas.
+   * ================================================================ */
+
+  var DEFINITIONS = [
+    { number: "01", name: "Draw", build: buildDraw },
+    { number: "02", name: "Disassemble", build: buildDisassemble },
+    { number: "03", name: "Mask", build: buildMask },
+    { number: "04", name: "Trail", build: buildTrail },
+    { number: "05", name: "Type collapse", build: buildTypeCollapse },
+    { number: "06", name: "Magnetic", build: buildMagnetic }
+  ];
+
+  var host = document.getElementById("variants");
+  var variants = [];
+
+  DEFINITIONS.forEach(function (definition) {
+    var block = buildStage(definition.number, definition.name);
+    host.appendChild(block);
+
+    var slot = block.querySelector(".brand-slot");
+    var logo = newLogoSvg("logo");
+    var behaviour = definition.build(logo, slot);
+    slot.appendChild(logo);
+
+    variants.push({
+      number: definition.number,
+      block: block,
+      stage: block.querySelector(".stage"),
+      slot: slot,
+      logo: logo,
+      heroSlot: block.querySelector(".hero-slot"),
+      bands: Array.prototype.slice.call(block.querySelectorAll(".band")),
+      meter: createMeter(block.querySelector(".meter")),
+      behaviour: behaviour,
+      /* Measured geometry. */
+      top: 0,
+      height: 0,
+      travel: 1,
+      dx0: 0,
+      dy0: 0,
+      heroScale: 1,
+      slotWidth: 0,
+      slotHeight: 0,
+      slotLeftInStage: 0,
+      slotTopInStage: 0,
+      /* Per-frame state. */
+      openBand: 0,
+      lastProgress: 0,
+      introStart: 0,
+      wasActive: false
+    });
+  });
+
+  /* ---------------------------------------------------------------- *
+   * Measurement
+   * ---------------------------------------------------------------- */
+
+  function measure() {
+    var viewport = window.innerHeight;
+    for (var index = 0; index < variants.length; index += 1) {
+      var variant = variants[index];
+      variant.top = variant.block.offsetTop;
+      variant.height = variant.block.offsetHeight;
+      variant.travel = Math.max(200, viewport * TRAVEL_FRACTION);
+
+      var slotBox = variant.slot.getBoundingClientRect();
+      var stageBox = variant.stage.getBoundingClientRect();
+      variant.slotWidth = slotBox.width;
+      variant.slotHeight = slotBox.height;
+      /* Cached so the magnetic variant can work out where the lockup is
+         on screen without measuring anything inside the frame loop. */
+      variant.slotLeftInStage = slotBox.left - stageBox.left;
+      variant.slotTopInStage = slotBox.top - stageBox.top;
+
+      if (REDUCE) {
+        variant.dx0 = 0;
+        variant.dy0 = 0;
+        variant.heroScale = 1;
+      } else {
+        var heroBox = variant.heroSlot.getBoundingClientRect();
+        /* Both boxes live inside the same sticky stage, so the offset
+           between them does not change as the page scrolls. */
+        variant.dx0 = heroBox.left - slotBox.left;
+        variant.dy0 = heroBox.top - slotBox.top;
+        variant.heroScale = slotBox.width > 0 ? heroBox.width / slotBox.width : 1;
+      }
+
+      variant.meter.resize();
+    }
+  }
+
+  function calibrate() {
+    for (var index = 0; index < variants.length; index += 1) {
+      var behaviour = variants[index].behaviour;
+      if (behaviour.calibrate) behaviour.calibrate();
+    }
+    measure();
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Pointer — one listener for the page.
+   * ---------------------------------------------------------------- */
+
+  var pointerX = null;
+  var pointerY = null;
+
+  if (!REDUCE) {
+    window.addEventListener(
+      "pointermove",
+      function (event) {
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+      },
+      { passive: true }
+    );
+    window.addEventListener("pointerleave", function () {
+      pointerX = null;
+      pointerY = null;
+    });
+  }
+
+  /* ---------------------------------------------------------------- *
+   * The one loop
+   * ---------------------------------------------------------------- */
+
+  var INTRO_MS = 1250;
+  var startTime = 0;
+  var lastScroll = window.scrollY || window.pageYOffset || 0;
+  var scrollSpeed = 0;
+
+  function frame(time) {
+    if (!startTime) startTime = time;
+    var scrollY = window.scrollY || window.pageYOffset || 0;
+    var viewport = window.innerHeight;
+
+    var delta = Math.abs(scrollY - lastScroll);
+    lastScroll = scrollY;
+    scrollSpeed += (clamp(delta / 42, 0, 1) - scrollSpeed) * 0.14;
+
+    for (var index = 0; index < variants.length; index += 1) {
+      var variant = variants[index];
+      var rectTop = variant.top - scrollY;
+
+      /* Only the hero on screen computes. */
+      var visible = rectTop < viewport && rectTop + variant.height > 0;
+      if (!visible) {
+        if (variant.wasActive && variant.behaviour.rest) variant.behaviour.rest();
+        variant.wasActive = false;
+        continue;
+      }
+      /* The load-in belongs to the hero, not to the page: it starts the
+         first time this hero is on screen, so the drawing and the
+         assembly are actually seen rather than finishing off screen. */
+      if (!variant.introStart) variant.introStart = time;
+      var intro = clamp((time - variant.introStart) / INTRO_MS, 0, 1);
+
+      variant.wasActive = true;
+
+      var progress = clamp(-rectTop / variant.travel, 0, 1);
+      var eased = smoothstep(progress);
+      var moved = Math.abs(progress - variant.lastProgress) > 0.0004;
+
+      /* Travel. Identity at progress 1 — the docked lockup is not a
+         computed position, it is the absence of a transform. */
+      var scale = 1 + (variant.heroScale - 1) * (1 - eased);
+      var translateX = variant.dx0 * (1 - eased);
+      var translateY = variant.dy0 * (1 - eased);
+      var transform =
+        "translate3d(" + translateX.toFixed(3) + "px," + translateY.toFixed(3) + "px,0) " +
+        "scale(" + scale.toFixed(5) + ")";
+
+      if (variant.behaviour.lean) {
+        /* Where the sticky stage currently is, derived rather than read:
+           it tracks the block until it pins at 0, then again once the
+           block's tail scrolls past. */
+        var pinLimit = variant.height - viewport;
+        var stageTop =
+          rectTop > 0 ? rectTop : rectTop < -pinLimit ? rectTop + pinLimit : 0;
+        var centre = {
+          x: variant.slotLeftInStage + translateX + (variant.slotWidth * scale) / 2,
+          y: stageTop + variant.slotTopInStage + translateY + (variant.slotHeight * scale) / 2
+        };
+        var lean = variant.behaviour.lean({
+          eased: eased,
+          pointerX: pointerX,
+          pointerY: pointerY,
+          logoCentre: centre
+        });
+        transform =
+          "translate3d(" + (translateX + lean.x).toFixed(3) + "px," + (translateY + lean.y).toFixed(3) + "px,0) " +
+          "scale(" + scale.toFixed(5) + ") " +
+          "translate(" + (variant.slotWidth / 2).toFixed(2) + "px," + (variant.slotHeight / 2).toFixed(2) + "px) " +
+          lean.suffix + " " +
+          "translate(" + (-variant.slotWidth / 2).toFixed(2) + "px," + (-variant.slotHeight / 2).toFixed(2) + "px)";
+      }
+
+      variant.logo.style.transform = transform;
+
+      variant.behaviour.apply({
+        progress: progress,
+        eased: eased,
+        intro: intro,
+        time: time,
+        moving: moved,
+        docked: progress >= 1,
+        transform: transform,
+        /* Raw, unclamped travel through the whole block — used by the
+           mask so the picture keeps moving after the logo has settled. */
+        pan: clamp(-rectTop / (variant.height - viewport || 1), 0, 1)
+      });
+
+      variant.lastProgress = progress;
+
+      /* The accordion is driven from the same progress in all six, so
+         it is never the thing that reads as different. */
+      var open = clamp(Math.floor(progress * 5.4), 0, variant.bands.length - 1);
+      if (open !== variant.openBand) {
+        variant.bands[variant.openBand].classList.remove("open");
+        variant.bands[open].classList.add("open");
+        variant.openBand = open;
+      }
+
+      variant.meter.draw(time, pointerX, scrollSpeed);
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Start
+   * ---------------------------------------------------------------- */
+
+  function boot() {
+    calibrate();
+
+    if (REDUCE) {
+      /* No travel, no scale, no cursor tracking, no trail. The logo is
+         drawn once, at rest, in the header slot it already occupies. */
+      for (var index = 0; index < variants.length; index += 1) {
+        var variant = variants[index];
+        variant.logo.style.transform = "none";
+        variant.behaviour.apply({
+          progress: 1,
+          eased: 1,
+          intro: 1,
+          time: 1400,
+          moving: false,
+          docked: true,
+          transform: "none",
+          pan: 0
+        });
+        variant.bands[0].classList.add("open");
+        variant.meter.warm();
+      }
+      return;
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(calibrate, 140);
+  }, { passive: true });
+
+  if (document.fonts && document.fonts.ready) {
+    /* Jost's advance widths are not knowable until the webfont lands,
+       and STUDIO's right edge depends on them. */
+    boot();
+    document.fonts.ready.then(calibrate);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>

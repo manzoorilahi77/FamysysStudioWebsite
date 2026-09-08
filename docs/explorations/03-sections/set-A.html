@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Famysys Studio — Sections, set A: Pinned &amp; sequential</title>
+<meta name="description" content="Set A of five section explorations: How We Work pinned as five states, Ways to Work scrolled horizontally, Selected Work revealed through a scroll-following mask.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   Set A — three homepage sections, one idea each.
+
+   The palette is fixed and shared across all five sets. --muted is
+   1.07:1 on the dark ground, so it appears on light grounds only; the
+   dark ground's secondary tone is an alpha of --paper instead.
+   ------------------------------------------------------------------ */
+:root{
+  --sand:#F2EDE1;      /* pageBackground  */
+  --forest:#12251F;    /* darkBackground  */
+  --ivory:#FCF8EE;     /* cardBackground  */
+  --ink:#16241E;       /* textOnLight     */
+  --paper:#F1EBDD;     /* textOnDark      */
+  --muted:#212B25;     /* textMuted — light grounds only */
+  --claret:#7E1B33;    /* accentPrimary   */
+  --rose:#F0A8B8;      /* accentOnDark    */
+  --brass:#D6A03C;     /* accentWarm      */
+  --jade:#66E0B0;      /* accentHighlight */
+  --forest-2:#1E3A31;  /* sectionAlt      */
+  --sand-2:#E5DCCA;    /* sectionWarm     */
+
+  --paper-2:rgba(241,235,221,.68);   /* ~6.9:1 on --forest */
+  --paper-3:rgba(241,235,221,.55);   /* ~4.9:1 on --forest */
+  --rule-dark:rgba(241,235,221,.20);
+  --rule-light:rgba(22,36,30,.20);
+
+  --sans:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --pad:clamp(1.5rem,5vw,5.5rem);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--sand);color:var(--ink);
+  font-family:var(--sans);font-size:clamp(1rem,.94rem + .22vw,1.09rem);
+  line-height:1.55;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;font-weight:400;letter-spacing:-.015em}
+p{margin:0}
+img{display:block;max-width:100%}
+
+.eyebrow{
+  font-size:.74rem;letter-spacing:.19em;text-transform:uppercase;
+  font-weight:500;margin:0 0 1.4rem;
+}
+
+/* This file is an exploration, and says so at the top. */
+.plate{
+  background:var(--forest);color:var(--paper);
+  padding:1.1rem var(--pad);display:flex;gap:1.2rem;
+  align-items:baseline;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule-dark);
+}
+.plate b{font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}
+.plate span{color:var(--paper-2);font-size:.86rem}
+
+/* ==================================================================
+   1 · HOW WE WORK — the section pins, and the five steps advance as
+   states while it holds. The numerals dominate; the copy changes
+   beneath them.
+   ================================================================== */
+.s-process{background:var(--forest);color:var(--paper)}
+.pin-track{position:relative}
+.pin-stage{padding:clamp(3.5rem,9vh,7rem) var(--pad)}
+.stage-inner{max-width:1440px;margin:0 auto;width:100%}
+.s-process .eyebrow{color:var(--rose)}
+.s-head{
+  font-size:clamp(1.85rem,4.4vw,3.4rem);line-height:1.06;max-width:16ch;
+  margin-bottom:clamp(2.5rem,6vh,4.5rem);
+}
+.stage-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:2.5rem}
+.panels{position:relative}
+.panel{display:block;padding-bottom:.5rem}
+.panel + .panel{margin-top:3.25rem;border-top:1px solid var(--rule-dark);padding-top:2.5rem}
+.num{
+  font-family:var(--serif);font-style:italic;color:var(--rose);
+  font-size:clamp(6rem,25vw,21rem);line-height:.76;letter-spacing:-.025em;
+  margin-bottom:clamp(1rem,2.6vh,1.75rem);
+}
+.panel h3{font-size:clamp(1.5rem,3.2vw,2.5rem);line-height:1.06;margin-bottom:.8rem}
+.panel p{color:var(--paper-2);max-width:46ch;font-size:clamp(1rem,1.15vw,1.15rem)}
+
+.ticks{list-style:none;margin:0;padding:0;position:relative}
+.ticks li{
+  height:2.5rem;display:flex;align-items:center;gap:.9rem;
+  font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--paper-3);white-space:nowrap;
+}
+.ticks li i{font-family:var(--serif);font-style:italic;letter-spacing:0;font-size:1rem}
+.ticks li.on{color:var(--rose)}
+.marker{display:none}
+.rail-rule{display:none}
+
+/* ==================================================================
+   2 · WAYS TO WORK WITH US — the four tiers travel sideways while the
+   page scrolls down. Custom arrives last, and wider.
+   ================================================================== */
+.s-ways{background:var(--sand);color:var(--ink);padding:clamp(4rem,11vh,8rem) 0}
+.ways-head{padding:0 var(--pad);max-width:1440px;margin:0 auto clamp(2.5rem,6vh,4rem)}
+.s-ways .eyebrow{color:var(--claret)}
+.ways-head h2{font-size:clamp(1.85rem,4.4vw,3.4rem);line-height:1.06;max-width:18ch}
+.ways-head p{margin-top:1.1rem;max-width:52ch;color:var(--muted)}
+.h-track{position:relative}
+.h-stage{overflow:hidden}
+.h-rail{display:flex;flex-direction:column;gap:1.5rem;padding:0 var(--pad);align-items:stretch}
+.tier{background:var(--ivory);border:1px solid var(--rule-light);display:flex;flex-direction:column}
+.tier .shot{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--sand-2)}
+.tier .shot img{width:100%;height:100%;object-fit:cover}
+.tier .body{padding:clamp(1.4rem,3vw,2.1rem);display:flex;flex-direction:column;gap:1rem;flex:1}
+.tier h3{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1}
+.tier .desc{font-family:var(--serif);font-style:italic;color:var(--claret);font-size:1.15rem;line-height:1.2}
+.tier .sum{color:var(--muted)}
+.tier dl{margin:0;display:grid;gap:.85rem;padding-top:.9rem;border-top:1px solid var(--rule-light)}
+.tier dt{
+  font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--claret);font-weight:500;margin-bottom:.25rem;
+}
+.tier dd{margin:0;font-size:.95rem;color:var(--muted)}
+.tier .go{
+  margin-top:auto;align-self:flex-start;
+  background:var(--claret);color:var(--ivory);text-decoration:none;
+  padding:.8rem 1.5rem;font-size:.86rem;letter-spacing:.1em;text-transform:uppercase;
+}
+.tier .go:hover{background:#6A1029}
+.tier.custom{background:var(--forest);border-color:var(--forest);color:var(--paper)}
+.tier.custom .desc{color:var(--rose)}
+.tier.custom .sum{color:var(--paper-2)}
+.tier.custom .invite{
+  font-family:var(--serif);font-style:italic;font-size:clamp(1.25rem,2.4vw,1.85rem);
+  line-height:1.15;color:var(--paper);max-width:22ch;
+  padding-top:.9rem;border-top:1px solid var(--rule-dark);
+}
+.tier.custom .go{background:var(--rose);color:var(--forest)}
+.tier.custom .go:hover{background:#F7C2CE}
+
+/* ==================================================================
+   3 · SELECTED CREATIVE WORK — the eight pieces are uncovered by a
+   mask that tracks the scroll, rather than fading in.
+   ================================================================== */
+.s-work{background:var(--forest);color:var(--paper);padding:clamp(4rem,11vh,8rem) 0 clamp(5rem,14vh,10rem)}
+.work-head{padding:0 var(--pad);max-width:1440px;margin:0 auto clamp(3rem,7vh,5rem)}
+.s-work .eyebrow{color:var(--rose)}
+.work-head h2{font-size:clamp(1.85rem,4.4vw,3.4rem);line-height:1.06}
+.work-head p{margin-top:1.1rem;max-width:52ch;color:var(--paper-2)}
+.work-grid{
+  padding:0 var(--pad);max-width:1440px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:clamp(1.5rem,4vw,4rem);row-gap:clamp(3rem,8vh,6rem);
+}
+.piece:nth-child(even){margin-top:clamp(2rem,7vw,7rem)}
+.frame{position:relative;overflow:hidden;aspect-ratio:4/3;background:var(--forest-2)}
+.frame img{position:absolute;left:0;top:-8%;width:100%;height:116%;object-fit:cover}
+.veil{display:none}
+.meta{display:flex;gap:1.1rem;margin-top:1.4rem;align-items:baseline}
+.chip{font-family:var(--serif);font-style:italic;color:var(--rose);font-size:1.4rem;line-height:1;flex:none}
+.meta h3{font-size:clamp(1.1rem,1.9vw,1.5rem);line-height:1.15;margin-bottom:.35rem}
+.meta p{color:var(--paper-2);font-size:.97rem}
+
+@media (max-width:720px){
+  .work-grid{grid-template-columns:minmax(0,1fr)}
+  .piece:nth-child(even){margin-top:0}
+}
+
+/* ==================================================================
+   MOTION LAYER. Everything above is the final, readable state. The
+   class below is added by script only when the reader has not asked
+   for reduced motion; it is what turns the three sections into a pin,
+   a horizontal rail and a set of scroll-tracked masks.
+   ================================================================== */
+html.motion .pin-track{height:560vh}
+html.motion .pin-stage{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+html.motion .stage-grid{
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:clamp(2rem,6vw,6rem);align-items:start;
+}
+html.motion .panels{min-height:min(58vh,30rem)}
+html.motion .panel{
+  position:absolute;inset:0;margin:0;padding:0;border:0;
+  opacity:0;transform:translate3d(0,2.75rem,0);
+  transition:opacity .5s var(--ease),transform .62s var(--ease);
+  pointer-events:none;
+}
+html.motion .panel.is-on{opacity:1;transform:none;pointer-events:auto}
+html.motion .panel.is-past{opacity:0;transform:translate3d(0,-2.75rem,0)}
+html.motion .num{will-change:transform}
+html.motion .ticks{padding-left:1.4rem}
+html.motion .ticks li{transition:color .4s var(--ease)}
+html.motion .marker{
+  display:block;position:absolute;left:0;top:0;width:2px;height:2.5rem;
+  background:var(--rose);transition:transform .5s var(--ease);
+}
+html.motion .rail-rule{
+  display:block;position:relative;height:1px;background:var(--rule-dark);
+  margin-top:clamp(2rem,5vh,3.5rem);
+}
+html.motion .rail-rule i{
+  position:absolute;inset:0;background:var(--rose);
+  transform:scaleX(0);transform-origin:0 50%;will-change:transform;
+}
+@media (max-width:860px){
+  html.motion .stage-grid{grid-template-columns:minmax(0,1fr)}
+  html.motion .ticks{display:none}
+}
+
+html.motion .h-stage{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+html.motion .h-rail{
+  flex-direction:row;gap:clamp(1.5rem,3vw,2.75rem);
+  width:max-content;align-items:stretch;will-change:transform;
+}
+html.motion .tier{width:min(80vw,36rem);flex:none}
+html.motion .tier.custom{width:min(94vw,54rem)}
+
+html.motion .frame img{will-change:transform}
+html.motion .veil{display:block;position:absolute;inset:0;background:var(--forest);will-change:transform}
+html.motion .meta{will-change:opacity,transform}
+
+/* Safety net: if the preference flips after load, the motion layer
+   stands down and every section returns to its readable final state. */
+@media (prefers-reduced-motion:reduce){
+  html.motion .pin-track{height:auto}
+  html.motion .pin-stage{position:static;height:auto;display:block}
+  html.motion .panel{position:relative;inset:auto;opacity:1;transform:none;pointer-events:auto}
+  html.motion .panel + .panel{margin-top:3.25rem;border-top:1px solid var(--rule-dark);padding-top:2.5rem}
+  html.motion .marker,html.motion .rail-rule{display:none}
+  html.motion .h-stage{position:static;height:auto;display:block}
+  html.motion .h-track{height:auto!important}
+  html.motion .h-rail{flex-direction:column;width:auto;transform:none!important}
+  html.motion .tier,html.motion .tier.custom{width:auto}
+  html.motion .veil{display:none}
+  html.motion .frame img,html.motion .meta{transform:none!important;opacity:1!important}
+}
+</style>
+</head>
+<body>
+
+<div class="plate">
+  <b>Sections — set A</b>
+  <span>Pinned &amp; sequential. One idea per section: a pinned step machine, a horizontal tier rail, a scroll-tracked mask.</span>
+</div>
+
+<!-- 1 · HOW WE WORK ============================================== -->
+<section class="s-process">
+  <div class="pin-track" id="processTrack">
+    <div class="pin-stage">
+      <div class="stage-inner">
+        <p class="eyebrow">How We Work</p>
+        <h2 class="s-head">From idea to finished creative.</h2>
+
+        <div class="stage-grid">
+          <div class="panels" id="panels">
+            <article class="panel is-on">
+              <div class="num">01</div>
+              <h3>Understand</h3>
+              <p>We understand what you&rsquo;re trying to communicate, who it&rsquo;s for and what success looks like.</p>
+            </article>
+            <article class="panel">
+              <div class="num">02</div>
+              <h3>Create</h3>
+              <p>We develop the concept, script, design direction or production approach.</p>
+            </article>
+            <article class="panel">
+              <div class="num">03</div>
+              <h3>Produce</h3>
+              <p>Our team combines creative tools, AI and human production expertise to build the content.</p>
+            </article>
+            <article class="panel">
+              <div class="num">04</div>
+              <h3>Refine</h3>
+              <p>We review, refine and incorporate feedback within the agreed scope.</p>
+            </article>
+            <article class="panel">
+              <div class="num">05</div>
+              <h3>Deliver</h3>
+              <p>You receive polished, platform-ready creative assets.</p>
+            </article>
+          </div>
+
+          <ol class="ticks" id="ticks">
+            <span class="marker" id="marker"></span>
+            <li class="on"><i>01</i> Understand</li>
+            <li><i>02</i> Create</li>
+            <li><i>03</i> Produce</li>
+            <li><i>04</i> Refine</li>
+            <li><i>05</i> Deliver</li>
+          </ol>
+        </div>
+
+        <div class="rail-rule"><i id="processFill"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · WAYS TO WORK WITH US ===================================== -->
+<section class="s-ways">
+  <div class="ways-head">
+    <p class="eyebrow">Ways to Work With Us</p>
+    <h2>Flexible ways to work with Famysys Studio.</h2>
+    <p>Whether you need one creative asset or an ongoing production partner, we can adapt to your requirements.</p>
+  </div>
+
+  <div class="h-track" id="waysTrack">
+    <div class="h-stage" id="waysStage">
+      <div class="h-rail" id="waysRail">
+
+        <article class="tier">
+          <div class="shot"><img src="../../../public/media/tier-launch.jpg" alt="A professional studio light on a stand, lighting a desk and monitor in a dark room."></div>
+          <div class="body">
+            <h3>Launch</h3>
+            <p class="desc">Essential Content</p>
+            <p class="sum">For businesses looking to establish or refresh their regular creative output.</p>
+            <dl>
+              <div><dt>Ideal for</dt><dd>Small businesses, local businesses, startups and growing brands.</dd></div>
+              <div><dt>Typical work includes</dt><dd>Social creatives, short-form content, promotional assets and basic video production.</dd></div>
+            </dl>
+            <a class="go" href="/contact">Talk to us</a>
+          </div>
+        </article>
+
+        <article class="tier">
+          <div class="shot"><img src="../../../public/media/tier-grow.jpg" alt="A phone mounted on a tripod filming a rail of clothing in a small shop."></div>
+          <div class="body">
+            <h3>Grow</h3>
+            <p class="desc">Growth Content</p>
+            <p class="sum">For businesses that need a more consistent flow of video and creative content.</p>
+            <dl>
+              <div><dt>Ideal for</dt><dd>Growing businesses, brands, training companies and businesses actively investing in digital marketing.</dd></div>
+              <div><dt>Typical work includes</dt><dd>Short-form video, UGC editing, AI-assisted video, social creatives, motion and content adaptations.</dd></div>
+            </dl>
+            <a class="go" href="/contact">Talk to us</a>
+          </div>
+        </article>
+
+        <article class="tier">
+          <div class="shot"><img src="../../../public/media/tier-scale.jpg" alt="Two hands drawing artwork on a tablet with a stylus, beside a laptop and a mug."></div>
+          <div class="body">
+            <h3>Scale</h3>
+            <p class="desc">Advanced Creative</p>
+            <p class="sum">For businesses with larger or more sophisticated ongoing creative requirements.</p>
+            <dl>
+              <div><dt>Ideal for</dt><dd>Established businesses, B2B companies, product brands and marketing teams.</dd></div>
+              <div><dt>Typical work includes</dt><dd>Advanced video, explainers, training content, motion graphics, product visuals and multi-format creative production.</dd></div>
+            </dl>
+            <a class="go" href="/contact">Talk to us</a>
+          </div>
+        </article>
+
+        <article class="tier custom">
+          <div class="shot"><img src="../../../public/media/tier-custom.jpg" alt="A film stage with rigged lighting, a camera crane and a crew at work."></div>
+          <div class="body">
+            <h3>Custom Creative Partnership</h3>
+            <p class="desc">Your flexible creative production team.</p>
+            <p class="sum">For businesses that need ongoing creative support across multiple formats and services.</p>
+            <p class="invite">Tell us what you need. We&rsquo;ll help structure the right production model.</p>
+            <a class="go" href="/contact">Talk to us about your requirements</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · SELECTED CREATIVE WORK =================================== -->
+<section class="s-work">
+  <div class="work-head">
+    <p class="eyebrow">Selected Creative Work</p>
+    <h2>Selected Creative Work</h2>
+    <p>A growing collection of work created by Famysys Studio across design, video, AI-powered production and creative content.</p>
+  </div>
+
+  <div class="work-grid" id="workGrid">
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-01.jpg" alt="A cinema lens photographed close up against a dark background."><i class="veil"></i></div>
+      <div class="meta"><span class="chip">01</span><div><h3>Famysys Studio Capability Film</h3><p>Show what the Studio itself can do.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-02.jpg" alt="A small team working together at laptops around a table."><i class="veil"></i></div>
+      <div class="meta"><span class="chip">02</span><div><h3>Famysys IT Services Portfolio Film</h3><p>B2B/corporate credibility.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-03.jpg" alt="A plated dish being served at a restaurant table." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">03</span><div><h3>Food / Restaurant Creative Campaign</h3><p>Multiple AI videos + social creatives.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-04.jpg" alt="Social media apps in a folder on a phone screen." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">04</span><div><h3>UGC Transformation</h3><p>Raw footage &rarr; finished professional content.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-05.jpg" alt="A business portrait of a presenter against a plain background." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">05</span><div><h3>Synthesia Business Explainer</h3><p>Show presenter + visual storytelling.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-06.jpg" alt="A speaker addressing a seated group in a training room." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">06</span><div><h3>Training Video Series</h3><p>Show scalable training production.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-07.jpg" alt="A white smartwatch photographed on a plain grey background." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">07</span><div><h3>Product Visual Campaign</h3><p>Product imagery &rarr; lifestyle &rarr; promotional content.</p></div></div>
+    </article>
+
+    <article class="piece">
+      <div class="frame"><img src="../../../public/media/case-08.jpg" alt="A multi-monitor editing rig with colourful graphics on screen." loading="lazy"><i class="veil"></i></div>
+      <div class="meta"><span class="chip">08</span><div><h3>Motion Graphics Showcase</h3><p>Demonstrate progression toward premium creative.</p></div></div>
+    </article>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // Reduced motion is not a degraded path here: the stylesheet's base state
+  // IS the final state, and the motion layer only ever sits on top of it.
+  // Nothing to unwind, so the check is a single early return.
+  if (!window.matchMedia("(prefers-reduced-motion: no-preference)").matches) return;
+
+  document.documentElement.classList.add("motion");
+
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  /* 1 · pinned step machine */
+  var pTrack = document.getElementById("processTrack");
+  var panels = Array.prototype.slice.call(document.querySelectorAll("#panels .panel"));
+  var nums = panels.map(function (p) { return p.querySelector(".num"); });
+  var tickRows = Array.prototype.slice.call(document.querySelectorAll("#ticks li"));
+  var marker = document.getElementById("marker");
+  var pFill = document.getElementById("processFill");
+  var STEPS = panels.length;
+  var ROW_REM = 2.5;          // matches .ticks li height
+  var DRIFT_PX = 26;          // numeral travel across one step
+  var stepIndex = -1;
+
+  /* 2 · horizontal tier rail */
+  var wTrack = document.getElementById("waysTrack");
+  var wStage = document.getElementById("waysStage");
+  var wRail = document.getElementById("waysRail");
+  var travel = 0;
+
+  /* 3 · scroll-tracked masks */
+  var pieces = Array.prototype.slice.call(document.querySelectorAll("#workGrid .piece"))
+    .map(function (el) {
+      return {
+        frame: el.querySelector(".frame"),
+        img: el.querySelector("img"),
+        veil: el.querySelector(".veil"),
+        meta: el.querySelector(".meta")
+      };
+    });
+  var MASK_START = 0.92;      // frame top, as a fraction of the viewport
+  var MASK_END = 0.40;
+
+  var vh = 0;
+
+  function measure() {
+    vh = window.innerHeight;
+    // The rail's travel is its overflow past the stage, and the track is made
+    // exactly that much taller than the viewport — so one pixel of page
+    // scroll buys one pixel of sideways movement.
+    travel = Math.max(0, wRail.scrollWidth - wStage.clientWidth);
+    wTrack.style.height = (vh + travel) + "px";
+  }
+
+  function update() {
+    // Read first, write second: every rect this frame needs is taken before
+    // anything is styled, so no write invalidates a later read.
+    var pRect = pTrack.getBoundingClientRect();
+    var wRect = wTrack.getBoundingClientRect();
+    var pHeight = pTrack.offsetHeight;
+    var wHeight = wTrack.offsetHeight;
+    var frames = pieces.map(function (p) { return p.frame.getBoundingClientRect().top; });
+
+    // --- steps ---
+    var pSpan = pHeight - vh;
+    var pProg = pSpan > 0 ? clamp(-pRect.top / pSpan, 0, 1) : 0;
+    var raw = pProg * STEPS;
+    var idx = clamp(Math.floor(raw), 0, STEPS - 1);
+    var local = clamp(raw - idx, 0, 1);
+
+    if (idx !== stepIndex) {
+      stepIndex = idx;
+      for (var i = 0; i < STEPS; i++) {
+        panels[i].classList.toggle("is-on", i === idx);
+        panels[i].classList.toggle("is-past", i < idx);
+        tickRows[i].classList.toggle("on", i === idx);
+      }
+      marker.style.transform = "translate3d(0," + (idx * ROW_REM) + "rem,0)";
+    }
+    // The numeral drifts across its own step, so the section keeps moving
+    // with the scroll between the five state changes rather than sitting
+    // still until the next one.
+    nums[idx].style.transform =
+      "translate3d(0," + ((local - 0.5) * -DRIFT_PX).toFixed(2) + "px,0)";
+    pFill.style.transform = "scaleX(" + pProg.toFixed(4) + ")";
+
+    // --- rail ---
+    var wSpan = wHeight - vh;
+    var wProg = wSpan > 0 ? clamp(-wRect.top / wSpan, 0, 1) : 0;
+    wRail.style.transform = "translate3d(" + (-wProg * travel).toFixed(2) + "px,0,0)";
+
+    // --- masks ---
+    // Each veil is a solid panel of the section's own ground sliding down off
+    // its frame, so a piece is uncovered rather than faded up.
+    var start = vh * MASK_START;
+    var end = vh * MASK_END;
+    for (var j = 0; j < pieces.length; j++) {
+      var t = clamp((start - frames[j]) / (start - end), 0, 1);
+      var e = t * t * (3 - 2 * t);
+      pieces[j].veil.style.transform = "translate3d(0," + (e * 101).toFixed(2) + "%,0)";
+      pieces[j].img.style.transform = "translate3d(0," + ((1 - e) * 6).toFixed(2) + "%,0)";
+      pieces[j].meta.style.opacity = (0.25 + e * 0.75).toFixed(3);
+      pieces[j].meta.style.transform = "translate3d(0," + ((1 - e) * 12).toFixed(2) + "px,0)";
+    }
+  }
+
+  // One loop for all three sections. Scroll and resize only mark the frame
+  // dirty; nothing measures or styles outside this rAF.
+  var dirty = true;
+  function invalidate() { dirty = true; }
+  function frame() {
+    if (dirty) { dirty = false; update(); }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("scroll", invalidate, { passive: true });
+  window.addEventListener("resize", function () { measure(); invalidate(); });
+  window.addEventListener("load", function () { measure(); invalidate(); });
+
+  measure();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

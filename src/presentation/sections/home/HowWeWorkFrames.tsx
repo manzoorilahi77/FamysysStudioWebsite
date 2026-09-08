@@ -127,7 +127,14 @@ export function HowWeWorkFrames({ eyebrow, heading, revealLabel, steps }: HowWeW
   }
 
   return (
-    <Section dark fade={false} ariaLabel={heading} className="imagery-section">
+    // LIGHT, where this was dark. The Differentiator above it has to be dark — its four
+    // coloured panels and its stage are built on a dark ground — so with this one dark too
+    // the page ran 8,000px of unbroken green through its middle, a third of the homepage in
+    // one beat. Moving this one is the single change that fixes the whole run: the darks
+    // now fall on the hero, the Differentiator, Selected Work and the closing CTA, spaced
+    // by cream, and no two neighbouring sections share a ground. Nothing here names a
+    // colour — every plate, numeral and sentence reads the surface it is on.
+    <Section ariaLabel={heading} className="imagery-section">
       <Container>
         <p className="imagery-eyebrow label">{eyebrow}</p>
         <h2 className="imagery-display mt-4">{heading}</h2>

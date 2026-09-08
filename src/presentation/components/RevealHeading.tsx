@@ -30,6 +30,41 @@ interface RevealHeadingProps {
    * accented words are not adjacent, as in the thesis line.
    */
   readonly accent?: ReadonlyArray<string> | undefined;
+  /**
+   * Opt-in: how much each word on a line trails the one before it. Off by default, which
+   * is the heading behaviour every other caller wants — a heading resolves a LINE at a
+   * time, because a line is the unit a reader takes it in.
+   *
+   * The Differentiator's thesis is the one exception. It is a single centred sentence
+   * standing alone on its own ground, read as a sentence rather than as a headline, and
+   * the approved design has it assemble word by word. Passing a value here layers the
+   * per-word trail on top of the per-line step rather than replacing it, so a sentence
+   * that wraps still starts each line after the one above it has begun.
+   */
+  readonly wordStaggerMs?: number | undefined;
+  /**
+   * Opt-in: hand the words' appearance to the scroll position instead of to an entry
+   * transition. Each word reads `--lit` — 0 for not yet arrived, 1 for fully in — which a
+   * caller's frame task writes as the reader travels through the heading, so the sentence
+   * assembles under the scroll rather than playing once when it comes into view.
+   *
+   * The words render at `--lit`'s default of 1 until something writes it, which is what
+   * keeps the no-JavaScript and reduced-motion states complete: nothing is hidden waiting
+   * for a script that may never run. See `.reveal-word[data-scrub]`.
+   */
+  readonly scrub?: boolean;
+  /**
+   * Opt-in: force a line to end before this word, wherever it falls. The value is matched
+   * as a whole word and only its FIRST occurrence breaks, so a word that appears twice
+   * does not split the heading twice.
+   *
+   * A `max-width` cannot do this. The Differentiator's thesis turns on a hinge — the claim
+   * and then its limit — and the break belongs at the hinge, not wherever the measure runs
+   * out: left to itself the line read "AI is our production advantage not / our identity"
+   * at every width from 390 to 1920, which puts the join in the middle of the second half.
+   * A width tuned to break it correctly at one size breaks it somewhere else at the next.
+   */
+  readonly breakBefore?: string;
 }
 
 /** Index of the first element of `needle` inside `haystack`, or -1. */
@@ -75,6 +110,9 @@ export function RevealHeading({
   className = "",
   id,
   accent,
+  wordStaggerMs,
+  scrub = false,
+  breakBefore,
 }: RevealHeadingProps) {
   const [ref, isInView] = useInView<HTMLHeadingElement>({ threshold: 0.2, once: true });
   const prefersReducedMotion = useReducedMotion();
@@ -82,6 +120,9 @@ export function RevealHeading({
   const [lineOfWord, setLineOfWord] = useState<ReadonlyArray<number>>([]);
 
   const words = children.split(/\s+/).filter((word) => word.length > 0);
+  // -1 when nothing was asked for or the word is not in the heading, which leaves the
+  // heading wrapping exactly as it did rather than throwing or breaking in the wrong place.
+  const breakIndex = breakBefore ? words.indexOf(breakBefore) : -1;
   const accentedIndexes = new Set<number>();
   for (const phrase of accent ?? []) {
     const phraseWords = phrase.split(/\s+/).filter((word) => word.length > 0);
@@ -127,7 +168,9 @@ export function RevealHeading({
         // heading was still arriving at opacity 0 and resolving on scroll, which is a
         // scroll-triggered change of appearance and exactly what the preference asks a
         // page not to do. Nothing about the default path changes.
-        opacity: prefersReducedMotion || isInView ? 1 : 0,
+        // Scrubbed headings never fade as a block — the words carry the whole arrival, and
+        // a block fade on top of them would double the effect and hide the early words.
+        opacity: scrub || prefersReducedMotion || isInView ? 1 : 0,
         transitionProperty: "opacity",
         transitionDuration: prefersReducedMotion ? "120ms" : "420ms",
         transitionTimingFunction: "var(--ease-base)",
@@ -135,18 +178,31 @@ export function RevealHeading({
     >
       {words.map((word, index) => {
         const isAccented = accentedIndexes.has(index);
+        const line = lineOfWord[index] ?? 0;
+        // How far into its own line this word sits. Counting from the measured lines rather
+        // than from the word index is what keeps the trail restarting on every line instead
+        // of running away across a three-line sentence.
+        // -1 before the first measurement, when every word still reads as line 0 and the
+        // whole heading degrades to a single reveal. Treated as "first on its line".
+        const lineStart = wordStaggerMs ? lineOfWord.findIndex((c) => c === line) : 0;
+        const placeInLine = lineStart === -1 ? 0 : index - lineStart;
+        const delayMs = line * LINE_STAGGER_MS + placeInLine * (wordStaggerMs ?? 0);
         return (
           <span key={`${word}-${index}`}>
+            {/* The forced break. A real <br>, so the line ends here at every width and in
+                every state — including the one where no script has run. It is not
+                announced by a screen reader and the measurement below reads the words'
+                offsetTop, which the break moves along with everything else. */}
+            {index === breakIndex ? <br /> : null}
             <span
               ref={(element) => {
                 wordRefs.current[index] = element;
               }}
               className="reveal-word"
               data-visible={isInView}
+              {...(scrub ? { "data-scrub": "true" as const } : {})}
               style={{
-                transitionDelay: prefersReducedMotion
-                  ? "0ms"
-                  : `${(lineOfWord[index] ?? 0) * LINE_STAGGER_MS}ms`,
+                transitionDelay: prefersReducedMotion || scrub ? "0ms" : `${delayMs}ms`,
               }}
             >
               <span className={`reveal-word-inner${isAccented ? " text-display-accent" : ""}`}>

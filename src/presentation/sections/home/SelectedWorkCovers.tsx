@@ -14,35 +14,65 @@ interface SelectedWorkCoversProps {
   readonly caseStudies: ReadonlyArray<CaseStudyView>;
 }
 
-/** Percent of travel a cover makes inside the window it is taller than. */
-const PAN = 9;
+/** Where a frame's top is when its mask starts to slide, as a fraction of the viewport. */
+const MASK_START = 0.92;
+/** And where it is when the mask has cleared the frame entirely. */
+const MASK_END = 0.4;
+/** A hair past 100 so the mask's own edge is off the frame, not sitting on its last row. */
+const MASK_TRAVEL = 101;
+/** Percent of its own height the picture rises as it is uncovered. */
+const IMAGE_RISE = 6;
+/** How much larger the picture starts, so it settles into the frame rather than arriving. */
+const IMAGE_SETTLE = 0.06;
+/** Pixels the caption lifts through, and the opacity it starts from. */
+const TAG_LIFT = 14;
+const TAG_FLOOR = 0.25;
 
 interface CoverParts {
-  readonly window: HTMLElement;
+  readonly frame: HTMLElement;
   readonly image: HTMLElement | null;
-  /** 1 for the left column, -1 for the right, so the two columns move against each other. */
-  readonly direction: number;
+  readonly veil: HTMLElement | null;
+  readonly tag: HTMLElement | null;
 }
 
 function clamp(value: number, min: number, max: number): number {
   return value < min ? min : value > max ? max : value;
 }
 
+/** Smoothstep — the mask leaves and arrives slowly and crosses the frame quickly. */
+function ease(t: number): number {
+  return t * t * (3 - 2 * t);
+}
+
 /**
- * Eight covers at full width, two to a row, with no gutter between them.
+ * THE EIGHT PIECES, UNCOVERED BY A MASK THAT TRACKS THE SCROLL.
  *
- * Each cover sits in a window it is 24% taller than, and the picture moves inside that
- * window as the page scrolls — the left column downward, the right column upward. Two
- * columns travelling against each other is what makes a grid of eight photographs read as
- * one moving surface rather than as a catalogue.
+ * Two columns on the container line, the right one dropped by most of a frame, so the
+ * eight read down the page as a stagger rather than as four tidy rows. Every frame is 4:3
+ * and every caption sits under its own picture: an italic numeral, the title, and the line
+ * that says what the piece was for.
  *
- * The reference and the title are a small opaque plate below the picture, never over it.
- * The intent line waits for a hover WHERE THERE IS A POINTER TO HOVER WITH, and is simply
- * present everywhere else — on a touch screen, under `prefers-reduced-motion`, and before
- * the script runs. A cover has no button of its own the way a process frame does, and
- * eight focusable articles carrying no action would be eight tab stops that go nowhere; so
- * the reveal is scoped to fine pointers instead, and the line is on the page for everyone
- * who cannot summon it. See `.cover-intent` in globals.css.
+ * WHAT MOVES. Each frame carries a solid panel of the section's own ground over it, and
+ * that panel slides DOWN off the frame as the frame comes up the viewport — so a piece is
+ * uncovered rather than faded in, and what appears is the photograph at full strength
+ * rather than a half-transparent one. Underneath it the picture is 6% high and 6% large,
+ * and it settles both back as the mask clears; the caption comes up 14px behind it. The
+ * offset column means the two sides are never uncovered on the same beat.
+ *
+ * WHAT IT REPLACES. Eight covers at full bleed, two to a row with no gutter, each panning
+ * inside a window it was taller than. That was one moving surface with the pictures welded
+ * edge to edge; this is eight separate pieces on the page's own line, which is what the
+ * approved design asks for and what "follows the container" means here.
+ *
+ * NO COPY SITS ON A PHOTOGRAPH — the caption is beneath the frame, on the section ground,
+ * and it is in the document at all times. The intent line is no longer hidden behind a
+ * pointer: it is one short sentence per piece and the design shows all eight.
+ *
+ * THE BASE STATE IS THE FINAL STATE. With the script blocked, before it runs, and under
+ * `prefers-reduced-motion`, there is no mask at all — `.cover-veil` is `display: none`
+ * until the motion layer turns it on — and the eight pieces are simply present. See
+ * `useMotionLayer`. The frame task merges into the page's one shared loop; every rect it
+ * needs is read before a single style is written. See `useScrollFrame`.
  */
 export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversProps) {
   const isMotionOn = useMotionLayer();
@@ -56,16 +86,24 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
       return;
     }
     const parts = Array.from(grid.querySelectorAll<HTMLElement>("[data-cover-window]")).map(
-      (element, index): CoverParts => ({
-        window: element,
+      (element): CoverParts => ({
+        frame: element,
         image: element.querySelector<HTMLElement>("[data-cover-image]"),
-        direction: index % 2 === 0 ? 1 : -1,
+        veil: element.querySelector<HTMLElement>("[data-cover-veil]"),
+        tag: element.parentElement?.querySelector<HTMLElement>("[data-cover-tag]") ?? null,
       }),
     );
     coversRef.current = parts;
     return () => {
+      // The motion layer owns exactly these properties and nothing else writes them, so
+      // handing them back is what leaves the reduced-motion state genuinely untouched.
       for (const part of parts) {
         if (part.image) part.image.style.transform = "";
+        if (part.veil) part.veil.style.transform = "";
+        if (part.tag) {
+          part.tag.style.transform = "";
+          part.tag.style.opacity = "";
+        }
       }
       coversRef.current = [];
     };
@@ -77,26 +115,41 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
       return;
     }
     const viewport = window.innerHeight;
-    // All eight rects first, then all eight writes. See `useScrollFrame`.
-    const rects = covers.map((cover) => cover.window.getBoundingClientRect());
+    const start = viewport * MASK_START;
+    const end = viewport * MASK_END;
+    // All eight rects first, then all eight writes — a write in the middle would
+    // invalidate the layout the next read is about to measure.
+    const tops = covers.map((cover) => cover.frame.getBoundingClientRect().top);
 
     covers.forEach((cover, index) => {
-      const rect = rects[index];
-      if (!rect || rect.bottom < 0 || rect.top > viewport || !cover.image) {
+      const top = tops[index];
+      if (top === undefined) {
         return;
       }
-      // Where the window's own centre sits in the viewport: 1 at the bottom edge, -1 at
-      // the top.
-      const centre = (rect.top + rect.height / 2 - viewport / 2) / (viewport / 2);
-      const travel = clamp(centre, -1, 1) * PAN * cover.direction;
-      cover.image.style.transform = `translate3d(0,${travel.toFixed(2)}%,0)`;
+      const shown = ease(clamp((start - top) / (start - end), 0, 1));
+      const hidden = 1 - shown;
+      if (cover.veil) {
+        cover.veil.style.transform = `translate3d(0,${(shown * MASK_TRAVEL).toFixed(2)}%,0)`;
+      }
+      if (cover.image) {
+        cover.image.style.transform = `translate3d(0,${(hidden * IMAGE_RISE).toFixed(2)}%,0) scale(${(1 + hidden * IMAGE_SETTLE).toFixed(4)})`;
+      }
+      if (cover.tag) {
+        cover.tag.style.opacity = (TAG_FLOOR + shown * (1 - TAG_FLOOR)).toFixed(3);
+        cover.tag.style.transform = `translate3d(0,${(hidden * TAG_LIFT).toFixed(2)}px,0)`;
+      }
     });
   }, []);
 
   useScrollFrame(paint, isMotionOn);
 
   return (
-    <Section dark fade={false} ariaLabel={intro.heading} className="imagery-section work-section">
+    // LIGHT, and nothing here names a colour: the frame ground, the mask, the numeral and
+    // the caption all read the surface they are on, so the section works on either. It
+    // stays cream because the sections either side of it are both the alternate navy —
+    // making this one dark would put three dark sections in a row and undo the page's
+    // alternation.
+    <Section ariaLabel={intro.heading} className="imagery-section work-section">
       <Container>
         <p className="imagery-eyebrow label">{intro.eyebrow}</p>
         <h2 className="imagery-display mt-4">{intro.heading}</h2>
@@ -112,13 +165,17 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
                 alt={piece.media.alt}
                 width={1600}
                 height={1200}
-                sizes="(min-width: 780px) 50vw, 100vw"
+                sizes="(min-width: 780px) 44vw, 90vw"
                 loading="lazy"
                 className="cover-image"
                 data-cover-image
               />
+              {/* The mask. A solid panel of the section's own ground, and only its
+                  transform moves — see `.cover-veil`, which does not exist at all until
+                  the motion layer turns it on. */}
+              <i className="cover-veil" data-cover-veil aria-hidden="true" />
             </div>
-            <div className="cover-tag">
+            <div className="cover-tag" data-cover-tag>
               {/* Decorative: the reference is the piece's position in the list, and it is
                   already the first thing the title says. */}
               <span className="cover-numeral" aria-hidden="true">

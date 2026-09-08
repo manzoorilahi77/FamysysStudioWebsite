@@ -37,6 +37,7 @@ import type { Connection } from "mysql2/promise";
 
 import type { CmsRecord, CmsValue } from "../src/domain/cms/entities/CmsRecord";
 import { StaticCmsRepository } from "../src/infrastructure/cms/StaticCmsRepository";
+import { readMediaDirectory } from "../src/infrastructure/cms/contentSources";
 import { StaticAboutRepository } from "../src/infrastructure/content/repositories/StaticAboutRepository";
 import { StaticContactRepository } from "../src/infrastructure/content/repositories/StaticContactRepository";
 import { StaticEngagementRepository } from "../src/infrastructure/content/repositories/StaticEngagementRepository";
@@ -191,8 +192,15 @@ async function seedValue(
 }
 
 /**
- * Every string on a record, in the order the panel shows them: the record's own values,
- * then each named list, then the media alt text.
+ * Every string a record owns, in the order the store was first written in: the record's own
+ * values across all its groups, then every named list, then the media alt text.
+ *
+ * The two passes across groups rather than one pass per group are deliberate and have to stay
+ * that way — that is the order the field keys were allocated in when the database was first
+ * seeded, and `records.ts` allocates them the same way. Reordering here would rename rows.
+ *
+ * Nested item records are NOT followed. A capability shown inside the Creative Services page is
+ * stored as a collection record with an address of its own, and is seeded as one.
  */
 async function seedRecordStrings(
   connection: Connection,
@@ -201,17 +209,52 @@ async function seedRecordStrings(
   record: CmsRecord,
 ): Promise<void> {
   let order = 0;
-  for (const value of record.values) {
-    await seedValue(connection, ownerKind, ownerKey, value, null, order++);
-  }
-  for (const list of record.lists) {
-    for (const item of list.items) {
-      await seedValue(connection, ownerKind, ownerKey, item, list.id, order++);
+  for (const group of record.groups) {
+    for (const value of group.values) {
+      await seedValue(connection, ownerKind, ownerKey, value, null, order++);
     }
   }
-  if (record.media) {
-    await seedValue(connection, ownerKind, ownerKey, record.media.alt, null, order++);
+  for (const group of record.groups) {
+    for (const list of group.lists) {
+      for (const item of list.items) {
+        await seedValue(connection, ownerKind, ownerKey, item, listKeyOf(list.label), order++);
+      }
+    }
   }
+  for (const group of record.groups) {
+    for (const media of group.media) {
+      await seedValue(connection, ownerKind, ownerKey, media.alt, null, order++);
+    }
+  }
+}
+
+/** `list_key` groups a list's items back together. It is the list's label, slugged. */
+function listKeyOf(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Every nested card in the model, with the collection address it is stored under. */
+async function collectionRecords(): Promise<
+  ReadonlyArray<{ readonly key: string; readonly record: CmsRecord }>
+> {
+  const found = new Map<string, CmsRecord>();
+  const walk = (record: CmsRecord): void => {
+    for (const group of record.items) {
+      for (const nested of group.records) {
+        if (nested.address?.kind === "collection_record") {
+          found.set(nested.address.key, nested);
+        }
+        walk(nested);
+      }
+    }
+  };
+  for (const page of await cms.getPages()) {
+    for (const section of page.sections) walk(section);
+  }
+  return [...found.entries()].map(([key, record]) => ({ key, record }));
 }
 
 // ---------------------------------------------------------------------------
@@ -253,25 +296,9 @@ async function seedPages(connection: Connection): Promise<void> {
 // Collections. The strings come from the CMS model; the structure from the entities.
 // ---------------------------------------------------------------------------
 
-/**
- * The Lists collection is a cross-cut VIEW of strings that belong to capabilities,
- * process steps and tiers — every one of its rows is seeded already under its real owner.
- * Seeding it again would give the same string two rows and two versions, and an edit to
- * one would not be visible in the other.
- */
-const VIEW_ONLY_COLLECTIONS = new Set(["lists"]);
-
 async function seedCollectionStrings(connection: Connection): Promise<void> {
-  for (const collection of await cms.getCollections()) {
-    if (VIEW_ONLY_COLLECTIONS.has(collection.id)) continue;
-    for (const record of collection.records) {
-      await seedRecordStrings(
-        connection,
-        "collection_record",
-        `${collection.id}:${record.id}`,
-        record,
-      );
-    }
+  for (const entry of await collectionRecords()) {
+    await seedRecordStrings(connection, "collection_record", entry.key, entry.record);
   }
 }
 
@@ -404,12 +431,14 @@ async function seedEngagementTiers(connection: Connection): Promise<void> {
  * today by calling reusedFaq() instead of retyping.
  */
 async function seedFaq(connection: Connection): Promise<void> {
-  const collections = await cms.getCollections();
-  const faqCollection = collections.find((entry) => entry.id === "faq");
+  const questions = (await collectionRecords()).filter((entry) => entry.key.startsWith("faq:"));
   const idByKey = new Map<string, number>();
 
-  for (const [index, record] of (faqCollection?.records ?? []).entries()) {
-    const hasCta = record.values.some((value) => value.kind === "ctaLabel");
+  for (const [index, entry] of questions.entries()) {
+    const record = entry.record;
+    const hasCta = record.groups.some((group) =>
+      group.values.some((value) => value.kind === "ctaLabel"),
+    );
     const id = await run(
       connection,
       "faq_items",
@@ -434,8 +463,17 @@ async function seedFaq(connection: Connection): Promise<void> {
 // Media. The files stay on disk; what is stored is the part that is content.
 // ---------------------------------------------------------------------------
 
+/**
+ * The media library is read straight off `public/media` rather than through the panel.
+ *
+ * It used to come from a CMS screen that listed every file on disk with the records pointing at
+ * it. That screen is gone — a picture is now shown beside the alt text of the block that carries
+ * it, which is where someone writing alt text actually needs to see it — but the table it fed is
+ * still useful, so the seed reads the directory itself.
+ */
 async function seedMedia(connection: Connection): Promise<void> {
-  for (const asset of await cms.getMediaLibrary()) {
+  for (const file of readMediaDirectory("public/media")) {
+    const extension = file.name.includes(".") ? file.name.split(".").pop() ?? "" : "";
     await run(
       connection,
       "media_assets",
@@ -443,7 +481,7 @@ async function seedMedia(connection: Connection): Promise<void> {
        VALUES (?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          path = VALUES(path), extension = VALUES(extension), byte_size = VALUES(byte_size)`,
-      [asset.id, asset.path, asset.extension, asset.byteSize],
+      [file.name, `/media/${file.name}`, extension, file.byteSize],
     );
   }
 }

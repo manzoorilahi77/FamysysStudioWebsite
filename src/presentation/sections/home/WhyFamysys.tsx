@@ -1,299 +1,226 @@
 "use client";
 
 import Image from "next/image";
-import type { CSSProperties, ReactNode } from "react";
-import type { WhyFamysysBlockView } from "../../lib/viewModels";
-import { ClipNumber } from "../../components/ClipNumber";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
 import { SectionHeader } from "../../components/SectionHeader";
-import { useInView } from "../../hooks/useInView";
-import { useReducedMotion } from "../../hooks/useReducedMotion";
-import { useScrollProgress } from "../../hooks/useScrollProgress";
-import { useScrollSequence } from "../../hooks/useScrollSequence";
+import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { useScrollFrame } from "../../hooks/useScrollFrame";
+import type { WhyFamysysBlockView } from "../../lib/viewModels";
 
 interface WhyFamysysProps {
   readonly whyFamysys: WhyFamysysBlockView;
 }
 
-/**
- * One mark per reason, drawn rather than borrowed: no icon library, no emoji. Each encodes
- * its own claim and nothing else.
- *
- * 0 Flexible    — one stem forking into two ends: start with a project, expand from it.
- * 1 Efficient   — the same two points joined the long way and the direct way at once.
- * 2 Human-led   — a person, because that is exactly what the claim is about.
- * 3 Scalable    — one measure repeated at three sizes on a shared baseline.
- * 4 Value-driven — a balance: what is delivered against what it costs.
- *
- * `pathLength` is set to 1 on every subpath so a single `stroke-dasharray: 1` draws all of
- * them regardless of their real lengths — see `.reason-icon-draw`, which is what animates.
- */
-function ReasonMark({ index }: { readonly index: number }): ReactNode {
-  if (index === 0) {
-    return (
-      <>
-        <path d="M3 12h5.5" pathLength={1} />
-        <path d="M8.5 12 13.4 6.8" pathLength={1} />
-        <path d="M8.5 12 13.4 17.2" pathLength={1} />
-        <circle cx="16" cy="5.4" r="2.4" pathLength={1} />
-        <circle cx="16" cy="18.6" r="2.4" pathLength={1} />
-      </>
-    );
-  }
-  if (index === 1) {
-    return (
-      <>
-        <path d="M4.5 19.5C4.5 9.5 9.5 4.5 19.5 4.5" pathLength={1} />
-        <path d="M4.5 19.5 19.5 4.5" pathLength={1} />
-        <circle cx="4.5" cy="19.5" r="1.6" pathLength={1} />
-        <circle cx="19.5" cy="4.5" r="1.6" pathLength={1} />
-      </>
-    );
-  }
-  if (index === 2) {
-    return (
-      <>
-        <circle cx="12" cy="7.5" r="3.5" pathLength={1} />
-        <path d="M5 20.5c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5" pathLength={1} />
-      </>
-    );
-  }
-  if (index === 3) {
-    return (
-      <>
-        <path d="M3 20.5h18" pathLength={1} />
-        <path d="M6.5 20.5v-3.5" pathLength={1} />
-        <path d="M12 20.5v-8" pathLength={1} />
-        <path d="M17.5 20.5v-12.5" pathLength={1} />
-      </>
-    );
-  }
-  if (index === 4) {
-    return (
-      <>
-        <path d="M12 4.5v15" pathLength={1} />
-        <path d="M7.5 19.5h9" pathLength={1} />
-        <path d="M4 8.5h16" pathLength={1} />
-        <path d="M1.5 8.5a3.5 3.5 0 0 0 5 0" pathLength={1} />
-        <path d="M17.5 8.5a3.5 3.5 0 0 0 5 0" pathLength={1} />
-      </>
-    );
-  }
-  return null;
+/** Scroll each card is given while the stage holds, as a share of the viewport. */
+const RAIL_PER_CARD_VH = 30;
+/** How far a card rises as it passes the middle of the stage, in pixels. */
+const CARD_LIFT = 22;
+/** How far a picture leans inside its own window, as a percentage of its width. */
+const IMAGE_PARALLAX = 7;
+/** Share of the stage width over which the lift falls away from the centre line. */
+const LIFT_FALLOFF = 0.42;
+/** The picture is oversized by this much so the lean never exposes an edge. */
+const IMAGE_OVERSCAN = 1.14;
+
+interface Geometry {
+  travel: number;
+  stageWidth: number;
+  /** Each card's centre, in pixels from the rail's own left edge. */
+  centres: ReadonlyArray<number>;
 }
 
-interface ReasonRowProps {
-  readonly title: string;
-  readonly description: string;
-  readonly numeral: string;
-  readonly index: number;
-  readonly isCurrent: boolean;
-  readonly isPinned: boolean;
-}
-
-const MARK_PROPS = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.5,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-
-/**
- * One reason. The same markup in both modes; what changes is what triggers it.
- *
- * PINNED, the row is one card of the deck and its arrival is being made current: numeral
- * clipping up, title wiping in, mark drawing, description rising — replayed on every step,
- * which is what makes the swap read as the next reason arriving rather than as a
- * cross-fade between two paragraphs. Driving it from the row's own observer here would
- * fire all five at once, because the five are stacked in one place and the observer cannot
- * see opacity.
- *
- * UNPINNED, it is a row of the ledger and the trigger is its own observer, so a row
- * animates when the reader reaches it rather than when the section does.
- *
- * The mark is rendered TWICE from one definition: a resting copy in ink-12, and the accent
- * copy that draws over it. A single copy would have had to choose between being absent
- * before the draw — the row missing one of the things it carries — and having nothing left
- * to draw. `<use>` was the other option and needs an id per instance.
- */
-function ReasonRow({ title, description, numeral, index, isCurrent, isPinned }: ReasonRowProps) {
-  const [ref, isInView] = useInView<HTMLLIElement>({ threshold: 0.4, once: true });
-  const prefersReducedMotion = useReducedMotion();
-  const hasArrived = prefersReducedMotion || (isPinned ? isCurrent : isInView);
-
-  return (
-    <li ref={ref} className="reason-row" data-visible={hasArrived} data-current={isCurrent}>
-      <span className="reason-rule" aria-hidden="true" />
-      <span className="reason-numeral-slot" aria-hidden="true">
-        <ClipNumber
-          value={numeral}
-          className="reason-numeral text-display-l font-medium"
-          isVisible={hasArrived}
-          delayMs={prefersReducedMotion ? 0 : 120}
-          isDecorative
-        />
-      </span>
-      {/* The stage is a full viewport with one reason on it, so the title takes the site's
-          heading step there; in the ledger it is one of five rows and takes display-s. */}
-      <p
-        className={`reason-title font-medium text-ink ${isPinned ? "text-heading" : "text-display-s"}`}
-      >
-        {title}
-      </p>
-      <p className="reason-body text-body text-ink-70">{description}</p>
-      <span className="reason-icon reason-mark" aria-hidden="true">
-        <svg {...MARK_PROPS} width="32" height="32" focusable="false">
-          <g className="reason-icon-ghost">
-            <ReasonMark index={index} />
-          </g>
-          <g className="reason-icon-draw">
-            <ReasonMark index={index} />
-          </g>
-        </svg>
-      </span>
-    </li>
-  );
+function clamp(value: number, min: number, max: number): number {
+  return value < min ? min : value > max ? max : value;
 }
 
 /**
- * How much scroll each reason is given while the section is pinned, as a share of the
- * viewport. Matched to the process section's budget on purpose — two pinned sections on
- * one page that advance at different rates read as two different mechanics.
- */
-const PIN_PER_REASON_VH = 46;
-
-/**
- * THE FIVE REASONS — one at a time, on a stage that holds still.
+ * THE FIVE QUALITIES — a rail that travels sideways as the page scrolls down.
  *
- * From `lg` up the section pins: the stage stays under the header while a track several
- * screens tall passes it, and each scroll beat replaces the reason on it — image, numeral,
- * title and statement together. Scrolling is never intercepted; the stage is
- * `position: sticky` inside a tall track, so the page moves at exactly the rate the reader
- * asks for. See `useScrollSequence`, which the process section uses for the same job, and
- * which records what a section that actually swallowed scroll events would break.
+ * The five sit on one row of tall cards, wider than the screen, and the stage holds still
+ * while the row draws across it. A card rises as it reaches the middle and settles as it
+ * leaves; each picture leans inside its own window against the row's travel. The row has
+ * depth without anything being faded out to get it.
  *
- * Below `lg`, and under `prefers-reduced-motion`, there is no pin. The same five reasons
- * are a ledger instead — rows on one spine, separated by rules rather than by borders,
- * with the frame sticky beside them and the spine filling as the reader travels. Five
- * stacked cards in a viewport-height stage would not fit a phone, and a stage that has to
- * scroll inside a section that does not is worse than no stage at all.
+ * WHY NOT THE CORRIDOR IT REPLACES. That was ported from an exploration built on a dark
+ * ground, where distance reads as a card fading toward black. This section is cream, and
+ * the same fade here is a card washing out to the page: the far ones did not read as far
+ * away, they read as half-loaded, and three of the five were invisible at any moment while
+ * most of the screen was empty. Depth had to come from something other than opacity, and a
+ * row that fills the frame edge to edge has no empty ground left to explain.
  *
- * Both modes share every piece of markup. What differs is what drives it: pinned, the
- * current reason comes from the track's progress cut into five bands; unpinned, from how
- * far the reader has travelled through the list. Either way one index feeds the frame, the
- * row and the step marks, so they cannot disagree about which reason is showing.
+ * NO NUMERALS, for the reason the corridor lost them too: these five hold at the same
+ * time. A row says that; a numbered sequence says the opposite.
  *
- * The section has been a 3 + 2 grid of cards and, before that, five alternating full-width
- * rows. The cards were the better of those and still wrong: five bordered boxes of one
- * sentence each is the shape of a feature grid, the page already has one in What We Do, and
- * the 3 + 2 claimed a grouping the content does not have — three of these are not a group,
- * and the last two are not a second group.
+ * NO COPY SITS ON A PHOTOGRAPH. Each card's name and sentence are on a fully opaque plate
+ * beneath its picture, never over it, and both are in the document at all times — nothing
+ * is behind a pointer, so a screen reader and a keyboard get all five without touching
+ * anything.
+ *
+ * THE BASE STATE IS THE FINAL STATE. Before the script runs, and under
+ * `prefers-reduced-motion`, there is no track and no rail: the five are an ordinary
+ * responsive grid, every picture and sentence in place, nothing moving. The motion layer
+ * is only ever added on top, scoped to `[data-motion="on"]`. See `useMotionLayer`.
+ *
+ * NOTHING INTERCEPTS SCROLLING. The stage is `position: sticky` inside a taller track, so
+ * the page moves at exactly the rate the reader asks for; the sideways travel is a
+ * transform on the row, never a hijacked wheel event.
  */
 export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
-  const reasonCount = whyFamysys.reasons.length;
-  const { ref: trackRef, revealedCount, isPinned } = useScrollSequence<HTMLDivElement>(reasonCount);
-  const [listRef, progress] = useScrollProgress<HTMLDivElement>();
-  // Pinned, the sequence hands back a 1-based count of how far it has got. Unpinned, the
-  // index comes from read progress, clamped below the last index rather than at it —
-  // `floor(1 * 5)` is 5, which is not a row.
-  const currentIndex = isPinned
-    ? revealedCount - 1
-    : Math.min(reasonCount - 1, Math.floor(progress * reasonCount));
+  const isMotionOn = useMotionLayer();
+  const trackRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLUListElement>(null);
+  const cardsRef = useRef<ReadonlyArray<HTMLElement>>([]);
+  const geometryRef = useRef<Geometry>({ travel: 0, stageWidth: 0, centres: [] });
+
+  /**
+   * GEOMETRY IS MEASURED HERE AND NOWHERE ELSE — on mount, on resize, and whenever the
+   * rail's own box changes, which is what a picture settling into its aspect ratio does.
+   * The frame below reads one rect, the track's position in the viewport, which is a
+   * scroll reading rather than a layout one.
+   */
+  useEffect(() => {
+    const track = trackRef.current;
+    const rail = railRef.current;
+    if (!track || !rail || !isMotionOn) {
+      cardsRef.current = [];
+      return;
+    }
+    const cards = Array.from(rail.querySelectorAll<HTMLElement>("[data-card]"));
+    cardsRef.current = cards;
+
+    function measure(): void {
+      const node = railRef.current;
+      const stage = trackRef.current?.firstElementChild;
+      if (!node || !(stage instanceof HTMLElement)) {
+        return;
+      }
+      const stageWidth = stage.clientWidth;
+      geometryRef.current = {
+        // What the row has to travel for its last card to reach the right-hand edge.
+        travel: Math.max(0, node.scrollWidth - stageWidth),
+        stageWidth,
+        centres: cards.map((card) => card.offsetLeft + card.offsetWidth / 2),
+      };
+    }
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(rail);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      // The motion layer owns these properties and nothing else writes them, so handing
+      // them back is what leaves the reduced-motion state genuinely untouched.
+      rail.style.transform = "";
+      for (const card of cards) {
+        card.style.transform = "";
+        card.style.removeProperty("--near");
+        const image = card.querySelector<HTMLElement>("[data-card-image]");
+        if (image) image.style.transform = "";
+      }
+      cardsRef.current = [];
+    };
+  }, [isMotionOn, whyFamysys.reasons.length]);
+
+  const paint = useCallback(() => {
+    const track = trackRef.current;
+    const rail = railRef.current;
+    const cards = cardsRef.current;
+    const { travel, stageWidth, centres } = geometryRef.current;
+    if (!track || !rail || cards.length === 0 || stageWidth === 0) {
+      return;
+    }
+    // The one rect this frame reads, and it is read before a single style is written.
+    const rect = track.getBoundingClientRect();
+    const runway = rect.height - window.innerHeight;
+    if (runway <= 0) {
+      return;
+    }
+    const railX = -clamp(-rect.top / runway, 0, 1) * travel;
+    const middle = stageWidth / 2;
+    const falloff = stageWidth * LIFT_FALLOFF;
+
+    // Every card's offset from the centre line, computed from the cached centres rather
+    // than measured, so the loop below reads nothing and only writes.
+    const offsets = centres.map((centre) => centre + railX - middle);
+
+    rail.style.transform = `translate3d(${railX.toFixed(1)}px,0,0)`;
+
+    cards.forEach((card, index) => {
+      const offset = offsets[index] ?? 0;
+      /**
+       * How near this card is to the middle: 1 on the centre line, 0 once it is a falloff
+       * away. CONTINUOUS, not a winner — the first and last card can never reach the centre
+       * of a row that starts and ends flush with the frame, so picking a single nearest
+       * left two of the five permanently unlit. As a ramp every card lights as it comes in
+       * and dims as it goes, and the ends get their share.
+       */
+      const closeness = clamp(1 - Math.abs(offset) / falloff, 0, 1);
+      card.style.setProperty("--near", closeness.toFixed(3));
+      card.style.transform = `translate3d(0,${(-CARD_LIFT * closeness).toFixed(2)}px,0)`;
+
+      const image = card.querySelector<HTMLElement>("[data-card-image]");
+      if (image) {
+        const lean = clamp(offset / stageWidth, -1, 1) * IMAGE_PARALLAX;
+        image.style.transform = `translate3d(${lean.toFixed(2)}%,0,0) scale(${IMAGE_OVERSCAN})`;
+      }
+    });
+  }, []);
+
+  useScrollFrame(paint, isMotionOn);
 
   return (
-    <Section ariaLabel={whyFamysys.heading}>
+    // Dark, on the alternate green. The rail's cards stay light objects on it — a cream
+    // card on the dark ground separates further than it did on the warm one, and the card
+    // pins its own ink text rather than inheriting the section's cream.
+    <Section dark ground="alt" fade={false} ariaLabel={whyFamysys.heading}>
       <div
         ref={trackRef}
-        className="reason-track"
-        data-pinned={isPinned}
+        className="rail-track"
+        data-motion={isMotionOn ? "on" : "off"}
         style={
           {
-            "--reason-track-height": `${100 + reasonCount * PIN_PER_REASON_VH}vh`,
+            "--rail-track-height": `${100 + whyFamysys.reasons.length * RAIL_PER_CARD_VH}vh`,
           } as CSSProperties
         }
       >
-        <div className="reason-stage">
+        {/* THE HEADING IS INSIDE THE STAGE, so it is held with the row rather than scrolled
+            off above it: the whole section — what it is called, what it claims, and all
+            five cards — is on the screen at once for the length of the travel. `dark`,
+            because the section is: without it the heading renders in ink on the green. */}
+        <div className="rail-stage">
           <Container>
-            <SectionHeader split heading={whyFamysys.heading} body={whyFamysys.body} />
-
-            <div className="reason-layout mt-16">
-              {/* The frame. Every image is rendered once and cross-faded in place —
-                  swapping a single `src` would restart the download on each change and
-                  flash the frame empty between reasons, and there are only five. The first
-                  is eager because it is on screen the moment the section is. */}
-              <div className="reason-media" aria-hidden="true">
-                {whyFamysys.reasons.map((reason, index) => (
-                  <span
-                    key={reason.title}
-                    className="reason-media-item"
-                    data-current={index === currentIndex}
-                  >
-                    <Image
-                      src={reason.media.src}
-                      alt=""
-                      width={1600}
-                      height={1200}
-                      sizes="(min-width: 1024px) 42vw, 100vw"
-                      {...(index === 0 ? {} : { loading: "lazy" as const })}
-                      className="h-full w-full object-cover"
-                    />
-                  </span>
-                ))}
-                {/* The panel is decorative — `aria-hidden` on the wrapper, empty `alt` on
-                    every image — because it says nothing the text beside it does not
-                    already say in words. A screen reader announcing five photographs of
-                    studio equipment between five one-line claims would be reading the
-                    decoration and not the section. The alt text still exists on the content
-                    object, where a future caller that shows one of these ALONE needs it. */}
-                <span className="reason-media-chip label">
-                  {whyFamysys.reasons[currentIndex]?.title}
-                </span>
-              </div>
-
-              <div ref={listRef} className="reason-list">
-                {/* The ledger's spine. Decorative twice over: it repeats the scroll
-                    position, which the scrollbar already carries, and it names nothing.
-                    Hidden while pinned, where the marks below say the same thing better. */}
-                <span className="reason-spine" aria-hidden="true">
-                  <span
-                    className="reason-spine-fill"
-                    style={{ transform: `scaleY(${progress})` }}
-                  />
-                </span>
-                <ol className="reason-rows">
-                  {whyFamysys.reasons.map((reason, index) => (
-                    <ReasonRow
-                      key={reason.title}
-                      title={reason.title}
-                      description={reason.description}
-                      numeral={String(index + 1).padStart(2, "0")}
-                      index={index}
-                      isCurrent={index === currentIndex}
-                      isPinned={isPinned}
-                    />
-                  ))}
-                </ol>
-                {/* WHERE AM I, AND HOW MUCH IS LEFT. A pinned section stops the page
-                    moving, and without an answer to those two questions that reads as a
-                    stuck page rather than as a sequence. Five marks, one filled per reason
-                    passed. Only drawn while pinned — the ledger has its spine. */}
-                <ol className="reason-steps" aria-hidden="true">
-                  {whyFamysys.reasons.map((reason, index) => (
-                    <li
-                      key={reason.title}
-                      className="reason-step"
-                      data-state={
-                        index === currentIndex ? "current" : index < currentIndex ? "done" : "todo"
-                      }
-                    />
-                  ))}
-                </ol>
-              </div>
-            </div>
+            <SectionHeader split dark heading={whyFamysys.heading} body={whyFamysys.body} />
           </Container>
+
+          <ul className="rail" ref={railRef}>
+            {whyFamysys.reasons.map((reason, index) => (
+              <li key={reason.title} className="rail-card" data-card>
+                <div className="rail-window">
+                  <Image
+                    src={reason.media.src}
+                    alt={reason.media.alt}
+                    width={1200}
+                    height={1500}
+                    sizes="(min-width: 900px) 26rem, 78vw"
+                    {...(index === 0 ? {} : { loading: "lazy" as const })}
+                    className="rail-image"
+                    data-card-image
+                  />
+                </div>
+                {/* Opaque, and under the picture rather than over it. */}
+                <div className="rail-plate">
+                  <span className="rail-mark" aria-hidden="true" />
+                  <h3 className="rail-title text-display-s font-medium">{reason.title}</h3>
+                  <p className="rail-say text-small">{reason.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </Section>

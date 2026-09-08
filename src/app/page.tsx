@@ -14,7 +14,6 @@ import { Differentiator } from "../presentation/sections/home/Differentiator";
 import { HowWeWorkFrames } from "../presentation/sections/home/HowWeWorkFrames";
 import { WaysToWorkTiles } from "../presentation/sections/home/WaysToWorkTiles";
 import { SelectedWorkCovers } from "../presentation/sections/home/SelectedWorkCovers";
-import { WhyFamysys } from "../presentation/sections/home/WhyFamysys";
 import { Faq } from "../presentation/sections/shared/Faq";
 import { FinalCta } from "../presentation/sections/shared/FinalCta";
 import {
@@ -28,7 +27,6 @@ import {
   toFooterContentView,
   toHeroContentView,
   toNavigationMenuView,
-  toWhyFamysysBlockView,
 } from "../presentation/lib/viewModels";
 import { homeMetadata } from "../shared/site/metadata";
 
@@ -86,7 +84,15 @@ export default async function HomePage() {
           intro={homepage.workIntro}
           caseStudies={caseStudies.map(toCaseStudyView)}
         />
-        <WhyFamysys whyFamysys={toWhyFamysysBlockView(homepage.whyFamysys)} />
+        {/* WHY FAMYSYS IS OFF THE HOMEPAGE, at the client's direction. The section, its
+            content block and its use case are all still here — `homepage.whyFamysys` is
+            still read by `GetHomepageContent` and `WhyFamysys.tsx` is untouched — so
+            putting it back is one line. Nothing else renders it today.
+
+            The FAQ is hidden rather than removed, and from every page at once: see
+            FAQ_ENABLED in Faq.tsx, which is the single switch. The calls below and on the
+            three inner pages are left exactly as they were so unhiding touches one
+            boolean and no page. */}
         <Faq faq={toFaqBlockView(homepage.faq)} />
         <FinalCta closingCta={homepage.closingCta} />
       </main>

@@ -22,6 +22,20 @@ interface SectionProps {
    * the fade is switched off rather than the colour worked around.
    */
   readonly fade?: boolean;
+  /**
+   * Pins which of the two dark grounds this section takes, instead of letting THE SECTION
+   * SEAM count preceding dark sections and alternate them.
+   *
+   * The seam's counting is right for a page whose dark sections are occasional. The
+   * homepage's are not: from What We Do down it alternates light and dark on every
+   * section, and left to count, the darks came out ink, alt, ink, alt — four sections
+   * carrying two different greens where the design calls for one. Naming it here is the
+   * only way to say "these three are the same colour" without unpicking the seam for
+   * every other page, and an inline variable is what beats a seven-deep sibling chain.
+   *
+   * The hero and the closing CTA pass nothing and keep the base navy the seam gives them.
+   */
+  readonly ground?: "base" | "alt";
 }
 
 function paddingFor(dark: boolean, statement: boolean): string {
@@ -48,6 +62,7 @@ export function Section({
   ariaLabel,
   className = "",
   fade = true,
+  ground,
 }: SectionProps) {
   const [ref, isInView] = useInView<HTMLElement>({ threshold: 0.05, once: true });
 
@@ -61,6 +76,20 @@ export function Section({
       } ${className}`}
       style={{
         paddingBlock: paddingFor(dark, statement),
+        ...(ground
+          ? {
+              "--section-ground":
+                ground === "alt" ? "var(--color-section-alt)" : "var(--color-ink)",
+              "--section-ground-entering":
+                ground === "alt"
+                  ? "var(--color-section-alt-entering)"
+                  : "var(--color-ink-90)",
+              "--color-hairline-on-dark":
+                ground === "alt"
+                  ? "var(--color-hairline-on-section-alt)"
+                  : "var(--color-canvas-10)",
+            }
+          : {}),
         // Both ends of the fade come from the section-ground variables rather than from
         // `ink` directly, so a dark section that the seam rules have moved onto the
         // alternate navy fades from its OWN 90% step to its own ground. Naming ink here
@@ -73,7 +102,7 @@ export function Section({
                 : "var(--section-ground-entering, var(--color-ink-90))",
             }
           : {}),
-      }}
+      } as React.CSSProperties}
     >
       {children}
     </section>

@@ -233,7 +233,10 @@ export function WaysToWorkTiles({
   }, []);
 
   return (
-    <Section ariaLabel={heading} className="imagery-section">
+    // Dark, on the alternate green. Every plate in this section is opaque and sits over a
+    // photograph rather than over the section ground, so nothing here had to be recoloured
+    // to move — the eyebrow and the lede swap themselves off `.surface-dark`.
+    <Section dark ground="alt" fade={false} ariaLabel={heading} className="imagery-section">
       <Container>
         <p className="imagery-eyebrow label">{eyebrow}</p>
         <h2 className="imagery-display mt-4">{heading}</h2>

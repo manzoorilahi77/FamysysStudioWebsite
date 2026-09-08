@@ -310,7 +310,7 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
           navigation here that happens to be drawn in two pieces. */}
       <div
         data-header-bar
-        className="relative mx-auto w-full py-4"
+        className="relative mx-auto w-full py-6"
         style={navShellStyle}
       >
         <nav
@@ -328,8 +328,14 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
           <Link href="/" className="cnav-wordmark" aria-label="Famysys Studio, home">
             {/* One file, both scroll states. Transparent means "on the hero", which is
                 ink; scrolled means the bar is ink. Neither is light, so there is nothing
-                for the ink variant to appear on and nothing to cross-fade between. */}
-            <Wordmark alt="" dark priority className="h-8" />
+                for the ink variant to appear on and nothing to cross-fade between.
+
+                The height is a clamp on the class rather than Tailwind's `h-8`, because
+                the mark should grow with the room the bar has: it held a flat 32px from
+                1024 to 2560, which on a 1408px shell read as a small mark in a wide bar.
+                See `.cnav-mark`, which keeps 32px at 1024 — where the row is at its
+                tightest — and takes 44px at 1920. */}
+            <Wordmark alt="" dark priority className="cnav-mark" />
           </Link>
 
           <div className="cnav-end">

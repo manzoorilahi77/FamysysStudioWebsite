@@ -11,7 +11,7 @@ artifact below is marked with what it is, when it was made, and what happened to
 
 | Question | Answer |
 | --- | --- |
-| Which hero did the client choose? | **`01-heroes/hero-final.html`** — Claret's colours, navbar and type treatment combined with Cinder's background, composition and accordion, both taken from `hero-designs-4.html`. It is **in production**: see `src/presentation/sections/Hero.tsx`. |
+| Which hero did the client choose? | **`01-heroes/hero-final.html`** — Claret's colours, navbar and type treatment combined with Cinder's background, composition and accordion, both taken from `hero-designs-4.html`. It is **in production**: see `src/presentation/sections/home/Hero.tsx`. |
 | Which palette is live? | **Kiln** (`03-colour/palette-b/`) for the nine grounds and neutrals, with the **Claret accent pair** from the chosen hero replacing Kiln's own terracotta accents. The live values are in `src/shared/design/colors.ts`, block 2. |
 | Which homepage direction was chosen? | **None.** All four are unadopted alternatives. The live homepage keeps its own section order (`src/app/page.tsx`); the hero is the only exploration that reached production. |
 
@@ -59,7 +59,7 @@ layout, with the accordion kept on the right. `README-hero-final.md` has the rea
 Both accent values were then adopted **site-wide**, not just in the hero, which is why
 `colors.ts` carries the Claret pair on top of Kiln's grounds.
 
-**Where it lives now:** `src/presentation/sections/Hero.tsx` (the `.hero-final-*` classes),
+**Where it lives now:** `src/presentation/sections/home/Hero.tsx` (the `.hero-final-*` classes),
 `src/presentation/hooks/useHeroMotion.ts`, styles in `src/app/globals.css`, and the five band
 images at `public/media/hero-band-*.jpg` — which came from `01-heroes/media-4/` and are
 stand-ins with no recorded licence. That is an open item in `docs/content-todo.md`.

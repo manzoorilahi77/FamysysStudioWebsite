@@ -206,22 +206,30 @@ export const radius = "0.25rem"; // measured — famysys.com --radius-sm, applie
 // most of all, since the space around them is what makes the centring read as a
 // decision instead of a default.
 export const spacing = {
-  section: "clamp(4.5rem, 10vh, 8.5rem)",
-  sectionDark: "clamp(6.5rem, 14vh, 12rem)",
-  statement: "clamp(8rem, 18vh, 15rem)",
-  // THE SITE'S ONE GUTTER. The header bar, every section's Container and the footer all
-  // take this value, which is what makes a section's first character sit directly under
-  // the wordmark and its last pixel under the right edge of the header's CTA. It used to
-  // top out at 5.5rem while the header ran on a flat 1.5rem, so content was inset from
-  // the bar it was supposed to line up with — 4px at 390 and 64px at 1920.
+  // TRIMMED ~20%. At a 900px viewport the old values put 90px of empty ground at each end
+  // of a light section, 126px at each end of a dark one and 162px around a statement — so
+  // every seam on the homepage was a 180-250px band of nothing between two sections that
+  // already announce themselves by changing colour. The relationship between the three is
+  // unchanged: a dark section still breathes more than a light one and a statement more
+  // than either, which is what stops the page reading as a list.
+  section: "clamp(3.5rem, 8vh, 7rem)",
+  sectionDark: "clamp(4.5rem, 10.5vh, 9rem)",
+  statement: "clamp(6rem, 14vh, 12rem)",
+  // THE SITE'S ONE GUTTER, AND IT IS NOW THE BAR'S. Every section's Container, the footer
+  // and the header shell all take this, so a section's first character sits directly under
+  // the bar's first label and its last pixel under the right edge of the header's call to
+  // action — at every width, not at one.
   //
-  // 3rem is the ceiling rather than 5.5rem because the header has to live inside it too:
-  // the bar's contents measure 1128px at their tightest, and at the old ceiling the 80rem
-  // shell left only 1104px, so the nav would have overflowed. At 3rem it has 1184px.
-  gutter: "clamp(1.5rem, 4vw, 3rem)",
+  // It was `clamp(1.5rem, 4vw, 3rem)` against an 80rem page while the bar ran on 5vw
+  // against 88rem, which is the split `navContainer` below describes. Measured at 1920 the
+  // two lines were 16px apart at each edge; at 1440 they were 40px apart. Nothing about
+  // that gap was visible as a decision — it read as the bar being slightly out of true
+  // with the page under it. Adopting the BAR's numbers is what closes it, which is the
+  // direction the client asked for: the sections come to the bar.
+  gutter: "5vw",
 } as const;
 
-export const container = { maxWidth: "80rem" } as const; // 1280px
+export const container = { maxWidth: "88rem" } as const; // 1408px — famysys.com's header shell
 
 /**
  * THE BAR'S OWN LINE — the one thing on the site that does NOT take `container` above.
@@ -231,14 +239,13 @@ export const container = { maxWidth: "80rem" } as const; // 1280px
  * line 88px from each edge at 1440 (1264px wide), 64px at 1280 (1152px) and 51.2px at
  * 1024 (921.6px). The two values below reproduce that exactly.
  *
- * WHAT THIS COSTS, stated plainly because it undoes something the header was built to do:
- * `container` is 80rem with a 3rem gutter, so at 1440 a section's first character sits at
- * 128px and the bar's first label now sits at 88px. Above 1408 the bar is WIDER than the
- * page; between about 1100 and 1408 it is narrower. The two lines no longer coincide at
- * any width, which is the trade the parent site itself does not make — famysys.com runs
- * one shell for its bar and its sections alike. Matching its bar while keeping our own
- * page width is what pulls them apart. Changing `container` to these numbers would put
- * them back together and match famysys.com everywhere, and would relayout all seven pages.
+ * IT IS NO LONGER THE ONE THING. `container` and `spacing.gutter` above now carry these
+ * same two numbers, so the bar's line and the page's line are the same line at every
+ * width — which is what famysys.com itself does, one shell for its bar and its sections
+ * alike. This constant is kept because the header, the nav panels and `--nav-gutter` all
+ * name it directly and the bar's line is a fact about the bar, not a coincidence: if the
+ * page width ever moves again, the bar should be a deliberate decision rather than a
+ * silent passenger.
  */
 export const navContainer = { maxWidth: "88rem", gutter: "5vw" } as const; // 1408px
 

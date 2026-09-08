@@ -46,7 +46,7 @@ describe("StaticMarketingContentRepository", () => {
       "Professional Production",
       "Efficient Delivery",
     ]);
-    expect(differentiator.closingStatement).toBe("AI is our production advantage — not our identity.");
+    expect(differentiator.closingStatement).toBe("AI is our production advantage not our identity");
   });
 
   it("gives every differentiator element its own image, in element order", async () => {

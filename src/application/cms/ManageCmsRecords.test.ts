@@ -1,31 +1,44 @@
 import { describe, expect, it } from "vitest";
-import type { CmsCollection } from "../../domain/cms/entities/CmsCollection";
 import { isOpenCollection, recordNoun } from "../../domain/cms/entities/CmsCollection";
-import { FakeCmsRepository, fakeValue } from "./__fakes__/FakeCmsRepository";
+import {
+  FakeCmsRepository,
+  fakePage,
+  fakeRecord,
+  fakeValue,
+} from "./__fakes__/FakeCmsRepository";
 import { CreateCmsRecord, DeleteCmsRecord, SetInquiryStatus } from "./ManageCmsRecords";
 
-const collection: CmsCollection = {
-  id: "faq",
-  label: "FAQ",
-  description: "",
-  panelLabel: "All questions",
-  source: "database",
-  emptyMessage: "None.",
-  records: [
+/**
+ * The homepage's FAQ section with one question nested inside it — which is where a question now
+ * lives, rather than on a collection screen of its own.
+ */
+const question = fakeRecord({
+  id: "do-you-work-with-small-businesses",
+  address: { kind: "collection_record", key: "faq:do-you-work-with-small-businesses" },
+  values: [fakeValue({ id: "answer", value: "Yes." })],
+});
+
+const home = fakePage({
+  id: "home",
+  route: "/",
+  sections: [
     {
-      id: "do-you-work-with-small-businesses",
-      title: "Do you work with small businesses?",
-      summary: "Yes.",
-      status: "draft",
-      updatedAt: new Date("2026-09-01T00:00:00Z"),
-      values: [fakeValue({ id: "answer", value: "Yes." })],
-      lists: [],
+      ...fakeRecord({ id: "faq", address: { kind: "page_section", key: "home:faq" } }),
+      items: [
+        {
+          id: "items-questions",
+          label: "Questions",
+          collectionId: "faq",
+          addNoun: "a question",
+          records: [question],
+        },
+      ],
     },
   ],
-};
+});
 
 function subject() {
-  const repository = new FakeCmsRepository([], [collection]);
+  const repository = new FakeCmsRepository([home]);
   return {
     repository,
     create: new CreateCmsRecord(repository),
@@ -74,12 +87,15 @@ describe("adding a record", () => {
     expect(result).toMatchObject({ ok: false });
   });
 
-  it("refuses a collection that does not exist", async () => {
+  it("refuses a run of blocks that is not one an editor may add to", async () => {
     const { create } = subject();
 
-    const result = await create.execute("invented", { slug: "", title: "A", summary: "B" });
+    const result = await create.execute("case-studies", { slug: "", title: "A", summary: "B" });
 
-    expect(result).toMatchObject({ ok: false, message: "That collection does not exist." });
+    expect(result).toMatchObject({
+      ok: false,
+      message: "Blocks cannot be added to this part of the page.",
+    });
   });
 
   // The file-backed store cannot grow a record, and says so instead of failing obscurely.
@@ -148,12 +164,15 @@ describe("which collections are open", () => {
     expect(isOpenCollection("faq")).toBe(true);
 
     expect(isOpenCollection("case-studies")).toBe(false);
+    // Screens that no longer exist. The panel lists seven pages and an inbox, and nothing here
+    // should ever answer for one of them again.
     expect(isOpenCollection("testimonials")).toBe(false);
     expect(isOpenCollection("lists")).toBe(false);
+    expect(isOpenCollection("blog")).toBe(false);
   });
 
   it("gives a button label that reads as an instruction", () => {
     expect(recordNoun("faq")).toBe("a question");
-    expect(recordNoun("lists")).toBe("a record");
+    expect(recordNoun("case-studies")).toBe("a record");
   });
 });

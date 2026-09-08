@@ -15,5 +15,12 @@ export default async function AdminSectionRoute({
     notFound();
   }
 
-  return <SectionScreen page={page} section={section} />;
+  return (
+    <SectionScreen
+      page={page}
+      section={section}
+      canPreviewDrafts={adminContainer.cms.supportsDraftPreview}
+      canChangeBlocks={adminContainer.cms.supportsRecordChanges}
+    />
+  );
 }
