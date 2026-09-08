@@ -32,6 +32,9 @@ export function parseEdits(value: unknown): ReadonlyArray<CmsValueEdit> | null {
     if (!entry || typeof entry !== "object") return null;
     const candidate = entry as Record<string, unknown>;
     if (typeof candidate.valueId !== "string" || typeof candidate.value !== "string") return null;
+    // Which record within the section the field is on — the section itself, or one of the
+    // cards inside it. Optional, because a section field does not need to name one.
+    if (candidate.recordId !== undefined && typeof candidate.recordId !== "string") return null;
     // The revision, when the screen had one. A non-integer is refused rather than coerced: a NaN
     // in the comparison would match nothing and read as a conflict.
     if (
@@ -43,6 +46,7 @@ export function parseEdits(value: unknown): ReadonlyArray<CmsValueEdit> | null {
     parsed.push({
       valueId: candidate.valueId,
       value: candidate.value,
+      ...(candidate.recordId === undefined ? {} : { recordId: candidate.recordId as string }),
       ...(candidate.version === undefined ? {} : { version: candidate.version as number }),
     });
   }

@@ -21,9 +21,9 @@ interface AdminScreenProps {
  * screen puts under it.
  *
  * The explanatory paragraph is not decoration. A CMS whose sections are only named leaves
- * an editor guessing which of two similar screens owns a piece of copy, and this panel has
- * several — Lists and the records the lists belong to, Pages and the collections their
- * sections render. The sentence under the heading is where that is settled.
+ * an editor guessing which of two similar blocks owns a piece of copy, and this site has
+ * several — two blocks called Hero on the same page's neighbours, a Final CTA on six of the
+ * seven pages. The sentence under the heading is where that is settled.
  *
  * The account control signs out, and that is all it does. One shared login means there is
  * no account to switch to.

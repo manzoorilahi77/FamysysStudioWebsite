@@ -126,6 +126,91 @@ curl -s https://studio.famysys.com/robots.txt
 - **The pages render but the content is stale or wrong** — the build could not reach the
   database and fell back to the content modules. `npm run db:status` on the build machine.
 
+## Verifying the CMS on a machine that can reach the database
+
+`npm run test:e2e` drives the whole panel in a browser, but it runs against
+`CONTENT_SOURCE=static` because a development machine cannot reach `studio.famysys.com:3306`
+— cPanel refuses remote MySQL. Under that store a save writes `.cms-drafts.json` and a
+publish rewrites a TypeScript module, which is enough to prove save, validation, discard,
+draft state, publish-through and the whole of the editor's behaviour.
+
+**Seven things it cannot prove**, listed here so they are checked once rather than
+rediscovered. Run these on a machine with database access, after a real deploy, in order.
+
+- [ ] **1 · Migration 008 is applied.** `db/migrations/008_content_drafts.sql` creates
+      `content_drafts` and is written but NOT applied. Nothing in the panel saves without
+      it. `npm run db:migrate`, then `npm run db:status` to confirm.
+
+- [ ] **2 · `revalidatePath` actually regenerates the prerendered pages.**
+      *This is the one that has failed silently before.* The route SET is covered by
+      `src/infrastructure/cms/routes.test.ts` — it fails if any owner in the model resolves
+      to no route — but nothing on a development machine can prove the regeneration itself,
+      because in `next dev` there is no prerendered HTML to invalidate.
+      Edit a **capability's expanded copy** in the panel, publish, and then, **without a
+      cache-busting query string and without a reload**:
+      ```bash
+      curl -s https://studio.famysys.com/ | grep -c "<the new sentence>"
+      curl -s https://studio.famysys.com/creative-services | grep -c "<the new sentence>"
+      ```
+      Both must be non-zero on the FIRST request after the publish. A capability is used
+      deliberately: it is rendered by two pages, so a revalidation that only regenerates
+      the page being edited passes on `/creative-services` and fails on `/`.
+      Then repeat with the **footer's tagline**, which is site-wide, and check all seven
+      routes. If a page is stale, the publish wrote the row and lied about the rest.
+
+- [ ] **3 · The draft preview overlay.** `DbCmsRepository.supportsDraftPreview` is `true`
+      and `ContentStore.load()` lays `content_drafts` over `content_strings` when
+      `draftMode()` is on. Save a draft, press **Preview**, and check three things: the chip
+      reads *"With unpublished edits"* rather than *"Live content only"*, the iframe shows
+      the draft, and the same route in an ordinary tab still shows the published string.
+      Close the preview and reload the public page — the draft cookie must be gone, or the
+      editor's own view of the live site is quietly showing drafts.
+
+- [ ] **4 · Optimistic concurrency, per row.** Open the same section in two browsers. Save
+      in A. Save in B. B must be refused with **409** and the message about the content
+      having changed, and B's typing must still be on screen. Repeat for publish. The file
+      store proves the same idea against a whole file; the database proves it against the
+      `version` column, which is the mechanism that actually ships.
+
+- [ ] **5 · Adding and removing a block.** `supportsRecordChanges` is `false` on the file
+      store, so the Add and Remove controls do not render at all under `static`. On the
+      database path, add a capability, confirm it appears on `/` and `/creative-services`,
+      then remove it and confirm both pages lose it — a structural change calls
+      `structureChanged()` and regenerates all seven routes.
+
+- [ ] **6 · The contact forms reach the inbox.** Submit the homepage's closing form and
+      `/contact`'s eight-field form. Both must appear in the inbox, newest first, with
+      `sourceForm` right and — this is the part worth looking at — the three fields the
+      homepage never asks for **absent**, not shown as empty. Then mark one read, archive
+      it, and put it back. `InboxScreen.test.tsx` covers the screen and the two controls
+      against fixtures; what it cannot cover is the endpoint writing the row.
+
+- [ ] **7 · The login form.** `attemptLogin` counts rows in `login_attempts`, so sign-in
+      answers 503 with no database and the browser suite mints its session cookie directly
+      instead. Confirm a correct password signs in, that five wrong ones lock the client
+      out for fifteen minutes, and that the lockout message does not distinguish "wrong
+      password" from "locked" before the lockout is real.
+
+Nothing above is optional after a schema change or a change to `routes.ts`.
+
+## Running the browser suite
+
+```bash
+npm run test:e2e
+```
+
+It stops anything on port 4399, stops every Next dev server, deletes `.next`, installs the
+Chromium build if it is missing, then starts its own dev server with `CONTENT_SOURCE=static`
+and runs `e2e/`. **It kills other Next dev servers on the machine** — that is deliberate,
+because a server left from another session is the single most reliable source of false
+failures in this project, but it means the suite should not be started while somebody else
+is working on the same box.
+
+The run begins with `e2e/gate.setup.ts`. Every other test depends on it, so a dead server
+or a bundle that does not hydrate produces one failure that says so rather than thirty that
+blame the panel. It writes to the working tree — a publish rewrites a content module — and
+restores the modules from a snapshot afterwards, whether the run passed or failed.
+
 ## What this host cannot do
 
 - **No zero-downtime deploy.** One process, one port; the restart is a real gap. Two ports

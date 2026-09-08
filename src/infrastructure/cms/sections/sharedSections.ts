@@ -1,33 +1,46 @@
+import type { ContentAddress } from "../../../domain/cms/entities/ContentAddress";
 import type { CmsRecord } from "../../../domain/cms/entities/CmsRecord";
 import type { ContentPointer } from "../../../domain/cms/entities/ContentPointer";
 import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
 import type { FaqBlock } from "../../../domain/marketing/entities/FaqBlock";
-import { ctaFields, field, list, readOnlyList, toRecord } from "../records";
+import { ctaFields, field, list, paragraph, readOnlyList, toRecord } from "../records";
 
 /**
- * Six of the seven pages end on a closing CTA and three carry an FAQ block. Both are
- * mapped once here so the section rows read the same wherever they appear — and both take
- * a pointer factory, because the copy is per-page even where the shape is not.
+ * Six of the seven pages end on a closing CTA and four carry an FAQ block. Both are mapped
+ * once here so the section reads the same wherever it appears — and both take a pointer
+ * factory, because the copy is per-page even where the shape is not.
  */
 
 /** Path segments relative to one block in one content file. */
 export type At = (...path: ReadonlyArray<string | number>) => ContentPointer;
 
+/** The owner a write to this section goes to. */
+export function sectionAddress(pageId: string, sectionId: string): ContentAddress {
+  return { kind: "page_section", key: `${pageId}:${sectionId}` };
+}
+
 export function closingCtaSection(
+  pageId: string,
   block: ClosingCtaBlock,
   updatedAt: Date | null,
   at: At,
 ): CmsRecord {
   return toRecord({
     id: "closing-cta",
-    title: "Closing CTA",
+    title: "Final CTA",
     summary: block.heading,
     updatedAt,
-    values: [
-      field("Heading", block.heading, at("heading")),
-      field("Body", block.body, at("body")),
-      field("Closing line", block.closingLine, at("closingLine")),
-      ...ctaFields("CTA", block.cta, at("cta")),
+    address: sectionAddress(pageId, "closing-cta"),
+    groups: [
+      {
+        label: "Copy",
+        values: [
+          field("Heading", block.heading, at("heading")),
+          paragraph("Body", block.body, at("body")),
+          field("Closing line", block.closingLine, at("closingLine")),
+          ...ctaFields("CTA", block.cta, at("cta")),
+        ],
+      },
     ],
   });
 }
@@ -36,9 +49,9 @@ export function closingCtaSection(
  * AN INNER PAGE'S FAQ IS TWO DIFFERENT THINGS IN ONE LIST.
  *
  * Some entries are the client's own, spread in from the homepage block so they cannot
- * drift — those are edited on the FAQ screen, and are read-only here. The rest were
- * written for this page and live in this page's file, so they are editable here and
- * nowhere else.
+ * drift — those are edited on the homepage's FAQ section, where the shared set is defined,
+ * and are read-only here. The rest were written for this page and live in this page's file,
+ * so they are editable here and nowhere else.
  *
  * `sourceIndex` is the entry's position in the ARRAY LITERAL, which is not its position at
  * runtime: `[...reusedFaqItems, { … }]` is two elements in the file and four on the page.
@@ -68,6 +81,7 @@ export function ownFaqEntries(
 }
 
 export function faqSection(
+  pageId: string,
   eyebrow: string,
   heading: string,
   block: FaqBlock,
@@ -83,27 +97,44 @@ export function faqSection(
     title: "FAQ",
     summary: heading,
     updatedAt,
-    values: [field("Eyebrow", eyebrow, at("eyebrow")), field("Heading", heading, at("heading"))],
-    lists: [
-      readOnlyList(
-        "All questions, in order",
-        block.items.map((entry) => entry.question),
-        "The full list as the page renders it. Entries reused from the brief are edited under FAQ; entries written for this page are below.",
-      ),
-      ...(own.length > 0
-        ? [
-            list(
-              "Questions written for this page",
-              own.map((entry) => entry.question),
-              (index) => item(index, "question"),
-            ),
-            list(
-              "Answers written for this page",
-              own.map((entry) => entry.answer),
-              (index) => item(index, "answer"),
-            ),
-          ]
-        : []),
+    address: sectionAddress(pageId, "faq"),
+    groups: [
+      {
+        label: "Heading",
+        values: [
+          field("Eyebrow", eyebrow, at("eyebrow")),
+          field("Heading", heading, at("heading")),
+        ],
+      },
+      {
+        label: "Questions",
+        description:
+          "The list as the page renders it. Entries reused from the shared set are edited on the homepage's FAQ section; entries written for this page are editable below.",
+        lists: [
+          readOnlyList(
+            "All questions, in order",
+            block.items.map((entry) => entry.question),
+            "Reused from the shared set, or written for this page. Either way this list is the running order, which is structural — the wording is edited below or on the homepage.",
+          ),
+          ...(own.length > 0
+            ? [
+                list(
+                  "Questions written for this page",
+                  own.map((entry) => entry.question),
+                  (index) => item(index, "question"),
+                ),
+                {
+                  ...list(
+                    "Answers written for this page",
+                    own.map((entry) => entry.answer),
+                    (index) => item(index, "answer"),
+                  ),
+                  multiline: true,
+                },
+              ]
+            : []),
+        ],
+      },
     ],
   });
 }

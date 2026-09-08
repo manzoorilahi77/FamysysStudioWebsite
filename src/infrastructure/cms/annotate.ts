@@ -1,4 +1,3 @@
-import type { CmsCollection } from "../../domain/cms/entities/CmsCollection";
 import type { CmsPage } from "../../domain/cms/entities/CmsPage";
 import type { CmsRecord, CmsValue } from "../../domain/cms/entities/CmsRecord";
 
@@ -14,9 +13,9 @@ import type { CmsRecord, CmsValue } from "../../domain/cms/entities/CmsRecord";
  * approved automatically, with nothing to remember.
  *
  * `usedElsewhere` — every OTHER place in the panel the identical string appears. Six of
- * the seven pages end on the same closing line and three share an FAQ block, so an editor
- * changing one is often changing all of them. Derived by indexing the assembled model,
- * so it cannot go stale.
+ * the seven pages end on the same closing line, four share an FAQ block and the six
+ * capabilities appear on two pages, so an editor changing one is often changing all of
+ * them. Derived by indexing the assembled model, so it cannot go stale.
  */
 
 /** Keys holding a route, file path or enum rather than reviewable copy. */
@@ -57,56 +56,72 @@ export function collectStrings(node: unknown, out: string[] = []): string[] {
   return out;
 }
 
-function locationOf(owner: string, record: CmsRecord, value: CmsValue): string {
-  return `${owner} › ${record.title} · ${value.label}`;
+/** "Home › Hero · Heading", or "Creative Services › Capabilities › Motion · Descriptor". */
+function locationOf(trail: ReadonlyArray<string>, value: CmsValue): string {
+  return `${trail.join(" › ")} · ${value.label}`;
 }
 
-function valuesOf(record: CmsRecord): ReadonlyArray<CmsValue> {
-  return [
-    ...record.values,
-    ...record.lists.flatMap((list) => list.items),
-    ...(record.media ? [record.media.alt] : []),
-  ];
-}
-
-interface Owned {
-  readonly owner: string;
+interface Located {
+  readonly trail: ReadonlyArray<string>;
   readonly record: CmsRecord;
 }
 
-function ownedRecords(
-  pages: ReadonlyArray<CmsPage>,
-  collections: ReadonlyArray<CmsCollection>,
-): ReadonlyArray<Owned> {
-  return [
-    ...pages.flatMap((page) => page.sections.map((record) => ({ owner: page.title, record }))),
-    ...collections.flatMap((collection) =>
-      collection.records.map((record) => ({ owner: collection.label, record })),
-    ),
-  ];
+/** Every record in the model, with the path of titles that names it. */
+function locate(pages: ReadonlyArray<CmsPage>): ReadonlyArray<Located> {
+  const found: Located[] = [];
+  const walk = (trail: ReadonlyArray<string>, record: CmsRecord): void => {
+    const own = [...trail, record.title];
+    found.push({ trail: own, record });
+    for (const group of record.items) {
+      for (const nested of group.records) {
+        walk(own, nested);
+      }
+    }
+  };
+  for (const page of pages) {
+    for (const section of page.sections) {
+      walk([page.title], section);
+    }
+  }
+  return found;
 }
 
-/** Every location each distinct string occupies, keyed by the string. */
-function indexLocations(owned: ReadonlyArray<Owned>): ReadonlyMap<string, ReadonlyArray<string>> {
-  return owned.reduce((index, entry) => {
+function valuesOf(record: CmsRecord): ReadonlyArray<CmsValue> {
+  return record.groups.flatMap((group) => [
+    ...group.values,
+    ...group.lists.flatMap((entry) => entry.items),
+    ...group.media.map((entry) => entry.alt),
+  ]);
+}
+
+/**
+ * Every location each distinct string occupies, keyed by the string.
+ *
+ * A record that appears under two sections — the capabilities, on the homepage and on
+ * Creative Services — is genuinely two locations for the same string, and both are listed.
+ * That is the truthful answer to "where else does this appear", even though the two are one
+ * row: it is where an editor will see it change.
+ */
+function indexLocations(located: ReadonlyArray<Located>): ReadonlyMap<string, ReadonlyArray<string>> {
+  return located.reduce((index, entry) => {
     for (const value of valuesOf(entry.record)) {
       const existing = index.get(value.value) ?? [];
-      index.set(value.value, [...existing, locationOf(entry.owner, entry.record, value)]);
+      index.set(value.value, [...existing, locationOf(entry.trail, value)]);
     }
     return index;
   }, new Map<string, ReadonlyArray<string>>());
 }
 
 interface Annotator {
-  (owner: string, record: CmsRecord, value: CmsValue): CmsValue;
+  (trail: ReadonlyArray<string>, value: CmsValue): CmsValue;
 }
 
 function makeAnnotator(
   approved: ReadonlySet<string>,
   locations: ReadonlyMap<string, ReadonlyArray<string>>,
 ): Annotator {
-  return (owner, record, value) => {
-    const own = locationOf(owner, record, value);
+  return (trail, value) => {
+    const own = locationOf(trail, value);
     return {
       ...value,
       approval: approved.has(value.value) ? "client" : "drafted",
@@ -115,43 +130,39 @@ function makeAnnotator(
   };
 }
 
-function annotateRecord(owner: string, record: CmsRecord, annotate: Annotator): CmsRecord {
+function annotateRecord(
+  trail: ReadonlyArray<string>,
+  record: CmsRecord,
+  annotate: Annotator,
+): CmsRecord {
+  const own = [...trail, record.title];
   return {
     ...record,
-    values: record.values.map((value) => annotate(owner, record, value)),
-    lists: record.lists.map((entry) => ({
-      ...entry,
-      items: entry.items.map((item) => annotate(owner, record, item)),
+    groups: record.groups.map((group) => ({
+      ...group,
+      values: group.values.map((value) => annotate(own, value)),
+      lists: group.lists.map((entry) => ({
+        ...entry,
+        items: entry.items.map((item) => annotate(own, item)),
+      })),
+      media: group.media.map((entry) => ({ ...entry, alt: annotate(own, entry.alt) })),
     })),
-    ...(record.media
-      ? { media: { ...record.media, alt: annotate(owner, record, record.media.alt) } }
-      : {}),
+    items: record.items.map((group) => ({
+      ...group,
+      records: group.records.map((nested) => annotateRecord(own, nested, annotate)),
+    })),
   };
 }
 
-export interface AnnotatedModel {
-  readonly pages: ReadonlyArray<CmsPage>;
-  readonly collections: ReadonlyArray<CmsCollection>;
-}
-
-export function annotateModel(
+export function annotatePages(
   pages: ReadonlyArray<CmsPage>,
-  collections: ReadonlyArray<CmsCollection>,
   approvedSources: ReadonlyArray<unknown>,
-): AnnotatedModel {
+): ReadonlyArray<CmsPage> {
   const approved = new Set(collectStrings(approvedSources));
-  const annotate = makeAnnotator(approved, indexLocations(ownedRecords(pages, collections)));
+  const annotate = makeAnnotator(approved, indexLocations(locate(pages)));
 
-  return {
-    pages: pages.map((page) => ({
-      ...page,
-      sections: page.sections.map((section) => annotateRecord(page.title, section, annotate)),
-    })),
-    collections: collections.map((collection) => ({
-      ...collection,
-      records: collection.records.map((record) =>
-        annotateRecord(collection.label, record, annotate),
-      ),
-    })),
-  };
+  return pages.map((page) => ({
+    ...page,
+    sections: page.sections.map((section) => annotateRecord([page.title], section, annotate)),
+  }));
 }

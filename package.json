@@ -18,6 +18,8 @@
     "check-colours": "node scripts/check-colours.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "node scripts/e2e-preflight.mjs && playwright test",
+    "test:e2e:only": "playwright test",
     "format": "node scripts/format-changed.mjs",
     "format:all": "prettier --write .",
     "format:check": "prettier --check .",

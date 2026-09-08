@@ -42,3 +42,11 @@ shots*/
 
 # scratch space for scripts/deploy.mjs — the packed release, deleted after every run
 .deploy-tmp/
+
+# Unpublished CMS edits, when the panel is running against the TypeScript content
+# files rather than the database. See infrastructure/cms/FileDraftStore.ts.
+.cms-drafts.json
+
+# Playwright: browser session state, content snapshots, traces and reports.
+.playwright/
+playwright-report/

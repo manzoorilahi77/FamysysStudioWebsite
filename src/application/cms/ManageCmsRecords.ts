@@ -1,15 +1,22 @@
+import { canChangeItems, recordTree } from "../../domain/cms/entities/CmsRecord";
+import type { CmsItemGroup } from "../../domain/cms/entities/CmsRecord";
+import type { CmsInquiryStatus } from "../../domain/cms/entities/CmsInquiry";
 import type { CmsRepository, NewCmsRecord } from "../../domain/cms/repositories/CmsRepository";
 
 /**
- * ADDING AND REMOVING RECORDS, WHICH ONLY SOME COLLECTIONS ALLOW.
+ * ADDING AND REMOVING THE CARDS INSIDE A SECTION.
  *
  * Pages are fixed and there is no use case that could add one — the routes under src/app
- * decide which seven exist. Collections are open, but not all of them: the Lists screen is
- * a cross-cut view of strings that belong elsewhere, Testimonials has no content file at
- * all, and Case Studies needs two covers and a reference before a new piece renders as
- * anything. `supportsRecordChanges` and the repository's own list of creatable collections
- * decide, and a refusal comes back as a message rather than an exception, because the
- * panel shows it next to the button that was pressed.
+ * decide which seven exist. Sections are fixed for the same reason: they are the blocks
+ * those routes render. What an editor CAN change the number of is the repeated cards inside
+ * a section, and not all of those either: a ninth portfolio piece needs two covers, a
+ * reference and its capability links before it renders as anything, none of which is a
+ * string typed into a form.
+ *
+ * WHICH RUNS ARE OPEN IS ASKED OF THE MODEL, not declared here. A run that an editor may
+ * add to is one the read model marked as such, and the model got that from the store. A
+ * refusal comes back as a message rather than an exception, because the panel shows it next
+ * to the button that was pressed.
  *
  * A DELETE IS NOT REVERSIBLE and there is no bin, so the interface asks for the record's
  * title back before it will do it. That check lives in the panel, where the person is; what
@@ -25,30 +32,44 @@ function failure(message: string): RecordChangeResult {
   return { ok: false, message };
 }
 
+const NO_STORE =
+  "Blocks cannot be added or removed while the site reads its content from the TypeScript " +
+  "files: a new record there means a new object literal in a module and a slug wired into " +
+  "every file that looks it up. Set CONTENT_SOURCE=database.";
+
+const CLOSED = "Blocks cannot be added to this part of the page.";
+
+/** Every run of cards in the model, whether or not it is open. */
+async function itemGroups(repository: CmsRepository): Promise<ReadonlyArray<CmsItemGroup>> {
+  const pages = await repository.getPages();
+  return pages.flatMap((page) =>
+    page.sections.flatMap((section) =>
+      recordTree(section).flatMap((record) => [...record.items]),
+    ),
+  );
+}
+
 export class CreateCmsRecord {
   constructor(private readonly repository: CmsRepository) {}
 
   async execute(collectionId: string, record: NewCmsRecord): Promise<RecordChangeResult> {
     if (!this.repository.supportsRecordChanges) {
-      return failure(
-        "Records cannot be added while the site reads its content from the TypeScript " +
-          "files. Set CONTENT_SOURCE=database.",
-      );
+      return failure(NO_STORE);
     }
     const title = record.title.trim();
     if (!title) {
-      return failure("A new record needs a title.");
+      return failure("A new block needs a title.");
     }
     const summary = record.summary.trim();
     if (!summary) {
-      return failure("A new record needs the one line that appears under its title.");
+      return failure("A new block needs the one line that appears under its title.");
     }
 
-    const collection = (await this.repository.getCollections()).find(
-      (entry) => entry.id === collectionId,
+    const open = (await itemGroups(this.repository)).some(
+      (group) => group.collectionId === collectionId && canChangeItems(group),
     );
-    if (!collection) {
-      return failure("That collection does not exist.");
+    if (!open) {
+      return failure(CLOSED);
     }
 
     try {
@@ -59,7 +80,7 @@ export class CreateCmsRecord {
       });
       return { ok: true, recordId };
     } catch (error: unknown) {
-      return failure(error instanceof Error ? error.message : "The record could not be added.");
+      return failure(error instanceof Error ? error.message : "The block could not be added.");
     }
   }
 }
@@ -69,30 +90,29 @@ export class DeleteCmsRecord {
 
   async execute(collectionId: string, recordId: string): Promise<RecordChangeResult> {
     if (!this.repository.supportsRecordChanges) {
-      return failure(
-        "Records cannot be removed while the site reads its content from the TypeScript " +
-          "files. Set CONTENT_SOURCE=database.",
-      );
+      return failure(NO_STORE);
     }
 
-    const collection = (await this.repository.getCollections()).find(
-      (entry) => entry.id === collectionId,
+    const groups = (await itemGroups(this.repository)).filter(
+      (group) => group.collectionId === collectionId && canChangeItems(group),
     );
-    const record = collection?.records.find((entry) => entry.id === recordId);
-    if (!record) {
-      return failure("That record no longer exists. Reload the panel.");
+    const exists = groups.some((group) =>
+      group.records.some((entry) => entry.id === recordId),
+    );
+    if (!exists) {
+      return failure("That block is no longer there. Reload the panel.");
     }
 
     try {
       await this.repository.deleteRecord(collectionId, recordId);
       return { ok: true, recordId };
     } catch (error: unknown) {
-      return failure(error instanceof Error ? error.message : "The record could not be removed.");
+      return failure(error instanceof Error ? error.message : "The block could not be removed.");
     }
   }
 }
 
-export type InquiryStatus = "new" | "read" | "archived";
+export type InquiryStatus = CmsInquiryStatus;
 
 export class SetInquiryStatus {
   constructor(private readonly repository: CmsRepository) {}

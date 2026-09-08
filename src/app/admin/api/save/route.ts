@@ -39,6 +39,5 @@ export async function POST(request: Request): Promise<Response> {
   // not, and the interface tells those apart when it decides which field to mark. 409 for a lost
   // race, because that one is not the editor's mistake and the message asks them to reload
   // rather than to fix what they typed.
-  const status = result.ok ? 200 : /changed by someone else|no longer/.test(result.message) ? 409 : 422;
-  return json(result, status);
+  return json(result, result.ok ? 200 : result.conflict ? 409 : 422);
 }

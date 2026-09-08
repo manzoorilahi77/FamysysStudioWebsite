@@ -21,6 +21,20 @@ export interface ContentStringRow extends RowDataPacket {
   sort_order: number;
 }
 
+/** One unpublished edit, as the preview overlay reads it. */
+export interface ContentDraftRow extends RowDataPacket {
+  owner_key: string;
+  field_key: string;
+  value: string;
+}
+
+/** The panel's own read of a draft, with the revision it was made against. */
+export interface ContentDraftDetailRow extends ContentDraftRow {
+  owner_kind: "page_section" | "collection_record" | "media_asset";
+  base_version: number;
+  updated_at: string;
+}
+
 /** The panel's own read of a string: everything the editor is shown about it. */
 export interface ContentStringDetailRow extends ContentStringRow {
   id: number;

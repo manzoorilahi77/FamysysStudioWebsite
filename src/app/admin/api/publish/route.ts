@@ -30,7 +30,9 @@ export async function POST(request: Request): Promise<Response> {
 
   const result = await new PublishCmsSection(adminContainer.cms, routesForOwners).execute(target);
   if (!result.ok) {
-    return json(result, /changed after|no longer/.test(result.message) ? 409 : 422);
+    // 409 for a lost race — the content moved underneath this edit and the answer is to
+    // reload — and 422 for anything else, which is a refusal the editor caused.
+    return json(result, result.conflict ? 409 : 422);
   }
 
   publishedTo(result.routes);

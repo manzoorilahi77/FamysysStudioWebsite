@@ -14,6 +14,19 @@ export interface CmsPage {
   readonly route: string;
   readonly description: string;
   readonly source: string;
+  /**
+   * The blocks this page renders, in the order it renders them. See
+   * `infrastructure/cms/composition.ts`: the order is read from the route file's own JSX
+   * rather than declared, so a section added to the page shows up here without anyone
+   * editing the CMS.
+   */
   readonly sections: ReadonlyArray<CmsRecord>;
+  /**
+   * Whether that reading succeeded. It is a filesystem read of the project's own source,
+   * which a deployed standalone build may not have beside it — in which case the order
+   * falls back to the declared one and the panel says so rather than implying it derived
+   * something it did not.
+   */
+  readonly sectionsAreDerived: boolean;
   readonly updatedAt: Date | null;
 }

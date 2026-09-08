@@ -4,7 +4,8 @@ import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import type { AspectRatio, MediaKind } from "../../../domain/shared/value-objects/MediaRef";
 import { placeholders } from "../pool";
 import { cachedRows } from "./cache";
-import type { ContentStringRow } from "./rows";
+import { isPreviewRequest } from "./preview";
+import type { ContentDraftRow, ContentStringRow } from "./rows";
 
 /**
  * EVERY STRING FOR A SET OF RECORDS, READ IN ONE QUERY, ADDRESSED BY THE SAME KEYS THE
@@ -82,6 +83,28 @@ export class ContentStore {
         sortOrder: entry.sort_order,
       });
     }
+
+    // THE PREVIEW OVERLAY, and the only place unpublished words can reach a page.
+    // Only a request carrying Next's draft-mode cookie gets here, that cookie is set by
+    // one session-gated endpoint, and a draft can only REPLACE a published string —
+    // never introduce a field, never reorder a list. So the shape of a previewed page is
+    // the shape of the published one, with different words in it.
+    if (await isPreviewRequest()) {
+      const drafts = await cachedRows<ContentDraftRow>(
+        `SELECT owner_key, field_key, value
+           FROM content_drafts
+          WHERE owner_kind = ? AND (${clause})`,
+        [kind, ...values],
+      );
+      for (const entry of drafts) {
+        const owner = byOwner.get(entry.owner_key);
+        const existing = owner?.get(entry.field_key);
+        if (owner && existing) {
+          owner.set(entry.field_key, { ...existing, value: entry.value });
+        }
+      }
+    }
+
     return new ContentStore(byOwner);
   }
 

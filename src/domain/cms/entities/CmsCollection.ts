@@ -1,39 +1,27 @@
-import type { CmsRecord } from "./CmsRecord";
-
 /**
- * A set of records of one shape. Unlike `CmsPage`, a collection is open — items can be
- * added and removed once persistence exists, which is why the two are separate entities
- * rather than one list with a flag on it.
- */
-export interface CmsCollection {
-  /** Matches the route segment under /admin. */
-  readonly id: string;
-  readonly label: string;
-  /** The explanatory paragraph under the heading. */
-  readonly description: string;
-  /** The label on the panel's header row, left of the count. */
-  readonly panelLabel: string;
-  /** The content file the records are read from, shown as provenance. */
-  readonly source: string;
-  /** Shown in a row where a record has no summary of its own. */
-  readonly emptyMessage: string;
-  readonly records: ReadonlyArray<CmsRecord>;
-}
-
-/**
- * WHICH COLLECTIONS ARE OPEN, AND WHAT ONE OF THEIR RECORDS IS CALLED.
+ * WHAT IS LEFT OF "COLLECTIONS".
  *
- * "Open" means an editor can add and remove records. Four of the eight are; the other four
- * are not, and each for its own reason rather than by omission:
+ * There is no `CmsCollection` entity any more and there are no collection screens. Every
+ * set of repeated records — the six capabilities, the five stages, the four engagements,
+ * the eight pieces, the FAQ's questions — is now a `CmsItemGroup` inside the section that
+ * renders it, because that is where an editor looks for it.
+ *
+ * What survives is the one fact that is not about screens: which of those sets an editor
+ * may add a record to, and what a single record of it is called. A store still keys them by
+ * these ids, so they are still named here.
+ */
+
+/**
+ * WHICH SETS ARE OPEN, AND WHAT ONE OF THEIR RECORDS IS CALLED.
+ *
+ * "Open" means an editor can add and remove records. Four sets are; the fifth is not, and
+ * not by omission:
  *
  *   - Case Studies: a ninth piece needs two covers, a reference number and its capability
  *     links before it renders as anything, and none of those is a string typed into a
  *     form. It opens when media upload does.
- *   - Testimonials: there is no content behind it at all yet.
- *   - Lists: a cross-cut VIEW of strings that belong to capabilities, stages and tiers.
- *     Adding a row here would mean adding it to one of those, which is where it is done.
- *   - Pages are not a collection and never appear here: the routes under src/app decide
- *     which seven exist.
+ *   - Pages are not a set of records and never appear here: the routes under src/app
+ *     decide which seven exist.
  *
  * The noun is what the Add button says. "Add a question" reads as an instruction; "Add
  * record" reads as a database.
