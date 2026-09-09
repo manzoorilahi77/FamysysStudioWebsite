@@ -576,6 +576,11 @@ main > section.bg-ink + section.bg-ink::after {
   position: relative;
   display: inline-flex;
   align-items: center;
+  /* WCAG 2.5.8's 24x24 floor, on every pointer. The box came out 22px — the label is
+     15px on a 22px line — and the bar appears from 1024 up, which an iPad in landscape
+     reaches, so this is not a control only a cursor ever meets. The touch layer at the
+     foot of this file takes it the rest of the way to 44 where the pointer is coarse. */
+  min-height: 1.5rem;
   gap: 0.5rem;
   /* No horizontal padding: the gap between one item and the next is now set on the list,
      and the bracket before each label is what separates a label from the item before it.
@@ -2022,6 +2027,11 @@ div.grid > *:nth-child(even).card-surface-dark {
   margin: 0;
   padding: 0;
   list-style: none;
+  /* HOW MUCH BIGGER THE OPEN BAND IS THAN A CLOSED ONE, as a variable rather than a
+     number, because a thumb has an opinion about it — see the touch layer at the foot of
+     this file. At 4.6 the four closed bands are 42px, which is the right proportion for a
+     design that is pointed at and 2px under the floor for one that is tapped. */
+  --hero-band-open: 4.6;
   animation: hero-final-accordion-in 950ms var(--ease-base) 640ms both;
 }
 
@@ -2047,7 +2057,7 @@ div.grid > *:nth-child(even).card-surface-dark {
 }
 
 .hero-final-band.is-open {
-  flex-grow: 4.6;
+  flex-grow: var(--hero-band-open);
   border-color: var(--color-accent-on-dark);
 }
 
@@ -2069,6 +2079,24 @@ div.grid > *:nth-child(even).card-surface-dark {
 
 .hero-final-band:hover .hero-final-band-media {
   transform: scale(1.05);
+}
+
+/* THE BAND'S CONTROL. It fills the band, so the target is the whole photograph rather
+   than the strip of label at its foot — which on a phone is a 33vw-wide, 169px-tall
+   picture against a 26px caption. No ground and no border of its own: what it looks like
+   is the band, and the label inside it is the band's label. */
+.hero-final-band-hit {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .hero-final-band-label {
@@ -2106,13 +2134,13 @@ div.grid > *:nth-child(even).card-surface-dark {
 }
 
 /* Below the point where the two columns stop fitting side by side the accordion moves
-   under the copy and lies on its side, and the last two bands are dropped: five bands
-   across a phone leaves the open one too narrow to show anything. Their labels go with
-   them, which is why the five are ordered with the least essential last. */
+   under the copy and lies on its side, and three of the six bands are dropped: six across
+   a phone leaves the open one too narrow to show anything. Which three stay is the
+   client's choice and is named below — it is not a slice off the front. */
 @media (max-width: 900px) {
   .hero-final {
     display: block;
-    padding-block: clamp(6.5rem, 16vh, 9.375rem) clamp(12.75rem, 30vh, 17.5rem);
+    padding-block: clamp(6.5rem, 16vh, 9.375rem) clamp(13.5rem, 31vh, 18.5rem);
   }
 
   .hero-final-body {
@@ -2124,15 +2152,130 @@ div.grid > *:nth-child(even).card-surface-dark {
     left: var(--container-inset);
     right: var(--container-inset);
     top: auto;
-    bottom: clamp(2.75rem, 7vh, 5rem);
+    bottom: clamp(2rem, 4.5vh, 3.25rem);
     transform: none;
     width: auto;
-    height: clamp(7.5rem, 20vh, 10.625rem);
+    /* 219px at 390x844, where it was 169. The three pictures are the only work the
+       homepage shows above the fold and at 169 minus a 26px caption they were 143px of
+       image across a third of the width each — a strip. See the note on the bands. */
+    height: clamp(10.5rem, 26vh, 14rem);
+    gap: 8px;
     flex-direction: row;
   }
 
-  .hero-final-band:nth-child(n + 4) {
+  /* WHICH THREE, AND IT IS NOT THE FIRST THREE.
+     ---------------------------------------------------------------------------
+     The client names the three the phone shows: COLOUR, DESIGN and CONTENT. In
+     marketing.content.ts the six run camera, colour, motion, design, content, AI — so the
+     three wanted are the 2nd, 4th and 5th, and the rule has to name them rather than take
+     a slice off the front, which is what `nth-child(n + 4)` did and why the strip came out
+     camera / colour / motion.
+
+     Hiding by position and not by editing the list is deliberate: the six are the six
+     services /creative-services sells, in the order that page uses, and the desktop
+     accordion is all six. A phone showing a subset must not be a different list. */
+  .hero-final-band:nth-child(1),
+  .hero-final-band:nth-child(3),
+  .hero-final-band:nth-child(6) {
     display: none;
+  }
+
+  /* NOTHING RENUMBERS THE BANDS HERE, and the first version of this did.
+     A CSS counter gets the right answer — `display: none` generates no box and increments
+     no counter, so counting the bands counts exactly the three a phone shows — but the
+     answer only ever exists in generated content: `getComputedStyle(el, "::after").content`
+     hands back the unresolved `counter(...)` string, so nothing outside the renderer can
+     read what a reader is looking at, and the numeral cannot be asserted. Hero.tsx numbers
+     them from `HERO_MOBILE_BANDS` instead, which puts 01 02 03 in the DOM as text. */
+
+  /* IN COLOUR — the one thing kept from the equal-thirds version this replaced.
+     ---------------------------------------------------------------------------
+     The accordion stays an accordion, because that is the design: one band open and two
+     held back as slivers is what says which piece of work is the subject, and equal thirds
+     said nothing. What was wrong was never the shape; it was the grade. At
+     `saturate(0.28) brightness(0.62)` the three read as grey rectangles on a phone, where
+     on a 1440px screen the same values read as depth behind an open frame. This is a light
+     hold rather than a near-monochrome one, and the open band comes all the way to the
+     photograph's own colour. */
+  .hero-final-band-media {
+    filter: saturate(0.88) contrast(1.02) brightness(0.84);
+  }
+
+  .hero-final-band.is-open .hero-final-band-media {
+    filter: none;
+  }
+
+  /* The label keeps the desktop's own row — name at one end, numeral at the other — and
+     the slivers clip it, which is what a sliver is for. Only the gradient changes: the
+     picture under it is in colour now, so 90% ink is no longer enough to sit a cream
+     caption on. */
+  .hero-final-band-label {
+    padding: 1.5rem 0.625rem 0.625rem;
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--color-ink) 0%, transparent),
+      color-mix(in srgb, var(--color-ink) 94%, transparent)
+    );
+  }
+}
+
+/* A PHONE ON ITS SIDE IS NOT A SHORT DESKTOP.
+   ---------------------------------------------------------------------------
+   At 844x390 the hero is `100svh` — 390px — with a 600px floor under it, so the section
+   came out 210px TALLER than the screen it was on: the headline, the sentence and the two
+   invitations filled the viewport and the accordion sat entirely below the fold, under a
+   fold nothing indicated. A full-height hero has nothing to be full height OF when the
+   height is 390px.
+
+   So below 500px of viewport height the floor comes off, the vertical rhythm collapses to
+   its own minimums, and the accordion goes: three photographs 120px tall across the bottom
+   of a landscape phone are a strip of thumbnails, and the copy is what the section is for.
+   The meter stays — it is the ground, it costs no height, and it is the only thing here
+   that reads at any size. The bands' content is not lost with them: every one of the five
+   is a page the navigation reaches, and the section that follows names all six.
+
+   `svh` rather than `vh` on the height itself is what keeps the hero honest while a mobile
+   browser's toolbars come and go; the floor was the part that could not adapt. */
+@media (max-height: 500px) {
+  .hero-final {
+    min-height: 0;
+    padding-block: clamp(4.25rem, 15vh, 6rem) clamp(1.5rem, 6vh, 2.5rem);
+  }
+
+  .hero-final-accordion {
+    display: none;
+  }
+
+  .hero-final-sub {
+    margin-top: 0.75rem;
+  }
+
+  .hero-final-cta {
+    margin-top: 1rem;
+  }
+
+  .hero-final-sup {
+    margin-top: 0.75rem;
+  }
+}
+
+/* SHORT AND NARROW — a 390x667 phone, where the hero is 667px and the accordion was
+   claiming 204px of it before a word was set. The strip comes down to a band of three
+   pictures deep enough to read and no deeper, which is what puts both invitations and the
+   supporting line comfortably above the fold rather than exactly on it. */
+/* `min-height: 501px` is what keeps this off a phone on its SIDE, and it is a fix rather
+   than a tidy-up. 844x390 matches `max-width: 900` and `max-height: 720` as well as the
+   500px rule above it, and being the later block this one won: the landscape hero took
+   152px of bottom padding held clear for an accordion the 500px rule had already set to
+   `display: none`. A fifth of a 390px-tall screen was empty ground under the supporting
+   line, reserved for something that was not there. */
+@media (max-width: 900px) and (min-height: 501px) and (max-height: 720px) {
+  .hero-final {
+    padding-block: clamp(5.5rem, 14vh, 7.5rem) clamp(10.5rem, 26vh, 13rem);
+  }
+
+  .hero-final-accordion {
+    height: clamp(8.5rem, 21vh, 11rem);
+    bottom: clamp(1.5rem, 3.5vh, 2.5rem);
   }
 }
 
@@ -3055,7 +3198,13 @@ div.grid > *:nth-child(even).card-surface-dark {
   transition-timing-function: var(--ease-base);
 }
 
-.service-cell:hover .service-wash {
+/* `[data-lit]` IS THE TOUCH SCREEN'S HOVER, and it is paired with `:hover` at every one
+   of the four rules below rather than given its own block, so the two states can never
+   drift into looking like different designs. ServiceGrid writes the attribute onto
+   whichever cell's centre is nearest the middle of the screen, and only where there is no
+   cursor to point with — see the spotlight note in ServiceGrid.tsx. */
+.service-cell:hover .service-wash,
+.service-cell[data-lit="true"] .service-wash {
   clip-path: inset(0 0 0 0);
 }
 
@@ -3102,12 +3251,14 @@ div.grid > *:nth-child(even).card-surface-dark {
   transition-timing-function: var(--ease-base);
 }
 
-.service-cell:hover .service-title {
+.service-cell:hover .service-title,
+.service-cell[data-lit="true"] .service-title {
   transform: translateY(-3px);
   color: var(--color-text-on-dark);
 }
 
-.service-cell:hover .service-descriptor {
+.service-cell:hover .service-descriptor,
+.service-cell[data-lit="true"] .service-descriptor {
   color: var(--color-canvas-80);
 }
 
@@ -3150,7 +3301,8 @@ div.grid > *:nth-child(even).card-surface-dark {
    terracotta ember glows through from behind it. The colour trails the transform slightly
    so the digits read as rising INTO the lit band rather than switching state. The opacity
    channel keeps its entry delay untouched; colour gets its own 120ms. */
-.service-cell:hover .service-numeral {
+.service-cell:hover .service-numeral,
+.service-cell[data-lit="true"] .service-numeral {
   transform: translateY(-10px);
   color: var(--color-canvas-16);
 }
@@ -3221,18 +3373,22 @@ div.grid > *:nth-child(even).card-surface-dark {
      render the wash and the marker at all under reduced motion; these are the belt to that
      pair of braces. The colour restatements matter most: with no ink wash beneath them,
      the on-dark hover colours would put cream text on the cream canvas. */
-  .service-cell:hover .service-numeral {
+  .service-cell:hover .service-numeral,
+  .service-cell[data-lit="true"] .service-numeral {
     transform: none;
     color: var(--color-service-numeral);
   }
-  .service-cell:hover .service-title {
+  .service-cell:hover .service-title,
+  .service-cell[data-lit="true"] .service-title {
     transform: none;
     color: var(--color-ink);
   }
-  .service-cell:hover .service-descriptor {
+  .service-cell:hover .service-descriptor,
+  .service-cell[data-lit="true"] .service-descriptor {
     color: var(--color-ink-70);
   }
-  .service-cell:hover .service-wash {
+  .service-cell:hover .service-wash,
+  .service-cell[data-lit="true"] .service-wash {
     clip-path: inset(0 0 100% 0);
   }
   .service-marker {
@@ -3371,6 +3527,48 @@ div.grid > *:nth-child(even).card-surface-dark {
   letter-spacing: -0.025em;
   font-weight: 300;
   color: var(--color-text-on-dark);
+}
+
+/* THE SECTION IS THE STATEMENT, BELOW 900.
+   ---------------------------------------------------------------------------
+   The heading, the lead-in and the four elements come off the phone at the client's
+   direction; the closing statement stays. Nothing is unmounted to do it — the whole
+   section is in the markup at every width and renders in full from 901 up, which is
+   also why this is a `display` rule on the section's children rather than a condition
+   in Differentiator.tsx. `> :not()` reaches the Container and nothing inside it, so
+   there is one rule here and no list of the four things to hide.
+
+   WHAT IS LEFT NEEDS TO LOOK LIKE A DECISION. A single centred sentence sitting where a
+   section used to be reads as a leftover unless something says otherwise, so it takes a
+   short accent rule above it, a larger setting than it carries on the desktop page — 27px
+   at 390 against the 25px the shared clamp gives — and a measure narrow enough to break
+   into three lines rather than run as a paragraph. The air around it is the section's own
+   dark padding plus this block's, which comes to roughly 120px above and below at 390:
+   more than any other seam on the mobile page, which is the point of it. */
+@media (max-width: 900px) {
+  .element-section > :not(.element-thesis) {
+    display: none;
+  }
+
+  .element-thesis {
+    /* The margin was the gap to the four frames. There are no frames. */
+    margin-top: 0;
+    padding-block: clamp(1.5rem, 4.5vh, 3rem);
+  }
+
+  .element-thesis::before {
+    content: "";
+    display: block;
+    width: 2.5rem;
+    height: 2px;
+    margin: 0 auto clamp(1.5rem, 4.5vw, 2.25rem);
+    background-color: var(--color-accent-on-dark);
+  }
+
+  .element-thesis-line {
+    max-width: 17ch;
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -5414,10 +5612,20 @@ html {
   border-radius: 0;
   background-color: transparent;
   color: var(--color-canvas);
+  /* 17px, and it has to stay at or above 16: below that iOS Safari zooms the page in on
+     focus and leaves it zoomed, which puts the rest of the form off the side of the
+     screen with no obvious way back. */
   font-size: 1.0625rem;
   line-height: 1.62;
   letter-spacing: -0.006em;
-  padding: 0.25rem 0 0.625rem;
+  /* 3rem, where the padding alone used to decide the height and landed on 42.5px. An
+     underlined field has no box to show its size, so the size has to be stated: 48px is
+     over the 44px thumb floor at every width, and on a select it is also the difference
+     between hitting the control and hitting the label above it. The padding is biased to
+     the bottom so the text still sits on the rule rather than floating in the middle of
+     an invisible box. */
+  min-height: 3rem;
+  padding: 0.5rem 0 0.75rem;
   transition-property: border-color;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--ease-base);
@@ -5458,9 +5666,15 @@ html {
   background-color: var(--color-canvas);
 }
 
+/* The brief is the one field somebody writes a paragraph into, so it grows with what is
+   typed rather than making them scroll a 6.5rem box on a phone — see `autoGrow` in
+   ContactForm, which sets the height from the content's own scrollHeight. `resize` stays
+   vertical for a reader who wants to drag it larger anyway; on a touch screen there is no
+   resize grip, which is most of why the growth had to be automatic. */
 .contact-field--textarea {
   resize: vertical;
   min-height: 6.5rem;
+  overflow-y: hidden;
 }
 
 /* One error row shape for the summary and for all eight fields, so the triangle and the
@@ -5699,6 +5913,22 @@ html {
    2 · WAYS TO WORK WITH US — four pictures, a name on each, and nothing else
    until a tile is opened.
    ---------------------------------------------------------------------------- */
+
+/* OFF THE PHONE, at the client's direction, and off it with `display` rather than by not
+   rendering it. Everything below this rule is what the section is from 901 up, and the
+   section is in the markup at every width: `WaysToWorkTiles` is still called from
+   src/app/page.tsx, still reads its four tiers, and still ships its markup to a phone —
+   what a phone does not do is paint it. Undoing this is deleting one rule.
+
+   `.ways-section` and not `.imagery-section`: that class is shared with the process
+   frames and the work covers, both of which stay. See the note on the `<Section>` in
+   WaysToWorkTiles.tsx. */
+@media (max-width: 900px) {
+  .ways-section {
+    display: none;
+  }
+}
+
 .tiles {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -5736,12 +5966,15 @@ html {
   object-fit: cover;
 }
 
+/* Either a <button> or a <p>, depending on whether there is anything to open — see the
+   note in WaysToWorkTiles. The two look identical, so everything shared is stated here
+   and only `cursor` belongs to the button. */
 .tile-hit {
   display: block;
   width: 100%;
+  margin: 0;
   text-align: left;
   border: 0;
-  cursor: pointer;
   /* A LIGHT plate on the photograph, not a dark one. Fully opaque either way — the rule
      is that no copy sits on a picture without a backing — but cream reads as a label laid
      on the image rather than as a hole punched through it. Ink on it measures 15.170:1. */
@@ -5749,6 +5982,10 @@ html {
   color: var(--color-ink);
   font: inherit;
   padding: 1.25rem var(--imagery-inset);
+}
+
+button.tile-hit {
+  cursor: pointer;
 }
 
 .tile-name {
@@ -6087,8 +6324,14 @@ html {
   color: var(--color-canvas-80);
 }
 
+/* 24px on every pointer — WCAG 2.5.8's floor. It is an 11px line of tracked capitals, so
+   left as `display: block` its box was the height of its glyphs; `inline-flex` makes the
+   box honour the line box the type already has, exactly as `.inline-link` does. The touch
+   layer at the foot of this file takes it to 44 where the pointer is coarse. */
 .frames[data-motion="on"] .frame-more {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
   margin-top: 0.5rem;
   color: var(--color-accent);
   background: none;
@@ -6297,14 +6540,17 @@ html {
 }
 
 /* The picture is oversized under the mask so it can rise 6% and settle 6% larger
-   without either move exposing an edge of the frame. */
-.covers[data-motion="on"] .cover-image {
+   without either move exposing an edge of the frame — and ONLY while something is
+   going to move it. `data-depth` is off below 900, where the frame task writes the
+   mask and nothing else; without this scoping a phone would keep the overscan and
+   show a permanently cropped photograph for a settle that never runs. */
+.covers[data-motion="on"][data-depth="on"] .cover-image {
   height: 112%;
   top: -6%;
   will-change: transform;
 }
 
-.covers[data-motion="on"] .cover-tag {
+.covers[data-motion="on"][data-depth="on"] .cover-tag {
   will-change: transform, opacity;
 }
 
@@ -6325,5 +6571,170 @@ html {
   .covers[data-motion="on"] .cover-tag {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TARGET SIZE ON A TOUCH SCREEN — 44px, where the rest of the site holds 24px.
+   ---------------------------------------------------------------------------
+   IT IS THE LAST THING IN THIS FILE ON PURPOSE. A media query adds no specificity, so
+   `@media (pointer: coarse) { .footer-link { min-height: 2.75rem } }` and
+   `.footer-link { min-height: 24px }` are the same weight and the later one wins — which
+   meant this block silently did nothing while it sat above the rules it was meant to
+   raise. Keeping it at the bottom is what makes it apply; adding specificity instead
+   would work and would make every rule here a puzzle.
+   ---------------------------------------------------------------------------
+   `.inline-link` up the file is WCAG 2.5.8's 24x24 minimum, which is a floor for any
+   pointer. This is the separate, larger question a phone asks: 24px is enough for a cursor placed to
+   the pixel and is not enough for a thumb, which lands on an area about 9mm across and
+   cannot see what is under it. So every small target on the site opens to 44 where the
+   PRIMARY POINTER IS COARSE, and only there.
+
+   `(pointer: coarse)` and not a width, deliberately. A 1440px touchscreen laptop needs
+   these targets and would not get them from a max-width query; a 900px browser window on
+   a desktop does not need them and would. The one thing that decides is what the reader
+   is pointing with.
+
+   THE LAYOUT DOES NOT MOVE. Every rule here pairs its padding with an equal negative
+   margin, so the target grows into the space around it and the visual rhythm of a footer
+   column, a nav row or a list of chips is exactly what it was. What changes is the size
+   of the box that answers a tap, which is not a thing anybody can see.
+
+   Where a control already has its own inset — the FAQ rows at 24px of block padding, the
+   engagement tiles, the form's submit — it is not listed: it clears 44 on its own and a
+   rule here would be a second opinion about a number that is already right. */
+@media (pointer: coarse) {
+  /* The footer's links fill their column, so the target is the ROW rather than the word.
+     "About" is 38px of text: tall enough after this block and still narrower than a thumb,
+     and there is nothing beside it in the column for the extra width to collide with. It
+     is what a native list of links does, and for the same reason. */
+  .footer-link {
+    display: flex;
+    width: 100%;
+  }
+
+  .inline-link,
+  .footer-link,
+  .footer-email,
+  .progression-piece-chip,
+  .capability-index-link,
+  .process-overview-link {
+    min-height: 2.75rem;
+  }
+
+  /* The two that are boxes rather than lines of text: the target has to be square. */
+  .footer-admin,
+  .work-dialog-close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  /* `.footer-link` and `.footer-admin` already carry a -0.375rem/0.375rem pair for the
+     24px floor; 44 needs the rest of the difference, and it has to come out of the
+     margin as well or the footer's 14px column rhythm opens to 34px. */
+  .footer-link,
+  .footer-admin {
+    margin-block: -0.625rem;
+    padding-block: 0.625rem;
+  }
+
+  .footer-email {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* The bar's own controls. The wordmark is a link to the homepage and was 32px tall;
+     the drawer trigger was 41x11, which is the single smallest target on the site and
+     the one every phone reader has to hit first. */
+  .cnav-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    margin-block: -0.75rem;
+  }
+
+  .cnav-wordmark,
+  .footer-mark {
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  /* Only ever visible from 1024 up, which an iPad in landscape reaches. */
+  .nav-link {
+    min-height: 2.75rem;
+  }
+
+  /* The process frames' touch alternative to the hover-revealed sentence. It is an
+     11px line of tracked capitals sitting under the step name; 0.75rem of block padding
+     and the matching negative margin make it a target without moving the plate. */
+  .frames[data-motion="on"] .frame-more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-block: -0.5rem 0;
+  }
+
+  /* The work grid's card trigger is a stretched pseudo-element covering the whole tile,
+     so the card is already the target — but the tile's own filter chips are not. */
+  .work-filter-chip {
+    min-height: 2.75rem;
+  }
+
+  /* THE HERO'S CLOSED BANDS HAVE TO BE TAPPABLE, which is a different requirement from
+     being legible. A closed band is a sliver by design — its width is what says the open
+     one is the subject — and the sliver came out 42px on both arrangements: 41.9 across
+     the bottom of a 320px phone, 42.5 down the side of an iPad. Two pixels under, on the
+     one control in the section.
+     Lowering the OPEN band's share is what fixes it without changing anything else: at
+     3.2 the closed bands are 53px and the open one still takes three fifths of the strip,
+     so it is unambiguously the subject and every band can be pressed. The proportion is
+     untouched wherever there is a cursor to point with. */
+  .hero-final-accordion {
+    --hero-band-open: 3.2;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE BAR ON A PHONE — a note about what is NOT here.
+   ---------------------------------------------------------------------------
+   The bar was scaled up below 900: the mark opened from 32px to 43px at 390, the bar's
+   padding came in to 1rem, and the drawer trigger became a bordered 44px box with a 12px
+   label. Put beside the bar it replaced, the client's answer was that both were too big —
+   at that size the mark and a boxed word are the loudest things on a screen whose headline
+   is supposed to be. All of it came out. The mark keeps `.cnav-mark`'s own clamp, which
+   floors at 32px and is what the desktop bar uses; the bar keeps its `py-6`; the trigger
+   stays the plain tracked word it is at every width. Nothing below 900 changes the bar.
+
+   THE 44px TARGET IS UNAFFECTED, and that is the whole point of its being invisible. The
+   coarse-pointer block above gives `.cnav-menu` `min-width: 2.75rem`, `min-height:
+   2.75rem` and a matching negative margin, so the box that answers a thumb is 44x44 while
+   the thing drawn inside it is an 11px word and the row's height does not move. Measured
+   on the built page: 44x44 at 320, 360, 390 and 430, with 79px clear between the mark and
+   the trigger at 320, where the bar is tightest. A border was what made the target LOOK
+   like its own size; it was never what made it that size. */
+
+/* ---------------------------------------------------------------------------
+   THE BAR IS SHORTER BELOW THE INLINE NAV.
+   ---------------------------------------------------------------------------
+   What the note above says stands: nothing about the MARK or the trigger changes on a
+   phone. What does change is the room around them. `py-6` is the desktop bar's padding
+   and it was carried down unchanged, so a phone got 24px above and below a 44px row — a
+   92px bar, an eighth of an 800px screen, holding a mark and one word while the headline
+   underneath is what the page is for.
+
+   Half the padding brings it to 68px. The mark keeps `.cnav-mark`'s 32px floor and the
+   trigger keeps the plain tracked word it is at every width; the bar simply stops
+   reserving desktop whitespace on a screen that does not have it to spare.
+
+   THE 44px TARGET IS UNAFFECTED — again, and for the same reason. The coarse-pointer
+   block draws `.cnav-menu`'s box from the ROW, with a negative margin that keeps it out
+   of the row's height, so the box that answers a thumb is still 44x44 inside a bar that
+   is 24px shorter. `.cnav-wordmark`'s 44px floor is what sets the row, which is why the
+   padding is the only thing this touches. */
+@media (max-width: 1023px) {
+  [data-header-bar] {
+    padding-block: 0.75rem;
   }
 }

@@ -30,7 +30,12 @@ interface AdminScreenProps {
  */
 export function AdminScreen({ breadcrumb, heading, description, children }: AdminScreenProps) {
   return (
-    <div className="px-10 py-7">
+    // 16px of gutter on a phone against the desktop's 40. It is not a taste change: at
+    // px-10 the editor's own content box was 310px inside a 390px screen, which is where
+    // the save bar's three buttons stopped fitting on one line. `SectionEditor`'s sticky
+    // bar cancels this same padding with a negative margin, so the two have to move
+    // together — see the `-mx-4 px-4 sm:-mx-10 sm:px-10` pair there.
+    <div className="px-4 py-5 sm:px-10 sm:py-7">
       <div className="flex items-center justify-between gap-6">
         <nav aria-label="Breadcrumb" className="min-w-0">
           <ol className="text-small flex flex-wrap items-center gap-2 text-ink-40">

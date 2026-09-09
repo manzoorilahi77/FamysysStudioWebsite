@@ -1,4 +1,5 @@
 import type { CmsValue } from "../../../domain/cms/entities/CmsRecord";
+import { autoGrowTextarea } from "../../lib/autoGrowTextarea";
 
 /**
  * One string, and everything an editor needs to know before changing it: whose words they
@@ -14,12 +15,26 @@ import type { CmsValue } from "../../../domain/cms/entities/CmsRecord";
 /** How many other locations to name before summarising the rest. */
 const USAGE_SHOWN = 3;
 
+/**
+ * `text-base` — 16px — and not the panel's usual 15px `text-small`. Below 16px iOS Safari
+ * zooms the page in when a field takes focus and does not zoom back out, which on a phone
+ * leaves the editor looking at a magnified fragment of the form with the Save button off
+ * the side of the screen. It is the one place on the site where the type size is decided
+ * by a browser behaviour rather than by the scale.
+ *
+ * `min-h-11` is the 44px thumb floor: at `py-2` alone these came out 40px tall.
+ */
 const CONTROL =
-  "text-small w-full rounded-sm border px-3 py-2 transition-colors duration-[180ms] focus:border-ink-40 focus:outline-none";
+  "text-base min-h-11 w-full rounded-sm border px-3 py-2 transition-colors duration-[180ms] focus:border-ink-40 focus:outline-none";
 const EDITABLE = "border-ink-12 bg-card text-ink";
 const LOCKED = "border-ink-12 bg-canvas text-graphite-70 disabled:cursor-default";
 
-/** Rows for a growing box: one per ~90 characters, between three and twelve. */
+/**
+ * The box's FLOOR, in rows. It used to be its final height, computed at one character per
+ * 90 of text — a figure that only holds at the width the panel has on a desktop. The box
+ * is measured from its own content now (see `autoGrowTextarea`), so this is only the size
+ * it starts at and never goes below.
+ */
 function rowsFor(text: string): number {
   return Math.min(12, Math.max(3, Math.ceil(text.length / 90) + 1));
 }
@@ -84,7 +99,15 @@ export function ValueField({ value, draft, error, isChanged, onChange }: ValueFi
 
       <div className="mt-2">
         {value.multiline ? (
-          <textarea {...common} rows={rowsFor(draft)} />
+          <textarea
+            {...common}
+            rows={rowsFor(draft)}
+            ref={autoGrowTextarea}
+            onChange={(event) => {
+              common.onChange(event);
+              autoGrowTextarea(event.currentTarget);
+            }}
+          />
         ) : (
           <input {...common} type="text" />
         )}

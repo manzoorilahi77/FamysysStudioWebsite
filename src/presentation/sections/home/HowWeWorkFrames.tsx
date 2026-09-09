@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
 import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { motionLayerMinWidth } from "../../../shared/design/tokens";
 import { useScrollFrame } from "../../hooks/useScrollFrame";
 import type { ProcessStepDetailView } from "../../lib/viewModels";
 
@@ -54,7 +55,16 @@ function clamp(value: number, min: number, max: number): number {
  * are simply five pictures with their copy beneath them. See `useMotionLayer`.
  */
 export function HowWeWorkFrames({ eyebrow, heading, revealLabel, steps }: HowWeWorkFramesProps) {
-  const isMotionOn = useMotionLayer();
+  /**
+   * BELOW 900 THE FIVE FRAMES ARE FIVE PICTURES WITH THEIR COPY UNDER THEM.
+   *
+   * The sticky sequence costs five viewports of scroll to advance five sentences, which is
+   * 4,220px on a 390x844 phone and rather worse on a 667 one, and every one of those
+   * sentences is behind a hover with an 11px button under it as the touch alternative. The
+   * base state is the same five steps, each sentence already open, in about a third of the
+   * travel. Fewer sticky states was one option; none is the honest one at this width.
+   */
+  const isMotionOn = useMotionLayer({ minWidth: motionLayerMinWidth });
   const trackRef = useRef<HTMLOListElement>(null);
   const framesRef = useRef<ReadonlyArray<FrameParts>>([]);
   const [openSteps, setOpenSteps] = useState<ReadonlySet<number>>(() => new Set());

@@ -103,7 +103,7 @@ export function CapabilityBlock({ capability, index, deliverablesLabel }: Capabi
 
             <Link
               href={capability.cta.href}
-              className={`text-small mt-8 inline-block font-medium ${
+              className={`inline-link text-small mt-8 inline-block font-medium ${
                 isDark ? "text-accent-on-dark" : "text-accent"
               }`}
             >

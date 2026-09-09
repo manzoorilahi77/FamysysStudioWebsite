@@ -83,19 +83,19 @@ export function PreviewFrame({ route, heading, canPreviewDrafts, onClose }: Prev
             </span>
           )}
         </p>
-        <div className="text-small flex items-center gap-4 text-graphite-70">
+        <div className="text-small flex flex-wrap items-center gap-x-4 text-graphite-70">
           <a
             href={`${route}?preview=${nonce}`}
             target="_blank"
             rel="noreferrer"
-            className="transition-colors duration-[180ms] hover:text-ink"
+            className="inline-flex min-h-11 items-center transition-colors duration-[180ms] hover:text-ink"
           >
             Open in a new tab
           </a>
           <button
             type="button"
             onClick={onClose}
-            className="transition-colors duration-[180ms] hover:text-ink"
+            className="inline-flex min-h-11 items-center transition-colors duration-[180ms] hover:text-ink"
           >
             Close preview
           </button>
@@ -117,7 +117,11 @@ export function PreviewFrame({ route, heading, canPreviewDrafts, onClose }: Prev
         src={`${route}?preview=${nonce}`}
         title={`Preview of ${route}`}
         onLoad={scrollToSection}
-        className="block h-[70vh] w-full border-0 bg-canvas"
+        // 70vh of a 1080px desktop is 756px of page; 70vh of a 667px phone is 467px, which
+        // is not enough of a page to tell whether an edit landed. `70svh` with an 80vh
+        // floor on a short screen gives the frame most of the viewport where the viewport
+        // is all there is, and leaves the desktop proportion alone.
+        className="block h-[70svh] max-[1023px]:h-[80svh] w-full border-0 bg-canvas"
       />
 
       {!scrolled ? (

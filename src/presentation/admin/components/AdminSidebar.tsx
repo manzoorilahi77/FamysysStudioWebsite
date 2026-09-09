@@ -44,7 +44,7 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
 
   return (
     <nav aria-label="Admin sections" className="flex h-full flex-col gap-8 py-7">
-      <Link href="/admin" className="px-6" aria-label="Famysys Studio admin">
+      <Link href="/admin" className="flex min-h-11 items-center px-6" aria-label="Famysys Studio admin">
         <Wordmark alt="" dark className="h-7" />
       </Link>
 
@@ -64,7 +64,7 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
                       href={page.href}
                       // 180ms, the site's `motion.duration.fast` — the only transition
                       // the admin uses, on hover and active states and nowhere else.
-                      className={`text-small min-w-0 flex-1 truncate py-2 pl-6 pr-2 transition-colors duration-[180ms] ${
+                      className={`text-small flex min-h-11 min-w-0 flex-1 items-center truncate py-2 pl-6 pr-2 transition-colors duration-[180ms] ${
                         pathname === page.href
                           ? "bg-canvas-10 text-canvas"
                           : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"
@@ -86,7 +86,7 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
                       aria-expanded={expanded}
                       aria-controls={listId}
                       aria-label={`${expanded ? "Collapse" : "Expand"} ${page.label}`}
-                      className="px-4 text-canvas-40 transition-colors duration-[180ms] hover:text-canvas"
+                      className="flex min-h-11 min-w-11 items-center justify-center px-4 text-canvas-40 transition-colors duration-[180ms] hover:text-canvas"
                     >
                       <span aria-hidden="true" className="text-small">
                         {expanded ? "−" : "+"}
@@ -101,7 +101,7 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
                         <li key={section.id}>
                           <Link
                             href={section.href}
-                            className={`text-small block py-1.5 pl-10 pr-4 transition-colors duration-[180ms] ${
+                            className={`text-small flex min-h-11 items-center py-1.5 pl-10 pr-4 transition-colors duration-[180ms] ${
                               active
                                 ? "bg-canvas-10 text-canvas"
                                 : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"
@@ -126,7 +126,7 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
             <li>
               <Link
                 href={navigation.inbox.href}
-                className={`text-small flex items-center justify-between gap-3 py-2 pl-6 pr-4 transition-colors duration-[180ms] ${
+                className={`text-small flex min-h-11 items-center justify-between gap-3 py-2 pl-6 pr-4 transition-colors duration-[180ms] ${
                   isActive(pathname, navigation.inbox.href)
                     ? "bg-canvas-10 text-canvas"
                     : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"

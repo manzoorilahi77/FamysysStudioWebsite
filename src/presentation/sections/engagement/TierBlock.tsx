@@ -123,7 +123,7 @@ export function TierBlock({ tier, index, idealForLabel, typicalWorkLabel }: Tier
 
             <Link
               href={tier.cta.href}
-              className={`text-small mt-8 inline-block font-medium ${
+              className={`inline-link text-small mt-8 inline-block font-medium ${
                 isDark ? "text-accent-on-dark" : "text-accent"
               }`}
             >

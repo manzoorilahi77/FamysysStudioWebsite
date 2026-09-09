@@ -7,6 +7,7 @@ import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
 import { SectionHeader } from "../../components/SectionHeader";
 import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { motionLayerMinWidth } from "../../../shared/design/tokens";
 import { useScrollFrame } from "../../hooks/useScrollFrame";
 import type { WhyFamysysBlockView } from "../../lib/viewModels";
 
@@ -69,7 +70,17 @@ function clamp(value: number, min: number, max: number): number {
  * transform on the row, never a hijacked wheel event.
  */
 export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
-  const isMotionOn = useMotionLayer();
+  /**
+   * BELOW 900 THE RAIL IS THE GRID IT RENDERS AS WITHOUT A SCRIPT.
+   *
+   * A row wider than the screen, drawn sideways as the page scrolls down, needs horizontal
+   * room to be a row; at 390 the five cards are 208px each and the stage shows one and a
+   * half of them, which reads as a carousel that scrolls itself rather than as five things
+   * held at once. The base state says the same thing — five peers, no numerals — in a
+   * single column. This section is not currently rendered by any page (see the note in
+   * app/page.tsx); the switch is here so putting it back is still one line.
+   */
+  const isMotionOn = useMotionLayer({ minWidth: motionLayerMinWidth });
   const trackRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLUListElement>(null);
   const cardsRef = useRef<ReadonlyArray<HTMLElement>>([]);
@@ -206,7 +217,9 @@ export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
                     alt={reason.media.alt}
                     width={1200}
                     height={1500}
-                    sizes="(min-width: 900px) 26rem, 78vw"
+                    // Below 901 the rail is the base grid — one column at a phone's width, so the
+                    // card fills the container line rather than the 78vw a travelling row gave it.
+                    sizes="(min-width: 901px) 26rem, 90vw"
                     {...(index === 0 ? {} : { loading: "lazy" as const })}
                     className="rail-image"
                     data-card-image

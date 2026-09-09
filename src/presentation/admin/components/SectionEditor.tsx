@@ -44,8 +44,11 @@ interface SectionEditorProps {
   readonly canChangeBlocks: boolean;
 }
 
+/* `min-h-11` and the inline-flex that makes it real: Save, Preview and Publish are the
+   three controls the client will reach for from a phone, and at `py-2` alone they were
+   40px tall. */
 const BUTTON =
-  "text-small rounded-sm px-4 py-2 transition-colors duration-[180ms] disabled:cursor-default";
+  "text-small inline-flex min-h-11 items-center justify-center rounded-sm px-4 py-2 transition-colors duration-[180ms] disabled:cursor-default";
 const PRIMARY = `${BUTTON} bg-ink text-canvas disabled:bg-ink-40`;
 const SECONDARY = `${BUTTON} border border-ink-12 text-ink hover:bg-ink-4 disabled:text-ink-40`;
 
@@ -166,7 +169,7 @@ export function SectionEditor({
         </p>
       ) : null}
 
-      <div className="sticky top-0 z-10 -mx-10 mb-2 border-b border-hairline bg-canvas px-10 py-4">
+      <div className="sticky top-0 z-10 -mx-4 mb-2 border-b border-hairline bg-canvas px-4 py-4 sm:-mx-10 sm:px-10">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
@@ -200,7 +203,7 @@ export function SectionEditor({
               type="button"
               onClick={() => void discard()}
               disabled={busy}
-              className="text-small px-2 py-2 text-graphite-70 transition-colors duration-[180ms] hover:text-accent"
+              className="text-small inline-flex min-h-11 items-center px-2 py-2 text-graphite-70 transition-colors duration-[180ms] hover:text-accent"
             >
               Discard drafts
             </button>

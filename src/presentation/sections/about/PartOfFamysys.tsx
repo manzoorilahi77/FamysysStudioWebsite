@@ -86,7 +86,7 @@ export function PartOfFamysys({ ecosystem }: PartOfFamysysProps) {
                 href={ecosystem.link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-small mt-6 inline-block font-medium text-accent"
+                className="inline-link text-small mt-6 inline-block font-medium text-accent"
               >
                 {ecosystem.link.label}
                 <span aria-hidden="true"> &#8599;</span>

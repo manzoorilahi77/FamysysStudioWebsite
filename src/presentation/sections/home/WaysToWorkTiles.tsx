@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
 import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { motionLayerMinWidth } from "../../../shared/design/tokens";
 import type { CustomPartnershipDetailView, EngagementTierDetailView } from "../../lib/viewModels";
 
 interface WaysToWorkTilesProps {
@@ -130,20 +131,37 @@ function Tile({
           className="tile-image"
         />
       </div>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="tile-hit"
-        aria-expanded={isMotionOn ? isOpen : true}
-        aria-controls={panelId}
-        onClick={onToggle}
-      >
-        <span className="tile-plate">
-          <span className="tile-name">{name}</span>
-          <span className="tile-sign label">{openLabel}</span>
-        </span>
-      </button>
+      {/* A BUTTON ONLY WHERE THERE IS SOMETHING TO OPEN.
+          With the motion layer standing down — a phone, reduced motion, or the script
+          blocked — the detail is already in the document under the picture, so the plate
+          is the tier's name and nothing else. Leaving it a button there put a control on
+          every tile that did nothing when pressed, under a word that said "OPEN" above a
+          panel that already was: four dead tab stops and four false promises. It is a
+          heading in that state, which is what it looks like and what it is. */}
+      {isMotionOn ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          className="tile-hit"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          onClick={onToggle}
+        >
+          <span className="tile-plate">
+            <span className="tile-name">{name}</span>
+            <span className="tile-sign label">{openLabel}</span>
+          </span>
+        </button>
+      ) : (
+        <p className="tile-hit">
+          <span className="tile-plate">
+            <span className="tile-name">{name}</span>
+          </span>
+        </p>
+      )}
       <div className="tile-detail" id={panelId} inert={isMotionOn && !isOpen}>
+        {/* Only rendered where the panel covers the plate — `.tile-who` is `display: none`
+            in the base state for the same reason, and the two agree. */}
         <h3 className="tile-who">{name}</h3>
         <p className="tile-desc">{descriptor}</p>
         <p className="tile-sum">{summary}</p>
@@ -195,7 +213,17 @@ export function WaysToWorkTiles({
   tiers,
   custom,
 }: WaysToWorkTilesProps) {
-  const isMotionOn = useMotionLayer();
+  /**
+   * BELOW 900 EVERY TIER IS OPEN AND THERE IS NO PANEL TO CLOSE.
+   *
+   * The panel slides over the lower 84% of a picture that is `min(80vh, 44rem)` tall, so on
+   * a phone four tiers are three and a half screens of photograph before a word is read,
+   * and the detail then arrives in a box clipped to 84% of one of them with the Close
+   * control at its foot — the one control a thumb has to reach, and the first thing to be
+   * cut off. The base state puts each tier's picture, name and full detail in normal flow,
+   * which needs no Close, no `inert`, and no Escape. `isMotionOn` already gates all three.
+   */
+  const isMotionOn = useMotionLayer({ minWidth: motionLayerMinWidth });
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const isPinnedRef = useRef(false);
 
@@ -236,7 +264,20 @@ export function WaysToWorkTiles({
     // Dark, on the alternate green. Every plate in this section is opaque and sits over a
     // photograph rather than over the section ground, so nothing here had to be recoloured
     // to move — the eyebrow and the lede swap themselves off `.surface-dark`.
-    <Section dark ground="alt" fade={false} ariaLabel={heading} className="imagery-section">
+    //
+    // `ways-section` is this section's own hook and carries no styling of its own above
+    // 900. `imagery-section` is shared with the process frames and the work covers, so it
+    // cannot be the thing the mobile rule hides. See the `max-width: 900px` block beside
+    // `.tiles` in globals.css, which takes the whole section off the phone at the client's
+    // direction — with `display`, so the section is still in the markup and still renders
+    // in full on the desktop page.
+    <Section
+      dark
+      ground="alt"
+      fade={false}
+      ariaLabel={heading}
+      className="imagery-section ways-section"
+    >
       <Container>
         <p className="imagery-eyebrow label">{eyebrow}</p>
         <h2 className="imagery-display mt-4">{heading}</h2>

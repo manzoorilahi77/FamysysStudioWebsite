@@ -145,9 +145,16 @@ export function Footer({ entries, footer }: FooterProps) {
         {/* Twelve tracks, five for the brand and seven for the columns — the parent's
             split. The tagline is capped at 34ch so it breaks into three lines rather than
             running the full five tracks and leaving a column of white beside the links. */}
-        <div className="grid grid-cols-12 gap-x-8 gap-y-12 pt-20 pb-12">
+        {/* `gap-x` STARTS AT ZERO AND ONLY OPENS AT md, and that is a bug fix rather than
+            a nicety. A twelve-track grid with a 32px column gap has eleven of them, so it
+            cannot be narrower than 352px however far the tracks collapse — `minmax(0, 1fr)`
+            gives up the tracks and not the gaps. At 320 the content box is 288px, so the
+            footer was 64px wider than the page and every one of the seven pages scrolled
+            sideways because of it. Below md both children are `col-span-12` and sit one
+            above the other, so there is no column gap to want. */}
+        <div className="grid grid-cols-12 gap-y-12 pt-20 pb-12 md:gap-x-8">
           <div className="col-span-12 md:col-span-5 xl:col-span-4">
-            <Link href="/" aria-label="Famysys Studio, home" className="inline-block">
+            <Link href="/" aria-label="Famysys Studio, home" className="footer-mark inline-flex">
               <Wordmark alt="" dark className="h-8" />
             </Link>
             <p className="text-small mt-6 max-w-[34ch] text-canvas-60">{footer.tagline}</p>
@@ -168,8 +175,13 @@ export function Footer({ entries, footer }: FooterProps) {
               this had, a fourth column would have been 141px at 1280 and wrapped it.
 
               Below xl the four columns wrap onto two rows rather than being squeezed:
-              three across at 1024, two at 390. */}
-          <div className="col-span-12 grid grid-cols-2 gap-x-8 gap-y-10 md:col-span-7 md:grid-cols-3 xl:col-span-8 xl:grid-cols-4">
+              three across at 1024, two at 390, and ONE below 400. Two columns at 320 is
+              132px a track, which puts "Ways to Work With Us" — the longest label on the
+              site — on three lines and "Terms & Conditions" on two; a single column at that
+              width is four short stacks rather than four ragged ones, and the order the
+              headings already read in (Services, Studio, Connect, Legal) is the order they
+              should stack in anyway. */}
+          <div className="col-span-12 grid grid-cols-1 gap-x-6 gap-y-10 min-[400px]:grid-cols-2 md:col-span-7 md:grid-cols-3 md:gap-x-8 xl:col-span-8 xl:grid-cols-4">
             <FooterColumn title="Services">
               {serviceLinks.map((link) => (
                 <FooterLink key={link.href} cta={link} />

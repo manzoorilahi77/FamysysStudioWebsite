@@ -60,8 +60,15 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error: unknown) {
     // Configuration and connection failures both land here. Neither should put its
     // message in front of a browser: one names environment variables, the other carries
-    // the connection config.
-    console.error("[admin] Login could not be checked:", (error as Error)?.name);
+    // the connection config. The SERVER log is the other side of that trade — the reply
+    // tells the operator to read it, so it has to be worth reading. Logging only the name
+    // printed "Error" for both causes, which is every cause this catch has, and left the
+    // one thing that distinguishes them out of the only place it was safe to put it.
+    const cause = error as NodeJS.ErrnoException;
+    console.error(
+      `[admin] Login could not be checked: ${cause?.name}: ${cause?.message}` +
+        (cause?.code ? ` (code ${cause.code})` : ""),
+    );
     return json({ ok: false, message: "Sign-in is unavailable. Check the server logs." }, 503);
   }
 

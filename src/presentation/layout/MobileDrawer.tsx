@@ -80,8 +80,16 @@ export function MobileDrawer({
         transitionDuration: "220ms",
       }}
     >
-      <div className="flex justify-end px-6 py-6">
-        <button type="button" onClick={onClose} className="label text-ink-70">
+      <div className="flex justify-end px-4 py-3">
+        {/* 44px square, and the padding is what makes it one: the word is 11px of tracked
+            capitals and the box around it is the target. `-mr-2` pulls the enlarged box
+            back onto the 24px gutter the rest of the drawer sits on, so growing the target
+            does not move the word. */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="label -mr-2 inline-flex min-h-11 min-w-11 items-center justify-end px-2 text-ink-70"
+        >
           Close
         </button>
       </div>
@@ -96,7 +104,7 @@ export function MobileDrawer({
           has to expand another item to find. It is rendered from the SAME aside the panel
           renders, immediately after the entry that carries it, so the two surfaces cannot
           disagree about where it lives. */}
-      <nav aria-label="Mobile" className="flex flex-col gap-2 px-6">
+      <nav aria-label="Mobile" className="flex flex-col gap-1 px-6">
         {entries.map((entry, index) => {
           const isGroupOpen = openGroup === entry.href;
           const groupTriggerId = `drawer-trigger-${index}`;
@@ -128,14 +136,19 @@ export function MobileDrawer({
                       <Link
                         href={entry.href}
                         onClick={onClose}
-                        className="text-display-s font-medium text-ink"
+                        className="text-display-s flex min-h-11 items-center font-medium text-ink"
                       >
                         {entry.label}
                       </Link>
+                      {/* The chevron is the one control on this row that is NOT the page,
+                          so it has to be separable by a thumb: 44x44 with the negative
+                          margin putting its right edge back on the gutter. Without the
+                          width it was a 20px glyph inside 8px of padding, sitting 36px
+                          from a link that goes somewhere else entirely. */}
                       <button
                         id={groupTriggerId}
                         type="button"
-                        className="shrink-0 p-2 text-ink-70"
+                        className="-mr-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink-70"
                         aria-expanded={isGroupOpen}
                         aria-controls={groupPanelId}
                         aria-label={`Show ${entry.label} links`}
@@ -168,12 +181,18 @@ export function MobileDrawer({
                       className="faq-panel"
                     >
                       <div className="faq-panel-inner">
-                        <ul className="mt-3 space-y-2 pb-3 pl-2">
+                        {/* EVERY ROW IS 44px TALL, and the list's own gap comes off to pay
+                            for it. These were 24px links 8px apart, which for a thumb is
+                            one target with three names in it — the failure the brief calls
+                            "two links 8px apart are one target". `flex` on the anchor is
+                            what makes the height real: an inline box is only as tall as its
+                            glyphs. */}
+                        <ul className="mt-1 pb-2 pl-2">
                           {panelLinks(entry).map((item) => (
                             <li key={`${item.href}-${item.label}`}>
                               <Link
                                 href={item.href}
-                                className="text-body text-ink"
+                                className="text-body flex min-h-11 items-center text-ink"
                                 onClick={onClose}
                               >
                                 {item.label}
@@ -184,7 +203,7 @@ export function MobileDrawer({
                             <li>
                               <Link
                                 href={entry.panel.footerHref}
-                                className="inline-link text-small font-medium text-accent"
+                                className="inline-link text-small min-h-11 font-medium text-accent"
                                 onClick={onClose}
                               >
                                 {entry.panel.footerLabel} &rarr;
@@ -199,7 +218,7 @@ export function MobileDrawer({
                   <Link
                     href={entry.href}
                     onClick={onClose}
-                    className="text-display-s block font-medium text-ink"
+                    className="text-display-s flex min-h-11 items-center font-medium text-ink"
                     style={revealStyle}
                   >
                     {entry.label}
@@ -211,7 +230,7 @@ export function MobileDrawer({
                   <Link
                     href={aside.href}
                     onClick={onClose}
-                    className="text-display-s block font-medium text-ink"
+                    className="text-display-s flex min-h-11 items-center font-medium text-ink"
                     style={revealStyle}
                   >
                     {aside.label}

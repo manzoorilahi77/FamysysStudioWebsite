@@ -7,6 +7,7 @@ import { RevealHeading } from "../../components/RevealHeading";
 import { Section } from "../../components/Section";
 import { SectionHeader } from "../../components/SectionHeader";
 import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { motionLayerMinWidth } from "../../../shared/design/tokens";
 import { useScrollFrame } from "../../hooks/useScrollFrame";
 import type { DifferentiatorBlockView } from "../../lib/viewModels";
 
@@ -68,7 +69,19 @@ const THESIS_SETTLE = 0.3;
 const THESIS_SPREAD = 3.2;
 
 export function Differentiator({ differentiator }: DifferentiatorProps) {
-  const isMotionOn = useMotionLayer();
+  /**
+   * BELOW 900 THIS SECTION IS FOUR CARDS, not a smaller stage-and-list.
+   *
+   * The mechanic is a sticky 4:3 stage beside a list tall enough to travel past it, and a
+   * phone has neither half: in one column the stage cannot stick against anything, so the
+   * scroll bands resolved against a list that had already left the screen and the section
+   * arrived showing one photograph and four names with three of the four sentences behind
+   * a tap. The base state is the design the brief asks for — every element a card with its
+   * picture and its descriptor always visible, stacked — so this stands the layer down and
+   * lets it render. The cross-fade and the wipe have nowhere to happen and are replaced by
+   * nothing: four cards do not transition between each other, they are all simply there.
+   */
+  const isMotionOn = useMotionLayer({ minWidth: motionLayerMinWidth });
   const listRef = useRef<HTMLOListElement>(null);
   const sweepRef = useRef<HTMLSpanElement>(null);
   const stageId = useId();

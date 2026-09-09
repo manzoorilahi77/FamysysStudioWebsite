@@ -44,7 +44,7 @@ export function HowToChoose({ howToChoose }: HowToChooseProps) {
                 </p>
                 <Link
                   href={`#${entry.tierSlug}`}
-                  className="text-small mt-4 inline-block font-medium text-accent"
+                  className="inline-link text-small mt-4 inline-block font-medium text-accent"
                 >
                   {entry.tierName} &rarr;
                 </Link>

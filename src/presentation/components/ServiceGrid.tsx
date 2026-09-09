@@ -1,12 +1,14 @@
 "use client";
 
 import type { CSSProperties, PointerEvent } from "react";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ServiceOffering } from "../../domain/services/entities/ServiceOffering";
 import { motion } from "../../shared/design/tokens";
+import { useFinePointer } from "../hooks/useFinePointer";
 import { useGridColumns } from "../hooks/useGridColumns";
 import { useInView } from "../hooks/useInView";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScrollFrame } from "../hooks/useScrollFrame";
 
 interface ServiceGridProps {
   readonly capabilities: ReadonlyArray<ServiceOffering>;
@@ -97,8 +99,89 @@ function ServiceCell({ capability, numeral, delayMs, showWash, onEnter }: Servic
 export function ServiceGrid({ capabilities }: ServiceGridProps) {
   const [gridRef, isInView] = useInView<HTMLDivElement>({ threshold: 0.15, once: true });
   const prefersReducedMotion = useReducedMotion();
+  const hasFinePointer = useFinePointer();
   const columns = useGridColumns();
   const markerRef = useRef<HTMLSpanElement>(null);
+
+  /**
+   * THE SPOTLIGHT — what a phone gets instead of hover.
+   *
+   * The whole design of a cell is its inverted state: the ink curtain drops, the title
+   * lifts and flips to cream, the numeral rises into its crop and turns ghost. Without a
+   * cursor none of it ever happens, so on a touch screen the six cards were six flat
+   * blocks of text and the section's one piece of art direction was invisible to every
+   * reader holding a phone.
+   *
+   * So the SCROLL points instead of the pointer: whichever cell's centre is nearest the
+   * middle of the screen wears the state the cursor would have given it. In one column
+   * that reads as the section lighting each card in turn as the reader comes to it, which
+   * is the same information hover carries — this is the one you are looking at.
+   *
+   * `(hover: hover) and (pointer: fine)` and NOT a width, deliberately: a 1440px
+   * touchscreen laptop has no cursor and needs this; a narrow window on a desktop has one
+   * and does not. See `useFinePointer`. It is off under reduced motion for the same reason
+   * the wash and the marker are not rendered there at all.
+   */
+  const cellsRef = useRef<ReadonlyArray<HTMLElement>>([]);
+  const litRef = useRef<HTMLElement | null>(null);
+  const isSpotlightOn = !prefersReducedMotion && !hasFinePointer;
+
+  const spotlight = useCallback(() => {
+    const cells = cellsRef.current;
+    if (cells.length === 0) {
+      return;
+    }
+    // EVERY RECT IS READ BEFORE ANY ATTRIBUTE IS WRITTEN. The frame is shared — see
+    // `useScrollFrame` — and a write in the middle of this loop invalidates the layout
+    // the rest of the loop, and the next task in the frame, is about to read.
+    const viewport = window.innerHeight;
+    const middle = viewport / 2;
+    let nearest: HTMLElement | null = null;
+    let shortest = Infinity;
+    for (const cell of cells) {
+      const rect = cell.getBoundingClientRect();
+      // Off screen entirely: not a candidate. Without this the first or last card stays
+      // lit while the reader is a screen away from the section.
+      if (rect.bottom <= 0 || rect.top >= viewport) {
+        continue;
+      }
+      const distance = Math.abs(rect.top + rect.height / 2 - middle);
+      if (distance < shortest) {
+        shortest = distance;
+        nearest = cell;
+      }
+    }
+    if (nearest === litRef.current) {
+      return;
+    }
+    litRef.current?.removeAttribute("data-lit");
+    nearest?.setAttribute("data-lit", "true");
+    litRef.current = nearest;
+  }, []);
+
+  useScrollFrame(spotlight, isSpotlightOn);
+
+  // The cells are collected once rather than queried in the frame, which must not touch
+  // the document. Clearing on the way out matters: a reader who plugs in a mouse crosses
+  // the media query, the frame task unsubscribes, and a cell would otherwise be left lit
+  // with nothing driving it.
+  useEffect(() => {
+    if (!isSpotlightOn) {
+      litRef.current?.removeAttribute("data-lit");
+      litRef.current = null;
+      cellsRef.current = [];
+      return;
+    }
+    const grid = gridRef.current;
+    if (!grid) {
+      return;
+    }
+    cellsRef.current = Array.from(grid.querySelectorAll<HTMLElement>(".service-cell"));
+    return () => {
+      litRef.current?.removeAttribute("data-lit");
+      litRef.current = null;
+    };
+  }, [isSpotlightOn, capabilities, gridRef]);
 
   /**
    * Parks the marker on the bottom-right corner of the cell the cursor just entered.

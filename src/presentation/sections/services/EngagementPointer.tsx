@@ -56,7 +56,7 @@ export function EngagementPointer({
 
         <Link
           href={cta.href}
-          className="text-small mt-10 inline-block font-medium text-accent-on-dark"
+          className="inline-link text-small mt-10 inline-block font-medium text-accent-on-dark"
         >
           {cta.label} &rarr;
         </Link>

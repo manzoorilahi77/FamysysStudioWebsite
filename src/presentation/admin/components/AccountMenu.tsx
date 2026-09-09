@@ -32,7 +32,7 @@ export function AccountMenu() {
         type="button"
         onClick={signOut}
         disabled={signingOut}
-        className="transition-colors duration-[180ms] hover:text-ink disabled:cursor-default"
+        className="inline-flex min-h-11 items-center transition-colors duration-[180ms] hover:text-ink disabled:cursor-default"
       >
         {signingOut ? "Signing out…" : "Sign out"}
       </button>

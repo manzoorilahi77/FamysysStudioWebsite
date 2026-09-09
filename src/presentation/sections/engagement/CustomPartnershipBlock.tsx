@@ -103,7 +103,7 @@ export function CustomPartnershipBlock({ custom }: CustomPartnershipBlockProps) 
               </p>
               <Link
                 href={custom.cta.href}
-                className="text-small mt-6 inline-block font-medium text-accent-on-dark"
+                className="inline-link text-small mt-6 inline-block font-medium text-accent-on-dark"
               >
                 {custom.cta.label} &rarr;
               </Link>

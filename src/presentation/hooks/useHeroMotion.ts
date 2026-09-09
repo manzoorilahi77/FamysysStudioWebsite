@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFinePointer } from "./useFinePointer";
 import { useReducedMotion } from "./useReducedMotion";
 
 /**
@@ -27,8 +28,20 @@ import { useReducedMotion } from "./useReducedMotion";
  * scrolling does not change it.
  */
 
-/** Bars in the meter. */
-const BAR_COUNT = 64;
+/**
+ * BARS IN THE METER, AS A RANGE RATHER THAN A NUMBER.
+ *
+ * 64 was the design's count and it is right on a 1440px hero, where a bar is 22px wide
+ * and the field reads as a level meter. At 390 the same 64 bars are 6px each with a 1.3px
+ * gap, which does not read as bars at all — it reads as a dithered gradient, and it costs
+ * 192 fills a frame to draw it. The count is chosen from the canvas width instead, so a
+ * bar is never narrower than `BAR_MIN_WIDTH_PX`: about 26 bars at 390, 34 at 500, and the
+ * full 64 from 700 up. Recomputed on resize with everything else.
+ */
+const BAR_COUNT_MAX = 64;
+const BAR_COUNT_MIN = 22;
+/** The narrowest a bar may be drawn, in CSS pixels, before the count comes down. */
+const BAR_MIN_WIDTH_PX = 11;
 /** Fraction of a bar's width left empty between one bar and the next. */
 const BAR_GAP_RATIO = 0.22;
 /** How the wave is scaled into the canvas height before the ceiling is applied. */
@@ -78,6 +91,20 @@ const SCROLL_SPEED_FULL = 30;
 const LIFT_FLOOR = 0.16;
 /** How much more the lift adds at full scroll speed. */
 const LIFT_RANGE = 0.42;
+/**
+ * THE SAME TWO VALUES FOR A READER WHO HAS NO CURSOR.
+ *
+ * With a mouse the meter answers two inputs: the pointer, which drags a playhead and
+ * bulges the bars under it, and the scroll, which lifts the whole field. On a touch screen
+ * the first of those does not exist, and a meter that only breathes is a meter that is
+ * playing to itself — the whole idea of the section is that the ground responds to the
+ * reader. Scroll is the one input a thumb has, so scroll takes over the range the pointer
+ * gave up: the floor comes down so a still page reads as genuinely at rest, and the range
+ * goes up so a flick visibly drives the field. Nothing else about the meter changes — the
+ * three sines still run, so it drifts on its own between scrolls rather than flat-lining.
+ */
+const TOUCH_LIFT_FLOOR = 0.1;
+const TOUCH_LIFT_RANGE = 0.72;
 
 /** Smoothing on the scroll velocity, per frame. */
 const SCROLL_EASE = 0.22;
@@ -140,6 +167,9 @@ interface MeterFrame {
   readonly pointerX: number | null;
   /** Scroll speed, 0 at rest and 1 at `SCROLL_SPEED_FULL`. */
   readonly scrollSpeed: number;
+  /** Lift at rest, and the lift a full-speed scroll adds on top of it. */
+  readonly liftFloor: number;
+  readonly liftRange: number;
 }
 
 interface Meter {
@@ -160,6 +190,7 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
   let width = 0;
   let height = 0;
   let barWidth = 1;
+  let barCount = BAR_COUNT_MAX;
   let heights: number[] = [];
   let ceiling = Number.POSITIVE_INFINITY;
 
@@ -172,8 +203,13 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
     }
     width = canvas.width;
     height = canvas.height;
-    barWidth = width / BAR_COUNT;
-    heights = new Array<number>(BAR_COUNT).fill(0);
+    // From the CSS width, not the backing store: a bar's legibility is a question about
+    // how wide it looks, and the device pixel ratio has nothing to say about that.
+    barCount = Math.round(
+      clamp(canvas.clientWidth / BAR_MIN_WIDTH_PX, BAR_COUNT_MIN, BAR_COUNT_MAX),
+    );
+    barWidth = width / barCount;
+    heights = new Array<number>(barCount).fill(0);
   }
 
   function step(frame: MeterFrame): void {
@@ -185,12 +221,12 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
     const phase = frame.time * 0.0009;
     const pointer =
       frame.pointerX === null ? Number.NEGATIVE_INFINITY : frame.pointerX * pixelRatio;
-    const lift = LIFT_FLOOR + frame.scrollSpeed * LIFT_RANGE;
+    const lift = frame.liftFloor + frame.scrollSpeed * frame.liftRange;
     const gap = barWidth * BAR_GAP_RATIO;
     const reach = BULGE_REACH_PX * pixelRatio;
 
     context.fillStyle = rgba(bars, 0.62);
-    for (let index = 0; index < BAR_COUNT; index += 1) {
+    for (let index = 0; index < barCount; index += 1) {
       const x = index * barWidth;
       let level =
         0.5 +
@@ -211,7 +247,7 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
 
     // The cap is what turns a column into a reading on a meter.
     context.fillStyle = rgba(accent, 0.72);
-    for (let index = 0; index < BAR_COUNT; index += 1) {
+    for (let index = 0; index < barCount; index += 1) {
       const barHeight = heights[index] ?? 0;
       context.fillRect(
         index * barWidth + gap * 0.5,
@@ -224,7 +260,7 @@ function createMeter(canvas: HTMLCanvasElement, bars: Rgb, accent: Rgb, pixelRat
     // Every other bar carries a faint accent wash up its lower half, so the field has a
     // grain rather than reading as one flat block of the alternate ground.
     context.fillStyle = rgba(accent, 0.09);
-    for (let index = 0; index < BAR_COUNT; index += 2) {
+    for (let index = 0; index < barCount; index += 2) {
       const barHeight = heights[index] ?? 0;
       context.fillRect(
         index * barWidth + gap * 0.5,
@@ -280,21 +316,43 @@ export interface HeroMotion {
   readonly sectionRef: React.RefObject<HTMLElement | null>;
   readonly canvasRef: React.RefObject<HTMLCanvasElement | null>;
   readonly bodyRef: React.RefObject<HTMLDivElement | null>;
-  /** Which band is open. Scroll steps it; pointing at a band takes it over. */
+  /** Which band is open. Scroll steps it; pointing at one, or pressing it, takes over. */
   readonly activeBand: number;
   readonly onBandEnter: (index: number) => void;
   readonly onBandLeave: () => void;
+  /** Click, tap or Enter on a band — the path for everything that cannot hover. */
+  readonly onBandPress: (index: number) => void;
+  /** True only where the reader is holding a cursor. The bands read it to decide whether
+   *  their pointer handlers mean anything. */
+  readonly hasFinePointer: boolean;
 }
 
-export function useHeroMotion(bandCount: number): HeroMotion {
+/**
+ * `steps` is the bands the SCROLL may open, in the order it opens them — not a count.
+ *
+ * It was a count, and that was right while every band a reader could see was in the strip.
+ * It stopped being right the moment a phone showed a SUBSET: below 900 the strip is three
+ * of the six and the other three are `display: none`, so a sequence stepping 0 to 5 spent
+ * half the hero's travel opening a band nobody could see, and all three visible ones sat
+ * closed. Handing the hook the actual indices is what makes the sequence answer the strip
+ * that is on the screen. See `HERO_MOBILE_BANDS` in Hero.tsx, which is where the subset is
+ * chosen and where the matching CSS rule is named.
+ */
+export function useHeroMotion(steps: ReadonlyArray<number>): HeroMotion {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   // A ref, not state: the loop reads it every frame and a hover must not re-run the
   // effect that owns the loop.
   const hoveredBand = useRef(-1);
-  const [activeBand, setActiveBand] = useState(0);
+  const [activeBand, setActiveBand] = useState(steps[0] ?? 0);
+  // The loop reads the list every frame and must not re-subscribe because a render handed
+  // it a new array with the same contents; `stepsKey` is what the effect actually watches.
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
+  const stepsKey = steps.join(",");
   const prefersReducedMotion = useReducedMotion();
+  const hasFinePointer = useFinePointer();
 
   const onBandEnter = useCallback((index: number) => {
     hoveredBand.current = index;
@@ -302,6 +360,22 @@ export function useHeroMotion(bandCount: number): HeroMotion {
 
   const onBandLeave = useCallback(() => {
     hoveredBand.current = -1;
+  }, []);
+
+  /**
+   * A TAP PICKS A BAND AND KEEPS IT, until the next one is tapped.
+   *
+   * Hover cannot do this on a touch screen, and the pointer path must not try: a tap
+   * fires `pointerenter` and then no `pointerleave` at all, so a band opened by a thumb
+   * used to stay open for the rest of the visit and the scroll stopped stepping the
+   * accordion for good. So the pointer path is guarded on a real cursor and this is what
+   * a thumb gets instead — the same selection, taken deliberately, released by tapping
+   * the open band again.
+   */
+  const onBandPress = useCallback((index: number) => {
+    const next = hoveredBand.current === index ? -1 : index;
+    hoveredBand.current = next;
+    setActiveBand((current) => (next === -1 ? current : next));
   }, []);
 
   useEffect(() => {
@@ -329,6 +403,8 @@ export function useHeroMotion(bandCount: number): HeroMotion {
           time: STILL_START_MS + index * STILL_WARMUP_STEP_MS,
           pointerX: null,
           scrollSpeed: STILL_LIFT,
+          liftFloor: LIFT_FLOOR,
+          liftRange: LIFT_RANGE,
         });
       }
       return;
@@ -338,8 +414,15 @@ export function useHeroMotion(bandCount: number): HeroMotion {
     // through `Button`. The transform has to land on the anchor itself — that is the
     // element with the pill shape and the rolling label — and `Button` deliberately does
     // not forward arbitrary attributes onto it.
-    const magnets = Array.from(
-      section.querySelectorAll<HTMLElement>(".hero-final-cta a"),
+    //
+    // NONE OF THEM ON A TOUCH SCREEN. A magnetic button is a cursor answering a cursor;
+    // with a thumb the only `pointerenter` it ever sees is the tap itself, which would
+    // slide the control out from under the finger that is pressing it at the moment of
+    // the press. The two CTAs are the most important controls on the page and they hold
+    // still.
+    const magnets = (hasFinePointer
+      ? Array.from(section.querySelectorAll<HTMLElement>(".hero-final-cta a"))
+      : []
     ).map((element) => ({
       element,
       centreX: 0,
@@ -425,7 +508,9 @@ export function useHeroMotion(bandCount: number): HeroMotion {
         body.style.transform = `translate3d(0,${(centreOffset * -BODY_LIFT_PX).toFixed(2)}px,0)`;
       }
 
-      const stepped = clamp(Math.floor(clamp(out, 0, 0.999) * bandCount), 0, bandCount - 1);
+      const order = stepsRef.current;
+      const slot = clamp(Math.floor(clamp(out, 0, 0.999) * order.length), 0, order.length - 1);
+      const stepped = order[slot] ?? 0;
       const band = hoveredBand.current >= 0 ? hoveredBand.current : stepped;
       if (band !== currentBand) {
         currentBand = band;
@@ -434,8 +519,14 @@ export function useHeroMotion(bandCount: number): HeroMotion {
 
       meter.step({
         time: now,
-        pointerX,
+        // Null on a touch screen, always: the bulge and the playhead are the pointer's
+        // half of the meter and there is no pointer. What is left is the three sines
+        // drifting on their own and the scroll lift below, which is the whole of what
+        // this section responds to on a phone.
+        pointerX: hasFinePointer ? pointerX : null,
         scrollSpeed: clamp(Math.abs(scrollVelocity) / SCROLL_SPEED_FULL, 0, 1),
+        liftFloor: hasFinePointer ? LIFT_FLOOR : TOUCH_LIFT_FLOOR,
+        liftRange: hasFinePointer ? LIFT_RANGE : TOUCH_LIFT_RANGE,
       });
 
       for (const magnet of magnets) {
@@ -486,7 +577,9 @@ export function useHeroMotion(bandCount: number): HeroMotion {
 
     measure();
     window.addEventListener("resize", measure, { passive: true });
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    if (hasFinePointer) {
+      window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    }
     window.addEventListener("load", measure);
     if (document.fonts?.ready) {
       void document.fonts.ready.then(measure);
@@ -503,7 +596,28 @@ export function useHeroMotion(bandCount: number): HeroMotion {
         cleanup();
       }
     };
-  }, [bandCount, prefersReducedMotion]);
+  }, [stepsKey, prefersReducedMotion, hasFinePointer]);
 
-  return { sectionRef, canvasRef, bodyRef, activeBand, onBandEnter, onBandLeave };
+  /**
+   * When the strip changes which bands it shows — the one time that happens is a viewport
+   * crossing 900 — an open band may have just become one of the hidden ones, which leaves
+   * the strip with nothing open until the reader scrolls. This puts the selection back on
+   * the first band the new strip actually has.
+   */
+  useEffect(() => {
+    const order = stepsRef.current;
+    hoveredBand.current = -1;
+    setActiveBand((current) => (order.includes(current) ? current : (order[0] ?? 0)));
+  }, [stepsKey]);
+
+  return {
+    sectionRef,
+    canvasRef,
+    bodyRef,
+    activeBand,
+    onBandEnter,
+    onBandLeave,
+    onBandPress,
+    hasFinePointer,
+  };
 }

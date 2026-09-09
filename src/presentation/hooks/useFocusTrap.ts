@@ -17,7 +17,19 @@ export function useFocusTrap(containerRef: React.RefObject<HTMLElement | null>, 
       if (event.key !== "Tab" || !container) {
         return;
       }
-      const focusable = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      // `inert` and `hidden` subtrees still MATCH the selector — they are simply not
+      // focusable — so an unfiltered list can name a last element the browser will never
+      // put focus on, and the wrap at the end of the cycle then silently does nothing and
+      // drops focus onto the body. The drawer has such a subtree in it whenever a nav
+      // group is collapsed, which is its resting state.
+      const focusable = Array.from(
+        container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      ).filter(
+        (element) =>
+          !element.closest("[inert]") &&
+          !element.hidden &&
+          (element.offsetWidth > 0 || element.offsetHeight > 0 || element.getClientRects().length > 0),
+      );
       if (focusable.length === 0) {
         return;
       }

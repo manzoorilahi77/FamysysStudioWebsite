@@ -46,6 +46,30 @@ if (found) {
   console.log(`[clean-stale-next] removed .next — it held a ${left} (.next/${found})`);
 }
 
+// Two `next dev` servers on one .next is the same collision as dev-vs-build, and it is the
+// easier one to cause: the second finds port 3000 taken, says so in one line, and starts on
+// a random port instead. Both then write chunks and manifests into the same .next, and the
+// first server — the one the browser is still pointed at — starts serving 404s and compiling
+// /_not-found for routes that exist. Nothing in either server's output names the other, so
+// the guard names it here. Scoped to THIS repository, so a Next project in another window is
+// not mistaken for a second server on this one.
+if (mode === "dev" && !process.env.ALLOW_SECOND_DEV) {
+  const running = findNextDevProcesses().filter((line) => line.includes(process.cwd()));
+  if (running.length > 0) {
+    console.error(
+      [
+        "[clean-stale-next] a `next dev` server is already running for this repository. A",
+        "second one shares .next with it, and both start serving 404s for routes that exist.",
+        "",
+        ...running.map((line) => `  ${line}`),
+        "",
+        "Stop it and run dev again (or set ALLOW_SECOND_DEV=1 to override).",
+      ].join("\n"),
+    );
+    process.exit(1);
+  }
+}
+
 // Deleting .next is not enough when a dev server is still running: it re-creates its own
 // chunks and manifests in .next while `next build` compiles, and the build then fails in
 // "Collecting page data" with PageNotFoundError for every route. Nothing in the build

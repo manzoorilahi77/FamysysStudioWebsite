@@ -229,6 +229,24 @@ export const spacing = {
   gutter: "5vw",
 } as const;
 
+/**
+ * THE ONE WIDTH THE SITE CHANGES SHAPE AT, and the only breakpoint written down rather
+ * than expressed in a stylesheet.
+ *
+ * Four homepage sections carry a motion layer that is a mechanic rather than an
+ * ornament — a sticky stage beside a travelling list, five frames each taking a screen,
+ * a row wider than the viewport drawn sideways, a panel sliding over the lower 84% of an
+ * 80vh picture. Each of them needs room a phone has not got, and none of them is
+ * improved by being made smaller. Below this width they stand down and the section
+ * renders its base state, which is the same content as a plain stack.
+ *
+ * 900 rather than a round 768 or 1024 because it is already the line the hero and the
+ * Differentiator change shape at in globals.css, and one line is easier to hold than
+ * three. `useMotionLayer` takes it as `minWidth`, so the CSS `@media (max-width: 900px)`
+ * blocks and the JavaScript switch cannot disagree about where a phone stops.
+ */
+export const motionLayerMinWidth = 901; // px — matches `@media (max-width: 900px)` in globals.css
+
 export const container = { maxWidth: "88rem" } as const; // 1408px — famysys.com's header shell
 
 /**

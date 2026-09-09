@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import {
   CONTACT_FIELD_ORDER,
   toSubmitDemoRequestInput,
@@ -13,6 +13,7 @@ import {
 import type { ContactFormBlock } from "../../domain/contact/entities/ContactPage";
 import { CompanySize } from "../../domain/lead/value-objects/CompanySize";
 import { ContactRole } from "../../domain/lead/value-objects/ContactRole";
+import { autoGrowTextarea } from "../lib/autoGrowTextarea";
 import { staggerDelay } from "../motion/variants";
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
@@ -137,6 +138,18 @@ export function ContactForm({ form }: ContactFormProps) {
   const [errors, setErrors] = useState<ContactFieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const confirmationRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * THE BRIEF FIELD GROWS WITH WHAT IS TYPED. It is a five-row box, which is a reasonable
+   * share of a 1440px page and most of a 390x667 phone — and once it is full the reader is
+   * writing the most important thing on the form into a window three lines tall, scrolling
+   * their own sentence. `.contact-field--textarea` keeps the five-row floor, so nothing
+   * about the resting form changes. See `autoGrowTextarea`.
+   */
+  const autoGrow = useCallback(
+    (element: HTMLTextAreaElement | null) => autoGrowTextarea(element),
+    [],
+  );
 
   const fieldId = (field: ContactField): string => `${prefix}-${field}`;
   const errorCount = CONTACT_FIELD_ORDER.filter((field) => errors[field]).length;
@@ -286,7 +299,11 @@ export function ContactForm({ form }: ContactFormProps) {
         name="brief"
         rows={5}
         value={values.brief}
-        onChange={(event) => update("brief", event.target.value)}
+        ref={autoGrow}
+        onChange={(event) => {
+          update("brief", event.target.value);
+          autoGrow(event.currentTarget);
+        }}
         aria-invalid={Boolean(errors.brief)}
         aria-describedby={errors.brief ? `${fieldId("brief")}-error` : undefined}
         className="contact-field contact-field--textarea"

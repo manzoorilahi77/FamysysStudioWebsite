@@ -66,7 +66,12 @@ export function Button({
   rollOnHover = false,
 }: ButtonProps) {
   const variantClasses = dark ? DARK_VARIANT_CLASSES[variant] : LIGHT_VARIANT_CLASSES[variant];
-  const classes = `button-motion inline-flex items-center justify-center rounded-sm px-6 py-3 text-small font-medium ${variantClasses} ${className}`;
+  // `min-h-11` — 44px. `px-6 py-3` on a 15px label came out 43.6px, which is under the
+  // thumb floor by a rounding error rather than by a decision, and this is the site's one
+  // button component: every call to action on every page is this box. The floor never
+  // binds on the hero's larger pill or on any button with more padding, so nothing that
+  // already cleared 44 moves.
+  const classes = `button-motion inline-flex min-h-11 items-center justify-center rounded-sm px-6 py-3 text-small font-medium ${variantClasses} ${className}`;
   const label = <Label label={cta.label} roll={rollOnHover} />;
 
   if (cta.isExternal) {

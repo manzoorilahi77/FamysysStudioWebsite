@@ -6,6 +6,7 @@ import type { SectionIntro } from "../../../domain/marketing/entities/SectionInt
 import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
 import { useMotionLayer } from "../../hooks/useMotionLayer";
+import { motionLayerMinWidth } from "../../../shared/design/tokens";
 import { useScrollFrame } from "../../hooks/useScrollFrame";
 import type { CaseStudyView } from "../../lib/viewModels";
 
@@ -76,6 +77,23 @@ function ease(t: number): number {
  */
 export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversProps) {
   const isMotionOn = useMotionLayer();
+  /**
+   * THE ONLY SECTION OF THE FOUR THAT KEEPS ITS MOTION ON A PHONE, and it keeps one third
+   * of it.
+   *
+   * The mask survives the move down because it is not a mechanic that needs room: it is a
+   * panel of the section's own ground sliding off a frame as that frame comes up the
+   * viewport, driven by scroll, which is the one input a touch screen has plenty of. One
+   * column is simply eight of them instead of two staggered fours.
+   *
+   * The other two beats do not survive. Each frame was moving three things at once — the
+   * mask, the picture settling from 6% high and 6% large, and the caption lifting 14px out
+   * of a 0.25 floor — and eight frames at three properties each is 24 style writes a frame
+   * for depth nobody reads on a 390px-wide picture. Above 900 all three still run.
+   */
+  const isDepthOn = useMotionLayer({ minWidth: motionLayerMinWidth });
+  const isDepthOnRef = useRef(isDepthOn);
+  isDepthOnRef.current = isDepthOn;
   const gridRef = useRef<HTMLDivElement>(null);
   const coversRef = useRef<ReadonlyArray<CoverParts>>([]);
 
@@ -107,7 +125,7 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
       }
       coversRef.current = [];
     };
-  }, [isMotionOn, caseStudies.length]);
+  }, [isMotionOn, isDepthOn, caseStudies.length]);
 
   const paint = useCallback(() => {
     const covers = coversRef.current;
@@ -130,6 +148,9 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
       const hidden = 1 - shown;
       if (cover.veil) {
         cover.veil.style.transform = `translate3d(0,${(shown * MASK_TRAVEL).toFixed(2)}%,0)`;
+      }
+      if (!isDepthOnRef.current) {
+        return;
       }
       if (cover.image) {
         cover.image.style.transform = `translate3d(0,${(hidden * IMAGE_RISE).toFixed(2)}%,0) scale(${(1 + hidden * IMAGE_SETTLE).toFixed(4)})`;
@@ -156,7 +177,15 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
         <p className="imagery-lede">{intro.body}</p>
       </Container>
 
-      <div className="covers" ref={gridRef} data-motion={isMotionOn ? "on" : "off"}>
+      <div
+        className="covers"
+        ref={gridRef}
+        data-motion={isMotionOn ? "on" : "off"}
+        // The picture is only oversized while something is going to move it. Without this
+        // a narrow screen would keep the 112%/-6% overscan the settle needs and simply
+        // show a permanently cropped photograph.
+        data-depth={isDepthOn ? "on" : "off"}
+      >
         {caseStudies.map((piece) => (
           <article className="cover" key={piece.slug}>
             <div className="cover-window" data-cover-window>
