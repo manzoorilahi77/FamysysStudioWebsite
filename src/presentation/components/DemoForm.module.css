@@ -1,0 +1,37 @@
+/*
+ * COMPACT FIELDS, SCOPED TO THIS FORM ONLY.
+ *
+ * `.contact-field` (globals.css) sets a 3rem min-height and 6.5rem textarea floor sized for
+ * /contact, a whole page given over to the form. This one shares a screen with the closing
+ * pitch and has to fit a viewport alongside it — see FinalCta's own note on why it no
+ * longer takes the `statement` padding tier.
+ *
+ * Element + class beats class alone on specificity (0,1,1 > 0,1,0), so these override
+ * `.contact-field` regardless of which stylesheet loads first — no `!important`, and
+ * nothing here touches the shared class itself, so /contact is untouched.
+ */
+/* `button.field` is the FloatingSelect trigger — a button standing in for a select, so it
+   takes the same compact treatment as every other control here. */
+input.field,
+select.field,
+button.field {
+  min-height: 2.375rem;
+  padding: 0.375rem 0 0.5rem;
+}
+
+textarea.field {
+  /* ~2 lines at this form's line-height, not /contact's ~4. `autoGrow` still expands it
+     as the sender types past that. */
+  min-height: 3.25rem;
+  padding: 0.375rem 0 0.5rem;
+}
+
+/* This form's own ground for FloatingField.module.css's autofill override — see the note
+   there. The panel sits on canvas-4 over ink (FinalCta.tsx), not plain ink, and the
+   variable's fallback only covers /contact's plain-ink case. */
+.form {
+  --field-autofill-ground: var(--color-canvas-4);
+}
+
+/* 16px is the floor `.contact-field` states and stays at: below it iOS Safari zooms the
+   page in on focus. Everything else about the compact size lives above. */

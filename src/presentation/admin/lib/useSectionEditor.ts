@@ -34,8 +34,19 @@ export interface EditorField {
   readonly recordId: string;
   readonly value: CmsValue;
   readonly path: string;
-  /** The picture this alt text belongs to, when it is alt text. */
-  readonly mediaPath?: string;
+  /**
+   * The media block this value belongs to, when it belongs to one — its published file,
+   * and where its two sibling fields live in the form.
+   *
+   * The siblings are addressed rather than copied because what validation needs is what the
+   * boxes SAY, not what is stored: a video and its poster are chosen together, and judging
+   * either against the stored value would reject the only save that sets both.
+   */
+  readonly media?: {
+    readonly path: string;
+    readonly srcField?: string;
+    readonly posterField?: string;
+  };
 }
 
 export type EditorStatus =
@@ -47,16 +58,27 @@ export type EditorStatus =
 /** Every editable field on the section and on the cards inside it, flattened once. */
 function fieldsOf(section: CmsRecord): ReadonlyArray<EditorField> {
   return recordTree(section).flatMap((record) => {
-    const mediaByAlt = new Map(
-      record.groups.flatMap((group) => group.media).map((entry) => [entry.alt.id, entry.path]),
-    );
+    // Every value that belongs to a media block, pointed back at the block. All three of a
+    // block's fields land here, because all three need to know about the other two.
+    const blockOf = new Map<string, EditorField["media"]>();
+    for (const entry of record.groups.flatMap((group) => group.media)) {
+      const block = {
+        path: entry.path,
+        ...(entry.src ? { srcField: fieldPath(record.id, entry.src.id) } : {}),
+        ...(entry.posterValue ? { posterField: fieldPath(record.id, entry.posterValue.id) } : {}),
+      };
+      for (const owned of [entry.alt, entry.src, entry.posterValue]) {
+        if (owned) blockOf.set(owned.id, block);
+      }
+    }
+
     return recordValues(record).map((value): EditorField => {
-      const mediaPath = mediaByAlt.get(value.id);
+      const media = blockOf.get(value.id);
       return {
         recordId: record.id,
         value,
         path: fieldPath(record.id, value.id),
-        ...(mediaPath === undefined ? {} : { mediaPath }),
+        ...(media === undefined ? {} : { media }),
       };
     });
   });
@@ -155,11 +177,12 @@ export function useSectionEditor(section: CmsRecord, target: CmsSectionTarget) {
     // Client-side first, so a rejected field is marked without a round trip.
     const found: Record<string, string> = {};
     for (const field of changed) {
-      const rejection = validateContentValue(
-        field.value,
-        boxes[field.path] ?? "",
-        field.mediaPath,
-      );
+      const rejection = validateContentValue(field.value, boxes[field.path] ?? "", {
+        ...(field.media ? { path: field.media.path } : {}),
+        // The siblings as the boxes now have them, which is what this save would write.
+        ...(field.media?.srcField ? { src: valueOf(field.media.srcField) } : {}),
+        ...(field.media?.posterField ? { poster: valueOf(field.media.posterField) } : {}),
+      });
       if (rejection) found[field.path] = rejection;
     }
     if (Object.keys(found).length > 0) {
@@ -195,7 +218,7 @@ export function useSectionEditor(section: CmsRecord, target: CmsSectionTarget) {
     setStatus({ kind: "done", message: result.message ?? "Saved as a draft." });
     router.refresh();
     return true;
-  }, [boxes, changed, post, router, target]);
+  }, [boxes, changed, post, router, target, valueOf]);
 
   const run = useCallback(
     async (url: string, busy: string) => {

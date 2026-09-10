@@ -14,7 +14,6 @@ import { Differentiator } from "../presentation/sections/home/Differentiator";
 import { HowWeWorkFrames } from "../presentation/sections/home/HowWeWorkFrames";
 import { WaysToWorkTiles } from "../presentation/sections/home/WaysToWorkTiles";
 import { SelectedWorkCovers } from "../presentation/sections/home/SelectedWorkCovers";
-import { Faq } from "../presentation/sections/shared/Faq";
 import { FinalCta } from "../presentation/sections/shared/FinalCta";
 import {
   toCaseStudyView,
@@ -23,7 +22,6 @@ import {
   toProcessStepDetailView,
   toCtaView,
   toDifferentiatorBlockView,
-  toFaqBlockView,
   toFooterContentView,
   toHeroContentView,
   toNavigationMenuView,
@@ -89,11 +87,14 @@ export default async function HomePage() {
             still read by `GetHomepageContent` and `WhyFamysys.tsx` is untouched — so
             putting it back is one line. Nothing else renders it today.
 
-            The FAQ is hidden rather than removed, and from every page at once: see
-            FAQ_ENABLED in Faq.tsx, which is the single switch. The calls below and on the
-            three inner pages are left exactly as they were so unhiding touches one
-            boolean and no page. */}
-        <Faq faq={toFaqBlockView(homepage.faq)} />
+            THE FAQ IS ON /faq NOW, not here. The seven questions the homepage carried —
+            hidden behind a site-wide switch since the client's note that the accordion
+            was unhelpful — are on that page with the inner pages' five, grouped and open.
+            `homepage.faq` is still read by `GetHomepageContent`, because the panel still
+            edits the shared answers under Home, and /faq prints whatever it edited. The
+            three inner pages point at /faq from where their FAQ sections stood; the
+            homepage does not carry a pointer, because the footer on every page links the
+            questions page and the homepage's own FAQ had already been switched off. */}
         <FinalCta closingCta={homepage.closingCta} />
       </main>
       <Footer entries={navigationView.primaryLinks} footer={toFooterContentView(homepage.footer)} />

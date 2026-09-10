@@ -47,7 +47,7 @@ export function WorkCapabilityLinks({ crossLink }: WorkCapabilityLinksProps) {
     prefersReducedMotion ? 0 : ruleDelay(index) + motion.duration.fast;
 
   return (
-    <Section ariaLabel={crossLink.heading}>
+    <Section cmsSection="capability-links" ariaLabel={crossLink.heading}>
       <Container>
         <SectionHeader eyebrow={crossLink.eyebrow} heading={crossLink.heading} />
         <div ref={ref} className="capability-links mt-12" data-drawn={hasArrived}>

@@ -120,6 +120,17 @@ export interface ListInput {
   /** Builds the pointer for item `index`. Omit for a derived list, which is read-only. */
   readonly pointerAt?: (index: number) => ContentPointer;
   readonly readOnlyReason?: string;
+  /** The panel screen the reason is talking about. See `CmsList.readOnlyHref`. */
+  readonly readOnlyHref?: string;
+  /**
+   * WHAT EACH ITEM SAYS, when that should be shorter than what the list says.
+   *
+   * A locked field prints its reason under itself, so a list of five prints the same
+   * sentence five times. That is fine for a one-line reason and unreadable for a paragraph:
+   * the list explains the situation once, above them, and each name only has to say that it
+   * is not editable here and where it is. Defaults to the list's own reason.
+   */
+  readonly readOnlyItemReason?: string;
 }
 
 export function list(
@@ -135,8 +146,16 @@ export function readOnlyList(
   label: string,
   items: ReadonlyArray<string>,
   reason: string,
+  href?: string,
+  itemReason?: string,
 ): ListInput {
-  return { label, items, readOnlyReason: reason };
+  return {
+    label,
+    items,
+    readOnlyReason: reason,
+    ...(href ? { readOnlyHref: href } : {}),
+    ...(itemReason ? { readOnlyItemReason: itemReason } : {}),
+  };
 }
 
 export interface MediaInput {
@@ -236,15 +255,29 @@ function toList(input: ListInput, taken: Set<string>): CmsList {
         value: item,
         ...(input.multiline === undefined ? {} : { multiline: input.multiline }),
         ...(input.pointerAt ? { pointer: input.pointerAt(index) } : {}),
-        ...(input.readOnlyReason ? { readOnlyReason: input.readOnlyReason } : {}),
+        ...(input.readOnlyReason
+          ? { readOnlyReason: input.readOnlyItemReason ?? input.readOnlyReason }
+          : {}),
       }),
     ),
     ...(input.readOnlyReason ? { readOnlyReason: input.readOnlyReason } : {}),
+    ...(input.readOnlyHref ? { readOnlyHref: input.readOnlyHref } : {}),
   };
 }
 
+/**
+ * THE FILE IS A VALUE, THE ALT TEXT IS A VALUE, AND THEY ARE ALLOCATED IN THAT ORDER —
+ * alt first, because `media-alt` ids are already `field_key`s in `content_strings` and
+ * `uniqueId` numbers each seed independently. Adding `media-src` between two `media-alt`
+ * calls therefore cannot renumber them: the second alt is still `media-alt-2`.
+ *
+ * The file value carries no pointer. See `CmsMedia.src` for why, and for what each store
+ * does about it.
+ */
 function toMedia(input: MediaInput, taken: Set<string>): CmsMedia {
   const id = uniqueId("media-alt", taken);
+  const srcId = uniqueId("media-src", taken);
+  const posterId = uniqueId("media-poster", taken);
   return {
     id,
     label: input.label ?? "Image",
@@ -258,6 +291,23 @@ function toMedia(input: MediaInput, taken: Set<string>): CmsMedia {
       kind: "mediaAlt",
       multiline: false,
       ...(input.altPointer ? { pointer: input.altPointer } : {}),
+      ...(input.readOnlyReason ? { readOnlyReason: input.readOnlyReason } : {}),
+    }),
+    src: toValue(srcId, {
+      label: "File",
+      value: input.media.src.value,
+      kind: "mediaSrc",
+      multiline: false,
+      // A media block that is shown for reference cannot have its FILE changed either. The
+      // one reason covers both halves, so the panel never offers to swap a picture it has
+      // just said is edited somewhere else.
+      ...(input.readOnlyReason ? { readOnlyReason: input.readOnlyReason } : {}),
+    }),
+    posterValue: toValue(posterId, {
+      label: "Poster still",
+      value: input.media.poster?.value ?? "",
+      kind: "mediaPoster",
+      multiline: false,
       ...(input.readOnlyReason ? { readOnlyReason: input.readOnlyReason } : {}),
     }),
   };
@@ -302,17 +352,15 @@ export function toRecord(input: RecordInput): CmsRecord {
     updatedAt: input.updatedAt,
     ...(input.address ? { address: input.address } : {}),
     groups: built,
-    items: (input.items ?? []).map(
-      (group): CmsItemGroup => ({
-        id: `items-${derivedId(group.label)}`,
-        label: group.label,
-        collectionId: group.collectionId,
-        addNoun: recordNoun(group.collectionId),
-        canChange: group.canChange ?? isOpenCollection(group.collectionId),
-        ...(group.description ? { description: group.description } : {}),
-        records: group.records,
-      }),
-    ),
+    items: (input.items ?? []).map((group): CmsItemGroup => ({
+      id: `items-${derivedId(group.label)}`,
+      label: group.label,
+      collectionId: group.collectionId,
+      addNoun: recordNoun(group.collectionId),
+      canChange: group.canChange ?? isOpenCollection(group.collectionId),
+      ...(group.description ? { description: group.description } : {}),
+      records: group.records,
+    })),
     ...(input.note ? { note: input.note } : {}),
   };
 }

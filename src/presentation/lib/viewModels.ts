@@ -16,10 +16,14 @@ import type { AspectRatio, MediaKind, MediaRef } from "../../domain/shared/value
 import type { Differentiator } from "../../domain/marketing/entities/Differentiator";
 import type { DifferentiatorBlock } from "../../domain/marketing/entities/DifferentiatorBlock";
 import type { WhyFamysysBlock } from "../../domain/marketing/entities/WhyFamysysBlock";
+import type { FaqPage } from "../../domain/faq/entities/FaqPage";
 import type { FaqBlock, FaqItem } from "../../domain/marketing/entities/FaqBlock";
 import type {
   FooterContent,
   FooterSocialLink,
+  SocialNetwork,
+  FooterResource,
+  PendingCopy,
 } from "../../domain/marketing/entities/FooterContent";
 import type { HeroBand, HeroContent } from "../../domain/marketing/entities/HeroContent";
 import type { MegaMenuColumn } from "../../domain/navigation/entities/MegaMenuColumn";
@@ -177,6 +181,19 @@ export interface FaqBlockView {
   readonly items: ReadonlyArray<FaqItemView>;
 }
 
+export interface FaqGroupView {
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly items: ReadonlyArray<FaqItemView>;
+}
+
+export interface FaqPageView {
+  readonly hero: FaqPage["hero"];
+  readonly indexLabel: string;
+  readonly groups: ReadonlyArray<FaqGroupView>;
+}
+
 export interface CapabilityDetailView {
   readonly slug: string;
   readonly title: string;
@@ -278,9 +295,18 @@ export interface DirectionBlockView {
 }
 
 export interface FooterSocialLinkView {
+  /** Which brand mark to draw beside the name. Stable key, not the editable label. */
+  readonly network: SocialNetwork;
   readonly label: string;
   /** null while the client has not supplied the handle — the name renders, unlinked. */
   readonly href: string | null;
+}
+
+export interface FooterResourceView {
+  readonly label: string;
+  /** null while the client has not supplied the file — the label opens a dialog instead. */
+  readonly href: string | null;
+  readonly pending: PendingCopy;
 }
 
 export interface FooterContentView {
@@ -288,9 +314,10 @@ export interface FooterContentView {
   readonly contactEmail: string;
   readonly contactLink: CtaView;
   readonly addressLines: ReadonlyArray<string> | null;
-  readonly descriptor: string;
   readonly legalLinks: ReadonlyArray<CtaView>;
   readonly socialLinks: ReadonlyArray<FooterSocialLinkView>;
+  readonly socialPending: PendingCopy;
+  readonly capabilityDeck: FooterResourceView;
 }
 
 export function toCtaView(cta: Cta): CtaView {
@@ -429,6 +456,20 @@ export function toFaqBlockView(faq: FaqBlock): FaqBlockView {
   return { items: faq.items.map(toFaqItemView) };
 }
 
+/** The closing CTA is left off: FinalCta takes the domain block directly, as every page's does. */
+export function toFaqPageView(page: FaqPage): FaqPageView {
+  return {
+    hero: page.hero,
+    indexLabel: page.indexLabel,
+    groups: page.groups.map((group) => ({
+      id: group.id,
+      title: group.title,
+      description: group.description,
+      items: group.items.map(toFaqItemView),
+    })),
+  };
+}
+
 export function toCapabilityDetailView(detail: CapabilityDetail): CapabilityDetailView {
   return {
     slug: detail.slug.value,
@@ -499,7 +540,15 @@ export function toServicesHeroView(hero: ServicesHero): ServicesHeroView {
 }
 
 function toFooterSocialLinkView(link: FooterSocialLink): FooterSocialLinkView {
-  return { label: link.label, href: link.href?.value ?? null };
+  return { network: link.network, label: link.label, href: link.href?.value ?? null };
+}
+
+function toFooterResourceView(resource: FooterResource): FooterResourceView {
+  return {
+    label: resource.label,
+    href: resource.href?.value ?? null,
+    pending: resource.pending,
+  };
 }
 
 export function toFooterContentView(footer: FooterContent): FooterContentView {
@@ -508,9 +557,10 @@ export function toFooterContentView(footer: FooterContent): FooterContentView {
     contactEmail: footer.contactEmail,
     contactLink: toCtaView(footer.contactLink),
     addressLines: footer.addressLines,
-    descriptor: footer.descriptor,
     legalLinks: footer.legalLinks.map(toCtaView),
     socialLinks: footer.socialLinks.map(toFooterSocialLinkView),
+    socialPending: footer.socialPending,
+    capabilityDeck: toFooterResourceView(footer.capabilityDeck),
   };
 }
 

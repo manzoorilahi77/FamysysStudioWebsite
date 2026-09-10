@@ -1,12 +1,14 @@
 import { StaticAboutRepository } from "../content/repositories/StaticAboutRepository";
 import { StaticContactRepository } from "../content/repositories/StaticContactRepository";
 import { StaticEngagementRepository } from "../content/repositories/StaticEngagementRepository";
+import { StaticFaqRepository } from "../content/repositories/StaticFaqRepository";
+import { StaticLegalRepository } from "../content/repositories/StaticLegalRepository";
 import { StaticMarketingContentRepository } from "../content/repositories/StaticMarketingContentRepository";
 import { StaticNavigationRepository } from "../content/repositories/StaticNavigationRepository";
 import { StaticPortfolioRepository } from "../content/repositories/StaticPortfolioRepository";
 import { StaticProcessRepository } from "../content/repositories/StaticProcessRepository";
 import { StaticServiceCatalogRepository } from "../content/repositories/StaticServiceCatalogRepository";
-import { contentSource } from "../db/env";
+import { contentSource, mailConfiguration } from "../db/env";
 import { withStaticFallback } from "../db/fallback";
 import { DbAboutRepository } from "../db/repositories/DbAboutRepository";
 import { DbContactRepository } from "../db/repositories/DbContactRepository";
@@ -18,6 +20,8 @@ import { DbPortfolioRepository } from "../db/repositories/DbPortfolioRepository"
 import { DbProcessRepository } from "../db/repositories/DbProcessRepository";
 import { DbServiceCatalogRepository } from "../db/repositories/DbServiceCatalogRepository";
 import { HttpLeadRepository } from "../lead/HttpLeadRepository";
+import { SubmissionRateLimit } from "../lead/SubmissionRateLimit";
+import { GraphInquiryMailer } from "../mail/GraphInquiryMailer";
 
 /**
  * The composition root. This is the only file that constructs concrete repositories —
@@ -48,6 +52,9 @@ function source<T extends object>(database: () => T, files: () => T): T {
   if (!useDatabase) return files();
   return withStaticFallback(database(), files());
 }
+
+/** One instance: it stores the enquiry and, afterwards, stamps what mail went out. */
+const enquiries = new DbLeadRepository();
 
 export const container = {
   navigation: source(
@@ -82,6 +89,16 @@ export const container = {
     () => new DbContactRepository(),
     () => new StaticContactRepository(),
   ),
+  /**
+   * FILE-BACKED WITH NO DATABASE TWIN, and each for its own reason. The FAQ page's frame
+   * — its copy and which question sits in which group — is structure; the questions
+   * themselves still come through the four repositories above, so an answer edited in
+   * the panel reaches /faq. The two legal documents are statements of fact and
+   * commitments that should change with a reviewer, not in a text box. See each
+   * repository's own note.
+   */
+  faq: new StaticFaqRepository(),
+  legal: new StaticLegalRepository(),
   /** The browser's side of the contact form: it POSTs, it does not touch the database. */
   lead: new HttpLeadRepository(),
   /**
@@ -89,5 +106,14 @@ export const container = {
    * cannot be stored must fail loudly so the sender is told to try again, rather than be
    * accepted into nothing — which is exactly what StubLeadRepository used to do.
    */
-  demoRequestIntake: new DbLeadRepository(),
+  demoRequestIntake: enquiries,
+  inquiryDeliveryLog: enquiries,
+  /**
+   * Undefined while MAIL_ENABLED is false, which is the default and the right setting for
+   * any machine without the tenant's credentials. The route still stores the enquiry;
+   * `NotifyOfInquiry` sees no mailer and skips the send.
+   */
+  inquiryMailer: mailConfiguration().enabled ? new GraphInquiryMailer() : undefined,
+  /** Per process, which is right for the one PM2 process this site runs as. */
+  submissionRateLimit: new SubmissionRateLimit(),
 } as const;

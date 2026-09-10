@@ -26,7 +26,7 @@ export function ContactFormSection({ form, panel }: ContactFormSectionProps) {
   const hasDirectContact = Boolean(direct.email ?? direct.phone);
 
   return (
-    <Section dark fade={false} ariaLabel={form.heading}>
+    <Section cmsSection="form" dark fade={false} ariaLabel={form.heading}>
       <Container>
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
@@ -40,6 +40,7 @@ export function ContactFormSection({ form, panel }: ContactFormSectionProps) {
               existing dark-card surface, minus the hover escalation, because this one
               is not a target. */}
           <aside
+            data-cms-section="next-steps"
             aria-labelledby="what-happens-next"
             className="rounded-sm border border-canvas-16 bg-canvas-4 p-8 lg:col-span-5 lg:p-10"
           >
@@ -66,9 +67,7 @@ export function ContactFormSection({ form, panel }: ContactFormSectionProps) {
                   Studio's own email and phone are not in the brief, and the parent's are
                   the parent's — see contact.content.ts. A heading with nothing beneath it
                   would be worse than the absence. */}
-              {hasDirectContact ? (
-                <p className="label text-canvas">{panel.directEyebrow}</p>
-              ) : null}
+              {hasDirectContact ? <p className="label text-canvas">{panel.directEyebrow}</p> : null}
 
               <div className={hasDirectContact ? "mt-6" : ""}>
                 <Wordmark alt="Famysys Studio" dark className="h-7" />

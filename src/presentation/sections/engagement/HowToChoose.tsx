@@ -21,7 +21,7 @@ interface HowToChooseProps {
  */
 export function HowToChoose({ howToChoose }: HowToChooseProps) {
   return (
-    <Section ariaLabel={howToChoose.heading}>
+    <Section cmsSection="how-to-choose" ariaLabel={howToChoose.heading}>
       <Container>
         <SectionHeader
           eyebrow={howToChoose.eyebrow}

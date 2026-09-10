@@ -78,6 +78,7 @@ export function ProcessOverview({ label, steps }: ProcessOverviewProps) {
   return (
     <nav
       id="process-overview"
+      data-cms-section="process-overview"
       aria-label={label}
       className="process-overview bg-canvas border-b border-ink-8 md:sticky md:z-30"
       style={{ top: `${headerHeight}px` }}

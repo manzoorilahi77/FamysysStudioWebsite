@@ -103,7 +103,7 @@ function ClaimBlock({ claim, index, practiceLabel }: ClaimBlockProps) {
  */
 export function AboutApproach({ approach }: AboutApproachProps) {
   return (
-    <Section dark ariaLabel={approach.heading}>
+    <Section cmsSection="approach" dark ariaLabel={approach.heading}>
       <Container>
         <SectionHeader
           split

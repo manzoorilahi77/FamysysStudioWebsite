@@ -8,14 +8,13 @@ import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
 import { CapabilityBlock } from "../../presentation/sections/services/CapabilityBlock";
 import { EngagementPointer } from "../../presentation/sections/services/EngagementPointer";
-import { Faq } from "../../presentation/sections/shared/Faq";
+import { FaqPointer } from "../../presentation/sections/shared/FaqPointer";
 import { FinalCta } from "../../presentation/sections/shared/FinalCta";
 import { HowWeWork } from "../../presentation/sections/shared/HowWeWork";
 import { ServicesHero } from "../../presentation/sections/services/ServicesHero";
 import {
   toCapabilityDetailView,
   toCtaView,
-  toFaqBlockView,
   toFooterContentView,
   toNavigationMenuView,
   toServicesHeroView,
@@ -78,12 +77,9 @@ export default async function CreativeServicesRoute() {
           cta={toCtaView(page.engagementPointer.cta)}
         />
 
-        <Faq
-          faq={toFaqBlockView(page.faq.block)}
-          eyebrow={page.faq.eyebrow}
-          heading={page.faq.heading}
-          ariaLabel={page.faq.heading}
-        />
+        {/* Where this page's four questions were. They are on /faq now, in this page's
+            own group, and this points there under the same eyebrow and heading. */}
+        <FaqPointer eyebrow={page.faq.eyebrow} heading={page.faq.heading} group={page.faq.group} />
 
         <FinalCta closingCta={page.closingCta} accent={["which service"]} />
       </main>

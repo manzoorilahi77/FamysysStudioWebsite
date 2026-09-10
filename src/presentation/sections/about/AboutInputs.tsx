@@ -37,7 +37,7 @@ export function AboutInputs({ inputs }: AboutInputsProps) {
   const hasArrived = prefersReducedMotion || isInView;
 
   return (
-    <Section ariaLabel={inputs.heading}>
+    <Section cmsSection="inputs" ariaLabel={inputs.heading}>
       <Container>
         <SectionHeader split eyebrow={inputs.eyebrow} heading={inputs.heading} body={inputs.body} />
         <DrawnRule className="mt-12 lg:mt-16" />

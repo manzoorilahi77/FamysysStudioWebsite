@@ -23,7 +23,7 @@ interface ScopingBlockProps {
  */
 export function ScopingBlock({ scoping }: ScopingBlockProps) {
   return (
-    <Section dark ariaLabel={scoping.heading}>
+    <Section cmsSection="scoping" dark ariaLabel={scoping.heading}>
       <Container>
         <SectionHeader
           eyebrow={scoping.eyebrow}

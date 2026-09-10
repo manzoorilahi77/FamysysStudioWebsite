@@ -292,7 +292,7 @@ export function TierComparison({ comparison, tiers }: TierComparisonProps) {
   }, []);
 
   return (
-    <Section ariaLabel={comparison.heading}>
+    <Section cmsSection="tier-comparison" ariaLabel={comparison.heading}>
       <Container>
         {/* Split, like every other header on the site that has a supporting line: stacked,
             it left the whole right half of the section empty above a full-width table. */}

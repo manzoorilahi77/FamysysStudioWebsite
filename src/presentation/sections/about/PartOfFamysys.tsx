@@ -50,7 +50,7 @@ export function PartOfFamysys({ ecosystem }: PartOfFamysysProps) {
   });
 
   return (
-    <Section ariaLabel={ecosystem.heading} className="about-bleed-host">
+    <Section cmsSection="ecosystem" ariaLabel={ecosystem.heading} className="about-bleed-host">
       <Container>
         <div ref={ref} className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-6">
           <div className="about-bleed-left lg:col-span-6" style={enterStyle(0)}>

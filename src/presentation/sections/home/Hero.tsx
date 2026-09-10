@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import type { HeroContentView } from "../../lib/viewModels";
@@ -90,6 +90,7 @@ export function Hero({ hero }: HeroProps) {
     // than the section being shortened by the bar's height.
     <section
       ref={sectionRef}
+      data-cms-section="hero"
       aria-label="Introduction"
       className="hero-final surface-dark bg-ink"
     >
@@ -125,9 +126,8 @@ export function Hero({ hero }: HeroProps) {
                 }
               : {})}
           >
-            <Image
-              src={band.media.src}
-              alt={band.media.alt}
+            <Media
+              media={band.media}
               width={900}
               height={1200}
               sizes="(min-width: 901px) 28vw, 33vw"
@@ -157,7 +157,7 @@ export function Hero({ hero }: HeroProps) {
                     would otherwise read 02, 04, 05 — the DOM's answer to a question nobody
                     asked. A band not in the strip keeps its own index and is hidden
                     anyway. */}
-                <b>{String((bandSteps.indexOf(index) + 1 || index + 1)).padStart(2, "0")}</b>
+                <b>{String(bandSteps.indexOf(index) + 1 || index + 1).padStart(2, "0")}</b>
               </span>
             </button>
           </li>

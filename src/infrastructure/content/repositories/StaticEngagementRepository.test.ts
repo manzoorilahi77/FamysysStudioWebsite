@@ -43,7 +43,12 @@ const APPROVED = new Set(
 );
 
 function draftedStrings(): ReadonlyArray<string> {
-  return collectStrings(waysToWorkPage).filter((text) => !APPROVED.has(text));
+  // `faq.group` is the anchor on /faq the page's pointer lands on — a slug that names the
+  // group's title, not a string anyone reads on this page. Excluded so the no-pricing
+  // check below stays a check on copy.
+  return collectStrings(waysToWorkPage).filter(
+    (text) => !APPROVED.has(text) && text !== waysToWorkPage.faq.group,
+  );
 }
 
 describe("StaticEngagementRepository — Ways to Work With Us page", () => {

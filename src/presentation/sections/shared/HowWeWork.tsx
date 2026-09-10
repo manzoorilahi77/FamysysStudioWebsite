@@ -78,7 +78,7 @@ export function HowWeWork({ process, eyebrow, cta }: HowWeWorkProps) {
   const activeStep = hoveredStep !== null && hoveredStep < revealedCount ? hoveredStep : newestStep;
 
   return (
-    <Section ariaLabel={process.heading}>
+    <Section cmsSection="process-pointer" ariaLabel={process.heading}>
       {/* The track is what the sticky stage travels inside, and its height is the whole
           budget for the pin. It is set as a variable rather than as a height so the media
           query owns whether it applies: below lg this element is an ordinary div. */}

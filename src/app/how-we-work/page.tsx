@@ -6,14 +6,13 @@ import { container } from "../../infrastructure/di/container";
 import { ProcessOverview } from "../../presentation/components/ProcessOverview";
 import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
-import { Faq } from "../../presentation/sections/shared/Faq";
+import { FaqPointer } from "../../presentation/sections/shared/FaqPointer";
 import { FinalCta } from "../../presentation/sections/shared/FinalCta";
 import { ProcessHero } from "../../presentation/sections/process/ProcessHero";
 import { ProcessStepBlock } from "../../presentation/sections/process/ProcessStepBlock";
 import { ScopeAndRevisions } from "../../presentation/sections/process/ScopeAndRevisions";
 import { WorkedExample } from "../../presentation/sections/process/WorkedExample";
 import {
-  toFaqBlockView,
   toFooterContentView,
   toNavigationMenuView,
   toProcessStepDetailView,
@@ -65,12 +64,9 @@ export default async function HowWeWorkRoute() {
 
         <ScopeAndRevisions scope={page.scope} />
 
-        <Faq
-          faq={toFaqBlockView(page.faq.block)}
-          eyebrow={page.faq.eyebrow}
-          heading={page.faq.heading}
-          ariaLabel={page.faq.heading}
-        />
+        {/* Where this page's four questions were. They are on /faq now, in this page's
+            own group, and this points there under the same eyebrow and heading. */}
+        <FaqPointer eyebrow={page.faq.eyebrow} heading={page.faq.heading} group={page.faq.group} />
 
         <FinalCta closingCta={page.closingCta} accent={["step one?"]} />
       </main>

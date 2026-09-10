@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import { useCallback, useEffect, useRef } from "react";
 import type { SectionIntro } from "../../../domain/marketing/entities/SectionIntro";
 import { Container } from "../../components/Container";
@@ -170,7 +170,11 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
     // stays cream because the sections either side of it are both the alternate navy —
     // making this one dark would put three dark sections in a row and undo the page's
     // alternation.
-    <Section ariaLabel={intro.heading} className="imagery-section work-section">
+    <Section
+      cmsSection="selected-work"
+      ariaLabel={intro.heading}
+      className="imagery-section work-section"
+    >
       <Container>
         <p className="imagery-eyebrow label">{intro.eyebrow}</p>
         <h2 className="imagery-display mt-4">{intro.heading}</h2>
@@ -189,15 +193,13 @@ export function SelectedWorkCovers({ intro, caseStudies }: SelectedWorkCoversPro
         {caseStudies.map((piece) => (
           <article className="cover" key={piece.slug}>
             <div className="cover-window" data-cover-window>
-              <Image
-                src={piece.media.src}
-                alt={piece.media.alt}
+              <Media
+                media={piece.media}
                 width={1600}
                 height={1200}
                 sizes="(min-width: 780px) 44vw, 90vw"
-                loading="lazy"
                 className="cover-image"
-                data-cover-image
+                dataAttribute="data-cover-image"
               />
               {/* The mask. A solid panel of the section's own ground, and only its
                   transform moves — see `.cover-veil`, which does not exist at all until

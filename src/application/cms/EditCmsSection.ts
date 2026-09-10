@@ -8,6 +8,7 @@ import {
   type ContentEdit,
 } from "../../domain/cms/repositories/CmsRepository";
 import { validateContentValue } from "./ValidateContentValue";
+import type { MediaContext } from "./ValidateContentValue";
 
 /**
  * SAVE, PUBLISH, DISCARD — three use cases over one section, and three because they are
@@ -106,19 +107,46 @@ export function ownersOfSection(section: CmsRecord): ReadonlyArray<ContentAddres
   return recordTree(section).flatMap((record) => (record.address ? [record.address] : []));
 }
 
-function mediaPathFor(record: CmsRecord, value: CmsValue): string | undefined {
-  return record.groups
+/**
+ * WHAT ELSE IS ON THE MEDIA BLOCK THIS VALUE BELONGS TO, AS THIS SAVE WILL LEAVE IT.
+ *
+ * A media block is three fields — a file, a still and a description — and two of them can
+ * only be judged together: a video is invalid without a poster, and a poster cannot be
+ * cleared while the file is a video. So the sibling is read from THIS SAVE where the save
+ * touches it, and from what is stored otherwise.
+ *
+ * Reading only what is stored would reject the one save that could ever be legal: the one
+ * that swaps in a video and its still at the same time, which is the only way the panel
+ * offers to do it.
+ */
+function mediaContextFor(
+  record: CmsRecord,
+  value: CmsValue,
+  pending: ReadonlyMap<string, string>,
+): MediaContext {
+  const media = record.groups
     .flatMap((group) => group.media)
-    .find((entry) => entry.alt.id === value.id)?.path;
+    .find(
+      (entry) =>
+        entry.alt.id === value.id ||
+        entry.src?.id === value.id ||
+        entry.posterValue?.id === value.id,
+    );
+  if (!media) return {};
+
+  const settled = (field: CmsValue): string => pending.get(field.id) ?? currentValue(field);
+
+  return {
+    path: media.path,
+    ...(media.src ? { src: settled(media.src) } : {}),
+    ...(media.posterValue ? { poster: settled(media.posterValue) } : {}),
+  };
 }
 
 export class SaveCmsSection {
   constructor(private readonly repository: CmsRepository) {}
 
-  async execute(
-    target: CmsSectionTarget,
-    edits: ReadonlyArray<CmsValueEdit>,
-  ): Promise<SaveResult> {
+  async execute(target: CmsSectionTarget, edits: ReadonlyArray<CmsValueEdit>): Promise<SaveResult> {
     const found = await locate(this.repository, target);
     if (!found) {
       return { ok: false, valueId: null, message: NOT_FOUND };
@@ -128,6 +156,9 @@ export class SaveCmsSection {
     }
 
     const prepared: ContentEdit[] = [];
+    // Every value this save is about to set, so a field can be judged against its siblings
+    // as they will be rather than as they are. Keyed by value id, which is unique per record.
+    const pending = new Map(edits.map((edit) => [edit.valueId, edit.value]));
 
     for (const edit of edits) {
       const record = found.records.get(edit.recordId ?? found.section.id);
@@ -153,7 +184,11 @@ export class SaveCmsSection {
 
       // The same rule the content file itself runs at build time — see
       // ValidateContentValue for why that matters more than it sounds.
-      const rejection = validateContentValue(value, edit.value, mediaPathFor(record, value));
+      const rejection = validateContentValue(
+        value,
+        edit.value,
+        mediaContextFor(record, value, pending),
+      );
       if (rejection) {
         return { ok: false, valueId: edit.valueId, message: rejection };
       }

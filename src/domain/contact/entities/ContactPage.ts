@@ -9,14 +9,18 @@ export interface ContactHero {
   readonly body: string;
 }
 
-/** The eight labels, in the order the form asks them. */
+/**
+ * The five labels, in the order the form asks them.
+ *
+ * It was eight. `firstName`/`lastName` were one question split so the form could say which
+ * half was missing, which is worth nothing now that neither half is required, and
+ * `companyWebsite` and `role` are no longer asked at all. See `ContactRequestInput`, whose
+ * keys these mirror one for one.
+ */
 export interface ContactFormLabels {
-  readonly firstName: string;
-  readonly lastName: string;
+  readonly fullName: string;
   readonly email: string;
   readonly companyName: string;
-  readonly companyWebsite: string;
-  readonly role: string;
   readonly companySize: string;
   readonly brief: string;
 }
@@ -24,9 +28,7 @@ export interface ContactFormLabels {
 export interface ContactFormBlock {
   readonly heading: string;
   readonly labels: ContactFormLabels;
-  /** Appended to the one field that is not required, so the ask is visible before the error. */
-  readonly optionalSuffix: string;
-  /** Shown in both selects until the sender chooses. Never a valid submission. */
+  /** Shown in the size select until the sender chooses. */
   readonly selectPlaceholder: string;
   readonly submitLabel: string;
   readonly submittingLabel: string;

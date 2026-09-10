@@ -244,7 +244,7 @@ export function SectionEditor({
       {previewing ? (
         <PreviewFrame
           route={route}
-          heading={section.title}
+          sectionId={section.id}
           canPreviewDrafts={canPreviewDrafts}
           onClose={() => void closePreview()}
         />

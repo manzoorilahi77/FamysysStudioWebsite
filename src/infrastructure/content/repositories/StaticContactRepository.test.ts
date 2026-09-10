@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CONTACT_FIELD_ORDER } from "../../../application/lead/ValidateContactRequest";
 import { contactPage } from "../static/contact.content";
 import { closingCta, footerContent } from "../static/marketing.content";
 import { StaticContactRepository } from "./StaticContactRepository";
@@ -38,17 +39,25 @@ describe("contact page content", () => {
     expect(contactPage.panel.tagline).toBe(footerContent.tagline);
   });
 
-  it("asks the eight fields in the order the parent's form asks them", () => {
+  /**
+   * FIVE FIELDS, AND THE ORDER IS LOAD-BEARING. `DbContactRepository` reads these labels
+   * out of a positional list, so a key added, removed or moved here without the same move
+   * in `FORM_LABEL_KEYS` and a reseed silently mislabels the form — "Company" over the
+   * email box, and no error anywhere. The keys also have to match `ContactRequestInput`'s,
+   * which is what the form indexes them by.
+   */
+  it("asks five fields, in the order the form renders them", () => {
     expect(Object.keys(contactPage.form.labels)).toEqual([
-      "firstName",
-      "lastName",
+      "fullName",
       "email",
       "companyName",
-      "companyWebsite",
-      "role",
       "companySize",
       "brief",
     ]);
+  });
+
+  it("keeps the labels in step with the fields the validator knows about", () => {
+    expect(Object.keys(contactPage.form.labels)).toEqual([...CONTACT_FIELD_ORDER]);
   });
 
   it("carries three numbered steps", () => {

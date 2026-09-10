@@ -525,14 +525,14 @@ export function contactSections(
         },
         {
           label: "Field labels",
-          description: "The eight labels, in the order the form renders them.",
+          description:
+            "The five labels, in the order the form renders them. Only the email is required — the other four can be left blank and the enquiry still sends.",
           values: [
             field(
               "Select placeholder",
               page.form.selectPlaceholder,
               contact("form", "selectPlaceholder"),
             ),
-            field("Optional suffix", page.form.optionalSuffix, contact("form", "optionalSuffix")),
           ],
           lists: [
             // Keyed by name in the content file, so the pointer is the key rather than the
@@ -611,12 +611,9 @@ export function contactSections(
 
 /** `ContactFormLabels`' keys, in declaration order — which is `Object.values`' order. */
 const FORM_LABEL_KEYS: ReadonlyArray<string> = [
-  "firstName",
-  "lastName",
+  "fullName",
   "email",
   "companyName",
-  "companyWebsite",
-  "role",
   "companySize",
   "brief",
 ];

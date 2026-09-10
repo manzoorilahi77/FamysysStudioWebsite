@@ -28,6 +28,7 @@
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed": "tsx scripts/db-seed.ts",
     "db:status": "node scripts/db-status.mjs",
+    "mail:check": "node scripts/mail-check.mjs",
     "deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {

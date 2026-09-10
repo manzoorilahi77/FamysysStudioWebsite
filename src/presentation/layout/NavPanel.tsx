@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../components/Media";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { NavPanelView } from "../lib/viewModels";
@@ -193,13 +193,12 @@ export function NavPanel({ panel, isOpen, onClose, panelId, triggerId }: NavPane
               <li key={feature.href} style={revealStyle(featureIndex * CARD_STAGGER_MS)}>
                 <Link href={feature.href} className="nav-panel-card" onClick={onClose}>
                   <span className="nav-panel-card-frame block">
-                    <Image
-                      src={feature.media.src}
-                      alt=""
+                    <Media
+                      media={feature.media}
+                      decorative
                       width={640}
                       height={480}
                       sizes="(min-width: 1024px) 300px, 50vw"
-                      loading="lazy"
                       className="nav-panel-card-image h-full w-full object-cover"
                     />
                     {/* The accent wash that lifts over the picture on hover, and the arrow

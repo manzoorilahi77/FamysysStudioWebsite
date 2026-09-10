@@ -30,11 +30,17 @@ export type CmsApproval = "client" | "drafted";
 
 /**
  * What a value has to satisfy before it can be written. Each maps to a domain value
- * object — `ctaLabel` to `CtaLabel`, `url` to `Url`, `mediaAlt` to `MediaRef` — so an
- * edit is rejected by the same rule the site itself is built on rather than by a second
- * copy of it written for the admin panel.
+ * object — `ctaLabel` to `CtaLabel`, `url` to `Url`, `mediaAlt` and `mediaSrc` to
+ * `MediaRef` — so an edit is rejected by the same rule the site itself is built on rather
+ * than by a second copy of it written for the admin panel.
+ *
+ * `mediaSrc` is the FILE a media slot points at, and it is the one kind whose value is not
+ * copy. It is a value rather than a control of its own because being a value is what earns
+ * it the rails: a draft row, a revision, a preview, a publish, a discard. A bespoke
+ * "change the picture" path would have had to grow all five, and would have grown them
+ * differently.
  */
-export type CmsValueKind = "text" | "ctaLabel" | "url" | "mediaAlt";
+export type CmsValueKind = "text" | "ctaLabel" | "url" | "mediaAlt" | "mediaSrc" | "mediaPoster";
 
 /** One string an editor can see, and — when it has a pointer — change. */
 export interface CmsValue {
@@ -82,13 +88,27 @@ export interface CmsList {
   readonly items: ReadonlyArray<CmsValue>;
   /** Set when the whole list is assembled elsewhere and shown here for reference only. */
   readonly readOnlyReason?: string;
+  /**
+   * WHERE "EDITED SOMEWHERE ELSE" ACTUALLY IS, as a link rather than as a sentence.
+   *
+   * A reason that names another screen is only half an answer: the reader still has to find
+   * it in the sidebar, and if what they came looking for was a PICTURE rather than a word
+   * they may not believe the sentence applies to them at all. That is the exact failure this
+   * exists for — a section whose tiles carry photographs, whose panel shows no image field,
+   * and whose only clue is a line about where the "engagements" are edited.
+   */
+  readonly readOnlyHref?: string;
 }
 
 /** An image or a video a record carries, flattened from a `MediaRef`. */
 export interface CmsMedia {
   readonly id: string;
   readonly label: string;
-  /** Site-root path, so the panel can render the actual file rather than its name. */
+  /**
+   * Site-root path to what the site is CURRENTLY SERVING, so the panel can render the actual
+   * file rather than its name. Never the draft — that is `src.draftValue`, and the two are
+   * shown together for the same reason every other field shows both.
+   */
   readonly path: string;
   readonly kind: "image" | "video";
   /** A video's still, when it has one. */
@@ -96,6 +116,31 @@ export interface CmsMedia {
   readonly aspectRatio: string;
   /** The alt text, as an editable value — the one part of a media reference that is copy. */
   readonly alt: CmsValue;
+  /**
+   * The file, as an editable value. Absent where the slot's file cannot be changed at all.
+   *
+   * It carries no `pointer`, and that is deliberate rather than an omission: a pointer says
+   * where a string lives in the TYPESCRIPT modules, and a media path does not live there in
+   * any form a write could use — those files hold a bare stem and build `/media/${stem}.jpg`
+   * around it inside a helper, with the extension and the kind baked in. So the file-backed
+   * store accepts the draft and refuses the publish with the message it already uses for
+   * everything it cannot write, and the database store, where the path is a row like any
+   * other, publishes it.
+   */
+  readonly src?: CmsValue;
+  /**
+   * A VIDEO'S STILL, as an editable value — and the reason a slot can hold a video at all.
+   *
+   * `MediaRef` refuses to build a video reference without a poster, and it is right to: a
+   * video with no still is a black rectangle for as long as the first frame takes to arrive,
+   * in a slot the design fills with a photograph. So the poster is not optional decoration
+   * that can be added later; it is part of what makes the file valid, and the two are
+   * written together or not at all.
+   *
+   * Empty while the slot holds an image, because an image needs no still and a required
+   * field nobody can fill is a form that cannot be saved.
+   */
+  readonly posterValue?: CmsValue;
 }
 
 /**
@@ -182,6 +227,11 @@ export function recordValues(record: CmsRecord): ReadonlyArray<CmsValue> {
     ...group.values,
     ...group.lists.flatMap((list) => list.items),
     ...group.media.map((media) => media.alt),
+    // After the alt text, never before it. `recordValues` is the order the seed walks a
+    // record in, and the ids it allocates become `field_key`s that drafts and approval
+    // flags hang off. A new kind goes on the end so nothing already stored is renamed.
+    ...group.media.flatMap((media) => (media.src ? [media.src] : [])),
+    ...group.media.flatMap((media) => (media.posterValue ? [media.posterValue] : [])),
   ]);
 }
 

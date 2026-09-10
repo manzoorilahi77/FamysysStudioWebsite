@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Container } from "../../components/Container";
@@ -121,13 +121,11 @@ function Tile({
       }}
     >
       <div className="tile-shot">
-        <Image
-          src={media.src}
-          alt={media.alt}
+        <Media
+          media={media}
           width={1600}
           height={1200}
           sizes="(min-width: 1040px) 30vw, (min-width: 780px) 50vw, 100vw"
-          loading="lazy"
           className="tile-image"
         />
       </div>
@@ -272,6 +270,7 @@ export function WaysToWorkTiles({
     // direction — with `display`, so the section is still in the markup and still renders
     // in full on the desktop page.
     <Section
+      cmsSection="ways-to-work"
       dark
       ground="alt"
       fade={false}

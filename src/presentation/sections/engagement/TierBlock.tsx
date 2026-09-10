@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import Link from "next/link";
 import { motion } from "../../../shared/design/tokens";
 import { Container } from "../../components/Container";
@@ -55,6 +55,7 @@ export function TierBlock({ tier, index, idealForLabel, typicalWorkLabel }: Tier
     // fade={false}: the approved descriptor is accent-on-dark, which is derived against
     // full ink and measures 3.79:1 against the fade's lighter start value. See Section.
     <Section
+      cmsSection="engagement-tiers"
       id={tier.slug}
       dark={isDark}
       fade={false}
@@ -70,13 +71,11 @@ export function TierBlock({ tier, index, idealForLabel, typicalWorkLabel }: Tier
             {/* The scale settles on entry and stops. Under reduced motion it renders at
                 its final size. */}
             <div className="tier-media" data-settled={hasArrived}>
-              <Image
-                src={tier.media.src}
-                alt={tier.media.alt}
+              <Media
+                media={tier.media}
                 width={1600}
                 height={1200}
                 sizes="(min-width: 1024px) 42vw, 100vw"
-                loading="lazy"
                 className="h-full w-full object-cover"
               />
             </div>

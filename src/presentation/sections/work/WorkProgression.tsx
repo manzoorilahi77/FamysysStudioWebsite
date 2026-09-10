@@ -116,7 +116,7 @@ export function WorkProgression({ progression, pieces }: WorkProgressionProps) {
     pieces.find((piece) => piece.slug === slug)?.title ?? slug;
 
   return (
-    <Section dark fade={false} ariaLabel={progression.heading}>
+    <Section cmsSection="progression" dark fade={false} ariaLabel={progression.heading}>
       <Container>
         <SectionHeader
           eyebrow={progression.eyebrow}

@@ -33,7 +33,7 @@ export function EngagementPointer({
 }: EngagementPointerProps) {
   // fade={false}: the trailing link is accent-on-dark — see Section.
   return (
-    <Section dark fade={false} ariaLabel={heading}>
+    <Section cmsSection="engagement-pointer" dark fade={false} ariaLabel={heading}>
       <Container>
         <SectionHeader eyebrow={eyebrow} heading={heading} body={body} dark />
 

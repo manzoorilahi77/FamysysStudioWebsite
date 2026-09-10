@@ -13,7 +13,12 @@ describe("ProjectBrief", () => {
     expect(ProjectBrief.create("AV").value).toBe("AV");
   });
 
-  it.each(["", "   ", "a"])("throws InvalidProjectBriefError for the empty brief %s", (value) => {
+  /** The floor is gone with the requirement: one character is an answer, not a mistake. */
+  it("accepts a one-character brief", () => {
+    expect(ProjectBrief.create("?").value).toBe("?");
+  });
+
+  it.each(["", "   "])("throws InvalidProjectBriefError for the empty brief %p", (value) => {
     expect(() => ProjectBrief.create(value)).toThrow(InvalidProjectBriefError);
   });
 

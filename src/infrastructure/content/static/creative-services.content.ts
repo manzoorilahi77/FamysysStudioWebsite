@@ -251,6 +251,7 @@ export const creativeServicesPage: CreativeServicesPage = {
     // rather than repeating that gap.
     eyebrow: "Questions",
     heading: "Questions about these services.",
+    group: "services-and-capability",
     block: {
       items: [
         ...reusedFaqItems,

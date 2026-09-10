@@ -71,20 +71,20 @@ test("a CTA's label and destination are separate fields, and a list item is edit
 
   await setField(page, "Primary CTA label", "Start a Project");
   await setField(page, "Primary CTA link", "/contact?from=panel");
-  await setField(page, "Band labels 1", "Camera and rig");
+  await setField(page, "Band labels 1", "Graphic design");
 
   await saveDraft(page);
   await reloadSection(page);
 
   await expect(field(page, "Primary CTA label")).toHaveValue("Start a Project");
   await expect(field(page, "Primary CTA link")).toHaveValue("/contact?from=panel");
-  await expect(field(page, "Band labels 1")).toHaveValue("Camera and rig");
+  await expect(field(page, "Band labels 1")).toHaveValue("Graphic design");
 
   // Discarding puts every one of them back to what the site is serving.
   await discardDrafts(page);
   await expect(field(page, "Primary CTA label")).toHaveValue("Start a Conversation");
   await expect(field(page, "Primary CTA link")).toHaveValue("/contact");
-  await expect(field(page, "Band labels 1")).toHaveValue("Camera & rig");
+  await expect(field(page, "Band labels 1")).toHaveValue("Graphic Design");
   await expect(page.getByText("Everything here is live")).toBeVisible();
 });
 

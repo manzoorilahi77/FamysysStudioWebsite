@@ -187,4 +187,17 @@ describe("InboxScreen", () => {
     expect(screen.getByText(/Nothing is emailed anywhere/)).toBeInTheDocument();
     expect(screen.getByText(/No submissions yet/)).toBeInTheDocument();
   });
+
+  it("says enquiries are emailed, and stops saying they are not, once mail is on", () => {
+    render(<InboxScreen inquiries={[]} isMailEnabled />);
+
+    expect(screen.getByText(/Each enquiry is also emailed/)).toBeInTheDocument();
+    expect(screen.queryByText(/Nothing is emailed anywhere/)).not.toBeInTheDocument();
+  });
+
+  it("anchors each enquiry at the id the notification email links to", () => {
+    const { container } = render(<InboxScreen inquiries={[inquiry({ id: "42" })]} />);
+
+    expect(container.querySelector("#inquiry-42")).not.toBeNull();
+  });
 });

@@ -43,7 +43,7 @@ interface WhatWeDoProps {
  */
 export function WhatWeDo({ intro, cta, capabilities }: WhatWeDoProps) {
   return (
-    <Section ariaLabel={intro.heading}>
+    <Section cmsSection="what-we-do" ariaLabel={intro.heading}>
       <Container>
         <SectionHeader split eyebrow={intro.eyebrow} heading={intro.heading} body={intro.body} />
 

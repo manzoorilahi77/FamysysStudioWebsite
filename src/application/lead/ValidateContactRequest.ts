@@ -1,19 +1,22 @@
 import { InvalidBusinessEmailError } from "../../domain/lead/errors/LeadErrors";
 import { BusinessEmail } from "../../domain/lead/value-objects/BusinessEmail";
-import { CompanySize } from "../../domain/lead/value-objects/CompanySize";
-import { CompanyWebsite } from "../../domain/lead/value-objects/CompanyWebsite";
-import { ContactRole } from "../../domain/lead/value-objects/ContactRole";
-import { ProjectBrief } from "../../domain/lead/value-objects/ProjectBrief";
+import { emailErrorMessage } from "./DemoRequestFieldErrors";
 import type { SubmitDemoRequestInput } from "./SubmitDemoRequest";
 
-/** The contact form's eight fields, exactly as typed — raw strings, nothing coerced. */
+/**
+ * THE FIVE FIELDS BOTH FORMS ASK, exactly as typed — raw strings, nothing coerced.
+ *
+ * It was eight, and /contact asked all of them while the homepage's closing form asked
+ * four. The two forms are the same five questions now: who you are, how to reach you, who
+ * you work for, how big they are, and what you are trying to make. First and last name
+ * were one question split into two so the form could say which half was missing, which
+ * stops being worth anything once neither half is required; `companyWebsite` and `role`
+ * are simply no longer asked.
+ */
 export interface ContactRequestInput {
-  readonly firstName: string;
-  readonly lastName: string;
+  readonly fullName: string;
   readonly email: string;
   readonly companyName: string;
-  readonly companyWebsite: string;
-  readonly role: string;
   readonly companySize: string;
   readonly brief: string;
 }
@@ -23,64 +26,48 @@ export type ContactField = keyof ContactRequestInput;
 export type ContactFieldErrors = Partial<Record<ContactField, string>>;
 
 /**
- * The order the fields appear in the form. Focus moves to the FIRST invalid field on a
+ * The order the fields appear in the form. Focus moves to the first invalid field on a
  * failed submit, and "first" has to mean first on the page rather than first in whatever
- * order an object's keys happen to enumerate — otherwise focus lands somewhere the reader
- * has to hunt for. Reused by the form to walk its own errors.
+ * order an object's keys happen to enumerate. Reused by the forms to walk their errors and
+ * to render their rows, so the two cannot disagree about the order.
  */
 export const CONTACT_FIELD_ORDER: ReadonlyArray<ContactField> = [
-  "firstName",
-  "lastName",
+  "fullName",
   "email",
   "companyName",
-  "companyWebsite",
-  "role",
   "companySize",
   "brief",
 ];
 
-const REQUIRED_MESSAGE = "Required";
-const MALFORMED_EMAIL_MESSAGE = "That does not look like an email address";
-const MALFORMED_WEBSITE_MESSAGE = "That does not look like a website address";
+/** The only field a sender has to answer, and so the only one either form can complain about. */
+export const REQUIRED_FIELD: ContactField = "email";
+
+const REQUIRED_MESSAGE = "Enter an email address so we can reply";
 
 /**
- * Every field's verdict in one pass.
+ * ONE FIELD IS CHECKED, AND IT IS THE ONLY ONE THAT HAS TO BE.
  *
- * `SubmitDemoRequest` builds its value objects one after another and throws on the first
- * failure, which is right for a use case — it either has a valid request or it does not.
- * It is wrong for a form, where a sender who submits an empty one has to see all eight
- * errors at once rather than discovering them one submit at a time. So this runs the same
- * value objects, independently, and collects.
+ * This used to report on all eight — three "Required" messages for empty text fields, two
+ * for unchosen selects, one for the brief, and format checks on the email and the website.
+ * The form asked a lot before it would take anything, and every one of those messages was
+ * a reason for someone with a real project to close the tab.
  *
- * It is the client-side pass. The route still runs `SubmitDemoRequest`, which stays the
- * authority — this exists so the reader gets their errors without a round trip, not so
- * the server can trust the browser.
+ * An email address is different in kind from the rest: without it the enquiry cannot be
+ * answered, so a submission that lacks one is not a lead the studio has to work harder to
+ * read — it is a lead that has already been lost. Everything else is worth having and
+ * worth nobody's departure, so a blank name, company, size or brief passes here without
+ * comment and is stored as NULL.
+ *
+ * ANY WELL-FORMED ADDRESS IS ACCEPTED, personal ones included. The free-mail rule that
+ * refused gmail.com, outlook.com and the rest is gone: the studio would rather hear from
+ * someone at a personal address than not hear from them. See `BusinessEmail`.
+ *
+ * This is the CLIENT-side pass. The route still runs `SubmitDemoRequest`, which stays the
+ * authority — this exists so the sender gets the message without a round trip, not so the
+ * server can trust the browser.
  */
 export function validateContactRequest(input: ContactRequestInput): ContactFieldErrors {
-  const errors: ContactFieldErrors = {
-    ...requiredTextErrors(input),
-    ...emailError(input.email),
-    ...roleError(input.role),
-    ...companySizeError(input.companySize),
-    ...briefError(input.brief),
-    ...websiteError(input.companyWebsite),
-  };
-  return errors;
-}
-
-/** The plain "did they type anything" fields. Their only failure is being empty. */
-function requiredTextErrors(input: ContactRequestInput): ContactFieldErrors {
-  const errors: ContactFieldErrors = {};
-  if (!input.firstName.trim()) {
-    errors.firstName = REQUIRED_MESSAGE;
-  }
-  if (!input.lastName.trim()) {
-    errors.lastName = REQUIRED_MESSAGE;
-  }
-  if (!input.companyName.trim()) {
-    errors.companyName = REQUIRED_MESSAGE;
-  }
-  return errors;
+  return emailError(input.email);
 }
 
 function emailError(value: string): ContactFieldErrors {
@@ -91,83 +78,31 @@ function emailError(value: string): ContactFieldErrors {
     BusinessEmail.create(value);
     return {};
   } catch (error) {
-    // A free-mail address is valid and deliberately refused, so the value object's own
-    // message — which names the domain and says what to send instead — is the one to
-    // show. A malformed address gets the short form; repeating the address back at
-    // someone who mistyped it adds nothing.
-    if (error instanceof InvalidBusinessEmailError && error.failure === "free-mail") {
-      return { email: error.message.replace("Invalid business email: ", "") };
+    if (error instanceof InvalidBusinessEmailError) {
+      return { email: emailErrorMessage(error) };
     }
-    return { email: MALFORMED_EMAIL_MESSAGE };
-  }
-}
-
-function roleError(value: string): ContactFieldErrors {
-  if (!value.trim()) {
-    return { role: REQUIRED_MESSAGE };
-  }
-  try {
-    ContactRole.create(value);
-    return {};
-  } catch {
-    return { role: REQUIRED_MESSAGE };
-  }
-}
-
-function companySizeError(value: string): ContactFieldErrors {
-  if (!value.trim()) {
-    return { companySize: REQUIRED_MESSAGE };
-  }
-  try {
-    CompanySize.create(value);
-    return {};
-  } catch {
-    return { companySize: REQUIRED_MESSAGE };
-  }
-}
-
-function briefError(value: string): ContactFieldErrors {
-  if (!value.trim()) {
-    return { brief: REQUIRED_MESSAGE };
-  }
-  try {
-    ProjectBrief.create(value);
-    return {};
-  } catch {
-    return { brief: REQUIRED_MESSAGE };
-  }
-}
-
-/** The one optional field: empty passes, anything typed has to be a website. */
-function websiteError(value: string): ContactFieldErrors {
-  if (!value.trim()) {
-    return {};
-  }
-  try {
-    CompanyWebsite.create(value);
-    return {};
-  } catch {
-    return { companyWebsite: MALFORMED_WEBSITE_MESSAGE };
+    throw error;
   }
 }
 
 /**
- * The form's eight fields as the use case's four-plus-three.
+ * The form's five answers as the use case's input.
  *
- * `fullName` is composed here rather than asked for, because the form splits the name to
- * be able to say which half is missing, and `FullName` wants the whole thing. The website
- * is omitted rather than sent empty — undefined is a question left blank, "" would be an
- * answer the value object would then have to reject.
+ * Every optional field is OMITTED rather than sent empty. `undefined` is a question the
+ * sender left alone and "" would be an answer of nothing, and that distinction is what
+ * decides whether the row stores NULL or a blank string — see `DbLeadRepository`.
  */
 export function toSubmitDemoRequestInput(input: ContactRequestInput): SubmitDemoRequestInput {
-  const website = input.companyWebsite.trim();
   return {
-    fullName: `${input.firstName.trim()} ${input.lastName.trim()}`,
     email: input.email,
-    companyName: input.companyName,
-    companySize: input.companySize,
-    role: input.role,
-    brief: input.brief,
-    ...(website ? { companyWebsite: website } : {}),
+    ...present("fullName", input.fullName),
+    ...present("companyName", input.companyName),
+    ...present("companySize", input.companySize),
+    ...present("brief", input.brief),
   };
+}
+
+function present(key: string, value: string): Record<string, string> {
+  const trimmed = value.trim();
+  return trimmed ? { [key]: trimmed } : {};
 }

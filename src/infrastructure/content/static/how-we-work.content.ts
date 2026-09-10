@@ -273,6 +273,7 @@ export const howWeWorkPage: HowWeWorkPage = {
     // question and answer, reused verbatim from the brief's FAQ block.
     eyebrow: "Questions",
     heading: "Questions about the process.",
+    group: "process-and-delivery",
     block: {
       items: [
         {

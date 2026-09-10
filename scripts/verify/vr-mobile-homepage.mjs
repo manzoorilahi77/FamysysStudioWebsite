@@ -437,8 +437,8 @@ for (const [label, width, height] of [
     d.bandNumerals.join(" | "),
   );
   check(
-    d.bandNames[0] === "Camera & rig",
-    `${label} the list still starts at Camera & rig`,
+    d.bandNames[0] === "Graphic Design",
+    `${label} the list still starts at Graphic Design`,
     d.bandNames.join(" | "),
   );
   check(d.litCount === 0, `${label} no capability card is spotlit`, String(d.litCount));

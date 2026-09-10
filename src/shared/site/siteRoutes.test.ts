@@ -40,8 +40,9 @@ describe("SITE_ROUTES", () => {
     expect([...SITE_ROUTES].sort()).toEqual([...onDisk].sort());
   });
 
-  it("lists the seven pages in navigation order, home first", () => {
-    expect(SITE_ROUTES).toHaveLength(7);
+  it("lists the seven navigation pages first, home first, then the three the footer alone links, then the legal index", () => {
+    expect(SITE_ROUTES).toHaveLength(11);
     expect(SITE_ROUTES[0]).toBe("/");
+    expect(SITE_ROUTES.slice(7)).toEqual(["/faq", "/terms", "/privacy", "/legal"]);
   });
 });

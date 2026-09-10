@@ -1,0 +1,136 @@
+/*
+ * THE FLOATING LABEL, SHARED BY EVERY TEXT/EMAIL/TEXTAREA FIELD ON BOTH FORMS.
+ *
+ * At rest the label sits where typed text will go — it reads as a placeholder. On focus,
+ * or once there is a value, it rises above the field and becomes the site's own small-caps
+ * "label" treatment (0.6875rem, 0.2em tracking, uppercase — the same type the section
+ * eyebrows use), so filling a field in literally turns its placeholder into a heading.
+ *
+ * PURE CSS, VIA `:placeholder-shown`. The label is a sibling placed AFTER the control (see
+ * FieldShell/Field in each form), and the control carries `placeholder=" "` — a single
+ * space, so the browser always considers the field to HAVE a placeholder and the pseudo-
+ * class tracks emptiness reliably. No React state, no onFocus tracking: the float state is
+ * exactly "focused or non-empty", which is what `:focus` and `:not(:placeholder-shown)`
+ * already express.
+ *
+ * `top: 50%` for rest and `top: 0` for floated are percentages/lengths of the WRAPPER, so
+ * this scales to either form's field height without retuning — DemoForm's compact 38px
+ * field and /contact's 48px one both centre correctly from the same rule.
+ */
+
+/*
+ * `margin-top` reserves the room the label rises INTO when it floats — about 22px at this
+ * type size (its scaled height plus the small negative offset above the field). Without it,
+ * a compact form's row gap (as little as 12px) is narrower than the label's rise, so it
+ * overlapped whatever sat above it the moment a field was filled in. This is on every field
+ * including the first, where the extra space simply becomes a bit more air under the panel's
+ * own padding — harmless, and far simpler than special-casing the first row.
+ */
+.wrap {
+  position: relative;
+  margin-top: 1.25rem;
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(-50%) scale(1);
+  transform-origin: left center;
+  pointer-events: none;
+  color: var(--color-canvas-60);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  letter-spacing: -0.006em;
+  font-weight: 400;
+  text-transform: none;
+  transition:
+    top 180ms var(--ease-base),
+    transform 180ms var(--ease-base),
+    color 180ms var(--ease-base),
+    letter-spacing 180ms var(--ease-base),
+    font-weight 180ms var(--ease-base);
+}
+
+/* The textarea's own text starts at its top padding, not its vertical centre, so its rest
+   label sits there too rather than floating mid-box before anyone has typed a word. */
+.wrapTextarea .label {
+  top: 0.75rem;
+  transform: translateY(0) scale(1);
+  transform-origin: left top;
+}
+
+.wrap :global(.contact-field):focus ~ .label,
+.wrap :global(.contact-field):not(:placeholder-shown) ~ .label {
+  top: -0.15rem;
+  transform: translateY(-100%) scale(0.72);
+  color: var(--color-canvas);
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.wrapTextarea :global(.contact-field):focus ~ .label,
+.wrapTextarea :global(.contact-field):not(:placeholder-shown) ~ .label {
+  top: -0.85rem;
+  transform: translateY(0) scale(0.72);
+}
+
+/*
+ * A FILLED FIELD STAYS THE FORM'S OWN DARK, NOT THE BROWSER'S PALE AUTOFILL TINT.
+ *
+ * Chrome (and Edge/Safari) paint autofilled fields with their own opaque background —
+ * usually a pale yellow or blue — through an internal UA style that `background-color`
+ * cannot reach at all; the one property that does is `-webkit-box-shadow`'s inset form,
+ * large enough to fill the field, painted in the colour the field should actually have.
+ *
+ * That colour is `--field-autofill-ground`, not a literal `ink`: /contact's own ground IS
+ * plain ink, so it falls through to the fallback, but the closing form's panel sits on
+ * canvas-4 over ink (see FinalCta.tsx) — painting a flat ink fill there was visibly a
+ * different, darker rectangle than the panel around it, exactly the "box" the field
+ * should not have. DemoForm.module.css sets the variable to match its own panel.
+ *
+ * The absurd transition-delay is the standard trick for the text colour: Chrome applies
+ * `-webkit-text-fill-color` through the same mechanism, and without something to stall it,
+ * autofilled text can flash the wrong colour for a frame before this rule wins.
+ */
+.wrap :global(.contact-field):-webkit-autofill,
+.wrap :global(.contact-field):-webkit-autofill:hover,
+.wrap :global(.contact-field):-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-canvas);
+  -webkit-box-shadow: 0 0 0 1000px var(--field-autofill-ground, var(--color-ink)) inset;
+  box-shadow: 0 0 0 1000px var(--field-autofill-ground, var(--color-ink)) inset;
+  caret-color: var(--color-canvas);
+  transition:
+    background-color 600000s ease-in-out 0s,
+    color 600000s ease-in-out 0s;
+}
+
+/*
+ * FOCUS STAYS THE FIELD'S OWN UNDERLINE, NOT THE SITE'S GENERIC BOXED RING.
+ *
+ * globals.css's sitewide `:focus-visible` draws a 2px outset box around whatever is
+ * focused — right for a nav link or a card, but every field here is deliberately boxless
+ * (see the underline note at the top of this file), so that ring was the one rectangle on
+ * an otherwise rule-only form. `.wrap .contact-field` beats the bare `:focus-visible` on
+ * specificity (0,3,0 to 0,1,0), so this wins without `!important`. The indicator itself
+ * doesn't disappear — the same rule an error already puts on this border (accent-on-dark,
+ * see globals.css's `[aria-invalid="true"]`) is what focus takes too, just thicker, so
+ * "focused" reads as an emphatic version of the field's own rule rather than a foreign
+ * shape landing on it.
+ */
+.wrap :global(.contact-field):focus-visible {
+  outline: none;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--color-focus-ring, var(--color-accent-on-dark));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label {
+    transition: none;
+  }
+}

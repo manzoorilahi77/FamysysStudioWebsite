@@ -56,7 +56,23 @@ function Group({
           <fieldset key={list.id} className="m-0 border-0 p-0">
             <legend className="label text-ink-60">{list.label}</legend>
             {list.readOnlyReason ? (
-              <p className="text-small mt-2 max-w-[70ch] text-graphite-70">{list.readOnlyReason}</p>
+              <p className="text-small mt-2 max-w-[70ch] text-graphite-70">
+                {list.readOnlyReason}
+                {/* The screen the sentence just named, as somewhere to go. Without it the
+                    reader has the answer and still has to hunt for it in the sidebar. */}
+                {list.readOnlyHref ? (
+                  <>
+                    {" "}
+                    <a
+                      href={list.readOnlyHref}
+                      className="text-accent underline underline-offset-2 transition-colors duration-[180ms] hover:text-ink"
+                    >
+                      Open that screen
+                    </a>
+                    .
+                  </>
+                ) : null}
+              </p>
             ) : null}
             {list.items.length === 0 ? (
               <p className="text-small mt-3 text-graphite-70">This list is empty.</p>
@@ -78,16 +94,34 @@ function Group({
           </fieldset>
         ))}
 
-        {group.media.map((entry) => (
-          <MediaField
-            key={entry.id}
-            media={entry}
-            draft={editor.valueOf(field(entry.alt.id))}
-            error={editor.errorOf(field(entry.alt.id))}
-            isChanged={editor.isChanged(field(entry.alt.id))}
-            onChange={(next) => editor.set(field(entry.alt.id), next)}
-          />
-        ))}
+        {group.media.map((entry) => {
+          // A media block is TWO fields — the file and the words describing it — and they
+          // are addressed separately because they are saved, drafted and validated
+          // separately. `src` is absent only where the model has no file value at all.
+          const src = entry.src?.id;
+          const poster = entry.posterValue?.id;
+          return (
+            <MediaField
+              key={entry.id}
+              media={entry}
+              altDraft={editor.valueOf(field(entry.alt.id))}
+              altError={editor.errorOf(field(entry.alt.id))}
+              isAltChanged={editor.isChanged(field(entry.alt.id))}
+              onAltChange={(next) => editor.set(field(entry.alt.id), next)}
+              srcDraft={src ? editor.valueOf(field(src)) : entry.path}
+              srcError={src ? editor.errorOf(field(src)) : undefined}
+              isSrcChanged={src ? editor.isChanged(field(src)) : false}
+              onSrcChange={(next) => {
+                if (src) editor.set(field(src), next);
+              }}
+              posterDraft={poster ? editor.valueOf(field(poster)) : (entry.poster ?? "")}
+              posterError={poster ? editor.errorOf(field(poster)) : undefined}
+              onPosterChange={(next) => {
+                if (poster) editor.set(field(poster), next);
+              }}
+            />
+          );
+        })}
       </div>
     </section>
   );

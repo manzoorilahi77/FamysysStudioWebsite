@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { useCallback, useId, useRef, useState } from "react";
 import {
   CONTACT_FIELD_ORDER,
+  REQUIRED_FIELD,
   toSubmitDemoRequestInput,
   validateContactRequest,
   type ContactField,
@@ -12,27 +13,22 @@ import {
 } from "../../application/lead/ValidateContactRequest";
 import type { ContactFormBlock } from "../../domain/contact/entities/ContactPage";
 import { CompanySize } from "../../domain/lead/value-objects/CompanySize";
-import { ContactRole } from "../../domain/lead/value-objects/ContactRole";
 import { autoGrowTextarea } from "../lib/autoGrowTextarea";
+import floatStyles from "./FloatingField.module.css";
+import { FloatingSelect } from "./FloatingSelect";
 import { staggerDelay } from "../motion/variants";
+import { SubmissionSent } from "./SubmissionSent";
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
 const EMPTY_VALUES: ContactRequestInput = {
-  firstName: "",
-  lastName: "",
+  fullName: "",
   email: "",
   companyName: "",
-  companyWebsite: "",
-  role: "",
   companySize: "",
   brief: "",
 };
 
-/** The one field that is not required, so the label carries the qualifier. */
-const OPTIONAL_FIELDS: ReadonlySet<ContactField> = new Set(["companyWebsite"]);
-
-const ROLE_OPTIONS = ContactRole.options();
 const COMPANY_SIZE_OPTIONS = CompanySize.options();
 
 /** Milliseconds between one form row's entry and the next. */
@@ -95,29 +91,37 @@ interface FieldShellProps {
   readonly id: string;
   readonly label: string;
   readonly error: string | undefined;
-  readonly optionalSuffix?: string | undefined;
+  /** The label rests at the box's top padding rather than its vertical centre. */
+  readonly textarea?: boolean;
   readonly children: React.ReactNode;
 }
 
 /**
- * One shell for all eight fields, so the label sits in the same place and the error sits
- * in the same place on every one of them. That consistency is the whole point of the
- * pattern: when a form reports seven errors at once, a message that moves between fields
- * makes the reader re-find it each time.
+ * One shell for all five fields, so the label sits in the same place and the error sits in
+ * the same place on every one of them.
  *
- * The error is rendered without a transition. An error that fades in is slower to read
- * and slower to act on than one that is simply there.
+ * A FLOATING LABEL: at rest it sits where typed text goes, reading as a placeholder; on
+ * focus, or once there is a value, it rises and becomes the site's small-caps label type —
+ * see FloatingField.module.css. The control (which must carry `placeholder=" "`) comes
+ * first so the CSS sibling rule can key off it, and the label after is what it targets.
+ *
+ * NOTHING IS MARKED "(optional)" AND NOTHING IS MARKED REQUIRED, and both halves of that
+ * are deliberate. Four of the five are optional, so tagging them would hang a qualifier
+ * off most of the form and turn a short list of questions into a page of caveats. The one
+ * field that must be answered says so where it counts instead: `required` on the input,
+ * which is what a screen reader announces on focus, and a message under it the moment a
+ * submit is attempted without it.
+ *
+ * The error is rendered without a transition. An error that fades in is slower to read and
+ * slower to act on than one that is simply there.
  */
-function FieldShell({ id, label, error, optionalSuffix, children }: FieldShellProps) {
+function FieldShell({ id, label, error, textarea = false, children }: FieldShellProps) {
   return (
-    <div>
-      <label htmlFor={id} className="label block text-canvas-80">
+    <div className={`${floatStyles.wrap} ${textarea ? floatStyles.wrapTextarea : ""}`}>
+      {children}
+      <label htmlFor={id} className={floatStyles.label}>
         {label}
-        {optionalSuffix ? (
-          <span className="ml-2 font-normal text-canvas-60">{optionalSuffix}</span>
-        ) : null}
       </label>
-      <div className="mt-3">{children}</div>
       {error ? (
         <p id={`${id}-error`} className="contact-error text-small">
           <WarningTriangle />
@@ -132,12 +136,25 @@ interface ContactFormProps {
   readonly form: ContactFormBlock;
 }
 
+/**
+ * /contact's form, and — field for field — the homepage's closing form too. See `DemoForm`,
+ * which asks the same five questions with the same one requirement against a different
+ * heading and button.
+ *
+ * FIVE QUESTIONS, ONE OF THEM REQUIRED. It asked eight and required seven: first name,
+ * last name, work email, company, company website, role, company size and the brief. Every
+ * one of those was a thing someone had to type before the studio would accept a message,
+ * and a form that asks a stranger for their job title before it will hear what they want
+ * to make is a form that loses the ones who have not decided yet. The email is what is
+ * left, because without it there is no reply.
+ */
 export function ContactForm({ form }: ContactFormProps) {
   const prefix = useId();
   const [values, setValues] = useState<ContactRequestInput>(EMPTY_VALUES);
   const [errors, setErrors] = useState<ContactFieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const confirmationRef = useRef<HTMLDivElement>(null);
+  const [isConfirmationEmailed, setIsConfirmationEmailed] = useState(false);
 
   /**
    * THE BRIEF FIELD GROWS WITH WHAT IS TYPED. It is a five-row box, which is a reasonable
@@ -213,6 +230,12 @@ export function ContactForm({ form }: ContactFormProps) {
         return;
       }
 
+      // The route says whether it scheduled an acknowledgement email, so the confirmation
+      // only mentions one when it is actually coming.
+      const accepted = (await response.json().catch(() => null)) as {
+        confirmationEmail?: unknown;
+      } | null;
+      setIsConfirmationEmailed(accepted?.confirmationEmail === true);
       setStatus("success");
       requestAnimationFrame(() => confirmationRef.current?.focus());
     } catch {
@@ -220,80 +243,78 @@ export function ContactForm({ form }: ContactFormProps) {
     }
   }
 
+  function startAnother(): void {
+    setValues(EMPTY_VALUES);
+    setErrors({});
+    setIsConfirmationEmailed(false);
+    setStatus("idle");
+    requestAnimationFrame(() => document.getElementById(fieldId("fullName"))?.focus());
+  }
+
   if (status === "success") {
+    // The panel's heading and body stay the CMS's; a sender who gave a first name is
+    // greeted by it instead of the heading. See SubmissionSent.
     return (
-      <div
-        ref={confirmationRef}
-        tabIndex={-1}
-        role="status"
-        className="rounded-sm border border-canvas-16 bg-canvas-4 p-8"
-      >
-        <p className="text-display-s font-medium text-canvas">{form.confirmationHeading}</p>
-        <p className="text-body mt-3 text-canvas-80">{form.confirmationBody}</p>
-      </div>
+      <SubmissionSent
+        focusRef={confirmationRef}
+        heading={form.confirmationHeading}
+        body={form.confirmationBody}
+        fullName={values.fullName}
+        email={values.email.trim()}
+        isConfirmationEmailed={isConfirmationEmailed}
+        onReset={startAnother}
+      />
     );
   }
 
-  const textField = (field: ContactField, type: "text" | "email" | "url") => (
-    <FieldShell
-      id={fieldId(field)}
-      label={form.labels[field]}
-      error={errors[field]}
-      optionalSuffix={OPTIONAL_FIELDS.has(field) ? form.optionalSuffix : undefined}
-    >
+  const textField = (field: ContactField, type: "text" | "email") => (
+    <FieldShell id={fieldId(field)} label={form.labels[field]} error={errors[field]}>
       <input
         id={fieldId(field)}
         name={field}
         type={type}
         value={values[field]}
         onChange={(event) => update(field, event.target.value)}
+        required={field === REQUIRED_FIELD}
         aria-invalid={Boolean(errors[field])}
         aria-describedby={errors[field] ? `${fieldId(field)}-error` : undefined}
         className="contact-field"
+        placeholder=" "
       />
     </FieldShell>
   );
 
-  const selectField = (field: ContactField, options: ReadonlyArray<string>) => (
-    <FieldShell id={fieldId(field)} label={form.labels[field]} error={errors[field]}>
-      <select
-        id={fieldId(field)}
-        name={field}
-        value={values[field]}
-        onChange={(event) => update(field, event.target.value)}
-        aria-invalid={Boolean(errors[field])}
-        aria-describedby={errors[field] ? `${fieldId(field)}-error` : undefined}
-        className="contact-field contact-field--select"
-      >
-        <option value="">{form.selectPlaceholder}</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </FieldShell>
-  );
-
   /**
-   * The fields arrive in a short stagger, and nothing else on this page moves. A form is
-   * a thing to fill in, not a thing to watch.
+   * One field per row, in the order the validator lists them. The name and company used to
+   * be paired two-across with a sibling each — first/last, and company/website — and both
+   * of those siblings are gone, so pairing would now put a field beside a gap.
    */
   const rows: ReadonlyArray<React.ReactNode> = [
-    <div key="name" className="grid gap-6 sm:grid-cols-2">
-      {textField("firstName", "text")}
-      {textField("lastName", "text")}
-    </div>,
+    textField("fullName", "text"),
     textField("email", "email"),
-    <div key="company" className="grid gap-6 sm:grid-cols-2">
-      {textField("companyName", "text")}
-      {textField("companyWebsite", "url")}
-    </div>,
-    <div key="who" className="grid gap-6 sm:grid-cols-2">
-      {selectField("role", ROLE_OPTIONS)}
-      {selectField("companySize", COMPANY_SIZE_OPTIONS)}
-    </div>,
-    <FieldShell key="brief" id={fieldId("brief")} label={form.labels.brief} error={errors.brief}>
+    textField("companyName", "text"),
+    // A custom listbox rather than a native <select> — see FloatingSelect for why: a
+    // browser's own select popup cannot carry the site's palette, and every other field
+    // here now floats its label, which a native select cannot do either. Selectable, not
+    // `disabled`: leaving this unanswered is a valid submission, so the placeholder stays
+    // reachable to undo a wrong choice.
+    <FloatingSelect
+      key="companySize"
+      id={fieldId("companySize")}
+      label={form.labels.companySize}
+      value={values.companySize}
+      onChange={(value) => update("companySize", value)}
+      options={COMPANY_SIZE_OPTIONS}
+      placeholder={form.selectPlaceholder}
+      error={errors.companySize}
+    />,
+    <FieldShell
+      key="brief"
+      id={fieldId("brief")}
+      label={form.labels.brief}
+      error={errors.brief}
+      textarea
+    >
       <textarea
         id={fieldId("brief")}
         name="brief"
@@ -307,6 +328,7 @@ export function ContactForm({ form }: ContactFormProps) {
         aria-invalid={Boolean(errors.brief)}
         aria-describedby={errors.brief ? `${fieldId("brief")}-error` : undefined}
         className="contact-field contact-field--textarea"
+        placeholder=" "
       />
     </FieldShell>,
   ];
@@ -315,11 +337,11 @@ export function ContactForm({ form }: ContactFormProps) {
     <form onSubmit={handleSubmit} noValidate>
       {/*
         The summary is what announces a failed submit, and it is the only assertive
-        region on the form. Putting role="alert" on each of the eight field messages
-        instead would fire eight interruptions for one keypress; the field messages are
-        reached through aria-describedby when focus lands on the field, which is the
-        moment the reader needs them. Focus is moved to the first invalid field, so that
-        happens immediately after this is read.
+        region on the form. Putting role="alert" on the field message instead would fire
+        an interruption on every keypress that fixes it; the field message is reached
+        through aria-describedby when focus lands on the field, which is the moment the
+        reader needs it. Focus is moved to the first invalid field, so that happens
+        immediately after this is read.
       */}
       <div role="alert" aria-atomic="true" className="contact-summary">
         {errorCount > 0 ? (

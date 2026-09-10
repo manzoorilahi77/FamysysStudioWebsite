@@ -45,7 +45,7 @@ export function WhereWereGoing({ direction }: WhereWereGoingProps) {
   });
 
   return (
-    <Section ariaLabel={direction.heading}>
+    <Section cmsSection="direction" ariaLabel={direction.heading}>
       <Container>
         <SectionHeader eyebrow={direction.eyebrow} heading={direction.heading} className="" />
         <DrawnRule className="mt-10" />

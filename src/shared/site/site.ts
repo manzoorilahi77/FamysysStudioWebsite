@@ -29,7 +29,10 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://studio.fam
 export const SITE_NAME = "Famysys Studio";
 
 /**
- * The seven public routes, in the order the primary navigation lists them.
+ * THE TEN PUBLIC ROUTES: the seven the primary navigation lists, in its order, then the
+ * three the footer alone links — the questions page and the two legal documents. They
+ * are not in the bar and they are not in the mega menu; they are reached from the
+ * footer on every page, which is where a reader looks for them.
  *
  * THIS LIST IS ASSERTED AGAINST THE FILESYSTEM. `siteRoutes.test.ts` walks src/app and
  * fails if a page exists that is not named here or a route is named here that has no
@@ -54,6 +57,10 @@ export const SITE_ROUTES = [
   "/selected-work",
   "/about",
   "/contact",
+  "/faq",
+  "/terms",
+  "/privacy",
+  "/legal",
 ] as const;
 
 export type SiteRoute = (typeof SITE_ROUTES)[number];

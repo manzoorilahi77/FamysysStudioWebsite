@@ -17,7 +17,6 @@ describe("reading a page's composition", () => {
       "HowWeWorkFrames",
       "WaysToWorkTiles",
       "SelectedWorkCovers",
-      "Faq",
       "FinalCta",
       "Footer",
     ]);

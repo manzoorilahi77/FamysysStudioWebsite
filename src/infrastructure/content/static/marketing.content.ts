@@ -9,6 +9,7 @@
 // here rather than retyping, so an approved string has exactly one definition and
 // the pages cannot drift from each other.
 
+import { Url } from "../../../domain/shared/value-objects/Url";
 import { createCta } from "../../../domain/shared/value-objects/Cta";
 import { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import type { ClosingCtaBlock } from "../../../domain/marketing/entities/ClosingCtaBlock";
@@ -39,10 +40,18 @@ import type { WhatWeDoIntro } from "../../../domain/marketing/repositories/Marke
 // a flex child of a fixed-height column and its image is `object-fit: cover`. The value
 // is carried anyway because `MediaRef` requires one and the CMS media library lists it.
 //
-// TODO(client): every file below is stock photography, standing in until the studio's own
-// production stills exist. Source URLs are listed in docs/content-todo.md. The alt text
-// describes what each stock frame actually shows, so it has to be rewritten alongside the
-// images.
+// Every file below is stock photography from Unsplash, standing in until the studio's own
+// production stills exist. Unsplash ids are listed in docs/content-todo.md. The six were
+// chosen against the hero's ground — dark ink with the accent's teal and the glow's pink —
+// so the strip reads as one palette rather than six stock frames. The alt text describes
+// what each frame actually shows, so it has to be rewritten alongside the images.
+//
+// THE LABELS ARE THE MANAGER'S SIX (10 Sep 2026), one per band, in this order. They are not
+// the six capability titles verbatim: "Reels & Shorts" is a deliverable of Video Production
+// & Editing rather than a service of its own, and Explainer & Training Videos has no band.
+// That trade was made knowingly — short-form is the request that arrives most often — and
+// the phone shows bands 2, 4 and 5 (see HERO_MOBILE_BANDS in Hero.tsx), which is why Video
+// Editing, AI Content Creation and Motion Graphics sit in those slots.
 interface HeroBandSource {
   readonly file: string;
   readonly label: string;
@@ -51,38 +60,34 @@ interface HeroBandSource {
 
 const HERO_BANDS: ReadonlyArray<HeroBandSource> = [
   {
-    file: "hero-band-camera",
-    label: "Camera & rig",
-    alt: "A camera rig filming a performer under coloured light.",
+    file: "hero-band-graphic-design",
+    label: "Graphic Design",
+    alt: "A gloved hand drawing on a tablet with a stylus at a dark wooden desk, a keyboard in front.",
   },
   {
-    file: "hero-band-colour",
-    label: "Colour",
-    alt: "A colourist's desk with a grade open across two displays.",
+    file: "hero-band-video-editing",
+    label: "Video Editing",
+    alt: "A video editing timeline on a dark screen, its clips in bands of teal and pink.",
   },
   {
-    file: "hero-band-motion",
-    label: "Motion",
-    alt: "A motion graphic of a wave form rendered in long light trails.",
+    file: "hero-band-reels",
+    label: "Reels & Shorts",
+    alt: "A phone held up to record vertical video, lit by purple stage light.",
   },
   {
-    file: "hero-band-design",
-    label: "Design",
-    alt: "A designer's desk with creative-suite app icons on a tablet.",
+    file: "hero-band-ai-content",
+    label: "AI Content Creation",
+    alt: "An abstract rendered form folding over itself in blue and violet light on black.",
   },
   {
-    file: "hero-band-content",
-    label: "Content",
-    alt: "A clapperboard held up at the start of a take.",
+    file: "hero-band-motion-graphics",
+    label: "Motion Graphics",
+    alt: "A ribbon of pink and blue light trails curving through darkness.",
   },
   {
-    // The one band whose picture is not a `hero-band-` file: /creative-services already
-    // carries a frame for this service and its alt text is the client's own description of
-    // it, so the band takes both rather than inventing a sixth stock image to say the same
-    // thing. See `imageFile`/`imageAlt` for AI Video in creative-services.content.ts.
-    file: "service-ai-video",
-    label: "AI",
-    alt: "A presenter in a grey jacket, standing to camera in front of an orange wall.",
+    file: "hero-band-brand-visuals",
+    label: "Brand Visuals",
+    alt: "A glass perfume bottle on a reflective surface, lit in blue and pink.",
   },
 ];
 
@@ -391,48 +396,97 @@ export const closingCta: ClosingCtaBlock = {
 };
 
 export const footerContent: FooterContent = {
-  // TODO(client): the brief supplies no footer tagline, contact address or social
-  // handles — see docs/content-todo.md. The tagline below is the brief's own
-  // central-idea sentence, not new copy.
+  // TODO(client): the brief supplies no footer tagline. The sentence below is the brief's
+  // own central-idea sentence, not new copy. It is NO LONGER PRINTED IN THE FOOTER — the
+  // block under the wordmark is the address and the email now — but /contact still reads
+  // it for its "Or reach us directly" panel, which is why it is still here.
   tagline:
     "A professional creative production partner — combining human creativity, AI and efficient production.",
-  // TODO(client): THIS IS THE PARENT'S ADDRESS, NOT CONFIRMED AS THE STUDIO'S.
+  // TODO(client): THIS IS THE PARENT'S MAILBOX, NOT CONFIRMED AS THE STUDIO'S.
   // hello@famysys.com is the address on famysys.com's own contact page. The Studio may
   // share the mailbox or may have its own; nothing in the brief says which, and the
   // footer prints it on all seven pages, so this is the single most-published unconfirmed
   // string on the site. See docs/content-todo.md.
   contactEmail: "hello@famysys.com",
   contactLink: createCta("Contact", "/contact"),
-  // TODO(client): NO POSTAL ADDRESS UNTIL ONE IS CONFIRMED. The parent's footer prints
-  // 10193 W Grand Parkway S., Ste. 103-229, Richmond, TX 77407, United States. Whether
-  // the Studio operates from that address is not stated anywhere in the brief, and an
-  // address is the one piece of footer content a reader may act on physically — post,
-  // couriers, a visit. Null renders no address block at all rather than the parent's.
-  addressLines: null,
-  // TODO(client): drafted, pending approval. The parent's line is "AI-Native Digital
-  // Engineering Partner", which describes an engineering firm; this is its Studio
-  // equivalent, built from the brief's own three terms — human creativity, AI, efficient
-  // production — and from "creative production partner", which is the client's phrase.
-  descriptor: "AI-Enabled Creative Production Partner",
-  // TODO(client): THE DOCUMENTS DO NOT EXIST YET. /terms and /privacy are not routes on
-  // this site, so both links 404 until the pages are built — a deliberate, flagged
-  // regression from the previous state, where the footer carried no legal row at all.
-  // The parent's footer has this column and the Studio's structure now matches it; what
-  // is missing is the two documents. Either supply them or the column comes back out.
-  // See docs/content-todo.md.
+  // SUPPLIED BY THE CLIENT, 2026-09-10, as the address the footer is to print.
+  //
+  // TODO(client): CONFIRM THE ZIP. famysys.com's own footer prints this address with
+  // 77407; the wording supplied for the Studio reads 77447. Richmond, TX is 774xx either
+  // way and only one of the two is right, so the digit is transcribed as given and
+  // flagged rather than silently corrected to the parent's. An address is the one piece
+  // of footer content a reader may act on physically — post, couriers, a visit — and it
+  // now renders on all seven pages. See docs/content-todo.md.
+  addressLines: [
+    "10193 W Grand Parkway S.",
+    "Ste. 103-229, Richmond,",
+    "Texas 77447 United States",
+  ],
+  // ALL THREE ARE PAGES NOW. /terms and /privacy are drafted against famysys.com's own
+  // documents and marked for legal review clause by clause — see terms.content.ts,
+  // privacy.content.ts and docs/content-todo.md; each prints a review-status line under
+  // its date until the review is done. /faq gathers every question on the site, grouped
+  // and open. internalLinks.test.ts asserts all three resolve and keeps its pending-route
+  // exemption empty.
   legalLinks: [
     createCta("Terms & Conditions", "/terms"),
     createCta("Privacy Policy", "/privacy"),
+    createCta("FAQ", "/faq"),
   ],
-  // TODO(client): NO HANDLES SUPPLIED. The three names match the parent's column so the
-  // structure is the parent's, but every href is null — deliberately, because the only
-  // accounts that exist are the parent company's, and pointing the Studio's footer at
-  // them would send a reader to a different business. See docs/content-todo.md.
+  // ONE LINK, TWO DIALOGS. LinkedIn is the company page the client supplied and opens in
+  // a new tab. Instagram and YouTube have no account yet: each is `null` here and renders
+  // as a button that opens the "coming soon" dialog below, naming the network — so the
+  // column is honest about what exists without a dead link or a name that does nothing.
+  // Supplying a handle is one edit: put the URL here and the dialog stops for that
+  // network. See docs/content-todo.md.
   socialLinks: [
-    { label: "LinkedIn", href: null },
-    { label: "X", href: null },
-    { label: "GitHub", href: null },
+    {
+      network: "linkedin",
+      label: "LinkedIn",
+      href: Url.create("https://www.linkedin.com/company/famysys/home/"),
+    },
+    { network: "instagram", label: "Instagram", href: null },
+    { network: "youtube", label: "YouTube", href: null },
   ],
+  // THE CAPABILITY DECK, IN THE PARENT'S OWN FOOTER POSITION — under the identity block,
+  // beneath the email. famysys.com sets it as a bordered button with an arrow and a copy
+  // control; here it is a plain link, at the client's direction (10 September 2026): the
+  // Studio's footer is a list of links and a button in the middle of it would be the only
+  // object in the band.
+  //
+  // THERE IS NO FILE YET, so `href` is null and the label opens the dialog below instead —
+  // the same arrangement Instagram and YouTube use, for the same reason: a name that does
+  // nothing when pressed reads as broken, and a link to nowhere is worse. The client has
+  // said the URL will follow. Supplying it is one edit: put it here and the label becomes
+  // a link that opens in a new tab, and the dialog stops.
+  //
+  // TODO(client): the deck's URL, once the deck exists.
+  //
+  // TODO(client): the label. famysys.com calls its own "Corporate Capability Deck"; the
+  // Studio's is named "Capability Deck" here because "Corporate" is the parent's word for
+  // a parent-company document, and this deck is the Studio's. Confirm which name the file
+  // will carry, because the footer prints it on every page.
+  capabilityDeck: {
+    label: "Capability Deck",
+    href: null,
+    // TODO(client): expanded copy — draft, pending approval. Says what is true (the deck
+    // is being prepared), and where the same material is meanwhile (this site). It does
+    // not apologise and it does not promise a date, because no date has been given.
+    pending: {
+      eyebrow: "In preparation",
+      body: "The deck is being put together. Until it is ready, what it will hold — the services, the way of working and the engagement models — is set out across this site.",
+      closeLabel: "Close",
+    },
+  },
+  // TODO(client): expanded copy — draft, pending approval (all three). The dialog prints
+  // the network's own name as its heading, so the body speaks about "this channel" and
+  // fits both. Plain and declarative, as the site's voice is: it says what is true and
+  // where the work is meanwhile, and does not apologise for a channel not existing yet.
+  socialPending: {
+    eyebrow: "Coming soon",
+    body: "This channel is being set up. Until it is live, the studio's work is on this site, and the LinkedIn page carries what is new.",
+    closeLabel: "Close",
+  },
 };
 
 /**

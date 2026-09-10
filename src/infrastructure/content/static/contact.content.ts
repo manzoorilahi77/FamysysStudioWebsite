@@ -57,23 +57,22 @@ export const contactPage: ContactPage = {
     body: "Tell us what you are trying to create, who it is for and roughly when you need it. If it is work we should take, you will hear back from the person who would direct it — not a sales sequence.",
   },
   form: {
-    // TODO(client): expanded copy — draft, pending approval. The eight fields are the
-    // parent form's, in its order, with its labels — except the last, which asks what
-    // you are trying to CREATE where the parent asks what you are trying to FIX. The
-    // form's fields were already listed in docs/content-todo.md as needing confirmation
-    // before this page existed.
+    // TODO(client): expanded copy — draft, pending approval. The last label asks what you
+    // are trying to CREATE where the parent's form asks what you are trying to FIX; the
+    // rest are the parent's own. The form's fields were already listed in
+    // docs/content-todo.md as needing confirmation before this page existed.
+    //
+    // FIVE FIELDS, DOWN FROM EIGHT, at the client's direction. The name is one question
+    // again rather than a first/last pair, and "Company website" and "Your role" are not
+    // asked. Only the email is required — see `validateContactRequest`.
     heading: "Tell us about the work",
     labels: {
-      firstName: "First name",
-      lastName: "Last name",
+      fullName: "Full name",
       email: "Work email",
       companyName: "Company",
-      companyWebsite: "Company website",
-      role: "Your role",
       companySize: "Company size",
       brief: "What are you trying to create?",
     },
-    optionalSuffix: "(optional)",
     selectPlaceholder: "Select one",
     submitLabel: "Send inquiry",
     submittingLabel: "Sending…",

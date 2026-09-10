@@ -2620,48 +2620,6 @@ div.grid > *:nth-child(even).card-surface-dark {
   animation-play-state: paused;
 }
 
-/* FAQ — a header that holds still while its questions go past.
-
-   The section is two columns from lg. The left one is `position: sticky`, so the eyebrow
-   and heading stay put through the whole list and then leave with it; the right one is the
-   accordion, and it is the only thing that moves. The panel's height animates via
-   grid-template-rows 0fr→1fr (max-height animation needs a magic-number ceiling and eases
-   wrong when the real height is far under it). The inner wrapper needs min-height:0 for the
-   0fr row to actually collapse.
-
-   The rules are elements rather than borders for the same reason the capability rows'
-   are — they draw, one row at a time, and a border cannot be animated that way without
-   animating a box. Each row owns the rule ABOVE it and the list closes with one more. */
-
-/* `align-self: start` is the load-bearing half of this, not a tidiness flag: a grid item
-   stretches to the row's full height by default, and an element that is already as tall as
-   its container has nowhere to stick to — the property applies and does nothing.
-
-   `top` clears the fixed header, which publishes its own measured height. The fallback is
-   for the frame before that effect runs, not a second source of truth.
-
-   Nothing bounds this but the grid it sits in, which is the whole trick: sticky releases at
-   its containing block's bottom edge, so the aside travels exactly as far as the last
-   answer and the section then scrolls away in one piece.
-
-   lg only. Below it the layout is a stack, and a heading pinned above a list on a phone
-   would hold a third of the viewport hostage for the length of the section. */
-@media (min-width: 1024px) {
-  .faq-aside {
-    position: sticky;
-    top: calc(var(--header-height, 5rem) + 2.5rem);
-    align-self: start;
-  }
-}
-
-/* The eyebrow takes an accent square. It is generated content and the element keeps its own
-   text, so nothing here reaches the accessibility tree — the square is a mark, not a word. */
-.faq-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-}
-
 /* WCAG 2.2 AA 2.5.8, Target Size (Minimum), 24x24 CSS px.
    ---------------------------------------------------------------------------
    The site's small accent links — "View all services →", "Compare every engagement →",
@@ -2684,162 +2642,6 @@ div.grid > *:nth-child(even).card-surface-dark {
   min-height: 1.5rem;
 }
 
-.faq-eyebrow::before {
-  content: "";
-  flex: 0 0 auto;
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: var(--color-accent);
-}
-.faq-rule {
-  display: block;
-  height: 1px;
-  background-color: var(--color-ink-8);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition-property: transform, background-color;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-list[data-drawn="true"] .faq-rule {
-  transform: scaleX(1);
-}
-
-/* The open row's own rule. Accent is a second signal alongside the chevron and the
-   expanded panel, never the only one — 1.4.1 is satisfied before this is added. */
-.faq-row[data-open="true"] > .faq-rule {
-  background-color: var(--color-accent);
-}
-
-.faq-trigger {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  /* Row rhythm, and it is load-bearing twice over. It is most of what makes the column
-     read as calm rather than as a dense list — the reference sits its questions about this
-     far apart — and it is also what gives the sticky header something to hold still
-     AGAINST. At 1.5rem the seven rows made a 568px column inside a 748px section, which
-     fits entirely on a 900px screen: the pin was real, measured at 475px of travel, and
-     invisible, because nothing scrolled inside the section to pin against. */
-  padding-block: clamp(1.5rem, 2.4vw, 2.25rem);
-  text-align: left;
-  opacity: 0;
-  transform: translateY(10px);
-  transition-property: opacity, transform;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-trigger[data-visible="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* The same sweep the capability rows and the header's panel rows carry. Closed rows only:
-   a row that is already open has answered, and a hover state on it repeats what the
-   expanded panel underneath is saying. */
-.faq-trigger[aria-expanded="false"]::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-color: var(--color-ink-4);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition-property: transform;
-  transition-duration: var(--duration-hover);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-trigger[aria-expanded="false"]:hover::before,
-.faq-trigger[aria-expanded="false"]:focus-visible::before {
-  transform: scaleX(1);
-}
-
-/* A closed question is muted, an open one is full ink. ink-70 composites to #51677C on
-   canvas — 5.194:1, over the 4.5 text floor, which the flat slate this pattern usually
-   reaches for is not: the obvious #6B7A94 measures 3.88:1 and would have failed on the
-   primary interactive text of the section.
-
-   Inline by default, and transform does not apply to a non-replaced inline box. */
-.faq-question {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  color: var(--color-ink-70);
-  transition-property: transform, color;
-  transition-duration: var(--duration-hover);
-  transition-timing-function: var(--ease-base);
-}
-
-[aria-expanded="true"] .faq-question {
-  color: var(--color-ink);
-}
-
-.faq-trigger[aria-expanded="false"]:hover .faq-question,
-.faq-trigger[aria-expanded="false"]:focus-visible .faq-question {
-  transform: translateX(6px);
-}
-
-/* Closed: a small ink-20 square. Open: an accent diamond. The rotation is what keeps this
-   out of 1.4.1 territory on its own terms — the mark changes SHAPE, not just colour — and
-   it is the fourth signal for a state the panel height, the accent rule above the row and
-   `aria-expanded` already carry. Scaled slightly on the turn so the diamond reads at the
-   same visual weight as the square it came from. */
-.faq-marker {
-  position: relative;
-  z-index: 1;
-  flex: 0 0 auto;
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: var(--color-ink-20);
-  transition-property: transform, background-color;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-trigger[aria-expanded="false"]:hover .faq-marker,
-.faq-trigger[aria-expanded="false"]:focus-visible .faq-marker {
-  background-color: var(--color-ink-40);
-}
-
-[aria-expanded="true"] .faq-marker {
-  background-color: var(--color-accent);
-  transform: rotate(45deg) scale(1.15);
-}
-
-.faq-answer {
-  opacity: 0;
-  transition-property: opacity;
-  transition-duration: var(--duration-base);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-panel[data-open="true"] .faq-answer {
-  opacity: 1;
-}
-
-.faq-panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition-property: grid-template-rows;
-  transition-duration: var(--duration-base, 320ms);
-  transition-timing-function: var(--ease-base);
-}
-
-.faq-panel[data-open="true"] {
-  grid-template-rows: 1fr;
-}
-
-.faq-panel-inner {
-  overflow: hidden;
-  min-height: 0;
-}
-
 .faq-chevron {
   transition-property: transform;
   transition-duration: var(--duration-fast);
@@ -2855,23 +2657,783 @@ div.grid > *:nth-child(even).card-surface-dark {
   transform: rotate(180deg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  /* No draw, no stagger, no sweep. The rows start finished and open and close on the
-     global reduced duration — the JS zeroes every delay to match. */
-  .faq-rule,
-  .faq-list[data-drawn="true"] .faq-rule {
-    transform: none;
+
+/* ---------------------------------------------------------------------------
+   The FAQ pointer — the section that stands where the accordion did
+   --------------------------------------------------------------------------- */
+
+/* The heading IS the link. `inline-flex` on the anchor so the arrow sits on the heading's
+   baseline in the same box, and the two move together: the words shift right and the
+   arrow further, on hover and on focus, which is the sweep the capability rows use. */
+.faq-pointer-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  max-width: 22ch;
+  text-wrap: balance;
+  color: inherit;
+  min-height: 44px;
+}
+
+.faq-pointer-heading,
+.faq-pointer-arrow {
+  display: inline-block;
+  transition-property: transform, color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.faq-pointer-arrow {
+  color: var(--color-accent);
+}
+
+.faq-pointer-link:hover .faq-pointer-heading,
+.faq-pointer-link:focus-visible .faq-pointer-heading {
+  transform: translateX(0.15em);
+}
+
+.faq-pointer-link:hover .faq-pointer-arrow,
+.faq-pointer-link:focus-visible .faq-pointer-arrow {
+  transform: translateX(0.4em);
+}
+
+/* ---------------------------------------------------------------------------
+   The questions page (/faq)
+   --------------------------------------------------------------------------- */
+
+/* Twelve tracks from lg: the index takes the left three and the groups the right eight
+   from column five, which is the split the site's page bodies use. Below lg it is a
+   stack, index first. */
+.faqp {
+  padding-block: clamp(1rem, 3vh, 2rem) clamp(4rem, 10vh, 7rem);
+}
+
+.faqp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 6vh, 3.5rem) 2rem;
+}
+
+/* `min-width: 0` ON BOTH ITEMS, and it is the load-bearing line on a phone. A grid item's
+   automatic minimum is its content's min-content width, and the index's row of pills is
+   wider than a 390px screen — so the item refused to shrink, overflowed its track, and the
+   whole page scrolled sideways by 190px. Measured at 320, 360, 390 and 430 before this
+   was added. With the minimum released, the row's own `overflow-x: auto` does its job. */
+.faqp-aside,
+.faqp-groups {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .faqp-layout {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
-  .faq-trigger,
-  .faq-trigger[data-visible="true"] {
-    opacity: 1;
-    transform: none;
+  .faqp-aside {
+    grid-column: 1 / span 3;
   }
-  .faq-trigger[aria-expanded="false"]::before {
+  .faqp-groups {
+    grid-column: 5 / span 8;
+  }
+}
+
+/* THE INDEX. On a phone it is a row of pills that scrolls sideways if the four titles
+   overrun, with the row's own edges as the only clue that it does — there is no gradient
+   fade, because a fade over a scrolling row of links hides the one that is cut off. From
+   lg it is a column that sticks below the fixed bar and follows the reader down. */
+.faqp-index-list {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Room for the focus ring, which `overflow: auto` would otherwise clip. */
+  padding: 4px;
+  margin-inline: -4px;
+}
+
+.faqp-index-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* `position: relative` IS A BUG FIX, NOT A LAYOUT CHOICE. Each link carries a visually
+   hidden span for the count ("… , 4 questions"), and `.sr-only` positions it absolutely.
+   An absolutely positioned box belongs to its nearest POSITIONED ancestor, and with none
+   inside the row that was the document itself — so the span sat at its pill's x-offset
+   in the document's coordinate space, outside the scroller, and the whole page scrolled
+   sideways to reach a 1px box at x=577. Measured at 320, 360, 390 and 430. Making the link
+   the containing block keeps the span inside the row, where the row's own overflow
+   contains it. */
+.faqp-index-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--color-ink-12);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-70);
+  transition-property: color, border-color, background-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.faqp-index-link:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ink-40);
+}
+
+.faqp-index-link[aria-current="location"] {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+  background-color: var(--color-ink-4);
+}
+
+.faqp-index-ordinal {
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.faqp-index-count {
+  color: var(--color-ink-40);
+}
+
+.faqp-index-link[aria-current="location"] .faqp-index-count {
+  color: var(--color-accent);
+}
+
+@media (min-width: 1024px) {
+  .faqp-index {
+    position: sticky;
+    top: calc(var(--header-height, 5rem) + 2.5rem);
+  }
+  .faqp-index-list {
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow: visible;
+    padding: 0;
+    margin-inline: 0;
+    margin-top: 1.25rem;
+  }
+  /* In the column the pills become rows: a hairline down the left, the current one's in
+     accent and its text in ink, the rest resting at ink-70. No borders around each. */
+  .faqp-index-link {
+    justify-content: space-between;
+    white-space: normal;
+    border: none;
+    border-left: 2px solid var(--color-ink-8);
+    border-radius: 0;
+    padding: 0.625rem 0 0.625rem 1rem;
+    min-height: 44px;
+  }
+  .faqp-index-link:hover {
+    border-left-color: var(--color-ink-40);
+  }
+  .faqp-index-link[aria-current="location"] {
+    border-left-color: var(--color-accent);
+    background-color: transparent;
+  }
+}
+
+/* THE GROUPS. Four chapters down the right-hand column. Every second one sits on the
+   alternate section ground with the token radius and an inset, so the page reads as
+   surfaces rather than as headings on one sheet. `scroll-margin-top` is what makes a jump
+   from the index land with the group's head just under the bar. */
+.faqp-groups {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 7vh, 4.5rem);
+}
+
+.faqp-group {
+  scroll-margin-top: calc(var(--header-height, 5rem) + 1.5rem);
+}
+
+/* `section-warm`, the light warm tint, NOT `section-alt`: that token is the dark navy the
+   process sections sit on, and a group set on it printed ink text on an ink ground. */
+.faqp-group[data-alt="true"] {
+  background-color: var(--color-section-warm);
+  border-radius: var(--radius-sm);
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* The head: the group's ordinal in the display italic, then the title beside it. The
+   numeral is the same mark the process frames use — accent on cream at 5.107:1, and
+   decorative in the WCAG sense: the ordinal is carried by the index and the heading. */
+.faqp-group-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem clamp(1rem, 3vw, 2rem);
+  padding-bottom: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.faqp-group-numeral {
+  display: block;
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  color: var(--color-accent);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 0.9;
+  min-width: 2ch;
+}
+
+/* THE HEAD STICKS ON A PHONE, and only on a phone. Below lg there is no index to say
+   which group the reader is in, so the group says it itself: the title stays at the top
+   of the screen on the page's ground until the next group's head pushes it off. The
+   numeral and the description are hidden while stuck so the bar stays one line tall. */
+@media (max-width: 1023px) {
+  .faqp-group-head {
+    position: sticky;
+    top: var(--header-height, 5rem);
+    z-index: 1;
+    grid-template-columns: minmax(0, 1fr);
+    background-color: var(--color-canvas);
+    padding: 0.625rem 0 0.75rem;
+    border-bottom: 1px solid var(--color-ink-8);
+    margin-bottom: 0.5rem;
+  }
+  .faqp-group[data-alt="true"] .faqp-group-head {
+    background-color: var(--color-section-warm);
+  }
+  .faqp-group-head .faqp-group-numeral,
+  .faqp-group-head p {
     display: none;
   }
-  .faq-trigger[aria-expanded="false"]:hover .faq-question,
-  .faq-trigger[aria-expanded="false"]:focus-visible .faq-question {
+  .faqp-group-head h2 {
+    font-size: 1.375rem;
+    line-height: 1.2;
+  }
+}
+
+/* THE ROWS. A ledger: numeral, question, answer, on one drawn line each. From lg the
+   question takes the left five tracks and the answer the right six from column seven,
+   so a row is as tall as its answer and the questions read as a short column. Below lg
+   the three stack, numeral first. */
+.faqp-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.faqp-row-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 2rem;
+  padding-block: clamp(1.25rem, 3vh, 1.75rem);
+}
+
+.faqp-row-numeral {
+  line-height: 1.5;
+}
+
+.faqp-row-answer {
+  max-width: 52ch;
+}
+
+@media (min-width: 1024px) {
+  .faqp-row-body {
+    grid-template-columns: 2.5rem minmax(0, 5fr) minmax(0, 6fr);
+    gap: 0 2rem;
+    padding-block: clamp(1.5rem, 3.5vh, 2.25rem);
+  }
+  .faqp-row-numeral {
+    padding-top: 0.35em;
+  }
+  .faqp-row-question {
+    padding-right: 1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The legal documents (/terms, /privacy) and their index (/legal)
+   ---------------------------------------------------------------------------
+
+   THESE ARE famysys.com's OWN LEGAL PAGES, MEASURED AND REPRODUCED. The client's direction
+   is that a document opened here and the same document opened on the parent site should
+   be the same page, so every value below is the parent's: its type steps for the title
+   and lead (which differ from this site's display scale — the parent's display-l is
+   clamp(1.75rem, 2.95vw, 3.25rem), this site's is larger), its 500 body weight, its
+   spacing to the quarter-rem, its 68ch measure, its 15rem index track, and its two
+   transitions. Where a colour is named it is the same role on both sites (ink, graphite,
+   accent, the ink-12 hairline) and comes from this site's tokens, which carry the same
+   palette. Nothing here is tuned to taste; a change to any of it is a departure from the
+   parent, and should be made there first. */
+
+.legal {
+  background-color: var(--color-canvas);
+  color: var(--color-graphite);
+  /* The parent's body runs at 500; this site's at 400. The documents follow the parent. */
+  font-weight: 500;
+}
+
+/* The parent balances every heading and sets paragraphs `pretty` site-wide; this site does
+   neither globally, so the two are applied here. It is what breaks "The terms we publish,
+   in full." as "The terms we / publish, in full." on both sites rather than leaving one
+   word on the second line here. */
+.legal h1,
+.legal h2 {
+  text-wrap: balance;
+}
+
+.legal p {
+  text-wrap: pretty;
+}
+
+/* THE HEAD. Clears the fixed header with the parent's own top padding — 16vh, held between
+   7rem and 11rem — rather than this site's header-height arithmetic, so the title sits at
+   the same height on both sites at the same viewport. */
+.legal-head {
+  padding-top: clamp(7rem, 16vh, 11rem);
+  padding-bottom: clamp(2rem, 5vh, 3rem);
+}
+
+.legal-head--index {
+  padding-bottom: clamp(4rem, 10vh, 7rem);
+}
+
+/* The eyebrow: a 7px accent square, then the word, 5px apart — the parent's
+   `gap-[calc(var(--spacing-marker) - 0.4375rem - 0.5rem)]` with its 1.25rem marker. */
+.legal-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  color: var(--color-ink-70);
+}
+
+.legal-eyebrow-mark {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-accent);
+}
+
+/* The parent's display-l, not this site's. */
+.legal-title {
+  margin-top: 1.5rem;
+  max-width: 20ch;
+  font-size: clamp(1.75rem, 2.95vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.024em;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.legal-title--index {
+  max-width: 18ch;
+}
+
+/* The parent's lead step. */
+.legal-lead {
+  margin-top: 1.5rem;
+  max-width: 52ch;
+  font-size: clamp(1rem, 1.2vw, 1.1875rem);
+  line-height: 1.62;
+  letter-spacing: -0.008em;
+  color: var(--color-graphite-70);
+}
+
+/* THE FACTS ROW: effective, published, questions, write to us — and, on a draft, status. */
+.legal-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-ink-12);
+}
+
+.legal-facts dt {
+  color: var(--color-ink-70);
+}
+
+.legal-facts dd {
+  margin-top: 0.25rem;
+  color: var(--color-graphite);
+}
+
+.legal-email {
+  color: var(--color-graphite);
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-ink-20);
+  text-underline-offset: 4px;
+  transition:
+    color 300ms var(--ease-base),
+    text-decoration-color 300ms var(--ease-base);
+}
+
+.legal-email:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+
+.legal-address {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-style: normal;
+}
+
+/* The one line the parent's approved documents do not carry. In the accent so a reader
+   cannot take a draft for a commitment; gone when `reviewStatus` is null. */
+.legal-review-status {
+  color: var(--color-accent);
+}
+
+/* THE BODY: index beside article from lg, stacked below it. */
+.legal-body {
+  padding-bottom: clamp(6rem, 14vh, 10rem);
+}
+
+.legal-grid {
+  display: grid;
+  gap: 3rem clamp(2rem, 5vw, 5rem);
+}
+
+@media (min-width: 1024px) {
+  .legal-grid {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  }
+  .legal-index {
+    position: sticky;
+    top: calc(var(--header-height, 5rem) + 2rem);
+    align-self: start;
+  }
+}
+
+.legal-index-label {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-ink-12);
+  color: var(--color-ink-70);
+}
+
+/* THE WHOLE LIST, AT EVERY WIDTH. The parent caps this at 13rem below lg and lets it scroll
+   inside itself; the client asked for no scrollbar, so every entry is laid out in full and
+   the page scrolls instead. (A first pass also showed the cap on desktop, by declaring the
+   base rule after the lg override that was meant to lift it — that is why the order here
+   matters and the cap is simply gone.) */
+.legal-index-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.legal-index-list li {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.legal-index-number {
+  padding-top: 1px;
+  color: var(--color-ink-70);
+  font-variant-numeric: tabular-nums;
+}
+
+.legal-index-link {
+  color: var(--color-graphite-70);
+  transition: color 300ms var(--ease-base);
+}
+
+.legal-index-link:hover {
+  color: var(--color-accent);
+}
+
+/* THE CURRENT CLAUSE. The entry for the clause whose heading has crossed the middle of the
+   screen takes full ink and its number the accent — the same tonal step the FAQ index
+   uses, so "you are here" reads the same way on both pages. The colours cross over the
+   same 300ms curve the hover uses. */
+.legal-index-number {
+  transition: color 300ms var(--ease-base);
+}
+
+.legal-index-link[aria-current="location"] {
+  color: var(--color-ink);
+}
+
+.legal-index-list li[data-current="true"] .legal-index-number {
+  color: var(--color-accent);
+}
+
+.legal-article {
+  min-width: 0;
+  max-width: 68ch;
+}
+
+/* A SECTION: a hairline, then the number beside the heading, then the clause. The first
+   has no hairline and no top padding; each after the first sits 3rem below the last. */
+.legal-section {
+  scroll-margin-top: calc(var(--header-height, 5rem) + 2rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-ink-12);
+}
+
+.legal-section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.legal-section + .legal-section {
+  margin-top: 3rem;
+}
+
+.legal-heading {
+  display: flex;
+  gap: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.legal-heading-number {
+  padding-top: 0.5rem;
+  color: var(--color-ink-70);
+  font-variant-numeric: tabular-nums;
+}
+
+.legal-heading-text {
+  max-width: 40ch;
+}
+
+.legal-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.legal-prose {
+  line-height: 1.75;
+  color: var(--color-graphite);
+}
+
+.legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  list-style: none;
+  padding: 0;
+}
+
+.legal-list li {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* A 5px accent square, dropped 0.7em so it sits on the first line's x-height. */
+.legal-bullet {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  margin-top: 0.7em;
+  background-color: var(--color-accent);
+}
+
+/* THE CLOSING LINE: a 2rem rule that grows to 2.5rem and takes the accent on hover, then
+   "All legal documents". The rule scales from its right end so it grows toward the page
+   edge and the words stay put. */
+.legal-closing {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-ink-12);
+}
+
+.legal-closing-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-ink-70);
+  transition: color 300ms var(--ease-base);
+}
+
+.legal-closing-link:hover {
+  color: var(--color-ink);
+}
+
+.legal-closing-rule {
+  display: inline-block;
+  width: 2rem;
+  height: 1px;
+  transform-origin: right;
+  background-color: var(--color-ink-20);
+  transition:
+    transform 300ms var(--ease-base),
+    background-color 300ms var(--ease-base);
+}
+
+.legal-closing-rule--after {
+  transform-origin: left;
+}
+
+.legal-closing-link:hover .legal-closing-rule,
+.legal-doc-link:hover .legal-closing-rule {
+  transform: scaleX(1.25);
+  background-color: var(--color-accent);
+}
+
+/* THE INDEX PAGE'S LIST: each document a hairlined row, the whole row a link. */
+.legal-docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-ink-12);
+}
+
+.legal-doc {
+  border-bottom: 1px solid var(--color-ink-12);
+}
+
+.legal-doc-link {
+  display: grid;
+  gap: 0.75rem clamp(1.5rem, 4vw, 4rem);
+  padding-block: clamp(2rem, 4vh, 3rem);
+}
+
+@media (min-width: 768px) {
+  .legal-doc-link {
+    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  }
+}
+
+.legal-doc-when {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  color: var(--color-ink-70);
+}
+
+.legal-doc-body {
+  min-width: 0;
+}
+
+.legal-doc-title {
+  max-width: 24ch;
+  font-weight: 600;
+  color: var(--color-ink);
+  transition: color 300ms var(--ease-base);
+}
+
+.legal-doc-link:hover .legal-doc-title {
+  color: var(--color-accent);
+}
+
+.legal-doc-lead {
+  margin-top: 0.75rem;
+  max-width: 56ch;
+  color: var(--color-graphite-70);
+}
+
+.legal-doc-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  color: var(--color-ink-70);
+}
+
+/* ---------------------------------------------------------------------------
+   The "not yet" dialog — behind a footer network without an account, and behind
+   the capability deck before the deck exists
+   --------------------------------------------------------------------------- */
+
+/* Inset from every edge on a phone — `calc(100vw - 2.5rem)` leaves 20px each side — and
+   capped at 24rem. Never full-bleed: a modal that touches the edges of a phone reads as a
+   new page, and this is a sentence, not a page. */
+.pending-dialog {
+  border: none;
+  padding: 0;
+  margin: auto;
+  background: transparent;
+  width: min(24rem, calc(100vw - 2.5rem));
+  max-width: none;
+  overflow: visible;
+}
+
+.pending-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--pending-dialog-exit-ms, 180ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.pending-dialog[data-visible="true"]::backdrop {
+  opacity: 1;
+  transition-duration: var(--pending-dialog-enter-ms, 320ms);
+}
+
+/* Flat ink, one hairline, token radius, no shadow — the site's own surface language. The
+   scale is 0.96 → 1 on entry and back on exit; exit runs on the faster duration. */
+.pending-dialog-panel {
+  padding: clamp(1.5rem, 5vw, 2rem);
+  border: 1px solid var(--color-canvas-16);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: scale(0.96);
+  transition-property: opacity, transform;
+  transition-duration: var(--pending-dialog-exit-ms, 180ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.pending-dialog[data-visible="true"] .pending-dialog-panel {
+  opacity: 1;
+  transform: scale(1);
+  transition-duration: var(--pending-dialog-enter-ms, 320ms);
+}
+
+.pending-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* The mark at 20px here — larger than the footer's 16, because it is the subject. */
+.pending-dialog-head .footer-social-mark {
+  width: 20px;
+  height: 20px;
+  color: var(--color-canvas);
+}
+
+/* Full width and at the bottom on every width, 44px tall, the ghost button's language on
+   ink. On a phone the bottom of a centred 24rem panel is inside a thumb's reach from the
+   bottom edge; a corner × would be under the notch and above the reach. */
+.pending-dialog-close {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 1.75rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--color-canvas-40);
+  border-radius: var(--radius-sm);
+  color: var(--color-canvas);
+  transition-property: border-color, background-color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-base);
+}
+
+.pending-dialog-close:hover {
+  border-color: var(--color-canvas);
+  background-color: var(--color-canvas-10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The panel appears. The backdrop still fades, on the reduced duration the component
+     sets, because a backdrop that snaps is more startling than one that does not. */
+  .pending-dialog-panel,
+  .pending-dialog[data-visible="true"] .pending-dialog-panel {
+    transform: none;
+  }
+  .faq-pointer-link:hover .faq-pointer-heading,
+  .faq-pointer-link:focus-visible .faq-pointer-heading,
+  .faq-pointer-link:hover .faq-pointer-arrow,
+  .faq-pointer-link:focus-visible .faq-pointer-arrow {
     transform: none;
   }
 }
@@ -2937,15 +3499,20 @@ div.grid > *:nth-child(even).card-surface-dark {
    on this site to the parent's 300ms, and the easing is already identical: the parent's
    `--ease-brand` and this site's `--ease-base` are both cubic-bezier(0.22, 1, 0.36, 1).
 
-   The 24px minimum hit area is the parent's too. These are 15px links stacked 14px apart,
-   which on a phone is a column of targets under the accessible minimum without it; the
-   negative block margin keeps the padding from opening the visual gaps back up. */
+   A 44px HIT BOX ON A 24px LINE. The parent's footer holds the 24px accessible minimum;
+   this one holds the 44px thumb floor, because the three Connect entries are now
+   controls that do something — one opens a tab, two open a dialog — and a column of
+   15px words is the least forgiving target on the page. The box is 24px of line plus
+   10px of padding each side, and the negative block margin takes the padding back out of
+   the flow, so the words sit exactly where they did. The list gap under `FooterColumn`
+   is 20px so that neighbouring boxes meet edge to edge rather than overlapping: two
+   targets that share pixels are one target that answers unpredictably. */
 .footer-link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  margin-block: -0.375rem;
-  padding-block: 0.375rem;
+  min-height: 44px;
+  margin-block: -0.625rem;
+  padding-block: 0.625rem;
   color: var(--color-canvas-60);
   transition-property: color;
   transition-duration: var(--duration-base);
@@ -2962,6 +3529,23 @@ div.grid > *:nth-child(even).card-surface-dark {
   color: var(--color-canvas-60);
 }
 
+/* A CONNECT row is a brand mark and a word, so it needs a gap the page links do not. */
+.footer-link--social {
+  gap: 0.625rem;
+}
+
+/* THE BRAND MARKS BESIDE LinkedIn, Instagram AND YouTube.
+   16px, which is the cap height of the 15px label next to it — a glyph set to the full
+   line box would sit taller than the word it belongs to and turn a link into two objects.
+   `flex-shrink: 0` keeps it square when the column is 132px wide and the word wraps under
+   it, and the fill is inherited (`currentColor` in the SVG) so the mark and its name go
+   from canvas-60 to full canvas together on hover rather than one of them moving. */
+.footer-social-mark {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 /* THE ADMIN DOT — the last thing on the descriptor line.
    Five pixels of canvas-10 on ink: present, and effectively invisible unless you know it
    is there. Hover and keyboard focus both take it to accent-on-dark, the lightened accent
@@ -2974,11 +3558,38 @@ div.grid > *:nth-child(even).card-surface-dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* Sits in inline flow after the sentence's last letter — see Footer.tsx. An empty
+     inline-flex box takes its bottom margin edge as its baseline, which would hang the dot
+     below the line; `middle` centres the 24px box on the text's own middle instead. */
+  vertical-align: middle;
   min-width: 24px;
   min-height: 24px;
   margin-block: -0.375rem;
   padding-block: 0.375rem;
   outline-offset: 2px;
+}
+
+/* THE DOT SET AS PUNCTUATION rather than as a trailing icon.
+   Two measurements have to be cancelled for a 5px dot to land where a full stop lands.
+   The 24px touch target centres the dot, so 9.5px of the box sits empty to its left; and
+   `.label` carries 0.2em of tracking, which at 11px leaves another 2.2px of air after the
+   final letter. Pulling the box back by 10px spends both and leaves the dot about 1.7px
+   past the D — close enough to read as the sentence's stop.
+
+   THE TARGET ITSELF IS UNTOUCHED. This moves the box, it does not shrink it: the thing a
+   thumb or a pointer has to hit is still 24x24, which is the whole reason the dot is not
+   simply a 5px anchor. Only the drawn mark appears to move. */
+.footer-admin--stop {
+  margin-inline-start: -0.625rem;
+  /* AND THE SAME AGAIN ON THE OTHER SIDE, so the 24px target costs the LINE only about
+     4px. Without it the sentence and the dot's box together overrun a 390px column by a
+     few pixels while the sentence alone fits, and the dot wraps onto a second line BY
+     ITSELF — a stray mark under the copyright, which is the exact thing the full-stop
+     treatment exists to avoid. Cancelling the trailing half of the target takes the dot's
+     inline footprint down to the mark itself; the touch area is unchanged, and so is where
+     the dot sits, because a negative end margin moves what follows and there is nothing
+     following it. */
+  margin-inline-end: -0.625rem;
 }
 
 .footer-admin-dot {
@@ -2997,9 +3608,13 @@ div.grid > *:nth-child(even).card-surface-dark {
   background-color: var(--color-accent-on-dark);
 }
 
-/* The address is the footer's one real call to action, so it is underlined at rest rather
+/* The email is the footer's one real call to action, so it is underlined at rest rather
    than on hover: a link that only announces itself under a cursor is not announcing itself
-   to anyone who is not already pointing at it. The hover brings the rule up to full canvas. */
+   to anyone who is not already pointing at it. The hover brings the rule up to full canvas.
+
+   It sits under the postal address with the capability deck beside it, at body size rather
+   than the display size it carried when it was alone below a full-width rule. The rule is
+   gone and so is the band it opened, so the underline is the whole of what marks this out. */
 .footer-email {
   display: inline-block;
   color: var(--color-canvas);
@@ -3012,6 +3627,108 @@ div.grid > *:nth-child(even).card-surface-dark {
 
 .footer-email:hover {
   border-bottom-color: var(--color-canvas);
+}
+
+/* THE FOOTER BAND: four areas, one grid. See the note on it in Footer.tsx.
+   Below md the areas stack in reading order — identity, contact, columns, legal — so the
+   email follows the address directly on a phone. The spacing between them is margins, not
+   a row gap, because the four gaps are not equal: the email belongs to the address (20px),
+   the columns are a new block (48px), and the copyright closes the band (40px).
+
+   From md the grid is two columns by two rows, and the second row is the footer's last
+   line: the email and the deck on the left, the copyright on the right, both `align-self:
+   baseline` so the 17px email, the 15px deck and the 11px caps all sit on one text
+   baseline — the one alignment that reads as level across three sizes. The column split
+   is the old twelve-track split, five to seven and then four to eight from xl, which keeps
+   every link column wide enough for "Ways to Work With Us" to hold one line. */
+.footer-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "identity"
+    "contact"
+    "columns"
+    "legal";
+  padding-block: 2rem;
+}
+
+.footer-identity {
+  grid-area: identity;
+}
+
+.footer-contact {
+  grid-area: contact;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.footer-columns {
+  grid-area: columns;
+  margin-top: 3rem;
+}
+
+.footer-legal {
+  grid-area: legal;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .footer-band {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-areas:
+      "identity columns"
+      "contact legal";
+    column-gap: 2rem;
+    row-gap: 1.75rem;
+  }
+  .footer-contact,
+  .footer-columns,
+  .footer-legal {
+    margin-top: 0;
+  }
+  .footer-contact,
+  .footer-legal {
+    align-self: baseline;
+  }
+  .footer-legal {
+    justify-self: end;
+  }
+}
+
+@media (min-width: 1280px) {
+  .footer-band {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  }
+}
+
+/* THE CAPABILITY DECK'S LABEL, beside the email and set to match it.
+   Underlined at rest for the same reason the email is: these two are the only things in
+   the block a reader can act on, and a link that announces itself only under a cursor
+   announces itself to nobody who is not already pointing at it. Smaller than the email,
+   because the email is the footer's call to action and this is a document beside it.
+   `min-height` keeps the target at 44px with the negative margin cancelling the padding,
+   exactly as `.footer-link` does, so the line is as tall as its text and no taller. */
+.footer-deck {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -0.625rem;
+  padding-block: 0.625rem;
+  color: var(--color-canvas-60);
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-canvas-16);
+  text-underline-offset: 4px;
+  transition-property: color, text-decoration-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-base);
+}
+
+.footer-deck:hover {
+  color: var(--color-canvas);
+  text-decoration-color: var(--color-canvas);
 }
 
 @media (prefers-reduced-motion: reduce) {

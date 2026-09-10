@@ -303,6 +303,7 @@ export const waysToWorkPage: WaysToWorkPage = {
     // are the client's own, question and answer, reused verbatim from the brief.
     eyebrow: "Questions",
     heading: "Questions about engagements.",
+    group: "pricing-and-engagement",
     block: {
       items: [
         reusedFaq("How much do your services cost?"),

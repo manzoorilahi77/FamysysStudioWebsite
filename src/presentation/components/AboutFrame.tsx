@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Media } from "./Media";
 import type { AspectRatio } from "../../domain/shared/value-objects/MediaRef";
 import type { MediaView } from "../lib/viewModels";
 
@@ -42,14 +42,12 @@ export function AboutFrame({
       className={`about-frame ${RATIO_CLASS[media.aspectRatio]} ${className}`}
       data-settled={hasArrived}
     >
-      <Image
-        src={media.src}
-        alt={media.alt}
+      <Media
+        media={media}
         width={1600}
         height={1200}
         sizes={sizes}
         priority={priority}
-        loading={priority ? "eager" : "lazy"}
         className="h-full w-full object-cover"
       />
     </div>

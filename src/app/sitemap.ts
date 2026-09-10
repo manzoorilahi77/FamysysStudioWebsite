@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_ROUTES, absoluteUrl } from "../shared/site/site";
 
 /**
- * The seven public pages, absolute, and nothing else.
+ * Every public page, absolute, and nothing else.
  *
  * `force-static` because the list cannot change between requests — it changes when a page
  * is added to the source tree, which is a deploy. Generating it per request would cost a

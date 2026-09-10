@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import { motion } from "../../../shared/design/tokens";
 import { ClipNumber } from "../../components/ClipNumber";
 import { Container } from "../../components/Container";
@@ -61,6 +61,7 @@ export function ProcessStepBlock({
     // fade={false}: the approved description is accent-on-dark, which is derived against
     // full ink and measures 3.79:1 against the fade's lighter start value. See Section.
     <Section
+      cmsSection="process-steps"
       id={step.slug}
       dark={isDark}
       fade={false}
@@ -76,13 +77,11 @@ export function ProcessStepBlock({
             {/* The scale settles on entry and stops there — it is the image arriving, not
                 an idle loop. Under reduced motion it renders at its final size. */}
             <div className="step-media" data-settled={hasArrived}>
-              <Image
-                src={step.media.src}
-                alt={step.media.alt}
+              <Media
+                media={step.media}
                 width={1600}
                 height={1200}
                 sizes="(min-width: 1024px) 42vw, 100vw"
-                loading="lazy"
                 className="h-full w-full object-cover"
               />
             </div>

@@ -13,6 +13,21 @@ interface SectionProps {
   readonly ariaLabel?: string;
   readonly className?: string;
   /**
+   * WHICH BLOCK THE ADMIN PANEL CALLS THIS. Rendered as `data-cms-section`, and it is the
+   * only thing on the public page that exists for the panel's benefit.
+   *
+   * The panel's preview used to find a section by matching its NAME against the headings in
+   * the rendered page, which works only when the name an editor gave a block happens to be
+   * the words printed on it. It is not: the homepage's "Hero" prints no such word, and
+   * "Ways to Work With Us" prints `waysToWork.heading`, which is different copy. Both fell
+   * through to previewing the whole page.
+   *
+   * An attribute rather than an `id` because `id` is the page's own anchor namespace — the
+   * tier blocks and case studies already use it for in-page links — and a second meaning on
+   * the same attribute is how one of them eventually breaks the other.
+   */
+  readonly cmsSection?: string;
+  /**
    * Dark sections settle their background from ink-90 to ink as they enter. Opt out where
    * the section carries accent-on-dark text: that colour is derived against full ink
    * (5.015:1) and measures only 3.79:1 against the fade's start value, ink-90 composited
@@ -36,6 +51,14 @@ interface SectionProps {
    * The hero and the closing CTA pass nothing and keep the base navy the seam gives them.
    */
   readonly ground?: "base" | "alt";
+  /**
+   * Overrides `paddingFor()` for one call site. The uneven rhythm (light < dark <
+   * statement) is a sitewide decision and stays the default for everyone; this is the
+   * escape hatch for the rare section that has its own height constraint — the closing
+   * CTA's form panel has to fit a viewport alongside its copy column, which the shared
+   * dark-section padding was never sized for.
+   */
+  readonly paddingBlockOverride?: string;
 }
 
 function paddingFor(dark: boolean, statement: boolean): string {
@@ -63,6 +86,8 @@ export function Section({
   className = "",
   fade = true,
   ground,
+  cmsSection,
+  paddingBlockOverride,
 }: SectionProps) {
   const [ref, isInView] = useInView<HTMLElement>({ threshold: 0.05, once: true });
 
@@ -71,38 +96,39 @@ export function Section({
       ref={ref}
       id={id}
       aria-label={ariaLabel}
+      data-cms-section={cmsSection}
       className={`${dark ? "surface-dark bg-ink text-canvas" : "bg-canvas text-ink"} ${
         dark && fade ? "section-fade" : ""
       } ${className}`}
-      style={{
-        paddingBlock: paddingFor(dark, statement),
-        ...(ground
-          ? {
-              "--section-ground":
-                ground === "alt" ? "var(--color-section-alt)" : "var(--color-ink)",
-              "--section-ground-entering":
-                ground === "alt"
-                  ? "var(--color-section-alt-entering)"
-                  : "var(--color-ink-90)",
-              "--color-hairline-on-dark":
-                ground === "alt"
-                  ? "var(--color-hairline-on-section-alt)"
-                  : "var(--color-canvas-10)",
-            }
-          : {}),
-        // Both ends of the fade come from the section-ground variables rather than from
-        // `ink` directly, so a dark section that the seam rules have moved onto the
-        // alternate navy fades from its OWN 90% step to its own ground. Naming ink here
-        // would make every alternate section flash the base navy before settling.
-        // The fallbacks are what a dark section outside a run resolves to.
-        ...(dark && fade
-          ? {
-              backgroundColor: isInView
-                ? "var(--section-ground, var(--color-ink))"
-                : "var(--section-ground-entering, var(--color-ink-90))",
-            }
-          : {}),
-      } as React.CSSProperties}
+      style={
+        {
+          paddingBlock: paddingBlockOverride ?? paddingFor(dark, statement),
+          ...(ground
+            ? {
+                "--section-ground":
+                  ground === "alt" ? "var(--color-section-alt)" : "var(--color-ink)",
+                "--section-ground-entering":
+                  ground === "alt" ? "var(--color-section-alt-entering)" : "var(--color-ink-90)",
+                "--color-hairline-on-dark":
+                  ground === "alt"
+                    ? "var(--color-hairline-on-section-alt)"
+                    : "var(--color-canvas-10)",
+              }
+            : {}),
+          // Both ends of the fade come from the section-ground variables rather than from
+          // `ink` directly, so a dark section that the seam rules have moved onto the
+          // alternate navy fades from its OWN 90% step to its own ground. Naming ink here
+          // would make every alternate section flash the base navy before settling.
+          // The fallbacks are what a dark section outside a run resolves to.
+          ...(dark && fade
+            ? {
+                backgroundColor: isInView
+                  ? "var(--section-ground, var(--color-ink))"
+                  : "var(--section-ground-entering, var(--color-ink-90))",
+              }
+            : {}),
+        } as React.CSSProperties
+      }
     >
       {children}
     </section>

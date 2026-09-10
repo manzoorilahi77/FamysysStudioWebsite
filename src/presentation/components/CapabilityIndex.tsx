@@ -62,6 +62,7 @@ export function CapabilityIndex({ label, items }: CapabilityIndexProps) {
   return (
     <nav
       id="capability-index"
+      data-cms-section="capability-index"
       aria-label={label}
       className="capability-index bg-canvas border-b border-ink-8 md:sticky md:z-30"
       style={{ top: `${headerHeight}px` }}

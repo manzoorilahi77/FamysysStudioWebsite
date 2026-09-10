@@ -49,14 +49,12 @@ const APP_DIRECTORY = join(process.cwd(), "src", "app");
 const ROUTES = new Set(["/", ...routesUnder(APP_DIRECTORY)]);
 
 /**
- * ROUTES THAT DO NOT EXIST AND ARE LINKED ANYWAY, each with the reason it is allowed to
- * be broken. Only these two: the footer's LEGAL column matches famysys.com's, which links
- * Terms & Conditions and Privacy Policy, and neither document has been supplied for the
- * Studio. The links are in place so they work the day the pages land — until then they
- * 404 from all seven pages, which is a real defect held open deliberately and tracked in
- * docs/content-todo.md. Anything else that fails to resolve is a mistake, not a decision.
+ * ROUTES THAT DO NOT EXIST AND ARE LINKED ANYWAY. NONE, and the set is kept so that the
+ * next one has somewhere to go and a reason to be written beside it. It held /terms,
+ * /privacy and /faq for as long as the footer linked three pages that were not built;
+ * all three exist now, and the test below asserts the set stays empty.
  */
-const PENDING_ROUTES = new Set(["/terms", "/privacy"]);
+const PENDING_ROUTES: ReadonlySet<string> = new Set();
 
 /** Every `Url`-shaped value in the tree whose value looks like an internal path. */
 function collectHrefs(node: unknown, out: string[] = [], seen = new Set<unknown>()): string[] {
@@ -91,14 +89,18 @@ const CONTENT_MODULES: Record<string, unknown> = {
 };
 
 describe("internal links", () => {
-  it("finds the seven content routes on disk", () => {
+  it("finds the eleven public routes on disk", () => {
     expect([...ROUTES].sort()).toEqual([
       "/",
       "/about",
       "/contact",
       "/creative-services",
+      "/faq",
       "/how-we-work",
+      "/legal",
+      "/privacy",
       "/selected-work",
+      "/terms",
       "/ways-to-work-with-us",
     ]);
   });
@@ -118,28 +120,43 @@ describe("internal links", () => {
     expect(unresolved).toEqual([]);
   });
 
-  /**
-   * The exemption above is two routes wide and it is meant to shrink to nothing. This
-   * asserts what each one costs while it is still exempt, so "the footer links two pages
-   * that do not exist" stays a stated fact with a test behind it rather than a silence.
-   */
-  it("still owes the two legal pages the footer now links", () => {
+  /** The footer's three legal links, each of which is now a page. Nothing is exempt any more. */
+  it("resolves every legal link the footer carries, with no pending-route exemption left", () => {
     const legal = marketing.footerContent.legalLinks.map((link) => link.href.value);
-    expect(legal).toEqual(["/terms", "/privacy"]);
+    expect(legal).toEqual(["/terms", "/privacy", "/faq"]);
     for (const route of legal) {
-      expect(ROUTES.has(route)).toBe(false);
-      expect(PENDING_ROUTES.has(route)).toBe(true);
+      expect(ROUTES.has(route)).toBe(true);
     }
+    expect(PENDING_ROUTES.size).toBe(0);
   });
 
-  /** The CONNECT column exists; its destinations do not. Both halves are deliberate. */
-  it("names three social networks and links none of them", () => {
+  /**
+   * One network is linked and two are not, and both halves are deliberate: LinkedIn is
+   * the company page the client supplied, and the other two open a "coming soon" dialog
+   * until their accounts exist — never a dead anchor.
+   */
+  it("links LinkedIn externally and leaves Instagram and YouTube to the dialog", () => {
+    const [linkedin, instagram, youtube] = marketing.footerContent.socialLinks;
+    expect(linkedin?.href?.value).toBe("https://www.linkedin.com/company/famysys/home/");
+    expect(linkedin?.href?.isExternal).toBe(true);
+    expect(instagram?.href).toBeNull();
+    expect(youtube?.href).toBeNull();
     expect(marketing.footerContent.socialLinks.map((link) => link.label)).toEqual([
       "LinkedIn",
-      "X",
-      "GitHub",
+      "Instagram",
+      "YouTube",
     ]);
-    expect(marketing.footerContent.socialLinks.every((link) => link.href === null)).toBe(true);
+  });
+
+  /**
+   * Every network carries the key the footer draws its brand mark from, and no two carry
+   * the same one. A duplicate would render one glyph twice AND collide on the React key
+   * the CONNECT list is built with, so this is cheaper to assert than to notice.
+   */
+  it("gives each social entry its own brand-mark key", () => {
+    const networks = marketing.footerContent.socialLinks.map((link) => link.network);
+    expect(networks).toEqual(["linkedin", "instagram", "youtube"]);
+    expect(new Set(networks).size).toBe(networks.length);
   });
 
   it("links the Contact route the header and every closing call to action point at", () => {

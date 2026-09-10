@@ -25,7 +25,24 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
     // 3:1 UI-boundary floor). Both were already true before /contact existed; the
     // measured contrast pass built for that page is what surfaced them. A form is also
     // not a moment for a background transition — /contact's form section does the same.
-    <Section dark statement fade={false} ariaLabel={closingCta.heading}>
+    // ONE SCREEN, NO SCROLL. This used to take `statement` — the site's most generous
+    // padding tier, up to 12rem (192px) top and bottom — which is right for a standalone
+    // centred line and wrong for a section that also has to fit a five-field form: on an
+    // ordinary laptop viewport the panel ran taller than the screen, so the first field and
+    // the closing line could never both be on screen at once. `paddingBlockOverride` gives
+    // this call site its own small floor instead of the statement tier, and the section is
+    // sized to the viewport below the fixed header and centred within it — `min-h` rather
+    // than a fixed height, so a very short brief still leaves the section no taller than the
+    // screen, and a viewport too short for even the compact form scrolls exactly as far as
+    // the content needs rather than by however much the tier over-allocated.
+    <Section
+      cmsSection="closing-cta"
+      dark
+      fade={false}
+      ariaLabel={closingCta.heading}
+      paddingBlockOverride="clamp(1.5rem, 3vh, 2.5rem)"
+      className="flex min-h-[calc(100svh-var(--header-height,5rem))] flex-col justify-center"
+    >
       <Container>
         {/* The closing pitch and the form, side by side. The heading is IN the left column
             with the copy it belongs to, not stacked above both — it was centred once and
@@ -49,17 +66,24 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
             against the panel rather than against the copy's own height. Top-aligned, the
             column ended two thirds of the way up a 480px panel and left the section's
             bottom-left quarter empty. */}
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          {/* `lg:justify-center` centres the pitch — heading, paragraph, button — on the
-              form panel's vertical middle, which is what a two-column row of unequal
-              content lengths needs: top-aligned, a 300px column against a 600px panel put
-              the whole left half in the row's upper third. The closing line leaves the
-              flow at `lg` and pins to the column's bottom edge instead of pushing the
-              stack up with `mt-auto`; an auto margin outranks `justify-content`, so in
-              flow it would have taken the centring back off. Absolute, it also keeps the
-              centred group's midpoint exactly on the panel's, rather than half the
-              closing line's height above it. */}
-          <div className="relative flex flex-col lg:col-span-6 lg:justify-center">
+        {/* gap-8/lg:gap-10, down from gap-12/gap-16 — the channel between the two columns
+            was tuned for a copy block sized against the OLD, taller panel; against the
+            compact one it read as too wide a gap relative to the content either side. */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
+          {/* `lg:justify-center` centres the WHOLE column — heading through closing line —
+              on the form panel's vertical middle, which is what a two-column row of unequal
+              content lengths needs: top-aligned, a short column against a taller panel put
+              the whole left half in the row's upper third.
+
+              THE CLOSING LINE USED TO PIN TO THE PANEL'S BOTTOM EDGE VIA `absolute
+              lg:bottom-0`, one flex item deliberately taken out of the column's own flow so
+              it tracked the PANEL's height rather than the copy's. That was the right idea
+              against the old, much taller panel; against the compact one (see the padding
+              note above) it left a gap between the button and a line now anchored to a
+              floor several hundred pixels below it — the line read as disconnected from
+              its own column rather than as its closing thought. Simple flow, one rhythm
+              step under the button, is what "closing line" actually means here. */}
+          <div className="flex flex-col lg:col-span-6 lg:justify-center">
             {/* 18ch, and measured rather than guessed. At the heading step it resolves to
                 ~430px at 1440, which holds the four 37- to 40-character headings to two
                 lines and leaves the two 27-character ones ("Bring us something to make.",
@@ -78,7 +102,7 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
                 does the same job under the closing heading that they do under theirs, and
                 at lead size it was the one supporting line on the page still set as a
                 co-headline. */}
-            <p className="text-body mt-10 text-canvas-80" style={{ maxWidth: "44ch" }}>
+            <p className="text-body mt-6 text-canvas-80" style={{ maxWidth: "44ch" }}>
               {closingCta.body}
             </p>
             {/* `cta-highlight` spends the page's one use of the bright highlight, on
@@ -87,7 +111,7 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
                 other dark primary buttons — putting it on the variant would have made the
                 colour appear three or four times a page, which is the one thing it must
                 not do. See the rule in globals.css. */}
-            <div className="mt-8">
+            <div className="mt-6">
               <Button
                 cta={toCtaView(closingCta.cta)}
                 variant="primary"
@@ -95,12 +119,10 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
                 className="cta-highlight"
               />
             </div>
-            {/* The column's foot, not a fourth item in a stack. Below `lg` the columns
-                stack and it is simply the last line, held off the button by `pt-12`; at
-                `lg` it leaves the flow and pins to the column's bottom edge, which is the
-                form panel's bottom edge, so it can sit there without dragging the centred
-                pitch above it off the panel's middle. */}
-            <p className="text-small mt-auto max-w-[38ch] pt-12 text-canvas-60 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:pt-0">
+            {/* The column's fourth and last item, in flow at every width — the same
+                mt-8 rhythm the heading, paragraph and button already step through, rather
+                than a value tuned to clear a pinned sibling. */}
+            <p className="text-small mt-8 max-w-[38ch] text-canvas-60">
               {closingCta.closingLine}
             </p>
           </div>
@@ -110,8 +132,12 @@ export function FinalCta({ closingCta, accent = ["creative requirement?"] }: Fin
               /contact's "what happens next" aside uses — canvas-4 over ink with a canvas-16
               edge, 1.111:1, the site's dark card — so the two forms read as one studio's
               rather than as two treatments of the same job. No hover escalation: the panel
-              is a ground, not a target. */}
-          <div className="rounded-sm border border-canvas-16 bg-canvas-4 p-8 lg:col-span-6 lg:col-start-7 lg:p-10">
+              is a ground, not a target.
+
+              p-6/lg:p-7, down from p-8/p-10 — the panel's own padding, spent against a form
+              that is now compact by design (see DemoForm.module.css) rather than against
+              one built for generous room. */}
+          <div className="rounded-sm border border-canvas-16 bg-canvas-4 p-6 lg:col-span-6 lg:col-start-7 lg:p-7">
             <DemoForm />
           </div>
         </div>

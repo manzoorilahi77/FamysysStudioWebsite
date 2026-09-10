@@ -13,30 +13,45 @@ import { toDemoRequestFieldErrors } from "./DemoRequestFieldErrors";
 describe("toDemoRequestFieldErrors", () => {
   it("maps InvalidFullNameError to the fullName field", () => {
     const result = toDemoRequestFieldErrors(
-      new InvalidFullNameError("a first and last name are both required."),
+      new InvalidFullNameError("name exceeds 100 characters."),
     );
 
     expect(result?.fullName).toBeDefined();
   });
 
-  it("maps a free-mail InvalidBusinessEmailError to the email field with an actionable message", () => {
+  /**
+   * The company name is a plain string rather than a value object, so its over-length
+   * refusal arrives as the entity's own error and has to land on the right field rather
+   * than falling through to the 503 branch.
+   */
+  it("maps InvalidDemoRequestError to the companyName field", () => {
     const result = toDemoRequestFieldErrors(
-      new InvalidBusinessEmailError(
-        "Please use your work email address instead of a personal gmail.com address.",
-        "free-mail",
-      ),
+      new InvalidDemoRequestError("companyName exceeds 191 characters."),
     );
 
-    expect(result?.email).toMatch(/work email/i);
-    expect(result?.email).not.toMatch(/Invalid business email/i);
+    expect(result?.companyName).toBeDefined();
   });
 
-  it("maps a malformed InvalidBusinessEmailError without repeating the address back", () => {
+  it("maps a malformed InvalidBusinessEmailError to an example, without repeating the address back", () => {
     const result = toDemoRequestFieldErrors(
       new InvalidBusinessEmailError('"jane@acme" is not a valid email address.'),
     );
 
-    expect(result?.email).toBe("That does not look like an email address");
+    expect(result?.email).toBe("Enter a valid email address, like name@company.com");
+  });
+
+  it("maps a likely typo to the corrected address", () => {
+    const result = toDemoRequestFieldErrors(
+      new InvalidBusinessEmailError("misspelt", "likely-typo", "shaf@gmail.com"),
+    );
+
+    expect(result?.email).toBe("Check the address — did you mean shaf@gmail.com?");
+  });
+
+  it("maps an over-long address to its own message", () => {
+    const result = toDemoRequestFieldErrors(new InvalidBusinessEmailError("long", "too-long"));
+
+    expect(result?.email).toMatch(/too long/);
   });
 
   it("maps InvalidCompanySizeError to the companySize field", () => {
@@ -59,9 +74,14 @@ describe("toDemoRequestFieldErrors", () => {
     expect(toDemoRequestFieldErrors(new InvalidProjectBriefError("empty"))?.brief).toBeDefined();
   });
 
+  /**
+   * `InvalidDemoRequestError` used to be the example here, because nothing mapped it. It
+   * now carries the company name's over-length refusal, so the unrecognised case needs an
+   * error from outside the lead domain — which is exactly what the route's 503 branch is
+   * for: a database that refused the write is not a field the sender can fix.
+   */
   it("returns undefined for an error it doesn't recognize", () => {
-    const result = toDemoRequestFieldErrors(new InvalidDemoRequestError("companyName is required."));
-
-    expect(result).toBeUndefined();
+    expect(toDemoRequestFieldErrors(new Error("ER_LOCK_WAIT_TIMEOUT"))).toBeUndefined();
+    expect(toDemoRequestFieldErrors(undefined)).toBeUndefined();
   });
 });

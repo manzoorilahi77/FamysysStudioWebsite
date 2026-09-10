@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Container } from "../../components/Container";
 import { RevealHeading } from "../../components/RevealHeading";
@@ -231,6 +231,7 @@ export function Differentiator({ differentiator }: DifferentiatorProps) {
 
   return (
     <Section
+      cmsSection="differentiator"
       dark
       ground="alt"
       fade={false}
@@ -267,13 +268,11 @@ export function Differentiator({ differentiator }: DifferentiatorProps) {
                     data-tint={index % differentiator.elements.length}
                     data-current={index === selected}
                   >
-                    <Image
-                      src={element.media.src}
-                      alt={element.media.alt}
+                    <Media
+                      media={element.media}
                       width={1600}
                       height={1200}
                       sizes="(min-width: 900px) 55vw, 100vw"
-                      {...(index === 0 ? {} : { loading: "lazy" as const })}
                       className="element-frame-image"
                     />
                     {/* Fully opaque, one tint per element. The title and the sentence sit

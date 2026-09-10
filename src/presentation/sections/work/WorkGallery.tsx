@@ -113,10 +113,15 @@ export function WorkGallery({
   return (
     <Section ariaLabel={gridLabel} className="work-section">
       <Container>
-        <p id="work-filter-label" className="label text-ink-70">
+        <p id="work-filter-label" data-cms-section="filters" className="label text-ink-70">
           {filter.label}
         </p>
-        <div className="work-filter mt-4" role="group" aria-labelledby="work-filter-label">
+        <div
+          className="work-filter mt-4"
+          data-cms-section="filters"
+          role="group"
+          aria-labelledby="work-filter-label"
+        >
           <button
             type="button"
             className="work-filter-chip"
@@ -153,6 +158,7 @@ export function WorkGallery({
             what sits beside what — see .work-grid. */}
         <div
           id="work-grid"
+          data-cms-section="gallery"
           className="work-grid mt-14"
           style={{
             opacity: isSwapping ? 0 : 1,

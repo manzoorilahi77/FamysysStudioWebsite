@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import { Button } from "../../components/Button";
 import { Container } from "../../components/Container";
 import { Eyebrow } from "../../components/Eyebrow";
@@ -25,6 +25,7 @@ export function ServicesHero({ hero }: ServicesHeroProps) {
   return (
     <section
       className="surface-dark bg-ink text-canvas"
+      data-cms-section="hero"
       aria-label={hero.heading}
       style={{ minHeight: "60svh" }}
     >
@@ -53,9 +54,8 @@ export function ServicesHero({ hero }: ServicesHeroProps) {
       </Container>
 
       <div className="services-hero-band">
-        <Image
-          src={hero.media.src}
-          alt={hero.media.alt}
+        <Media
+          media={hero.media}
           width={2400}
           height={1000}
           sizes="100vw"

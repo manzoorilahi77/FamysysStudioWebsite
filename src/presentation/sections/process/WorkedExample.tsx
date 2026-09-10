@@ -24,7 +24,7 @@ interface WorkedExampleProps {
  */
 export function WorkedExample({ example }: WorkedExampleProps) {
   return (
-    <Section dark ariaLabel={example.heading}>
+    <Section cmsSection="worked-example" dark ariaLabel={example.heading}>
       <Container>
         <SectionHeader
           eyebrow={example.eyebrow}

@@ -20,7 +20,7 @@ interface ScopeAndRevisionsProps {
  */
 export function ScopeAndRevisions({ scope }: ScopeAndRevisionsProps) {
   return (
-    <Section ariaLabel={scope.heading}>
+    <Section cmsSection="scope-and-revisions" ariaLabel={scope.heading}>
       <Container>
         <SectionHeader eyebrow={scope.eyebrow} heading={scope.heading} body={scope.body} />
 

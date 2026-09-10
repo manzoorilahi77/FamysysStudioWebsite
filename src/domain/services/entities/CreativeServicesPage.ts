@@ -41,6 +41,13 @@ export interface EngagementPointer {
 export interface ServicesFaq {
   readonly eyebrow: string;
   readonly heading: string;
+  /**
+   * The group on /faq this page's pointer opens — "services-and-capability" — as declared
+   * in faq.content.ts. The page no longer renders its questions; it renders a pointer
+   * under the same eyebrow and heading, and the pointer needs to land on the right part
+   * of the page that does.
+   */
+  readonly group: string;
   readonly block: FaqBlock;
 }
 

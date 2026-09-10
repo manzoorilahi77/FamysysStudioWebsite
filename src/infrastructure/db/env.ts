@@ -11,6 +11,8 @@
  * password in one is a password that has been published.
  */
 
+import { SITE_NAME } from "../../shared/site/site";
+
 export type ContentSource = "database" | "static";
 
 export interface DatabaseCredentials {
@@ -99,6 +101,73 @@ export function adminPasswordHash(): string {
     );
   }
   return hash;
+}
+
+export interface GraphCredentials {
+  readonly tenantId: string;
+  readonly clientId: string;
+  readonly clientSecret: string;
+}
+
+/**
+ * OUTBOUND MAIL: OFF, OR FULLY CONFIGURED. There is no third state.
+ *
+ * Off is the default, because a development machine has no tenant credentials and must not
+ * need them to run the site or submit the form. With mail off an enquiry is stored exactly
+ * as it always was and the send is skipped.
+ *
+ * On means all five values are present and both addresses look like addresses. Anything
+ * less throws, and `instrumentation.ts` calls this at boot — so a half-configured server
+ * refuses to start, rather than a visitor's enquiry being the thing that discovers the gap.
+ *
+ * `MAIL_FROM_NAME` defaults to the brand name rather than being left out, because without
+ * an explicit name Graph uses the mailbox's display name in Entra, which is set for
+ * administration. That is how a shared mailbox arrives in Gmail as "Studio Hello".
+ */
+export type MailConfiguration =
+  | { readonly enabled: false }
+  | {
+      readonly enabled: true;
+      readonly sender: string;
+      readonly fromName: string;
+      readonly notifyTo: string;
+      readonly graph: GraphCredentials;
+    };
+
+const MAIL_ADDRESS_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function isMailEnabled(): boolean {
+  const raw = read("MAIL_ENABLED")?.trim().toLowerCase();
+  if (raw === undefined || raw === "false" || raw === "0" || raw === "no") return false;
+  if (raw === "true" || raw === "1" || raw === "yes") return true;
+  throw new Error(`MAIL_ENABLED must be "true" or "false", not "${raw}".`);
+}
+
+export function mailConfiguration(): MailConfiguration {
+  if (!isMailEnabled()) return { enabled: false };
+
+  const missing: string[] = [];
+  const sender = required("MAIL_SENDER", missing).trim();
+  const notifyTo = required("MAIL_NOTIFY_TO", missing).trim();
+  const tenantId = required("GRAPH_TENANT_ID", missing).trim();
+  const clientId = required("GRAPH_CLIENT_ID", missing).trim();
+  const clientSecret = required("GRAPH_CLIENT_SECRET", missing).trim();
+  assertNoneMissing(missing);
+
+  if (!MAIL_ADDRESS_PATTERN.test(sender)) {
+    throw new Error("MAIL_SENDER does not look like an email address.");
+  }
+  if (!MAIL_ADDRESS_PATTERN.test(notifyTo)) {
+    throw new Error("MAIL_NOTIFY_TO does not look like an email address.");
+  }
+
+  return {
+    enabled: true,
+    sender,
+    notifyTo,
+    fromName: read("MAIL_FROM_NAME")?.trim() ?? SITE_NAME,
+    graph: { tenantId, clientId, clientSecret },
+  };
 }
 
 /**

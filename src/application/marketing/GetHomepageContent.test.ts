@@ -181,9 +181,14 @@ function fixtureFooterContent(): FooterContent {
     contactEmail: "hello@famysys.com",
     contactLink: createCta("Contact", "/contact"),
     addressLines: null,
-    descriptor: "AI-Enabled Creative Production Partner",
     legalLinks: [createCta("Privacy policy", "/privacy"), createCta("Terms of use", "/terms")],
-    socialLinks: [{ label: "LinkedIn", href: null }],
+    socialLinks: [{ network: "linkedin", label: "LinkedIn", href: null }],
+    socialPending: { eyebrow: "Coming soon", body: "Being set up.", closeLabel: "Close" },
+    capabilityDeck: {
+      label: "Capability Deck",
+      href: null,
+      pending: { eyebrow: "In preparation", body: "Being written.", closeLabel: "Close" },
+    },
   };
 }
 

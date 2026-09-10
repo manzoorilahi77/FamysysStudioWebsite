@@ -54,7 +54,9 @@ export const SECTION_OF: Readonly<
     WaysToWorkTiles: ["ways-to-work"],
     SelectedWorkCovers: ["selected-work"],
     WhyFamysys: ["why-famysys"],
-    Faq: ["faq"],
+    // No homepage component renders the shared FAQ block any more — /faq does — so it is
+    // listed under Home as a block the page holds but does not render, with the note
+    // saying so. It stays under Home because that is where the shared answers are edited.
     FinalCta: ["closing-cta"],
     Footer: ["footer"],
   },
@@ -64,7 +66,7 @@ export const SECTION_OF: Readonly<
     CapabilityBlock: ["capabilities"],
     HowWeWork: ["process-pointer"],
     EngagementPointer: ["engagement-pointer"],
-    Faq: ["faq"],
+    FaqPointer: ["faq"],
     FinalCta: ["closing-cta"],
   },
   "how-we-work": {
@@ -73,7 +75,7 @@ export const SECTION_OF: Readonly<
     ProcessStepBlock: ["process-steps"],
     WorkedExample: ["worked-example"],
     ScopeAndRevisions: ["scope-and-revisions"],
-    Faq: ["faq"],
+    FaqPointer: ["faq"],
     FinalCta: ["closing-cta"],
   },
   "ways-to-work-with-us": {
@@ -83,7 +85,7 @@ export const SECTION_OF: Readonly<
     CustomPartnershipBlock: ["custom-partnership"],
     HowToChoose: ["how-to-choose"],
     ScopingBlock: ["scoping"],
-    Faq: ["faq"],
+    FaqPointer: ["faq"],
     FinalCta: ["closing-cta"],
   },
   "selected-work": {
@@ -210,8 +212,9 @@ const UNMAPPED_NOTE =
   "is how a block added to the site shows up here without anyone editing the CMS.";
 
 const UNRENDERED_NOTE =
-  "The panel knows this block, but the page does not currently render it. Its content is " +
-  "still here and still editable; nothing on the site shows it.";
+  "The panel knows this block, but this page does not currently render it. Its content is " +
+  "still here and still editable — and may be rendered elsewhere: the homepage's FAQ " +
+  "block, for one, is printed on /faq.";
 
 export function orderSections(
   pageId: string,

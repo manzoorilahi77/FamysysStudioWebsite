@@ -21,12 +21,16 @@ const DESCRIPTION =
 const EMPTY = "No submissions yet. This list is live, so an empty week is a quiet week.";
 
 /**
- * The gap that matters most on this screen, said on the screen. Nothing forwards an
- * enquiry anywhere: the row is written and that is all that happens. Somebody has to open
- * this panel, and if nobody knows that, a lead sits here unread.
+ * What happens to an enquiry besides this list, said on the screen. With mail off the row
+ * is written and that is all: somebody has to open this panel, and if nobody knows that, a
+ * lead sits here unread. With mail on, this list is still the record — a notification that
+ * failed leaves its enquiry here all the same.
  */
 const NOT_EMAILED =
-  "Nothing is emailed anywhere. An enquiry is stored here and nowhere else — no notification is sent to the studio, to a shared inbox or to a CRM. Until email forwarding is built, this list is the only place a submission appears, so it has to be checked.";
+  "Nothing is emailed anywhere. Mail is switched off on this server (MAIL_ENABLED), so an enquiry is stored here and nowhere else — no notification is sent to the studio, to a shared inbox or to a CRM. This list is the only place a submission appears, so it has to be checked.";
+
+const EMAILED =
+  "Each enquiry is also emailed to the studio, with Reply-To set to the sender, and the sender gets an acknowledgement. This list is still the record: an enquiry whose email failed is here all the same.";
 
 function Field({ label, value }: { readonly label: string; readonly value: string }) {
   return (
@@ -39,7 +43,8 @@ function Field({ label, value }: { readonly label: string; readonly value: strin
 
 function Enquiry({ inquiry }: { readonly inquiry: CmsInquiry }) {
   return (
-    <article className="px-5 py-5">
+    // The id is what the notification email's button links to: /admin/inbox#inquiry-<id>.
+    <article id={`inquiry-${inquiry.id}`} className="scroll-mt-6 px-5 py-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-small flex flex-wrap items-center gap-3 text-ink">
@@ -95,16 +100,28 @@ function Enquiry({ inquiry }: { readonly inquiry: CmsInquiry }) {
   );
 }
 
-export function InboxScreen({ inquiries }: { readonly inquiries: ReadonlyArray<CmsInquiry> }) {
+export function InboxScreen({
+  inquiries,
+  isMailEnabled = false,
+}: {
+  readonly inquiries: ReadonlyArray<CmsInquiry>;
+  readonly isMailEnabled?: boolean;
+}) {
   const open = inquiries.filter((inquiry) => inquiry.status !== "archived");
   const archived = inquiries.filter((inquiry) => inquiry.status === "archived");
   const unread = open.filter((inquiry) => inquiry.status === "new").length;
 
   return (
     <AdminScreen breadcrumb={[{ label: "Inbox" }]} heading="Inbox" description={DESCRIPTION}>
-      <p className="text-small mb-6 max-w-[70ch] rounded-sm border border-accent bg-accent-8 px-5 py-4 text-ink">
-        {NOT_EMAILED}
-      </p>
+      {isMailEnabled ? (
+        <p className="text-small mb-6 max-w-[70ch] rounded-sm bg-ink-4 px-5 py-4 text-ink">
+          {EMAILED}
+        </p>
+      ) : (
+        <p className="text-small mb-6 max-w-[70ch] rounded-sm border border-accent bg-accent-8 px-5 py-4 text-ink">
+          {NOT_EMAILED}
+        </p>
+      )}
 
       <AdminPanel
         label="Enquiries"

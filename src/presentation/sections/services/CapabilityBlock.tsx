@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import Link from "next/link";
 import { motion } from "../../../shared/design/tokens";
 import { Container } from "../../components/Container";
@@ -52,6 +52,7 @@ export function CapabilityBlock({ capability, index, deliverablesLabel }: Capabi
     // fade={false}: the descriptor and the link are accent-on-dark, which is derived
     // against full ink and fails 4.5:1 against the fade's lighter start value.
     <Section
+      cmsSection="capabilities"
       id={capability.slug}
       dark={isDark}
       fade={false}
@@ -67,13 +68,11 @@ export function CapabilityBlock({ capability, index, deliverablesLabel }: Capabi
             {/* The scale settles on entry and stops there — it is the image arriving, not
                 an idle loop. Under reduced motion it renders at its final size. */}
             <div className="capability-media" data-settled={hasArrived}>
-              <Image
-                src={capability.media.src}
-                alt={capability.media.alt}
+              <Media
+                media={capability.media}
                 width={1200}
                 height={900}
                 sizes="(min-width: 1024px) 42vw, 100vw"
-                loading="lazy"
                 className="h-full w-full object-cover"
               />
             </div>
@@ -99,7 +98,11 @@ export function CapabilityBlock({ capability, index, deliverablesLabel }: Capabi
               {capability.expandedCopy}
             </p>
 
-            <DeliverableList label={deliverablesLabel} items={capability.deliverables} dark={isDark} />
+            <DeliverableList
+              label={deliverablesLabel}
+              items={capability.deliverables}
+              dark={isDark}
+            />
 
             <Link
               href={capability.cta.href}

@@ -23,7 +23,7 @@ interface ContactHeroProps {
  */
 export function ContactHero({ hero }: ContactHeroProps) {
   return (
-    <section className="bg-canvas text-ink" aria-label={hero.heading}>
+    <section className="bg-canvas text-ink" data-cms-section="hero" aria-label={hero.heading}>
       <Container>
         <div className="pt-40 pb-20 lg:pt-48 lg:pb-28">
           <p className="label flex items-center gap-3 text-accent">

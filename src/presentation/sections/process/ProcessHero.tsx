@@ -25,6 +25,7 @@ export function ProcessHero({ hero }: ProcessHeroProps) {
   return (
     <section
       className="surface-dark bg-ink text-canvas flex items-center"
+      data-cms-section="hero"
       aria-label={hero.heading}
       style={{ minHeight: "60svh" }}
     >

@@ -23,10 +23,16 @@ interface WordmarkProps {
  * flip surfaces mid-scroll and needed both files stacked so the flip never waited on a
  * request. The header is permanently ink now and takes the canvas file alone.
  *
- * EVERY caller is currently `dark`, so the canvas file is the only one being served — the
- * header, the footer and the contact card all sit on ink. The ink file is kept because the
- * prop still offers a light surface and both variants are cut from one master in the same
- * pass; dropping it would leave `dark={false}` pointing at nothing.
+ * BOTH FILES ARE SERVED, and the split is by surface rather than by page. The header, the
+ * footer, the contact card and the admin sidebar all sit on ink and pass `dark`, so they
+ * take the canvas file. The admin login is the one light surface on the site — it is
+ * `bg-canvas` — and takes the ink file by leaving the prop off.
+ *
+ * THERE IS NO THIRD FILE IN THIS FOLDER ANY MORE. Both of these are cut from the client's
+ * `Famysys - Studio - Logo .png` (navy on white, confirmed 10 September 2026 as the actual
+ * logo), which lives in the media library as public/media/237d99103b20ebcc.png with its
+ * media_assets row. The unreferenced 2561x773 master that used to sit here, six times the
+ * size of the two files that are served, is deleted. Re-cut from the library file.
  */
 export function Wordmark({ alt, dark = false, className = "", priority = false }: WordmarkProps) {
   return (

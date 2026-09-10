@@ -1,12 +1,16 @@
 import { DomainError } from "../../shared/errors/DomainError";
 
 /**
- * `failure` separates the two failures this error covers, because they need different
- * messages and reading them back off the message string is how that goes wrong. A
- * malformed address is the sender mistyping; a free-mail address is a valid address the
- * studio declines to take a brief at, and its message has to say what to do instead.
+ * `failure` separates the ways an address can be refused, because each needs its own
+ * message and reading them back off the message string is how that goes wrong. Personal
+ * providers are NOT among them — gmail.com and the rest are accepted, see `BusinessEmail`.
+ *
+ *   malformed    not the shape of an address: no @, no dot in the domain, a space
+ *   too-long     longer than the column it is stored in
+ *   likely-typo  well-formed, but at a misspelling of a common provider (gmai.com);
+ *                `suggestion` carries the corrected address to offer back
  */
-export type BusinessEmailFailure = "malformed" | "free-mail";
+export type BusinessEmailFailure = "malformed" | "too-long" | "likely-typo";
 
 export class InvalidBusinessEmailError extends DomainError {
   readonly code = "INVALID_BUSINESS_EMAIL";
@@ -14,6 +18,7 @@ export class InvalidBusinessEmailError extends DomainError {
   constructor(
     reason: string,
     readonly failure: BusinessEmailFailure = "malformed",
+    readonly suggestion: string | undefined = undefined,
   ) {
     super(`Invalid business email: ${reason}`);
   }

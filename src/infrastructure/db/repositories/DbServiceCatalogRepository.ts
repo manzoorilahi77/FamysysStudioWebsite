@@ -99,6 +99,8 @@ export class DbServiceCatalogRepository implements ServiceCatalogRepository {
       faq: {
         eyebrow: page.text(faqOwner, "eyebrow"),
         heading: page.text(faqOwner, "heading"),
+        // Which /faq group the pointer opens: structure, from the module, like the slugs.
+        group: shape.faq.group,
         block: { items: faq },
       },
       closingCta: closingCta(page, "creative-services:closing-cta"),

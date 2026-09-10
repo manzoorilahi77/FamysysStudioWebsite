@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Container } from "../../components/Container";
 import { Section } from "../../components/Section";
@@ -144,7 +144,7 @@ export function HowWeWorkFrames({ eyebrow, heading, revealLabel, steps }: HowWeW
     // now fall on the hero, the Differentiator, Selected Work and the closing CTA, spaced
     // by cream, and no two neighbouring sections share a ground. Nothing here names a
     // colour — every plate, numeral and sentence reads the surface it is on.
-    <Section ariaLabel={heading} className="imagery-section">
+    <Section cmsSection="how-we-work" ariaLabel={heading} className="imagery-section">
       <Container>
         <p className="imagery-eyebrow label">{eyebrow}</p>
         <h2 className="imagery-display mt-4">{heading}</h2>
@@ -157,15 +157,13 @@ export function HowWeWorkFrames({ eyebrow, heading, revealLabel, steps }: HowWeW
           return (
             <li className="frame-step" key={step.slug} data-frame data-open={isOpen}>
               <div className="frame-shot">
-                <Image
-                  src={step.media.src}
-                  alt={step.media.alt}
+                <Media
+                  media={step.media}
                   width={1920}
                   height={1200}
                   sizes="100vw"
-                  loading="lazy"
                   className="frame-image"
-                  data-frame-image
+                  dataAttribute="data-frame-image"
                 />
               </div>
               {/* Fully opaque, and only its opacity moves: this is what darkens a frame

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "./Media";
 import type { AspectRatio } from "../../domain/shared/value-objects/MediaRef";
 import { useInView } from "../hooks/useInView";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -64,13 +64,12 @@ export function WorkTile({ piece, statusLabel, isPriority, onOpen }: WorkTilePro
       data-slug={piece.slug}
     >
       <div className="media-tile">
-        <Image
-          src={piece.media.src}
-          alt={piece.media.alt}
+        <Media
+          media={piece.media}
           width={ratio.w}
           height={ratio.h}
           sizes="(min-width: 768px) 50vw, 100vw"
-          {...(isPriority ? { priority: true } : { loading: "lazy" as const })}
+          priority={isPriority}
           className={`media-tile-media h-full w-full object-cover ${
             prefersReducedMotion ? "" : "media-tile-media--scalable"
           }`}

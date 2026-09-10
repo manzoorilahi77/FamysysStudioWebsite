@@ -109,7 +109,7 @@ export function faqSection(
       {
         label: "Questions",
         description:
-          "The list as the page renders it. Entries reused from the shared set are edited on the homepage's FAQ section; entries written for this page are editable below.",
+          "The questions this page contributes to /faq, where all of them are printed. The page itself now renders a pointer to that page under the eyebrow and heading above. Entries reused from the shared set are edited on the homepage's FAQ section; entries written for this page are editable below.",
         lists: [
           readOnlyList(
             "All questions, in order",

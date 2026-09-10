@@ -36,7 +36,7 @@ interface BeliefStatementProps {
  */
 export function BeliefStatement({ belief }: BeliefStatementProps) {
   return (
-    <Section statement ariaLabel={belief.label}>
+    <Section cmsSection="belief" statement ariaLabel={belief.label}>
       <Container>
         <div className="belief-enter">
           <RevealHeading

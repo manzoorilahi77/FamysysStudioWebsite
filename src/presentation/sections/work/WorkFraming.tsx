@@ -34,7 +34,7 @@ const PARAGRAPH_DELAY_MS = 120;
  */
 export function WorkFraming({ framing }: WorkFramingProps) {
   return (
-    <Section ariaLabel={framing.heading}>
+    <Section cmsSection="framing" ariaLabel={framing.heading}>
       <Container>
         <div className="work-framing grid gap-8 lg:grid-cols-12 lg:gap-6">
           <div className="lg:col-span-5">

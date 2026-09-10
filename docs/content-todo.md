@@ -31,30 +31,15 @@
 > Either approve this wording or supply a replacement of about 110 characters.
 
 
-> ## Drafted, pending approval: the homepage FAQ heading
+> ## Drafted, pending approval: the FAQ page's heading (was the homepage FAQ's)
 >
-> The brief supplies seven questions and answers for the homepage and **no heading for the section
-> that holds them**, where every other section on the site opens with one.
->
-> This was held open with the literal string **`TODO(client)`**, rendered as the `<h2>` at display
-> size, on the theory that a conspicuous placeholder could not ship unnoticed. It reached review
-> looking like a bug, which is the answer to that theory: a placeholder loud enough to be caught is
-> also loud enough to be read as broken by anyone who sees the page before the client does.
->
-> The heading now reads **"The questions that come up first."** — drafted, and marked as drafted,
-> the same as the roughly two hundred other strings on this site that are pending approval.
->
-> It deliberately does NOT take the shape the two inner pages use — _"Questions about these
-> services."_ (`/creative-services`) and _"Questions about the process."_ (`/how-we-work`), both
-> also drafted. Those name their own page and work there, but three variations on "Questions about
-> X" across one site reads as a template rather than a voice, and the homepage is the one that has
-> to sound like somebody wrote it. All three still share the "Questions" eyebrow, which is what
-> keeps them a family.
->
-> **The client still owns this line.** It is the default in `src/presentation/sections/shared/Faq.tsx`
-> (`heading`); inner pages pass their own and never inherit it. Approve it, replace it, or drop it
-> — but it is no longer a blocker, because what is on the page is now a sentence rather than a
-> ticket number.
+> The brief supplies seven questions and answers and **no heading for the section that held
+> them**. The line **"The questions that come up first."** was drafted for the homepage's FAQ
+> section and recorded here as drafted; that section is gone — every question on the site is
+> on **`/faq`** now, grouped and open — and the line moved with the questions to be that page's
+> `<h1>`. It is in `src/infrastructure/content/static/faq.content.ts` (`hero.heading`), and it
+> still needs the same approval it always did. Approve it, replace it, or supply a heading of
+> your own. See "The questions page" below for everything else on that page that is drafted.
 
 > ## Enquiries are stored, and nobody is told
 >
@@ -95,26 +80,35 @@ Source URL for any id below: `https://unsplash.com/photos/<id>`.
 
 File: `src/infrastructure/content/static/marketing.content.ts` (`HERO_BANDS`)
 
-Five bands, one open at a time, each standing for one of the studio's disciplines. Every band
-carries a LABEL as well as a picture, and the label is copy — it is the only word on the band and
-it names a service, so it wants the client's own vocabulary rather than these placeholders. The
-numeral beside it is the band's position and is not editable. **Real production stills drop in
-one-for-one**: the accordion sizes every band itself (`object-fit: cover`), so a replacement needs
-no particular ratio. Rewrite the `alt` alongside the file.
+Six bands, one open at a time, each standing for one of the studio's services. Every band
+carries a LABEL as well as a picture. The labels are the manager's six (10 Sep 2026), one per
+band, in this order; the numeral beside each is the band's position and is not editable.
+**Real production stills drop in one-for-one**: the accordion sizes every band itself
+(`object-fit: cover`), so a replacement needs no particular ratio. Rewrite the `alt` alongside
+the file.
 
-| Slot                    | Label        | Shows                                               |
-| ----------------------- | ------------ | --------------------------------------------------- |
-| `hero-band-camera.jpg`  | Camera & rig | Camera rig filming a performer under coloured light |
-| `hero-band-colour.jpg`  | Colour       | Colourist's desk, a grade open across two displays  |
-| `hero-band-content.jpg` | Content      | Clapperboard held up at the start of a take         |
-| `hero-band-design.jpg`  | Design       | Designer's desk, creative-suite icons on a tablet   |
-| `hero-band-motion.jpg`  | Motion       | Motion graphic of a wave form in long light trails  |
+The six frames were picked against the hero's own ground — dark ink, the accent's teal, the
+glow's pink — so the strip reads as one palette. All are Unsplash, downloaded into
+`public/media/`, centre-cropped no wider than 4:5 and saved at 1200px wide.
 
-> **Provenance not recorded.** These five came from `docs/explorations/01-heroes/media-4/`, which the
-> approved hero design referenced, and that folder carries no source manifest — so unlike every
-> other stock image on this page there is no Unsplash id to cite. They are stand-ins either way and
-> are meant to be replaced, but if the site ships before the studio's own stills exist, the licence
-> for each of these five has to be established first.
+| Slot                            | Label               | Shows                                                    | Unsplash id   |
+| ------------------------------- | ------------------- | -------------------------------------------------------- | ------------- |
+| `hero-band-graphic-design.jpg`  | Graphic Design      | Hand drawing on a tablet with a stylus at a dark desk    | `WYwT7pXuXvo` |
+| `hero-band-video-editing.jpg`   | Video Editing       | Editing timeline on a dark screen, teal and pink clips   | `yk9VXp4W5-Q` |
+| `hero-band-reels.jpg`           | Reels & Shorts      | Phone held up recording vertical video in purple light   | `5NHG7XLmWoE` |
+| `hero-band-ai-content.jpg`      | AI Content Creation | Abstract rendered form in blue and violet light on black | `aAC5RQ25iqY` |
+| `hero-band-motion-graphics.jpg` | Motion Graphics     | Ribbon of pink and blue light trails through darkness    | `zxQRSnlWLZU` |
+| `hero-band-brand-visuals.jpg`   | Brand Visuals       | Glass perfume bottle on a reflective surface, blue/pink  | `zvqq7CG8BwY` |
+
+> **Label note.** "Reels & Shorts" is a deliverable of Video Production & Editing rather than a
+> service of its own, and Explainer & Training Videos has no band. The manager chose that trade
+> knowingly. The phone shows bands 2, 4 and 5 (`HERO_MOBILE_BANDS` in `Hero.tsx`), so the order
+> above is load-bearing: Video Editing, AI Content Creation and Motion Graphics are the three.
+
+The five previous band files — `hero-band-camera.jpg`, `hero-band-colour.jpg`,
+`hero-band-content.jpg`, `hero-band-design.jpg`, `hero-band-motion.jpg` — are no longer
+referenced by anything. They came from `docs/explorations/01-heroes/media-4/` with no source
+manifest, so their licence was never established; delete them once nobody wants them back.
 
 The eight `mosaic-0*.jpg` files remain in `public/media/` and are no longer referenced by anything:
 they belonged to the drifting three-column hero this accordion replaced. Delete them once nobody
@@ -397,15 +391,18 @@ reduced motion), and widen `MediaRef` handling in the hero accordion so a band c
 
 File: `public/brand/`, `src/app/icon.png`, `src/app/apple-icon.png`
 
-Generated from the client's `White Famy - Logo.png`, which superseded the earlier
-`Famystudio.png`. The source is a single-colour knockout lockup on transparency, so two pre-tinted
-variants are derived from it rather than a CSS filter: an ink one for light surfaces and a canvas
-one for dark. The favicon and apple icon are the square mark alone, canvas on ink.
+THE SOURCE IS `Famysys - Studio - Logo .png`, the client's file of 1 September 2026, confirmed
+on 10 September as the actual logo. It is held in the media library as
+`public/media/237d99103b20ebcc.png` (sha-named, the same rule the panel's uploads follow) with a
+`media_assets` row, so it survives a reseed. It supersedes `White Famy - Logo.png` and the earlier
+`Famystudio.png`; the unreferenced 2561x773 master that sat in `public/brand/` is deleted.
 
-The supplied file is pure white on a 9500x9500 canvas that is mostly empty — the artwork occupies
-a 6370x1990 box. Everything in `public/brand/` and both app icons are cropped to that box and
-re-tinted to the brand colours, so the off-palette `#0F2A4A` master noted here previously is no
-longer in play.
+The file is navy (`#0F2A4A`, off-palette) on an opaque white 9500x9500 canvas that is mostly
+empty — the artwork occupies a 6361x1920 box. The two served wordmarks are derived from it, not
+tinted by a CSS filter: the navy is lifted to an alpha mask, trimmed to that box, fitted into
+424x128, and filled with ink for light surfaces and canvas for dark. The favicon and apple icon
+are the square mark alone, canvas on ink; the mark is the same solid plate with the step knocked
+out, so they did not need re-cutting.
 
 **The mark changed shape, not just colour.** The previous artwork drew the square as an outline
 with a filled step inside it; this one draws it as a solid plate with the step knocked out of it.
@@ -1328,10 +1325,11 @@ content modules and therefore not up for review here. Regenerate with
 | Contact email                | `marketing.content.ts` (`footerContent.contactEmail`) | `hello@famysys.com` is **the parent's address**, taken from famysys.com's own contact page. The footer now sets it at display size in the lower band, so it is the most prominent single string on the page after the wordmark. Confirm the Studio's own address, or confirm it shares this mailbox.                                                                                                                                                                                                                                                                                                                                                                                      |     |
 | Postal address               | `marketing.content.ts` (`footerContent.addressLines`) | famysys.com's footer prints **10193 W Grand Parkway S., Ste. 103-229, Richmond, TX 77407, United States**. Whether the Studio operates from that address is not stated anywhere in the brief, and an address is the one piece of footer content a reader may act on physically — post, couriers, a visit. `addressLines` is `null` and **no address block renders**; the footer's lower band is the email alone until one is confirmed.                                                                                                                                                                                                                                                   |
 | Footer descriptor line       | `marketing.content.ts` (`footerContent.descriptor`)   | **"AI-Enabled Creative Production Partner"** — drafted, pending approval. It sits under the copyright, and it is the Studio's answer to the parent's "AI-Native Digital Engineering Partner". Built from the brief's own three terms (human creativity, AI, efficient production) and from "creative production partner", which is the client's phrase, but the arrangement is ours. **Visible on every page.**                                                                                                                                                                                                                                                                           |
-| Social handles               | `marketing.content.ts` (`footerContent.socialLinks`)  | The footer's CONNECT column now lists **LinkedIn, X and GitHub**, matching famysys.com's, but **none of the three links anywhere** — each renders as a name with no destination. The only accounts that exist belong to the parent company, and pointing the Studio's footer at them would send a reader to a different business. Supply the Studio's handles, or confirm the column should come out. **Visible on every page.**                                                                                                                                                                                                                                                          |     |
-| Legal pages                  | `marketing.content.ts` (`footerContent.legalLinks`)   | **BROKEN LINKS, ON PURPOSE, ON ALL SEVEN PAGES.** The rebuilt footer matches famysys.com's structure, which has a LEGAL column linking Terms & Conditions and Privacy Policy — so both links are now in place and both 404, because `/terms` and `/privacy` do not exist here. This reverses an earlier decision to carry no legal row at all rather than ship dead links, and it is the highest-cost item on this list after the contact form: a site whose forms ask for a name, a company and an email is linking a privacy policy that is not there. Supply the two documents (or say the column comes out) — `internalLinks.test.ts` holds the exemption open and names both routes. |     |
+| Social handles               | `marketing.content.ts` (`footerContent.socialLinks`)  | The CONNECT column lists **LinkedIn, Instagram and YouTube**. LinkedIn links to the company page the client supplied (`linkedin.com/company/famysys`) and opens in a new tab. **Instagram and YouTube have no account yet**: each opens a small "coming soon" dialog naming the network — never a dead link. The dialog's three strings (`footerContent.socialPending`) are drafted, pending approval. Supply a handle and that network becomes a link. **Visible on every page.** |     |
+| **Capability deck**          | `marketing.content.ts` (`footerContent.capabilityDeck`) | famysys.com's footer carries a **Corporate Capability Deck** under its identity block. The Studio's footer now carries the same thing in the same position, as a plain link rather than the parent's bordered button (client direction, 10 September 2026: "not this design just a link is enough"). **There is no file yet and no URL** — the client has said it will follow — so `href` is null and the label opens an "In preparation" dialog saying the deck is being put together, the same arrangement Instagram and YouTube use. Two things are needed: **the URL**, and **the name** — the parent's is "Corporate Capability Deck"; this is labelled "Capability Deck" because "Corporate" is the parent's word for a parent-company document. The dialog's three strings are drafted, pending approval. **Visible on every page.** |     |
+| Legal pages                  | `terms.content.ts`, `privacy.content.ts`               | **Both pages exist now** at `/terms` and `/privacy`, drafted against famysys.com's own and **marked for legal review clause by clause** — see "Legal pages — every clause flagged for review" below. Each prints "Draft — pending legal review." under its date until `reviewStatus` is set to null. Neither is editable in the panel, deliberately. |     |
 | Tier field labels duplicated | `WaysToWork.tsx` (homepage)                           | "Ideal for" and "Typical work includes" are now exported from `marketing.content.ts` as `TIER_FIELD_LABELS`, and `/ways-to-work-with-us` reads them from there. The homepage section still carries them as component literals: `presentation/` may not import `infrastructure/` under the boundary rules, so removing that duplication means threading them through as props from `app/page.tsx`. A homepage change, deliberately not made while building an inner page.                                                                                                                                                                                                                  |
-| Two forms, two field sets    | `DemoForm.tsx` and `ContactForm.tsx`                  | The closing form on every page asks four questions (full name, work email, company, company size); `/contact` asks eight, matching famysys.com's own contact form. Both were drafted, neither is in the brief. Confirm both, or decide the short form should ask the same eight.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Two forms, one field set     | `DemoForm.tsx` and `ContactForm.tsx`                  | Both forms now ask the same five questions (full name, work email, company, company size, what you are trying to create) and require only the email. The earlier split — four fields on the closing form, eight on `/contact` — is gone. |     |
 | Company-size bands           | `CompanySize.ts`                                      | Now the four famysys.com uses — **1–50 · 50–200 · 200–1,000 · 1,000+**. They REPLACED a five-band set (1-10 / 11-50 / 51-200 / 201-500 / 500+) that the previous build invented, so the closing form's dropdown changed too. Two overlapping vocabularies would have made the answers un-comparable between the two forms, and neither set was ever confirmed. Confirm the four.                                                                                                                                                                                                                                                                                                          |
 | "Your role" options          | `ContactRole.ts`                                      | **Founder / Owner · Marketing Lead · Brand or Creative Lead · Content or Social Lead · Agency or Partner · Other.** NOT the parent's list, which is CEO / COO / CFO / CIO-CTO / VP / Other and is shaped for an enterprise IT buyer approving an engineering engagement. The Studio sells creative production to marketing and brand owners, often at companies with no C-suite to route through; reusing the parent's would have pushed most real senders into "Other". This is a read of who the Studio expects to hear from, and needs confirming.                                                                                                                                     |
 | Demo form reply commitment   | `DemoForm.tsx` (success message)                      | "Someone from Famysys Studio will reply **within one business day**" is an operational promise, not placeholder copy. Confirm the studio can hold that turnaround, or loosen the wording.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -1381,26 +1379,20 @@ presentation components are outside the content modules altogether. Regenerate w
 
 <!-- /generated -->
 
-## Routes — all seven content pages now exist
+## Routes — every public page now exists
 
 `/` · `/creative-services` · `/how-we-work` · `/ways-to-work-with-us` · `/selected-work` ·
-`/about` · `/contact`
+`/about` · `/contact` · `/faq` · `/terms` · `/privacy` · `/legal`
 
-**Every navigation destination on the site now resolves.** `/contact` was the last one, and
-it was the destination of nearly every call to action: the header's "Contact" and "Start a
-Conversation" buttons, the primary CTA in four of the five section-page heroes, the What We
-Do CTA, all four "Talk to us" links in Ways to Work With Us, all six "Talk to us about
-this" links on Creative Services, the FAQ's pricing answer, and every closing CTA.
+**Every internal destination on the site resolves.** `/contact` was the last of the seven
+content pages, and it was the destination of nearly every call to action. `/faq`, `/terms` and
+`/privacy` closed the footer's three dead links; `/legal` is the index the two legal documents'
+closing lines point at, as on the parent site.
 
 `internalLinks.test.ts` reads the routes off disk and checks every internal href in every
 content module against them, so the next dead link fails the test suite rather than waiting
-to be clicked. The browser pass re-checks the same thing against the running build: 468
-links across the seven pages, every internal target resolving 200.
-
-`/privacy` and `/terms` still do not exist, and as of the footer rebuild they **are linked
-again** from every page — see the legal-pages row above. They are the only two internal
-links on the site that do not resolve, and `internalLinks.test.ts` names both in a
-`PENDING_ROUTES` exemption so the gap is stated rather than silent.
+to be clicked. Its `PENDING_ROUTES` exemption is empty. `siteRoutes.test.ts` holds `SITE_ROUTES`
+— the sitemap's source — to the same on-disk list.
 
 ## Deliberately absent
 
@@ -1408,3 +1400,146 @@ links on the site that do not resolve, and `internalLinks.test.ts` names both in
   scoped around the actual requirement." A test in
   `StaticMarketingContentRepository.test.ts` fails the build if a price-shaped string appears in the
   Ways to Work content, and the rendered page is checked for the same.
+
+## The questions page (`/faq`)
+
+Every FAQ on the site, on one page, grouped, with the answers open — at the client's direction
+that the accordion was unhelpful and looked generic.
+
+### Where the questions were found, and how many
+
+Nineteen placements across four pages, **twelve unique questions**. None was visible before this
+page: the accordion section was switched off site-wide (`FAQ_ENABLED = false`) at the client's
+request.
+
+| Where                              | Placements | Of which own | Reused from the homepage |
+| ---------------------------------- | ---------: | -----------: | ------------------------ |
+| Homepage (`marketing.content.ts`)  |          7 |            7 | —                        |
+| `/creative-services`               |          4 |            1 | 3                        |
+| `/how-we-work`                     |          4 |            2 | 2                        |
+| `/ways-to-work-with-us`            |          4 |            2 | 2                        |
+
+The seven homepage questions are the client's own, verbatim from the brief. The five written for
+the inner pages are drafted and were already listed as such under each page above. **Nothing was
+lost**: `GetFaqPage` gathers the four blocks at render time, resolves them into the groups
+declared in `faq.content.ts`, and refuses to render if any question is missing from the grouping,
+named by no group, or named by two — and a test runs that against the real content
+(`GetFaqPage.test.ts`, asserting twelve).
+
+### The grouping, and why
+
+Derived from the twelve questions rather than chosen first. Read together they fall into four
+kinds, and the four are in the order a buyer meets them:
+
+| Group                        | Questions                                                                                                                                                                     |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Working with us**          | Do you work with small businesses? · Can you do a sample before we commit?                                                                                                     |
+| **Services and capability**  | Do you only create AI-generated content? · Can I give you my own raw video footage? · Can you create content from our existing documents or presentations? · Can you work across more than one service at a time? |
+| **Process and delivery**     | How long does a project usually take? · Who do we deal with day to day?                                                                                                        |
+| **Pricing and engagement**   | How much do your services cost? · Do you offer ongoing monthly support? · Can we move between these as we grow? · What if none of the three named tiers fits?                   |
+
+Two groups hold two questions and two hold four; that is uneven and left that way — a group
+padded to match its neighbours would hold a question that belongs somewhere else. "Can you do a
+sample before we commit?" sits under _Working with us_ rather than _Pricing_ because it is asked
+before a commitment exists, not about the price of one.
+
+### What the inner pages do instead
+
+Each of the three inner pages renders a **pointer** where its FAQ section stood — the same eyebrow
+and heading it had ("Questions about these services." etc., all drafted and listed above), with
+the heading itself the link, landing on that page's own group. The homepage carries no pointer:
+its FAQ was already switched off, and the footer on every page links `/faq`.
+
+### Every drafted string on the page
+
+| Where                                    | Drafted string                                                                                                                                  |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| hero › heading                           | The questions that come up first. _(moved from the homepage FAQ — see the note at the top of this file)_                                       |
+| hero › body                              | Everything asked across the site, in one place, with the answers open. If yours is not here, the contact page is the fastest way to ask it.  |
+| indexLabel                               | On this page                                                                                                                                    |
+| groups › Working with us › description    | Whether the studio is for you, and how a first piece of work starts.                                                                            |
+| groups › Services and capability › description | What the studio makes, what it can make it from, and how much of it at once.                                                              |
+| groups › Process and delivery › description | How long the work takes and who you deal with while it is happening.                                                                        |
+| groups › Pricing and engagement › description | What it costs, how the engagement is shaped, and how it changes as you grow.                                                              |
+
+The four group **titles** are also drafted. The closing call to action is the client's own,
+reused from the homepage.
+
+## Legal pages — every clause flagged for review (`/terms`, `/privacy`, `/legal`)
+
+Both documents are drafted against famysys.com's own (`/legal/terms-and-conditions/` and
+`/legal/privacy-policy/`), keeping their **structure exactly** — twelve and fourteen numbered
+sections, in the parent's order, under its headings — and **not** their words wherever the words
+describe the parent rather than the Studio.
+
+**The pages are the parent's pages, measured and reproduced** (client direction, 10 September
+2026: "the ui design and animations should be 100% same, it will be like opening same page across
+both websites"). The head (eyebrow, title, lead, the Effective / Published / Questions / Write to
+us row), the sticky numbered index, the section anatomy, the bullets and the closing "All legal
+documents" line are element-for-element the parent's, at its measurements and type steps, in this
+site's tokens for the same colour roles. The parent's legal pages carry no entrance or scroll
+animation — only 300ms colour transitions and the closing rule's hover — and neither do these.
+Section anchors are the parent's slugs (`/terms#liability` resolves on both sites). `/legal` was
+added because the closing line needs somewhere to go; it is the parent's `/legal/` index. Two
+things differ by necessity: the palette is the Studio's (ink, graphite, accent are the same roles
+in this site's colours), and a fifth fact, **Status**, prints the review line below.
+
+The one-sentence lead under each title and the index page's title and lead are drafted:
+
+| Where              | String                                                                                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/terms` lead      | "The terms on which this website is published: what it is, how it may be used, how an enquiry is treated, and where the work itself is governed."                      |
+| `/privacy` lead    | "What this website collects when you send an enquiry, what it does not, who can see it, how long it is kept, and what you can ask us to do with it."                   |
+| `/legal` title     | "The terms we publish, in full." — the parent's, kept.                                                                                                                  |
+| `/legal` lead      | "What governs your use of this site, and what happens to anything you send us through it. Each document states the day its wording takes effect." — the parent's, kept. |
+| Published date     | `LEGAL_PUBLISHED_DATE` in `legalShared.ts`, the same day as the effective date, as on the parent. Set both at approval.                                                  | Every clause below is marked
+`TODO(client): legal review required` in the content file beside the string it refers to. Until
+they are resolved, each page prints **"Draft — pending legal review."** under its effective date
+(`reviewStatus` in `legalShared.ts`; set to null to remove).
+
+Neither document is editable in the admin panel, deliberately: a privacy clause is a statement
+of fact about what the system does and a terms clause is a commitment, and neither should be
+rewordable in a text box without the review these are waiting for.
+
+### Both documents
+
+| Flag                    | Where                          | What has to be decided                                                                                                                                                                                                                            |
+| ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Legal entity**        | `legalShared.ts` › `legalContact.name`; every clause that says "we" | "Famysys Studio" is the trading name the site uses. Whether the Studio is its own legal entity or an arm of FAMYSYS, and which name a legal notice should be addressed to, is not stated anywhere in the brief. |
+| **Address**             | `legalShared.ts` › `legalContact.addressLines` | Read from the footer. The footer's own note records that its ZIP (77447) differs from the one famysys.com prints for the same street (77407). A legal notice to the wrong ZIP is a notice not received.                      |
+| **Effective date**      | `legalShared.ts` › `LEGAL_EFFECTIVE_DATE` | "10 September 2026" — the day the drafts were written. Set the real date when the documents are approved and published.                                                                                                     |
+
+### Terms & Conditions
+
+| §  | Flag                               | What has to be decided                                                                                                                                                                                                                                       |
+| -- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 01 | Legal entity                       | "published by Famysys Studio" — see above.                                                                                                                                                                                                                 |
+| 02 | Specific service                   | The parent says its case studies "describe work already delivered". The Studio's Selected Work shows eight **planned** pieces with stock frames marked as placeholders. The clause is rewritten to be true of that; it needs rewriting again when the pieces exist. |
+| 05 | Specific service / contract form   | The parent names "a master agreement with a statement of work". The Studio's own pages describe a written scope and a quotation. The clause says what the site says; confirm what the actual contract is.                                                  |
+| 09 | Jurisdiction                       | What liability can be limited is a matter of the applicable law, which is the open question in §11.                                                                                                                                                         |
+| 11 | **Jurisdiction**                   | "the jurisdiction in which Famysys Studio is established" — the parent's deferral, kept. Nothing says where the Studio is established (the address is Texas; the parent works across the US and India). The single most consequential line in the document. |
+| 12 | Legal entity, address              | The contact block — see above.                                                                                                                                                                                                                               |
+
+### Privacy Policy
+
+Every clause was checked against the code before it was written. Three of the parent's claims
+are **not true of this site** and were not inherited: an IP address and user-agent stored with
+each enquiry (the `inquiries` table has no such columns, by design — migration 006); a 24-month
+retention period with redaction (no job deletes or redacts anything); and named staff accounts
+with a per-person audit trail (the panel has one shared password). A test asserts the policy does
+not say any of the three.
+
+| §  | Flag                               | What has to be decided                                                                                                                                                                                                                                       |
+| -- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 01 | **Data controller**                | "Famysys Studio is responsible for the personal data" — the controller is the entity legally responsible, and it is the same open question as the entity in the Terms.                                                                                    |
+| 02 | Specific service                   | Promises that any client engagement carries data-protection terms and a client privacy notice. Confirm the engagement contract actually contains them.                                                                                                       |
+| 04 | Specific service / hosting provider | The server keeps request logs "according to [the host's] practice". What those logs hold and how long the host keeps them is the provider's practice; confirm it with the provider named in §08.                                                          |
+| 05 | Jurisdiction                       | "Legitimate interest" is a lawful basis under some regimes and a term of art under others. Which law applies decides whether this clause is the right shape.                                                                                               |
+| 07 | **Retention period**               | The parent promises 24 months and redaction; this site has no such job, so the clause says enquiries are kept "until we clear them" and that there is no fixed period. If a period is decided, the job has to be written **before** the sentence is changed. |
+| 08 | Specific service                   | The parent lists an email service, because it forwards enquiries by email. **This site sends no email.** The list names staff, the hosting provider and legally-required disclosure only. Name the hosting provider once confirmed; add the mail service if forwarding is built. |
+| 09 | **Jurisdiction / where handled**   | "We work across the United States and India" — the parent's sentence, kept as the nearest true thing and marked because it is a claim about where the **Studio's** people and servers are. If either is elsewhere, this is the clause that is wrong.       |
+| 10 | Response period                    | "We will respond within 30 days" — a commitment the studio has to keep, and one the applicable law may set differently.                                                                                                                                    |
+| 11 | Specific service                   | "Traffic to this site is encrypted in transit" assumes the production host serves HTTPS. Confirm the certificate is in place on the live host.                                                                                                             |
+| 11 | Jurisdiction                       | Which breaches must be notified, to whom and how fast is set by the applicable law.                                                                                                                                                                          |
+| 14 | Legal entity, address              | The contact block — see above.                                                                                                                                                                                                                               |
+

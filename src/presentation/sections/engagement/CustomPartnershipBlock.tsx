@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import Link from "next/link";
 import { motion } from "../../../shared/design/tokens";
 import { Container } from "../../components/Container";
@@ -52,7 +52,14 @@ export function CustomPartnershipBlock({ custom }: CustomPartnershipBlockProps) 
   });
 
   return (
-    <Section id={custom.slug} dark fade={false} ariaLabel={custom.name} className="tier-anchor">
+    <Section
+      cmsSection="custom-partnership"
+      id={custom.slug}
+      dark
+      fade={false}
+      ariaLabel={custom.name}
+      className="tier-anchor"
+    >
       <Container>
         <div
           ref={ref}
@@ -61,13 +68,11 @@ export function CustomPartnershipBlock({ custom }: CustomPartnershipBlockProps) 
         >
           <div style={enterStyle(0)}>
             <div className="custom-media" data-settled={hasArrived}>
-              <Image
-                src={custom.media.src}
-                alt={custom.media.alt}
+              <Media
+                media={custom.media}
                 width={2400}
                 height={1350}
                 sizes="(min-width: 1024px) 70vw, 100vw"
-                loading="lazy"
                 className="h-full w-full object-cover"
               />
             </div>

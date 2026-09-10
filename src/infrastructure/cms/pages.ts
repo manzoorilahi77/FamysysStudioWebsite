@@ -32,13 +32,20 @@ import {
 } from "./sections/studioPageSections";
 
 /**
- * THE SEVEN PAGES ARE FIXED.
+ * THE SEVEN PAGES THE PANEL EDITS ARE FIXED.
  *
  * `src/app` decides which routes the site has, so this list is the site contract rather
  * than data: the admin panel cannot add a page or remove one, and says so on every page
  * screen. What is editable is the sections inside them — and which sections those are, and
  * in what order, is read out of each route file rather than declared here. See
  * composition.ts.
+ *
+ * FOUR ROUTES ARE PUBLIC AND NOT HERE, on purpose. /terms and /privacy are legal
+ * documents whose every clause is a fact or a commitment, and they change with a reviewer
+ * rather than in a text box, and /legal is the index that lists them; /faq is a frame over questions that ARE edited here, under
+ * the four owners that hold them (the homepage's shared block and the three inner pages'
+ * own entries), so giving it a screen of its own would be a second door to the same
+ * rows. All four still render the footer, which is why they are in `ALL_ROUTES` below.
  */
 
 export interface PageSources {
@@ -167,7 +174,13 @@ export function buildPages(sources: PageSources): ReadonlyArray<CmsPage> {
   });
 }
 
-/** The seven public routes, in site order. Used for a whole-site regeneration. */
+/**
+ * EVERY public route, in site order. Used for a whole-site regeneration, which is what a
+ * footer publish triggers — and the footer is on all ten pages, not only the seven the
+ * panel edits. /faq, /terms and /privacy have no panel screen (see the note on `buildPages`
+ * and the container), but they render the footer, so a footer publish that skipped them
+ * would leave the old footer standing on four pages.
+ */
 export const ALL_ROUTES: ReadonlyArray<string> = [
   "/",
   "/creative-services",
@@ -176,4 +189,8 @@ export const ALL_ROUTES: ReadonlyArray<string> = [
   "/selected-work",
   "/about",
   "/contact",
+  "/faq",
+  "/terms",
+  "/privacy",
+  "/legal",
 ];

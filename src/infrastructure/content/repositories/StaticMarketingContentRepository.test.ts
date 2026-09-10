@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { StaticMarketingContentRepository } from "./StaticMarketingContentRepository";
 
 describe("StaticMarketingContentRepository", () => {
-  it("returns hero content with two CTAs and five labelled accordion bands", async () => {
+  it("returns hero content with two CTAs and six labelled accordion bands", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const hero = await repository.getHero();
@@ -12,14 +12,16 @@ describe("StaticMarketingContentRepository", () => {
     expect(hero.supportingLine.length).toBeGreaterThan(0);
     expect(hero.primaryCta.label.value).toBe("Start a Conversation");
     expect(hero.secondaryCta.label.value).toBe("Explore Our Services");
-    // Five slots so real stills drop in one-for-one — see docs/content-todo.md.
-    expect(hero.bands).toHaveLength(5);
+    // Six slots, one per band, so real stills drop in one-for-one — see docs/content-todo.md.
+    // The labels are the manager's six, in the order Hero.tsx's phone subset depends on.
+    expect(hero.bands).toHaveLength(6);
     expect(hero.bands.map((band) => band.label)).toEqual([
-      "Camera & rig",
-      "Colour",
-      "Motion",
-      "Design",
-      "Content",
+      "Graphic Design",
+      "Video Editing",
+      "Reels & Shorts",
+      "AI Content Creation",
+      "Motion Graphics",
+      "Brand Visuals",
     ]);
   });
 
@@ -175,7 +177,7 @@ describe("StaticMarketingContentRepository", () => {
    * exactly the two routes the pending-route exemption in internalLinks.test.ts names. A
    * third dead link, or a different route, is a mistake rather than the decision.
    */
-  it("links the two legal pages the documents have not been written for yet", async () => {
+  it("links the three legal pages the documents have not been written for yet", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const footer = await repository.getFooterContent();
@@ -183,21 +185,51 @@ describe("StaticMarketingContentRepository", () => {
     expect(footer.legalLinks.map((link) => link.label.toString())).toEqual([
       "Terms & Conditions",
       "Privacy Policy",
+      "FAQ",
     ]);
-    expect(footer.legalLinks.map((link) => link.href.value)).toEqual(["/terms", "/privacy"]);
+    expect(footer.legalLinks.map((link) => link.href.value)).toEqual([
+      "/terms",
+      "/privacy",
+      "/faq",
+    ]);
     expect(footer.contactEmail.length).toBeGreaterThan(0);
   });
 
   /**
-   * The address is the one footer field where a wrong value is a factual claim about
-   * where a business is, so its absence is asserted rather than left to a reading of the
-   * content file. Null means the footer prints no address block at all.
+   * THE CAPABILITY DECK IS NAMED BEFORE THE DECK EXISTS, which is only safe while pressing
+   * it does something honest. `href` is null and the dialog copy is present: that pair is
+   * what makes the label a button that says the deck is being prepared rather than a link
+   * to nothing. The day a URL arrives this test fails, which is the reminder that the
+   * dialog copy has stopped being reachable and the label is now a download.
    */
-  it("prints no postal address until one is confirmed for the Studio", async () => {
+  it("names the capability deck with no file behind it yet, and copy for the dialog that stands in", async () => {
+    const repository = new StaticMarketingContentRepository();
+
+    const { capabilityDeck } = await repository.getFooterContent();
+
+    expect(capabilityDeck.label.length).toBeGreaterThan(0);
+    expect(capabilityDeck.href).toBeNull();
+    expect(capabilityDeck.pending.eyebrow.length).toBeGreaterThan(0);
+    expect(capabilityDeck.pending.body.length).toBeGreaterThan(0);
+    expect(capabilityDeck.pending.closeLabel.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * The address is the one footer field where a wrong value is a factual claim about
+   * where a business is, and it now prints on all seven pages. It used to be null and
+   * this test asserted the absence; it asserts the exact lines instead, so a stray edit
+   * to the street, the suite or the ZIP fails here rather than shipping a wrong address
+   * site-wide.
+   */
+  it("prints the supplied postal address, line for line", async () => {
     const repository = new StaticMarketingContentRepository();
 
     const footer = await repository.getFooterContent();
 
-    expect(footer.addressLines).toBeNull();
+    expect(footer.addressLines).toEqual([
+      "10193 W Grand Parkway S.",
+      "Ste. 103-229, Richmond,",
+      "Texas 77447 United States",
+    ]);
   });
 });

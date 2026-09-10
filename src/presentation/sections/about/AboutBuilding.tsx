@@ -46,7 +46,7 @@ export function AboutBuilding({ building }: AboutBuildingProps) {
   });
 
   return (
-    <Section dark fade={false} ariaLabel={building.heading}>
+    <Section cmsSection="building" dark fade={false} ariaLabel={building.heading}>
       <Container>
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-6">
           <div className="lg:col-span-4 lg:sticky lg:top-32 lg:self-start">

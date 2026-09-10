@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "../../components/Media";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { Container } from "../../components/Container";
@@ -188,7 +188,7 @@ export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
     // Dark, on the alternate green. The rail's cards stay light objects on it — a cream
     // card on the dark ground separates further than it did on the warm one, and the card
     // pins its own ink text rather than inheriting the section's cream.
-    <Section dark ground="alt" fade={false} ariaLabel={whyFamysys.heading}>
+    <Section cmsSection="why-famysys" dark ground="alt" fade={false} ariaLabel={whyFamysys.heading}>
       <div
         ref={trackRef}
         className="rail-track"
@@ -209,20 +209,18 @@ export function WhyFamysys({ whyFamysys }: WhyFamysysProps) {
           </Container>
 
           <ul className="rail" ref={railRef}>
-            {whyFamysys.reasons.map((reason, index) => (
+            {whyFamysys.reasons.map((reason) => (
               <li key={reason.title} className="rail-card" data-card>
                 <div className="rail-window">
-                  <Image
-                    src={reason.media.src}
-                    alt={reason.media.alt}
+                  <Media
+                    media={reason.media}
                     width={1200}
                     height={1500}
                     // Below 901 the rail is the base grid — one column at a phone's width, so the
                     // card fills the container line rather than the 78vw a travelling row gave it.
                     sizes="(min-width: 901px) 26rem, 90vw"
-                    {...(index === 0 ? {} : { loading: "lazy" as const })}
                     className="rail-image"
-                    data-card-image
+                    dataAttribute="data-card-image"
                   />
                 </div>
                 {/* Opaque, and under the picture rather than over it. */}

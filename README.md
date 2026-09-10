@@ -439,7 +439,7 @@ The seventh and last page, and **the only one whose reference is famysys.com's o
 rather than the design language the other six share. The client asked for it, and that page
 already solves this problem.
 
-> ### Submissions are kept. Nobody is notified yet.
+> ### Submissions are kept, then emailed.
 >
 > Both forms — the closing "Start a Conversation" form on every page and the eight-field form
 > here — POST to `/api/demo-request`, which validates through `SubmitDemoRequest` and writes a
@@ -450,10 +450,12 @@ already solves this problem.
 > discarded it — and worse, the route lived in a private `_api` folder that a static export
 > never emitted, so in production the form POSTed to a URL that did not exist.
 >
-> **What is still missing is notification.** Nothing emails anyone when an enquiry arrives, so
-> somebody has to open the panel to find it. `inquiries` carries `forwarded_at` and
-> `forward_error` for the forwarder that will stamp them: the row lands first and mail happens
-> after, so an outage can never cost a lead. It remains an item in `docs/content-todo.md`.
+> **Notification goes through Microsoft Graph.** Once the row is stored and the form has its
+> `201`, the route schedules two emails with `after()`: a notification to the studio with
+> Reply-To set to the sender, and an acknowledgement to the sender. The row lands first and
+> mail happens after, so an outage can never cost a lead; `notified_at` and `ack_sent_at`
+> record what Graph accepted. Off by default (`MAIL_ENABLED=false`) — see "Outbound mail" in
+> `docs/deployment.md`, and `npm run mail:check`.
 
 **Two sections**, where the other inner pages have six to ten. Someone arriving here has already
 decided to get in touch; making them read four more blocks before reaching the form would be
@@ -522,7 +524,8 @@ Two passes over the same value objects, and they agree on wording where they ove
 | Case | Message |
 |---|---|
 | Empty required field | `Required` |
-| Malformed email | `That does not look like an email address` — the address is not repeated back |
+| Malformed email | `Enter a valid email address, like name@company.com` — the address is not repeated back |
+| Likely typo (`shaf@gmai.com`) | `Check the address — did you mean shaf@gmail.com?` |
 | Free-mail address | `BusinessEmail`'s own actionable message, naming the domain |
 | Malformed website | `That does not look like a website address`. Empty passes; the field is optional |
 
@@ -862,7 +865,8 @@ placeholder"; don't go hunting for `TODO(client)` comments in the content files 
 
 - **The contact form, checked as behaviour rather than markup.** Submit empty and confirm an
   inline error under every required field and none under the optional one; submit a malformed
-  email, a free-mail address and a malformed website and confirm each gets its own message;
+  email and a malformed website and confirm each gets its own message, and confirm a personal
+  address such as gmail.com is accepted;
   confirm focus lands on the first invalid field *in page order*; confirm the summary announces
   the count; confirm the error sits the same distance under all eight fields; confirm a
   half-typed email is NOT errored on blur before the first submit, and that an errored field

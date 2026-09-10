@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Media } from "./Media";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WorkDetailLabels } from "../../domain/portfolio/entities/SelectedWorkPage";
@@ -122,6 +122,7 @@ export function WorkDetailDialog({
     <dialog
       ref={dialogRef}
       className="work-dialog"
+      data-cms-section="piece-detail"
       data-visible={isVisible}
       aria-labelledby="work-dialog-title"
       style={{ ["--work-dialog-ms" as string]: `${transitionMs}ms` }}
@@ -150,9 +151,8 @@ export function WorkDetailDialog({
               plain copy that the frame inside it is stock. */}
           <figure className="work-dialog-figure">
             <div className="work-dialog-media">
-              <Image
-                src={piece.media.src}
-                alt={piece.media.alt}
+              <Media
+                media={piece.media}
                 width={1600}
                 height={900}
                 sizes="(min-width: 1024px) 52rem, 100vw"

@@ -69,14 +69,12 @@ export function homeSections(
         {
           label: "Supporting line",
           description: "The line under the buttons.",
-          values: [
-            field("Supporting line", homepage.hero.supportingLine, hero("supportingLine")),
-          ],
+          values: [field("Supporting line", homepage.hero.supportingLine, hero("supportingLine"))],
         },
         {
           label: "Accordion bands",
           description:
-            "The five bands beside the type. Their file names are not copy, and the numeral beside each label is the band's position, so neither is editable.",
+            "The six bands beside the type. Their file names are not copy, and the numeral beside each label is the band's position, so neither is editable.",
           lists: [
             list(
               "Band labels",
@@ -180,7 +178,9 @@ export function homeSections(
             readOnlyList(
               "Steps",
               homepage.process.steps.map((step) => step.title),
-              `${READ_ONLY.spread} The stages are edited on the How We Work page, which renders them in full.`,
+              `${READ_ONLY.spread} The stages are edited on the How We Work page, which renders them in full — and so are the PHOTOGRAPHS this section shows beside them, which is why there is no image field on this screen.`,
+              "/admin/pages/how-we-work/process-steps",
+              "Edited on the How We Work page, with its photograph.",
             ),
           ],
         },
@@ -208,7 +208,9 @@ export function homeSections(
                 ...homepage.waysToWork.tiers.map((tier) => tier.name),
                 homepage.waysToWork.custom.name,
               ],
-              `${READ_ONLY.spread} The engagements are edited on the Ways to Work With Us page, which renders them in full.`,
+              `${READ_ONLY.spread} The engagements are edited on the Ways to Work With Us page, which renders them in full — and so are the PHOTOGRAPHS on these tiles, which is why there is no image field on this screen.`,
+              "/admin/pages/ways-to-work-with-us/engagement-tiers",
+              "Edited on the Ways to Work With Us page, with its photograph.",
             ),
           ],
         },
@@ -288,7 +290,7 @@ export function homeSections(
           label: "Questions",
           collectionId: "faq",
           description:
-            "The homepage asks all of them. Creative Services, How We Work and Ways to Work each reuse the ones that fit, so an answer edited here is edited on every page that asks the question.",
+            "The shared questions. Every one is printed on /faq, grouped and open; Creative Services, How We Work and Ways to Work each add a question or two of their own there and point at the page from where their FAQ sections stood. An answer edited here is the answer /faq prints.",
           records: cards.faq,
         },
       ],
@@ -329,28 +331,34 @@ export function homeSections(
           ],
         },
         {
-          label: "Not printed yet",
-          description: "Four things the footer has room for and no approved content for.",
+          label: "Fixed for now",
+          description:
+            "What the footer prints or lists that is not editable here — each for a reason worth reading before asking for it to change.",
           values: [
             readOnly(
               "Postal address",
               homepage.footer.addressLines?.join(", ") ?? "Not shown",
-              "No address is printed. The parent company's Richmond, TX address is on famysys.com; whether the Studio operates from it has not been confirmed, and an address is something a reader may act on physically. Confirm the address and it goes in — as a structural change, not an edit.",
-            ),
-            readOnly(
-              "Descriptor line",
-              homepage.footer.descriptor,
-              "Drafted, pending approval. The line under the copyright — the Studio's equivalent of the parent's 'AI-Native Digital Engineering Partner'. It becomes editable here once the client has approved a wording.",
+              "Printed under the wordmark on all seven pages, as supplied. It is read-only here because an address is the one piece of footer content a reader may act on physically — post, couriers, a visit — so a typo is a wrong claim about where the business is rather than a wording change. One open question: famysys.com prints this address with ZIP 77407 and the wording supplied for the Studio reads 77447. Confirm which is right.",
             ),
             readOnly(
               "Legal links",
               String(homepage.footer.legalLinks.length),
-              "Terms & Conditions and Privacy Policy, matching the parent's footer. Both currently 404: neither /terms nor /privacy exists on this site yet. The links are in place so they work the moment the documents are published — until then this is a known, tracked gap in docs/content-todo.md.",
+              "Terms & Conditions, Privacy Policy and FAQ, and all three are pages now. The two legal documents are drafted against famysys.com's own and marked for legal review — they are not editable here, deliberately; see docs/content-todo.md. FAQ gathers every question on the site, whose answers ARE edited here, under the FAQ section above and the three inner pages' own.",
             ),
             readOnly(
               "Social links",
               String(homepage.footer.socialLinks.length),
-              "LinkedIn, X and GitHub are listed but link nowhere: the brief supplies no Studio handles, and the only accounts that exist belong to the parent company. Supply the Studio's handles and each name gets its destination.",
+              "LinkedIn opens the company page in a new tab. Instagram and YouTube have no account yet, so each opens a small 'coming soon' dialog naming the network instead of going nowhere. Supply a handle and that network becomes a link — a structural change, not an edit.",
+            ),
+            readOnly(
+              "Capability deck",
+              homepage.footer.capabilityDeck.label,
+              "Printed beside the email on every page, on the footer's last line with the copyright. There is no file yet, so pressing it opens a dialog saying the deck is being prepared rather than downloading nothing. Supplying the URL makes it a link that opens in a new tab — a structural change, not an edit.",
+            ),
+            readOnly(
+              "Coming-soon dialog",
+              `${homepage.footer.socialPending.eyebrow} — ${homepage.footer.socialPending.body}`,
+              "What the dialog behind Instagram and YouTube says. One copy serves both; the dialog prints the network's own name as its heading. Drafted, pending approval.",
             ),
           ],
         },

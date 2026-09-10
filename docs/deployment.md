@@ -55,6 +55,9 @@ the directory PM2 starts it in. It holds:
 | `NEXT_PUBLIC_SITE_URL` | `https://studio.famysys.com`. Canonical URLs and the Open Graph card are absolute. |
 | `HOSTNAME` | `127.0.0.1`. **Loopback only** — a server bound to `0.0.0.0` on a shared host is reachable by every other account on the box. |
 | `PORT` | `6570`. Must match the port in the docroot `.htaccess`. |
+| `MAIL_ENABLED` | `true` here and nowhere else. `false` (the default) stores enquiries and emails nobody. |
+| `MAIL_SENDER` `MAIL_FROM_NAME` `MAIL_NOTIFY_TO` | The mailbox Graph sends as, the name beside it, and where notifications land. See [Outbound mail](#outbound-mail). |
+| `GRAPH_TENANT_ID` `GRAPH_CLIENT_ID` `GRAPH_CLIENT_SECRET` | The Entra app registration. The secret **expires** — diarise the date. |
 
 > **The `$` in the bcrypt hash must be backslash-escaped.** Next runs variable expansion
 > over `.env` values, so an unescaped hash arrives as a fragment of itself and every
@@ -90,6 +93,47 @@ at the first one that fails. What it is doing:
 3. **Switch and restart.** Symlink `current` at the new release and `pm2 restart
    fsstudios`. This is the only moment the site is unavailable, and it is about two
    seconds.
+
+## Outbound mail
+
+Each contact form submission sends two emails through Microsoft Graph: a notification to
+`MAIL_NOTIFY_TO` (Reply-To set to the sender, so Reply answers them) and an acknowledgement
+to the sender. Both go out **after** the enquiry is stored and the form has been told it
+succeeded, so a mail failure never costs an enquiry. `inquiries.notified_at` and
+`inquiries.ack_sent_at` are stamped only when Graph accepts each message, so
+`SELECT id FROM inquiries WHERE notified_at IS NULL` lists every enquiry nobody was told about.
+
+**The Entra app registration** (single tenant, no redirect URI):
+
+1. API permissions → Microsoft Graph → **Application** permissions → `Mail.Send` → **Grant
+   admin consent**. A Delegated `Mail.Send` does not work with client credentials.
+2. Scope it. An application `Mail.Send` grant can send as *any* mailbox in the tenant. In
+   Exchange Online PowerShell:
+   ```powershell
+   New-ApplicationAccessPolicy -AppId <GRAPH_CLIENT_ID> -PolicyScopeGroupId <MAIL_SENDER> `
+     -AccessRight RestrictAccess -Description "Famysys Studio: contact form mail only"
+   Test-ApplicationAccessPolicy -AppId <GRAPH_CLIENT_ID> -Identity <MAIL_SENDER>
+   ```
+3. Certificates & secrets → New client secret. Copy the **Value**, not the Secret ID.
+   **Diarise the expiry**: sending stops that day, and it shows up as a logged error rather
+   than an outage, so it is noticed late unless someone is expecting it.
+
+**Turning it on.** Migration `011_inquiries_mail_stamps.sql` must be applied first
+(`npm run db:migrate`) — without it the enquiries still store, but the stamps fail and are
+logged. Then add the seven `MAIL_*`/`GRAPH_*` values to `shared/.env` and
+`pm2 restart fsstudios --update-env`. A missing value with `MAIL_ENABLED=true` stops the
+server starting, and `error.log` names the variable.
+
+**Then check it, in this order:**
+
+```bash
+cd ~/apps/fsstudios/current
+node --env-file=../shared/.env scripts/mail-check.mjs          # token + permission
+node --env-file=../shared/.env scripts/mail-check.mjs --send   # one real message
+```
+
+Then submit the real form once and confirm both messages arrive, and that **Reply** on the
+notification addresses the person who wrote in, not the shared inbox.
 
 ## Rolling back
 

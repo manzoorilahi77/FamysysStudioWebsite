@@ -7,7 +7,7 @@ import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
 import { CustomPartnershipBlock } from "../../presentation/sections/engagement/CustomPartnershipBlock";
 import { EngagementHero } from "../../presentation/sections/engagement/EngagementHero";
-import { Faq } from "../../presentation/sections/shared/Faq";
+import { FaqPointer } from "../../presentation/sections/shared/FaqPointer";
 import { FinalCta } from "../../presentation/sections/shared/FinalCta";
 import { HowToChoose } from "../../presentation/sections/engagement/HowToChoose";
 import { ScopingBlock } from "../../presentation/sections/engagement/ScopingBlock";
@@ -16,7 +16,6 @@ import { TierComparison } from "../../presentation/sections/engagement/TierCompa
 import {
   toCustomPartnershipDetailView,
   toEngagementTierDetailView,
-  toFaqBlockView,
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
@@ -69,12 +68,9 @@ export default async function WaysToWorkRoute() {
 
         <ScopingBlock scoping={page.scoping} />
 
-        <Faq
-          faq={toFaqBlockView(page.faq.block)}
-          eyebrow={page.faq.eyebrow}
-          heading={page.faq.heading}
-          ariaLabel={page.faq.heading}
-        />
+        {/* Where this page's four questions were. They are on /faq now, in this page's
+            own group, and this points there under the same eyebrow and heading. */}
+        <FaqPointer eyebrow={page.faq.eyebrow} heading={page.faq.heading} group={page.faq.group} />
 
         <FinalCta closingCta={page.closingCta} accent={["which of these"]} />
       </main>

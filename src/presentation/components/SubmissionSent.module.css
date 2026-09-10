@@ -1,0 +1,270 @@
+/*
+ * THE CONFIRMATION AFTER A BRIEF IS SENT.
+ *
+ * One orchestrated moment rather than scattered effects: the Famysys mark assembles — its
+ * frame settles, then its two blocks slide in from opposite corners and lock into the
+ * stair — a single ring pulses out, and the steps below tick in the order they happened.
+ * About two seconds from submit to rest.
+ *
+ * Every animation runs FROM a hidden state TO the element's resting style, so with motion
+ * reduced (or animations unsupported) the panel simply appears finished.
+ *
+ * Colours are the site's generated tokens; nothing here names a hex.
+ */
+
+.panel {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  position: relative;
+  display: grid;
+  gap: 20px;
+  padding: clamp(28px, 4vw, 44px);
+  border: 1px solid var(--color-canvas-16);
+  border-radius: 4px;
+  background: var(--color-canvas-4);
+  color: var(--color-canvas);
+  outline: none;
+  overflow: hidden;
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--color-accent-on-dark);
+  outline-offset: 4px;
+}
+
+/* --- The mark --------------------------------------------------------------------- */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.markWrap {
+  position: relative;
+  flex: none;
+  width: 60px;
+  height: 60px;
+}
+
+.mark {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--color-canvas);
+}
+
+.frame,
+.pieceA,
+.pieceB {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.frame {
+  animation: frame-in 560ms var(--ease-out) both;
+}
+
+.pieceA {
+  animation: piece-a 620ms 300ms var(--ease-out) both;
+}
+
+.pieceB {
+  animation: piece-b 620ms 420ms var(--ease-out) both;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--color-accent-on-dark);
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
+  animation: ring 1000ms 900ms var(--ease-out) both;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-canvas-80);
+  animation: rise 500ms 560ms var(--ease-out) both;
+}
+
+.eyebrow time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- The words -------------------------------------------------------------------- */
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display-accent);
+  font-weight: 400;
+  font-size: clamp(38px, 4.6vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  animation: rise 700ms 480ms var(--ease-out) both;
+}
+
+.body {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--color-canvas-80);
+  animation: rise 700ms 600ms var(--ease-out) both;
+}
+
+/* --- What just happened ----------------------------------------------------------- */
+
+.trail {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-canvas-16);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-canvas-16);
+  animation: rise 520ms calc(1000ms + var(--step, 0) * 280ms) var(--ease-out) both;
+}
+
+.check {
+  grid-row: span 2;
+  align-self: start;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--color-accent-highlight);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 440ms calc(1120ms + var(--step, 0) * 280ms) var(--ease-in-out) both;
+}
+
+.stepTitle {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--color-canvas);
+}
+
+.stepDetail {
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-canvas-80);
+  overflow-wrap: anywhere;
+}
+
+/* --- Again ------------------------------------------------------------------------ */
+
+.again {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-canvas-40);
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-canvas);
+  cursor: pointer;
+  transition: border-color 200ms ease;
+  animation: rise 500ms 1900ms var(--ease-out) both;
+}
+
+.again:hover {
+  border-bottom-color: var(--color-canvas);
+}
+
+.again:focus-visible {
+  outline: 2px solid var(--color-accent-on-dark);
+  outline-offset: 4px;
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+
+.again:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* --- Keyframes -------------------------------------------------------------------- */
+
+@keyframes frame-in {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-10deg);
+  }
+}
+
+@keyframes piece-a {
+  from {
+    opacity: 0;
+    transform: translate(-36px, -32px);
+  }
+}
+
+@keyframes piece-b {
+  from {
+    opacity: 0;
+    transform: translate(36px, 32px);
+  }
+}
+
+@keyframes ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel *,
+  .panel {
+    animation: none !important;
+    transition: none !important;
+  }
+}
