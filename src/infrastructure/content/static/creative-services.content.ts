@@ -58,30 +58,22 @@ interface DraftDetail {
 const DRAFT_DETAILS: Readonly<Record<string, DraftDetail>> = {
   "Creative Design": {
     expandedCopy:
-      "Design work that carries a brand across everything a business publishes — a social post, a sales deck, a printed brochure, a display banner. We work from existing brand guidelines where they exist, and settle a consistent set of layouts, type and colour where they do not. Everything is handed over as editable source files alongside exports sized for each placement.",
+      "One consistent system — layout, type, colour — applied across everything a brand publishes, from a social post to a printed brochure. Handed over as editable source files, not locked exports.",
     deliverables: [
       "Social creatives sized for Instagram, LinkedIn and Facebook",
-      "Marketing collateral — one-pagers, sales sheets and case study layouts",
-      "Presentation decks built on a reusable master template",
-      "Brochures and printed documents, supplied print-ready",
-      "Display and web banners across the standard ad sizes",
-      "Digital assets — email headers, profile art and event graphics",
-      "Editable source files and an export set for every placement",
+      "Presentation decks built on a reusable master",
+      "Editable source files for every placement",
     ],
     imageFile: "service-creative-design",
     imageAlt: "Printed colour swatch books beside a tablet showing layout diagrams.",
   },
   "Video Production & Editing": {
     expandedCopy:
-      "Editing and finishing for short-form and business video. Send raw footage — creator clips, phone recordings, event coverage — and we cut, grade, caption and package it for the platform it is going to. Where a piece needs shooting rather than editing, the production is scoped around the requirement rather than sold as a fixed package.",
+      "Editing and finishing for footage you already have — creator clips, phone recordings, event coverage. We cut, grade, caption and package it for the platform it's going to.",
     deliverables: [
-      "UGC editing from creator or customer-supplied footage",
-      "Reels and Shorts cut to 9:16 with burned-in captions",
-      "Promotional videos for launches, offers and campaigns",
-      "Business videos — company profiles, service overviews and event recaps",
-      "Content repurposing — one long-form piece cut into a set of short clips",
-      "Colour grading, music, sound levelling and intro/outro treatment",
-      "Delivery in platform-ready aspect ratios, with separate caption files",
+      "Reels and Shorts cut to 9:16, captions burned in",
+      "One long-form piece repurposed into a set of short clips",
+      "Colour grading, sound and platform-ready delivery",
     ],
     imageFile: "service-video-production",
     imageAlt:
@@ -89,57 +81,44 @@ const DRAFT_DETAILS: Readonly<Record<string, DraftDetail>> = {
   },
   "AI Video & Virtual Presenters": {
     expandedCopy:
-      "Video built around a generated presenter rather than a filmed one, for content that would otherwise need a studio, a crew and a booked day. You supply the script or the source document; we choose the presenter, voice and language, then assemble the piece with the same editing, motion and brand treatment as any other video. AI is the production method here, not the product.",
+      "Video built around a generated presenter instead of a filmed one — for content that would otherwise need a studio, a crew and a booked day. Send a script or a document; we choose the voice and assemble the rest.",
     deliverables: [
-      "AI-generated videos built from a script or an existing document",
-      "Virtual presenters, with a choice of voice, language and delivery style",
-      "AI UGC — creator-style clips produced without a shoot",
-      "Visual storytelling assembled from stills, stock and generated footage",
-      "Multi-language versions cut from a single approved script",
-      "Brand treatment, captions and motion applied over the generated base",
+      "A choice of presenter, voice and language",
+      "Multi-language versions from one script",
+      "Same brand treatment and captions as any other video",
     ],
     imageFile: "service-ai-video",
     imageAlt: "A presenter in a grey jacket, standing to camera in front of an orange wall.",
   },
   "Explainer & Training Videos": {
     expandedCopy:
-      "Video for material people have to understand rather than simply watch — how a product works, how a process runs, what a new hire needs in their first week. We start from whatever already exists: a deck, a manual, a recorded session. The output is structured into modules with a consistent opening, on-screen labels and a closing summary.",
+      "Video for material people have to understand, not just watch — how a product works, how a process runs. We start from what already exists: a deck, a manual, a recorded session.",
     deliverables: [
-      "Business explainers, typically 60 to 180 seconds",
-      "Training content built as a numbered module series",
-      "Course videos with chapter markers and consistent section titles",
-      "Onboarding videos for new staff, customers or partners",
-      "Instructional content — screen recordings with annotated callouts",
-      "Conversion of existing decks, manuals and recorded sessions",
-      "Captions, transcripts and a summary sheet for each module",
+      "Modules with a consistent opening and closing summary",
+      "Screen recordings with on-screen callouts",
+      "Captions, transcripts and a summary sheet",
     ],
     imageFile: "service-explainer-training",
     imageAlt: "People seated around a table taking notes during a training session.",
   },
   "Motion Graphics & Advanced Creative": {
     expandedCopy:
-      "The layer that sits on top of finished footage, or stands on its own where there is no footage at all. Animated titles, moving diagrams, logo builds and effects work. This is the service that turns a static explanation into something that arrives in the order the viewer needs to read it.",
+      "The layer that sits on top of finished footage, or stands on its own where there's no footage at all — animated titles, moving diagrams, logo builds, effects work.",
     deliverables: [
-      "Motion graphics — animated charts, diagrams and process sequences",
-      "Animated typography and kinetic title sequences",
-      "Logo stings for video openings and endings",
-      "Visual effects — cleanup, object removal and screen replacement",
-      "Compositing of live footage with generated and graphic elements",
-      "Lower thirds, transitions and a reusable motion kit for later edits",
+      "Animated charts, diagrams and title sequences",
+      "Object removal and screen replacement",
+      "A reusable motion kit for later edits",
     ],
     imageFile: "service-motion-graphics",
     imageAlt: "A corridor of brightly coloured panels receding into the distance.",
   },
   "Product & Brand Visuals": {
     expandedCopy:
-      "Still imagery for products and brands, produced without booking a studio for every set of shots. We build the product scene, place it in a lifestyle context, and generate the variations a campaign needs — different backgrounds, formats and seasonal treatments — from one approved base.",
+      "Still imagery for products and brands, without booking a studio for every shot. We build the scene once and generate the variations a campaign needs — backgrounds, formats, seasonal treatments.",
     deliverables: [
-      "Product visuals on plain, coloured and textured backgrounds",
-      "Lifestyle imagery placing a product in a real-world setting",
-      "Promotional assets for launches, offers and seasonal campaigns",
-      "Campaign visuals as a matched set across every placement size",
-      "AI-assisted brand content generated from an approved base image",
-      "Retouching, background replacement and format variants",
+      "Product visuals on plain and lifestyle backgrounds",
+      "A matched set across every placement size",
+      "Retouching and format variants from one approved base",
     ],
     imageFile: "service-product-visuals",
     imageAlt: "A teal suede shoe styled on a pale pink set, propped up on bread rolls.",
@@ -208,7 +187,7 @@ export const creativeServicesPage: CreativeServicesPage = {
     // TODO(client): expanded copy — draft, pending approval (eyebrow, heading, body).
     eyebrow: "Creative Services",
     heading: "Six creative services, produced by one team.",
-    body: "Design, video, AI-assisted production, motion and product visuals. Each service below sets out what the work involves, who it suits and what you actually receive at the end of it.",
+    body: "Design, video, AI-assisted production, motion and product visuals. Expand any one below for what's actually included.",
     cta: createCta("Start a Conversation", "/contact"),
     media: servicesImage(
       "service-hero-band",
@@ -241,7 +220,7 @@ export const creativeServicesPage: CreativeServicesPage = {
     // The four summary lines are drafted too — see DRAFT_ENGAGEMENT_LINES above.
     eyebrow: "Ways to engage",
     heading: "Pick the engagement that fits the volume.",
-    body: "The same six services, bought four different ways — from a single project to an ongoing production partnership. Full details, including what each one typically covers, are on the Ways to Work With Us page.",
+    body: "The same six services, bought four ways — from a single project to an ongoing partnership. Full breakdown on Ways to Work With Us.",
     summaries: engagementSummaries,
     cta: createCta("Compare every engagement", "/ways-to-work-with-us"),
   },

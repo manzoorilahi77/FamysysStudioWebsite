@@ -12,9 +12,6 @@ const CAPABILITY_TITLES = [
   "Product & Brand Visuals",
 ];
 
-/** The brief's own bound: every block lists five to seven concrete deliverables. */
-const MIN_DELIVERABLES = 5;
-const MAX_DELIVERABLES = 7;
 
 describe("StaticServiceCatalogRepository", () => {
   it("returns the 6 capabilities from the brief, in order", async () => {
@@ -79,14 +76,20 @@ describe("StaticServiceCatalogRepository — Creative Services page", () => {
     }
   });
 
-  it("lists 5 to 7 deliverables per capability, with no blanks or duplicates", async () => {
+  it("gives every capability's deliverables no blanks or duplicates", async () => {
     const page = await new StaticServiceCatalogRepository().getCreativeServicesPage();
 
     for (const detail of page.capabilities) {
-      expect(detail.deliverables.length).toBeGreaterThanOrEqual(MIN_DELIVERABLES);
-      expect(detail.deliverables.length).toBeLessThanOrEqual(MAX_DELIVERABLES);
       expect(detail.deliverables.every((item) => item.trim().length > 0)).toBe(true);
       expect(new Set(detail.deliverables).size).toBe(detail.deliverables.length);
+    }
+  });
+
+  it("cuts every capability's deliverables to the three that differentiate it", async () => {
+    const page = await new StaticServiceCatalogRepository().getCreativeServicesPage();
+
+    for (const capability of page.capabilities) {
+      expect(capability.deliverables).toHaveLength(3);
     }
   });
 
