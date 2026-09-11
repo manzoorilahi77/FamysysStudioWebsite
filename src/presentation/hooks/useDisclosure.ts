@@ -8,8 +8,11 @@ export interface UseDisclosureResult {
   readonly contentRef: React.RefObject<HTMLDivElement | null>;
   /**
    * CSS max-height string for the disclosure's open/close animation. This is a deliberate,
-   * narrow exception to the site's transform/opacity-only motion convention; see the plan's
-   * Global Constraints section for the reasoning.
+   * narrow exception to the site's transform/opacity-only motion convention, scoped only to
+   * this disclosure's own open/close transition — not to the page's continuous scroll/entry/
+   * hover motion layer, which stays transform/opacity only. The alternative (always reserving
+   * the full expanded height and animating opacity alone) would defeat the page's shorter-page
+   * goal, since the collapsed copy's space would still be reserved.
    */
   readonly maxHeight: string;
   readonly triggerProps: {
