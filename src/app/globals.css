@@ -7506,3 +7506,51 @@ button.tile-hit {
     padding-block: 0.75rem;
   }
 }
+
+/* Composition 3's full-bleed frame. The image is bled 24px past the frame's own edges
+   on every side so the parallax translate (±24px, see FullBleedBlock's PARALLAX_RANGE_PX)
+   never exposes a gap at the top or bottom of the crop; the frame's own overflow:hidden
+   clips it back to the 16:9 box. */
+.capability-fullbleed-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.capability-fullbleed-image {
+  position: absolute;
+  inset: -24px 0;
+}
+
+/* Tuned for the copy band it sits under, not for the gradient's own good looks: 92%
+   ink at the bottom rising to 78% through the third of the frame the text occupies is
+   close enough to a solid ink plate that the on-dark text above holds its contrast
+   floor against any photograph under it — the same order of coverage `.service-wash`
+   relies on. Verify against the actual rendered image before shipping; see the plan's
+   Task 5 note. */
+.capability-fullbleed-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-ink) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 78%, transparent) 34%,
+    transparent 64%
+  );
+}
+
+.capability-fullbleed-copy {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  max-width: 34rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-fullbleed-image {
+    transform: none !important;
+  }
+}
