@@ -4942,6 +4942,17 @@ html {
   }
 }
 
+/* The type-led blocks' thumbnail chip: a square crop, capped narrower than the 42vw
+   column .capability-media otherwise sizes for, so it reads as a supporting detail
+   rather than a shrunken image-led block. */
+.capability-chip {
+  max-width: 14rem;
+}
+
+.capability-chip .capability-media {
+  aspect-ratio: 1 / 1;
+}
+
 /* ============================================================================
    How We Work (/how-we-work)
    ============================================================================ */
