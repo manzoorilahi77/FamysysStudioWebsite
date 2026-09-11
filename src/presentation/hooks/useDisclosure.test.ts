@@ -53,4 +53,25 @@ describe("useDisclosure", () => {
     const { result } = renderHook(() => useDisclosure());
     expect(result.current.maxHeight).toBe("0px");
   });
+
+  it("keeps disclosure open when clicking while hovering on a fine pointer device", () => {
+    mockPointer(true);
+    const { result } = renderHook(() => useDisclosure());
+
+    // Click to open
+    act(() => result.current.triggerProps.onClick());
+    expect(result.current.isOpen).toBe(true);
+
+    // Start hovering
+    act(() => result.current.triggerProps.onPointerEnter());
+    expect(result.current.isOpen).toBe(true);
+
+    // Click while hovering — isOpen toggles to false underneath, but hover keeps it open
+    act(() => result.current.triggerProps.onClick());
+    expect(result.current.isOpen).toBe(true); // Still open due to hover, not click
+
+    // Leave — now hover is gone, and isOpen is false, so it closes
+    act(() => result.current.triggerProps.onPointerLeave());
+    expect(result.current.isOpen).toBe(false);
+  });
 });

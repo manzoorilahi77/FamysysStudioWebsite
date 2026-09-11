@@ -6,6 +6,11 @@ import { useFinePointer } from "./useFinePointer";
 export interface UseDisclosureResult {
   readonly isOpen: boolean;
   readonly contentRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * CSS max-height string for the disclosure's open/close animation. This is a deliberate,
+   * narrow exception to the site's transform/opacity-only motion convention; see the plan's
+   * Global Constraints section for the reasoning.
+   */
   readonly maxHeight: string;
   readonly triggerProps: {
     readonly onClick: () => void;
@@ -21,7 +26,9 @@ export interface UseDisclosureResult {
  * so a sighted keyboard user tabbing to the trigger and pressing Enter/Space — which
  * fires a click — always works, with or without a cursor). `isOpen` is the click
  * state; a fine-pointer hover ORs on top of it, and never overrides a click-opened
- * disclosure closed again by a second hover cycle.
+ * disclosure closed again by a second hover cycle. On fine-pointer devices, a click
+ * while still hovering has no visible effect until the pointer leaves — hover keeps
+ * the disclosure open regardless of the click underneath.
  *
  * The content is always mounted and only ever clipped by `max-height` — never
  * conditionally rendered — so `contentRef.current` is attached before the first open
