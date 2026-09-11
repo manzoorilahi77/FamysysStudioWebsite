@@ -4902,6 +4902,46 @@ html {
   }
 }
 
+/* The capability blocks' inline expand — paragraph and deliverables are always in the
+   DOM, clipped by max-height rather than unmounted, per CapabilityDisclosure's own
+   note on why. */
+.capability-disclosure {
+  margin-top: 1.5rem;
+}
+
+.capability-disclosure-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding-block: 0.5rem;
+}
+
+.capability-disclosure-icon {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--duration-hover) var(--ease-base);
+}
+
+.capability-disclosure-icon[data-open="true"] {
+  transform: rotate(-135deg);
+}
+
+.capability-disclosure-content {
+  overflow: hidden;
+  transition: max-height var(--duration-base) var(--ease-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-disclosure-icon {
+    transition-duration: 0ms;
+  }
+}
+
 /* ============================================================================
    How We Work (/how-we-work)
    ============================================================================ */
