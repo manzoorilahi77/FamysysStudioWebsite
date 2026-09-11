@@ -7554,3 +7554,39 @@ button.tile-hit {
     transform: none !important;
   }
 }
+
+/* Composition 4's two stacked crops. Square rather than the block's default 4:3, so a
+   pair of them reads as a considered pairing rather than two half-height image-led
+   frames. */
+.capability-diptych-frame {
+  aspect-ratio: 1 / 1;
+}
+
+/* Composition 6's grid. Two photo cells (their crop directions set in ImageGridBlock's
+   className) and two accent cells sharing this 2x2 frame. */
+.capability-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.capability-grid-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.capability-grid-accent {
+  background-image: linear-gradient(135deg, var(--color-accent-wash) 0%, transparent 60%);
+}
+
+.capability-grid-accent--on-dark {
+  background-image: linear-gradient(135deg, var(--color-canvas-10) 0%, transparent 60%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-diptych-frame,
+  .capability-grid-cell {
+    transition-duration: 0ms;
+  }
+}
