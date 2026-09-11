@@ -64,7 +64,7 @@ export const SECTION_OF: Readonly<
     ServicesHero: ["hero"],
     CapabilityIndex: ["capability-index"],
     CapabilityBlock: ["capabilities"],
-    HowWeWork: ["process-pointer"],
+    ProcessPointerLink: ["process-pointer"],
     EngagementPointer: ["engagement-pointer"],
     FaqPointer: ["faq"],
     FinalCta: ["closing-cta"],

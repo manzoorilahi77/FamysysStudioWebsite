@@ -227,7 +227,7 @@ export const creativeServicesPage: CreativeServicesPage = {
     // The five steps are the client's own, reused verbatim; only the heading is written
     // for this page, so the sequence here can never drift from the homepage's.
     process: {
-      heading: "Five steps, the same on every service.",
+      heading: "Five steps, on every service.",
       // The reveal label belongs to the homepage's frames, which this page does not
       // render — it is carried through from the same source rather than restated, so
       // there is still exactly one definition of it.

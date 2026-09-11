@@ -10,7 +10,7 @@ import { CapabilityBlock } from "../../presentation/sections/services/Capability
 import { EngagementPointer } from "../../presentation/sections/services/EngagementPointer";
 import { FaqPointer } from "../../presentation/sections/shared/FaqPointer";
 import { FinalCta } from "../../presentation/sections/shared/FinalCta";
-import { HowWeWork } from "../../presentation/sections/shared/HowWeWork";
+import { ProcessPointerLink } from "../../presentation/sections/services/ProcessPointerLink";
 import { ServicesHero } from "../../presentation/sections/services/ServicesHero";
 import {
   toCapabilityDetailView,
@@ -61,11 +61,9 @@ export default async function CreativeServicesRoute() {
           />
         ))}
 
-        {/* The five steps are the homepage's, verbatim; only the heading is this page's,
-            so the sequence cannot drift from the one How We Work will describe in full. */}
-        <HowWeWork
-          process={page.processPointer.process}
+        <ProcessPointerLink
           eyebrow={page.processPointer.eyebrow}
+          heading={page.processPointer.process.heading}
           cta={toCtaView(page.processPointer.cta)}
         />
 
