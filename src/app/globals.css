@@ -4820,14 +4820,14 @@ html {
 }
 
 .capability-index-link {
+  position: relative;
   display: block;
   white-space: nowrap;
   padding: 1rem 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.6;
   color: var(--color-ink-70);
-  border-bottom: 2px solid transparent;
-  transition-property: color, border-color;
+  transition-property: color;
   transition-duration: var(--duration-hover);
   transition-timing-function: var(--ease-base);
 }
@@ -4836,13 +4836,37 @@ html {
   color: var(--color-ink);
 }
 
-/* Active state carries BOTH colour and a rule. Colour alone would be the only signal
-   distinguishing the current service, and colour alone is not a signal for everyone —
-   the underline is what makes it legible without seeing the hue. */
+/* The active state draws its own rule rather than showing a static border, matching
+   the same left-to-right draw the section hairlines use elsewhere on the page — a
+   moving line reads as "this just became current" where a static one only reads as
+   "this is current", and the brief asks every section to carry real motion. */
+.capability-index-rule {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  height: 2px;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-base);
+}
+
 .capability-index-link[data-active="true"] {
   color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
   font-weight: 500;
+}
+
+.capability-index-link[data-active="true"] .capability-index-rule {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-index-rule {
+    transition-duration: 0ms;
+  }
 }
 
 /* The block image settles into a 3% scale as it arrives and stops there. It is the image
@@ -7587,6 +7611,44 @@ button.tile-hit {
 @media (prefers-reduced-motion: reduce) {
   .capability-diptych-frame,
   .capability-grid-cell {
+    transition-duration: 0ms;
+  }
+}
+
+/* Ways to Engage rows. Nothing here responded to a pointer before this — every row now
+   tints faintly and the trailing arrow slides in, so the row itself reads as reachable
+   rather than only the trailing "Compare every engagement" link below the list. */
+.engagement-row {
+  padding-inline: 0.75rem;
+  margin-inline: -0.75rem;
+  border-radius: var(--radius-sm);
+  transition-property: background-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.engagement-row:hover {
+  background-color: var(--color-canvas-10);
+}
+
+.engagement-row-arrow {
+  color: var(--color-accent-on-dark);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-base);
+}
+
+.engagement-row:hover .engagement-row-arrow,
+.engagement-row:focus-within .engagement-row-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engagement-row,
+  .engagement-row-arrow {
     transition-duration: 0ms;
   }
 }

@@ -77,6 +77,7 @@ export function CapabilityIndex({ label, items }: CapabilityIndexProps) {
               aria-current={item.slug === activeSlug ? "true" : undefined}
             >
               {item.title}
+              <span className="capability-index-rule" aria-hidden="true" />
             </a>
           </li>
         ))}

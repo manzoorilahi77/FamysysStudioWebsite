@@ -43,11 +43,16 @@ export function EngagementPointer({
             // is invalid, and the browser's error recovery moves it out of the list.
             <li key={summary.name} className="border-b border-canvas-16">
               <Reveal index={index} staggerStepMs={motion.stagger.rowStepMs}>
-                <div className="grid gap-2 py-6 md:grid-cols-12 md:gap-6">
+                <div className="engagement-row grid gap-2 py-6 md:grid-cols-12 md:items-baseline md:gap-6">
                   <p className="text-display-s font-medium text-canvas md:col-span-4">
                     {summary.name}
                   </p>
-                  <p className="text-body text-canvas-80 md:col-span-8">{summary.line}</p>
+                  <p className="engagement-row-line text-body text-canvas-80 md:col-span-7">
+                    {summary.line}
+                  </p>
+                  <span className="engagement-row-arrow md:col-span-1" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </div>
               </Reveal>
             </li>
