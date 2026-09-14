@@ -1,6 +1,5 @@
-import type { CmsSectionTarget } from "../../../application/cms/EditCmsSection";
+import type { CmsActivityAction, CmsSectionTarget } from "../../../application/cms/EditCmsSection";
 import { GetCmsPage } from "../../../application/cms/GetCmsPage";
-import type { CmsActivityAction } from "../../../domain/cms/entities/CmsActivityEntry";
 import { adminContainer } from "../../../infrastructure/di/adminContainer";
 
 /**

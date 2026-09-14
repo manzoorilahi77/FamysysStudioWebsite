@@ -62,7 +62,7 @@ export function SeoRecordEditor({
   if (!titleValue || !descriptionValue || !canonicalValue) {
     return (
       <p className="text-small px-5 py-6 text-graphite-70">
-        This page's SEO section is missing a field it should have. Reload the panel.
+        This page&apos;s SEO section is missing a field it should have. Reload the panel.
       </p>
     );
   }
@@ -145,7 +145,7 @@ export function SeoRecordEditor({
             </p>
           ) : canonicalDraft !== route ? (
             <p className="text-small mt-2 text-graphite-70">
-              This page's real address is <span className="text-ink">{route}</span>. A
+              This page&apos;s real address is <span className="text-ink">{route}</span>. A
               canonical URL pointing anywhere else can remove this page from search results —
               change it only if you mean to.
             </p>

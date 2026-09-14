@@ -1,6 +1,7 @@
 import type { CmsPage } from "../../domain/cms/entities/CmsPage";
 import { currentValue, recordTree, recordValues } from "../../domain/cms/entities/CmsRecord";
 import type { CmsRecord, CmsValue } from "../../domain/cms/entities/CmsRecord";
+import type { CmsActivityAction } from "../../domain/cms/entities/CmsActivityEntry";
 import type { ContentAddress } from "../../domain/cms/entities/ContentAddress";
 import {
   ContentConflictError,
@@ -36,6 +37,8 @@ export interface CmsSectionTarget {
   readonly pageId: string;
   readonly sectionId: string;
 }
+
+export type { CmsActivityAction };
 
 /**
  * One field, addressed the way the screen addresses it: which record it is on, and which
