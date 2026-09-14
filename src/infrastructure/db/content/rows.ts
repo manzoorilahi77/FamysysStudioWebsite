@@ -136,6 +136,14 @@ export interface InquiryRow extends RowDataPacket {
   archived_at: string | null;
 }
 
+export interface ActivityLogRow extends RowDataPacket {
+  id: number;
+  action: "saved" | "published" | "previewed";
+  page_label: string;
+  section_label: string | null;
+  occurred_at: string;
+}
+
 export interface PageRow extends RowDataPacket {
   page_key: string;
   title: string;

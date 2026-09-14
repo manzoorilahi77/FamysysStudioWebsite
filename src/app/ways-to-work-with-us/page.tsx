@@ -19,7 +19,9 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/ways-to-work-with-us",
@@ -27,6 +29,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Four ways to engage Famysys Studio — Launch, Grow, Scale and a Custom Creative Partnership — what each one suits, and how an engagement is scoped.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Ways to Work With Us", path: "/ways-to-work-with-us" },
+]);
 
 export default async function WaysToWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
@@ -43,6 +50,7 @@ export default async function WaysToWorkRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} />
       <main id="main-content">
         <EngagementHero hero={page.hero} />

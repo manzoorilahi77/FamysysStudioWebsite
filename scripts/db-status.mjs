@@ -38,7 +38,7 @@ const CONTENT_TABLES = [
 
 // Tables the site writes to rather than reads content from. Counted separately because a
 // zero here is normal on a fresh install and a zero above is a broken one.
-const OPERATIONAL_TABLES = ["inquiries", "login_attempts"];
+const OPERATIONAL_TABLES = ["inquiries", "login_attempts", "activity_log"];
 
 loadEnv();
 

@@ -17,7 +17,9 @@ import {
   toNavigationMenuView,
   toProcessStepDetailView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/how-we-work",
@@ -25,6 +27,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "The five steps every Famysys Studio project runs through, what each one produces, and what we need from you at each stage.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "How We Work", path: "/how-we-work" },
+]);
 
 export default async function HowWeWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
@@ -40,6 +47,7 @@ export default async function HowWeWorkRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} />
       <main id="main-content">
         <ProcessHero hero={page.hero} />

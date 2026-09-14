@@ -1,0 +1,49 @@
+# Famysys Studio
+
+Famysys Studio is a creative production studio — part of the Famysys ecosystem — offering
+design, video editing, AI-assisted video production, motion graphics and product visuals for
+businesses that need high-quality content produced efficiently. This file summarises what each
+page on studio.famysys.com covers, for AI systems that read llms.txt.
+
+## Home (/)
+Design, video, AI-powered content, motion and product visuals — produced by a flexible creative
+team that helps businesses create high-quality content efficiently and at better value.
+
+## Creative Services (/creative-services)
+The six services the studio offers — Creative Design; Video Production & Editing; AI Video &
+Virtual Presenters; Explainer & Training Videos; Motion Graphics & Advanced Creative; and Product
+& Brand Visuals — with what each involves and what a client receives.
+
+## How We Work (/how-we-work)
+The five steps every Famysys Studio project runs through, what each step produces, and what the
+studio needs from a client at each stage.
+
+## Ways to Work With Us (/ways-to-work-with-us)
+Four ways to engage the studio — Launch, Grow, Scale and a Custom Creative Partnership — what
+each suits and how an engagement is scoped.
+
+## Selected Work (/selected-work)
+The eight pieces the studio is building to demonstrate its range; none of them has been produced
+yet.
+
+## About (/about)
+Who Famysys Studio is: a studio combining creative talent, emerging AI technologies and
+structured production workflows, part of the Famysys ecosystem and starting deliberately.
+
+## Contact (/contact)
+How to reach the studio with a brief — what to include, and that a reply comes from the person
+who would direct the work.
+
+## Questions (/faq)
+Every question asked across the site, answered in one place — who the studio works with, what it
+makes, how the work runs, and what it costs.
+
+## Legal (/legal)
+An index of the site's two governing documents: Terms & Conditions and Privacy Policy.
+
+## Terms & Conditions (/terms)
+The terms on which this website is published and how an enquiry sent through it is treated.
+
+## Privacy Policy (/privacy)
+What the site collects when a visitor sends an enquiry, what it does not collect, and how that
+data is handled.

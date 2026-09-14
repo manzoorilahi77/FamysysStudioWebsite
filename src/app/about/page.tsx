@@ -21,7 +21,9 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/about",
@@ -29,6 +31,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Famysys Studio combines creative talent, emerging AI technologies and structured production workflows. Part of the Famysys ecosystem, and starting deliberately.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "About", path: "/about" },
+]);
 
 export default async function AboutRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
@@ -47,6 +54,7 @@ export default async function AboutRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} />
       {/* Eight sections, each on its own layout, and the grounds alternate down the page
           without any section asking for a tone: the seam rules in globals.css count the

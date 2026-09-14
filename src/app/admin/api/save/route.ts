@@ -2,6 +2,7 @@ import type { CmsSectionTarget, CmsValueEdit } from "../../../../application/cms
 import { SaveCmsSection } from "../../../../application/cms/EditCmsSection";
 import { adminContainer } from "../../../../infrastructure/di/adminContainer";
 import { hasAdminSession, unauthorised } from "../../session";
+import { logActivityFor } from "../activity";
 import { json, parseEdits, parseTarget } from "../shared";
 
 /**
@@ -34,6 +35,9 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const result = await new SaveCmsSection(adminContainer.cms).execute(target, edits);
+  if (result.ok && result.saved > 0) {
+    await logActivityFor(target, "saved");
+  }
 
   // 422 rather than 400 for a rejected value: the request was well formed and the content was
   // not, and the interface tells those apart when it decides which field to mark. 409 for a lost

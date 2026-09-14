@@ -1,3 +1,4 @@
+import type { CmsActivityAction, CmsActivityEntry } from "../entities/CmsActivityEntry";
 import type { CmsInquiry, CmsInquiryStatus } from "../entities/CmsInquiry";
 import type { CmsPage } from "../entities/CmsPage";
 import type { ContentAddress, ContentFieldAddress } from "../entities/ContentAddress";
@@ -100,4 +101,23 @@ export interface CmsRepository {
 
   /** Marks an enquiry read or archived. */
   setInquiryStatus(id: string, status: CmsInquiryStatus): Promise<void>;
+
+  /**
+   * Whether this store can keep a record of what the panel did. True for the database,
+   * where a save, a publish and a preview each become a row; false for the TypeScript
+   * files, where there is nowhere to keep one and nothing an action could be logged
+   * against between one request and the next. The panel asks before it offers, the same
+   * way it already does for `supportsDraftPreview` and `supportsRecordChanges`.
+   */
+  readonly supportsActivityLog: boolean;
+
+  /** Records one action. A no-op where `supportsActivityLog` is false. */
+  logActivity(entry: {
+    readonly action: CmsActivityAction;
+    readonly pageLabel: string;
+    readonly sectionLabel?: string;
+  }): Promise<void>;
+
+  /** The most recent actions, newest first. Empty where `supportsActivityLog` is false. */
+  getRecentActivity(limit: number): Promise<ReadonlyArray<CmsActivityEntry>>;
 }

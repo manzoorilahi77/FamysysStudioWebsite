@@ -28,8 +28,11 @@ import {
  *     to a person. It does hash the password (bcrypt), rate-limit sign-in and record every
  *     attempt against a hashed client address — see infrastructure/auth and migration 007.
  *   - No email is sent when an enquiry arrives. There is no email service to name.
- *   - No analytics, no tracking pixels, no embeds, no cookies on the public pages, and the
- *     typefaces are served from this site (next/font self-hosts them). All verified.
+ *   - Google Analytics (GA4) runs on the public pages in production only — see
+ *     src/app/layout.tsx and docs on NEXT_PUBLIC_GA_ID, added 2026-09-11. It sets cookies
+ *     and is the one exception to "no cookies on the public pages"; nothing else sets one
+ *     there. No other analytics, tracking pixel or embed exists, and the typefaces are
+ *     still served from this site (next/font self-hosts them). All verified.
  *
  * Where the parent's clause is true of this site it is kept. Where it is not, the clause
  * says what IS true. Where the truth is the client's to supply — the controller, the
@@ -120,10 +123,18 @@ export const privacyDocument: LegalDocument = {
         p(
           "Signing in to the administration area records the attempt, against a hashed form of the address it came from rather than the address itself, so repeated failures can be locked out. Edits made through the administration area are kept as versions of the content, so an earlier wording can be seen and restored.",
         ),
-        // Verified: no analytics or tracking scripts anywhere in src/app or src/presentation,
-        // no third-party embeds, and both typefaces are self-hosted through next/font.
+        // Verified: the only analytics running is Google Analytics (GA4), loaded from
+        // src/app/layout.tsx, gated to production builds outside /admin. No other
+        // analytics, advertising, tracking pixel or social media embed exists anywhere in
+        // src/app or src/presentation, and both typefaces are self-hosted through next/font.
         p(
-          "We do not run analytics, advertising, tracking pixels or social media embeds on this website. The typefaces are served from this site rather than from a font network, so simply reading a page does not send a request to a third party.",
+          "We use Google Analytics (GA4) to understand how visitors use this website — pages viewed, how you arrived, and general device and location information. We do not run advertising trackers, other analytics tools, tracking pixels or social media embeds. The typefaces are served from this site rather than from a font network, so simply reading a page does not send a request to a third party for that reason.",
+        ),
+        // TODO(client): legal review required — Google is a data processor under this
+        // arrangement; a Data Processing Addendum / Google Ads Data Processing Terms
+        // acceptance in the GA4 property is the client's action, not this code's.
+        p(
+          "Google processes this data on our behalf, under its own privacy and data processing terms, and may combine it with data it holds from other sites you visit.",
         ),
       ],
     },
@@ -147,9 +158,17 @@ export const privacyDocument: LegalDocument = {
       number: "06",
       heading: "Cookies",
       blocks: [
-        // Verified: nothing outside src/app/admin reads or sets a cookie.
+        // Verified: Google Analytics (GA4) is the only thing outside src/app/admin that
+        // sets a cookie, added 2026-09-11 — see src/app/layout.tsx.
         p(
-          "The public website sets no cookies. There is nothing to accept, and no banner, because there is nothing to ask you about.",
+          "Google Analytics sets cookies on the public pages to distinguish visitors and measure how the site is used. It is off outside production and does not run in the administration area.",
+        ),
+        // TODO(client): legal review required — whether a consent banner is needed before
+        // GA4 loads depends on which visitors' data protection law applies (the same open
+        // jurisdiction question as sections 05 and 11), and is a decision for the client,
+        // not something this code should assume either way.
+        p(
+          "There is no cookie consent banner on this website at present. Depending on where our visitors are and which law applies to them, one may be required before analytics cookies are set — this is under review.",
         ),
         p(
           "The administration area sets one first-party session cookie so a signed-in member of staff stays signed in. It carries no advertising or analytics purpose, it is not readable by any other site, and it exists only for the people we have given the password to.",

@@ -1,5 +1,6 @@
 import type { AboutPage } from "../../domain/about/entities/AboutPage";
 import type { AboutRepository } from "../../domain/about/repositories/AboutRepository";
+import type { CmsActivityAction, CmsActivityEntry } from "../../domain/cms/entities/CmsActivityEntry";
 import type { CmsInquiry, CmsInquiryStatus } from "../../domain/cms/entities/CmsInquiry";
 import type { CmsPage } from "../../domain/cms/entities/CmsPage";
 import { recordTree, recordValues } from "../../domain/cms/entities/CmsRecord";
@@ -82,6 +83,14 @@ export class StaticCmsRepository implements CmsRepository {
    * screen that the draft is not in it, which is better than a button that does nothing.
    */
   readonly supportsDraftPreview: boolean = false;
+
+  /**
+   * A TypeScript module has no table an entry could be written to between one request and
+   * the next — there is nowhere to keep a log at all, the same reason `getInquiries` below
+   * always answers empty. The Dashboard says so rather than showing a feed that quietly
+   * cannot ever have anything in it.
+   */
+  readonly supportsActivityLog: boolean = false;
 
   constructor(protected readonly repositories: CmsContentRepositories) {}
 
@@ -241,6 +250,20 @@ export class StaticCmsRepository implements CmsRepository {
       `Enquiry ${id} cannot be marked "${status}": there is no inbox while content is read ` +
         "from the files, because there is nowhere for a submission to have been kept.",
     );
+  }
+
+  /** See `supportsActivityLog` — there is nothing to write this to, so it does nothing. */
+  async logActivity(_entry: {
+    readonly action: CmsActivityAction;
+    readonly pageLabel: string;
+    readonly sectionLabel?: string;
+  }): Promise<void> {
+    return;
+  }
+
+  /** Always empty — see `supportsActivityLog`. */
+  async getRecentActivity(_limit: number): Promise<ReadonlyArray<CmsActivityEntry>> {
+    return [];
   }
 
   protected async loadSiteContent(): Promise<SiteContent> {

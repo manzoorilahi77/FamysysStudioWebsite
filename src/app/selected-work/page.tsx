@@ -16,7 +16,9 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/selected-work",
@@ -26,6 +28,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "The eight pieces Famysys Studio is building, what each one is meant to demonstrate, and why these eight. None of them has been produced yet.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Selected Work", path: "/selected-work" },
+]);
 
 export default async function SelectedWorkRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
@@ -41,6 +48,7 @@ export default async function SelectedWorkRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} />
       <main id="main-content">
         <WorkHero hero={page.hero} />

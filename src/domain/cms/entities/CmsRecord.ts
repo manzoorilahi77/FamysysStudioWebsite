@@ -39,8 +39,23 @@ export type CmsApproval = "client" | "drafted";
  * it the rails: a draft row, a revision, a preview, a publish, a discard. A bespoke
  * "change the picture" path would have had to grow all five, and would have grown them
  * differently.
+ *
+ * `seoTitle`/`seoDescription`/`seoCanonical` are the SEO section's three text fields — a
+ * page's `<title>`, its meta description, and its canonical path. Each has a rule a plain
+ * `text` field does not: a length ceiling for the first two, real-route membership for the
+ * third — so they earn their own kinds the same way `ctaLabel` and `url` did, rather than
+ * being validated by a special case bolted onto `text`.
  */
-export type CmsValueKind = "text" | "ctaLabel" | "url" | "mediaAlt" | "mediaSrc" | "mediaPoster";
+export type CmsValueKind =
+  | "text"
+  | "ctaLabel"
+  | "url"
+  | "mediaAlt"
+  | "mediaSrc"
+  | "mediaPoster"
+  | "seoTitle"
+  | "seoDescription"
+  | "seoCanonical";
 
 /** One string an editor can see, and — when it has a pointer — change. */
 export interface CmsValue {

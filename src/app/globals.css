@@ -3386,6 +3386,143 @@ div.grid > *:nth-child(even).card-surface-dark {
   transition-duration: var(--pending-dialog-enter-ms, 320ms);
 }
 
+/* The login card takes the same "lit from above" surface as the nav panel: a hairline
+   border and an accent wash pulled down from the top edge, over flat canvas. No shadow —
+   the site is flat throughout and a floating card would be the only lit object on it. */
+.auth-card {
+  background-color: var(--color-canvas);
+  background-image:
+    linear-gradient(to bottom, var(--color-accent-4) 0%, transparent 7rem),
+    repeating-linear-gradient(
+      -35deg,
+      var(--color-ink-4) 0,
+      var(--color-ink-4) 1px,
+      transparent 1px,
+      transparent 3rem
+    );
+  border: 1px solid var(--color-ink-12);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+/* The login's brand half — the same two-glow depth §2's hovered service cell paints onto
+   solid ink (see .service-wash), held static rather than swept in on hover. Section-alt
+   breathes from the top-left, an accent ember sits low-left; a third layer is a faint
+   diagonal hairline field, the same idea as the grid §2 draws for itself, at rest instead
+   of drawn. All three are backdrop, so none has to clear a text contrast floor. */
+.login-brand-panel {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(120% 120% at 0% 0%, var(--color-section-alt), transparent 70%),
+    radial-gradient(
+      64% 48% at 10% 100%,
+      color-mix(in srgb, var(--color-accent) 55%, transparent),
+      transparent 74%
+    ),
+    repeating-linear-gradient(
+      -35deg,
+      var(--color-canvas-4) 0,
+      var(--color-canvas-4) 1px,
+      transparent 1px,
+      transparent 3rem
+    );
+}
+
+/* The panel's one cropped letter — the same move the site makes with a large watermark
+   numeral elsewhere (see tokens.ts `serviceNumeralOnCanvas`), borrowed here as a monogram
+   since a login has no list position to count. Set in the display accent face rather than
+   Jost: at this size Jost's "F" is two plain rectangles, and the accent italic is the
+   site's one typeface with actual character to spend at scale. Faint enough it never
+   competes with the words in front of it, and desktop-only — the panel is a short stacked
+   band on a phone, with no room for a letter this size (`hidden lg:block` in the markup). */
+.login-brand-monogram {
+  position: absolute;
+  right: -1vw;
+  bottom: -9vh;
+  font-family: var(--font-display-accent);
+  font-style: italic;
+  font-size: clamp(16rem, 24vw, 24rem);
+  line-height: 1;
+  color: var(--color-canvas-10);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The rule under the brand headline draws itself in left to right, on the same timing as
+   the grid's own hairline draw (`--duration-draw`) rather than fading — it is a line, and a
+   line arrives by being drawn. Runs once, after the headline and the copy above it. */
+.auth-rule-draw {
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: auth-rule-draw var(--duration-draw) var(--ease-base) 520ms both;
+}
+
+@keyframes auth-rule-draw {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* THE INQUIRY MODAL'S MECHANICS, BORROWED FROM .pending-dialog RATHER THAN REBUILT: native
+   <dialog>, the same backdrop fade and 0.96→1 panel scale, the same enter/exit timing pair.
+   Only the surface differs — the admin panel is light throughout, so the panel takes
+   bg-card and an ink-12 hairline instead of .pending-dialog-panel's dark-surface border,
+   the same pairing AdminPanel already uses everywhere else in the panel. */
+.admin-dialog {
+  border: none;
+  padding: 0;
+  margin: auto;
+  background: transparent;
+  width: min(34rem, calc(100vw - 2.5rem));
+  max-width: none;
+  overflow: visible;
+  max-height: min(85vh, 44rem);
+}
+
+.admin-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--admin-dialog-exit-ms, 180ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.admin-dialog[data-visible="true"]::backdrop {
+  opacity: 1;
+  transition-duration: var(--admin-dialog-enter-ms, 320ms);
+}
+
+.admin-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, 44rem);
+  overflow: hidden;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-ink-12);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition-property: opacity, transform;
+  transition-duration: var(--admin-dialog-exit-ms, 180ms);
+  transition-timing-function: var(--ease-base);
+}
+
+.admin-dialog[data-visible="true"] .admin-dialog-panel {
+  opacity: 1;
+  transform: scale(1);
+  transition-duration: var(--admin-dialog-enter-ms, 320ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-dialog-panel,
+  .admin-dialog[data-visible="true"] .admin-dialog-panel {
+    transform: none;
+  }
+}
+
 .pending-dialog-head {
   display: flex;
   align-items: center;

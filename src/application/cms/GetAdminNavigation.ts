@@ -13,8 +13,10 @@ import type { CmsRepository } from "../../domain/cms/repositories/CmsRepository"
  * route file; and the draft marks are the sections that have something saved and not
  * published. Add a section to a page and it appears here. Delete one and it goes.
  *
- * Below the pages there is one more item and only one: the inbox, with a count of the
- * enquiries nobody has opened.
+ * DASHBOARD, PAGES, SEO, INBOX. The pages list is still the derived one described above.
+ * Dashboard and SEO are plain fixed links, the same shape as the inbox always was — neither
+ * is a page the way the seven routes are, so neither gets an expandable section list of its
+ * own; each is one screen with a fixed destination.
  */
 
 export interface AdminNavSection {
@@ -41,7 +43,9 @@ export interface AdminNavInbox {
 }
 
 export interface AdminNavigation {
+  readonly dashboard: { readonly href: string };
   readonly pages: ReadonlyArray<AdminNavPage>;
+  readonly seo: { readonly href: string };
   readonly inbox: AdminNavInbox;
   /** How many sections across the whole panel are waiting to be published. */
   readonly draftedSections: number;
@@ -78,7 +82,9 @@ export class GetAdminNavigation {
     });
 
     return {
+      dashboard: { href: "/admin/dashboard" },
       pages: navigation,
+      seo: { href: "/admin/seo" },
       inbox: {
         href: "/admin/inbox",
         unread: inquiries.filter((inquiry) => inquiry.status === "new").length,

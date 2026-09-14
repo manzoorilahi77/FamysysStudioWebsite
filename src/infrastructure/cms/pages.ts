@@ -9,6 +9,7 @@ import type { HowWeWorkPage } from "../../domain/process/entities/HowWeWorkPage"
 import type { CreativeServicesPage } from "../../domain/services/entities/CreativeServicesPage";
 import { orderSections } from "./composition";
 import { CONTENT_FILE, contentModifiedAt } from "./contentSources";
+import { seoSection } from "./sections/seoSection";
 import {
   capabilityCards,
   caseStudyCards,
@@ -59,6 +60,51 @@ export interface PageSources {
   readonly about: AboutPage;
   readonly contact: ContactPage;
 }
+
+/**
+ * SEEDED FROM THE LITERAL `title`/`description` EACH ROUTE'S `pageMetadata()` CALL CARRIES
+ * TODAY. There is nowhere else to read them from — they are inline literals in each
+ * `page.tsx`, not properties of any of the seven site repositories — so this is a one-time
+ * starting point rather than a derived value: from here on, the SEO section in the admin
+ * panel is what these say, and the literals in the route files are what changed them last.
+ */
+const SEO_DEFAULTS: Readonly<Record<string, { readonly title: string; readonly description: string }>> = {
+  home: {
+    title: "Famysys Studio",
+    description:
+      "Design, video, AI-powered content, motion and product visuals — produced by a flexible creative team that helps businesses create high-quality content efficiently and at better value.",
+  },
+  "creative-services": {
+    title: "Creative Services",
+    description:
+      "Design, video, AI-assisted production, motion and product visuals — what each service involves and what you receive.",
+  },
+  "how-we-work": {
+    title: "How We Work",
+    description:
+      "The five steps every Famysys Studio project runs through, what each one produces, and what we need from you at each stage.",
+  },
+  "ways-to-work-with-us": {
+    title: "Ways to Work With Us",
+    description:
+      "Four ways to engage Famysys Studio — Launch, Grow, Scale and a Custom Creative Partnership — what each one suits, and how an engagement is scoped.",
+  },
+  "selected-work": {
+    title: "Selected Work",
+    description:
+      "The eight pieces Famysys Studio is building, what each one is meant to demonstrate, and why these eight. None of them has been produced yet.",
+  },
+  about: {
+    title: "About",
+    description:
+      "Famysys Studio combines creative talent, emerging AI technologies and structured production workflows. Part of the Famysys ecosystem, and starting deliberately.",
+  },
+  contact: {
+    title: "Contact",
+    description:
+      "Tell Famysys Studio what you are trying to create, who it is for and when you need it. Send a brief and hear back from the person who would direct the work.",
+  },
+};
 
 interface PageInput {
   readonly id: string;
@@ -160,7 +206,18 @@ export function buildPages(sources: PageSources): ReadonlyArray<CmsPage> {
   ];
 
   return inputs.map((input) => {
-    const ordered = orderSections(input.id, input.declared);
+    const defaults = SEO_DEFAULTS[input.id] ?? { title: input.title, description: input.description };
+    const declared = [
+      ...input.declared,
+      seoSection({
+        pageId: input.id,
+        route: input.route,
+        title: defaults.title,
+        description: defaults.description,
+        updatedAt: input.updatedAt,
+      }),
+    ];
+    const ordered = orderSections(input.id, declared);
     return {
       id: input.id,
       title: input.title,

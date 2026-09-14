@@ -7,7 +7,9 @@ import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
 import { LegalIndexPage } from "../../presentation/sections/legal/LegalIndexPage";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/legal",
@@ -15,6 +17,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "The documents that govern your use of this site and what happens to anything you send through it: the Terms & Conditions and the Privacy Policy.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Legal", path: "/legal" },
+]);
 
 /**
  * The index the two documents' closing lines point at — famysys.com/legal/ on the parent
@@ -32,6 +39,7 @@ export default async function LegalIndexRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} solidAtTop />
       <main id="main-content">
         <LegalIndexPage index={index} />

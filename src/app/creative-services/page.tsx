@@ -19,7 +19,9 @@ import {
   toNavigationMenuView,
   toServicesHeroView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema, serviceSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/creative-services",
@@ -27,6 +29,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Design, video, AI-assisted production, motion and product visuals — what each service involves and what you receive.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Creative Services", path: "/creative-services" },
+]);
 
 export default async function CreativeServicesRoute() {
   // The footer is built from the navigation and the homepage's footer content, so this
@@ -39,9 +46,20 @@ export default async function CreativeServicesRoute() {
 
   const navigationView = toNavigationMenuView(navigation);
   const capabilities = page.capabilities.map(toCapabilityDetailView);
+  const serviceSchemas = page.capabilities.map((capability) =>
+    serviceSchema({
+      title: capability.title,
+      description: capability.description,
+      slug: String(capability.slug),
+    }),
+  );
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
+      {serviceSchemas.map((schema, index) => (
+        <JsonLd key={index} data={schema} />
+      ))}
       <Header navigation={navigationView} />
       <main id="main-content">
         <ServicesHero hero={toServicesHeroView(page.hero)} />

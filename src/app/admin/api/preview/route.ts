@@ -1,7 +1,8 @@
 import { draftMode } from "next/headers";
 import { adminContainer } from "../../../../infrastructure/di/adminContainer";
 import { hasAdminSession, unauthorised } from "../../session";
-import { json } from "../shared";
+import { logActivityFor } from "../activity";
+import { json, parseTarget } from "../shared";
 
 /**
  * TURNS THE PREVIEW ON AND OFF.
@@ -25,7 +26,11 @@ export async function POST(request: Request): Promise<Response> {
   if (!(await hasAdminSession())) return unauthorised();
 
   const body: unknown = await request.json().catch(() => null);
-  const enable = (body as Record<string, unknown> | null)?.enable === true;
+  const candidate = body as Record<string, unknown> | null;
+  const enable = candidate?.enable === true;
+  // Which section is being previewed — for the activity log only. Its absence never blocks
+  // the preview itself: a caller that omits it simply goes unlogged.
+  const target = parseTarget(candidate?.target);
 
   const draft = await draftMode();
   if (!enable) {
@@ -41,5 +46,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   draft.enable();
+  if (target) {
+    await logActivityFor(target, "previewed");
+  }
   return json({ ok: true, previewing: true, drafts: true }, 200);
 }

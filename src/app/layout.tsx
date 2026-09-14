@@ -3,6 +3,9 @@ import { Instrument_Serif, Jost } from "next/font/google";
 import "./globals.css";
 import { colors } from "../shared/design/colors.ts";
 import { rootMetadata } from "../shared/site/metadata";
+import { organizationSchema } from "../shared/site/structured-data";
+import { GoogleAnalytics } from "../presentation/layout/GoogleAnalytics";
+import { JsonLd } from "../presentation/seo/JsonLd";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -52,6 +55,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${jost.variable} ${instrumentSerif.variable}`}>
       <body>
+        <JsonLd data={organizationSchema()} />
+        <GoogleAnalytics />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-ink focus:px-4 focus:py-2 focus:text-canvas"

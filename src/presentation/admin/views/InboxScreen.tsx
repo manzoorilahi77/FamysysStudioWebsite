@@ -1,102 +1,144 @@
-import type { CmsInquiry } from "../../../domain/cms/entities/CmsInquiry";
+"use client";
+
+import { useEffect, useState } from "react";
+import type { CmsInquiry, CmsInquiryStatus } from "../../../domain/cms/entities/CmsInquiry";
 import { AdminPanel, AdminPanelEmpty } from "../components/AdminPanel";
 import { AdminScreen } from "../components/AdminScreen";
 import { InquiryActions } from "../components/InquiryActions";
+import { InquiryDetailDialog } from "../components/InquiryDetailDialog";
 import { relativeTime } from "../lib/relativeTime";
 
 /**
- * THE ENQUIRIES, NEWEST FIRST, WITH EVERY FIELD THE SENDER FILLED IN.
+ * THE ENQUIRIES, NEWEST FIRST, FILTERABLE, WITH FULL DETAIL BEHIND A MODAL RATHER THAN
+ * INLINE.
  *
- * Not a summary line. Someone who took the trouble to describe their project in the brief
- * box should not have that sit in a column nobody reads — so the whole submission is on the
- * screen, and the reply is an email to the address at the top of it.
+ * The list used to print every field on the row itself, which is generous with the client's
+ * leads and unusable the moment there are more than a handful — nothing to scan, one long
+ * page of prose. A row now shows what a scan needs (who, from where, a one-line preview of
+ * what they are asking about, when, and its status) and a click opens the rest in
+ * `InquiryDetailDialog`, which is where "considered" actually lives: full field list,
+ * generous spacing, room to read.
  *
- * ARCHIVED ENQUIRIES ARE KEPT AND SHOWN SEPARATELY. There is no delete: an enquiry is the
- * one row on this site that cannot be produced again from a content file.
+ * ARCHIVED ENQUIRIES ARE KEPT, NEVER DELETED. There is no delete: an enquiry is the one row
+ * on this site that cannot be produced again from a content file. See `InquiryActions`.
  */
 
 const DESCRIPTION =
   "Contact form submissions, newest first. Both forms write here — the homepage's closing form and /contact.";
 
-const EMPTY = "No submissions yet. This list is live, so an empty week is a quiet week.";
+const NO_SUBMISSIONS = "No submissions yet. This list is live, so an empty week is a quiet week.";
+const NO_MATCHES = "Nothing matches these filters.";
 
-/**
- * What happens to an enquiry besides this list, said on the screen. With mail off the row
- * is written and that is all: somebody has to open this panel, and if nobody knows that, a
- * lead sits here unread. With mail on, this list is still the record — a notification that
- * failed leaves its enquiry here all the same.
- */
 const NOT_EMAILED =
   "Nothing is emailed anywhere. Mail is switched off on this server (MAIL_ENABLED), so an enquiry is stored here and nowhere else — no notification is sent to the studio, to a shared inbox or to a CRM. This list is the only place a submission appears, so it has to be checked.";
 
 const EMAILED =
   "Each enquiry is also emailed to the studio, with Reply-To set to the sender, and the sender gets an acknowledgement. This list is still the record: an enquiry whose email failed is here all the same.";
 
-function Field({ label, value }: { readonly label: string; readonly value: string }) {
+type StatusFilter = "all" | CmsInquiryStatus;
+type RangeFilter = "all" | "24h" | "7d" | "30d";
+
+const STATUS_FILTERS: ReadonlyArray<{ readonly key: StatusFilter; readonly label: string }> = [
+  { key: "all", label: "All" },
+  { key: "new", label: "New" },
+  { key: "read", label: "Read" },
+  { key: "archived", label: "Archived" },
+];
+
+const RANGE_FILTERS: ReadonlyArray<{ readonly key: RangeFilter; readonly label: string }> = [
+  { key: "all", label: "Any time" },
+  { key: "24h", label: "24 hours" },
+  { key: "7d", label: "7 days" },
+  { key: "30d", label: "30 days" },
+];
+
+const RANGE_MS: Readonly<Record<Exclude<RangeFilter, "all">, number>> = {
+  "24h": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+  "30d": 30 * 24 * 60 * 60 * 1000,
+};
+
+function withinRange(inquiry: CmsInquiry, range: RangeFilter, now: number): boolean {
+  return range === "all" ? true : now - inquiry.receivedAt.getTime() <= RANGE_MS[range];
+}
+
+const STATUS_PILL: Readonly<Record<CmsInquiryStatus, { readonly label: string; readonly className: string }>> = {
+  new: { label: "New", className: "bg-accent-8 text-accent" },
+  read: { label: "Read", className: "bg-ink-4 text-ink-60" },
+  archived: { label: "Archived", className: "bg-ink-4 text-graphite-70" },
+};
+
+/** Announced as well as drawn, the same rule `AdminSidebar`'s DraftDot follows. */
+function UnreadDot() {
   return (
-    <div>
-      <dt className="label text-ink-40">{label}</dt>
-      <dd className="text-small mt-1 whitespace-pre-line break-words text-ink">{value}</dd>
-    </div>
+    <span
+      className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent align-middle"
+      role="img"
+      aria-label="Unread"
+    />
   );
 }
 
-function Enquiry({ inquiry }: { readonly inquiry: CmsInquiry }) {
+function FilterButton({
+  active,
+  onClick,
+  children,
+}: {
+  readonly active: boolean;
+  readonly onClick: () => void;
+  readonly children: React.ReactNode;
+}) {
   return (
-    // The id is what the notification email's button links to: /admin/inbox#inquiry-<id>.
-    <article id={`inquiry-${inquiry.id}`} className="scroll-mt-6 px-5 py-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="text-small flex flex-wrap items-center gap-3 text-ink">
-            {inquiry.name}
-            {inquiry.status === "new" ? (
-              <span className="label rounded-sm bg-accent-8 px-2 py-1 text-accent">New</span>
-            ) : null}
-            <span className="label rounded-sm bg-ink-4 px-2 py-1 text-ink-60">
-              {inquiry.sourceForm === "home" ? "Homepage form" : "Contact page"}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`label rounded-sm px-3 py-1.5 transition-colors duration-[180ms] ${
+        active ? "bg-ink text-canvas" : "border border-ink-12 text-ink-60 hover:bg-ink-4"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Row({ inquiry, onOpen }: { readonly inquiry: CmsInquiry; readonly onOpen: () => void }) {
+  const unread = inquiry.status === "new";
+  const pill = STATUS_PILL[inquiry.status];
+  const preview = inquiry.projectBrief?.trim() || "No project brief given.";
+
+  return (
+    // The id the notification email's own button links to: /admin/inbox#inquiry-<id>.
+    // `InboxScreen` reads the hash on mount and opens this row's detail straight away —
+    // the anchor still exists so a link to it never lands on nothing even if that fails.
+    <li id={`inquiry-${inquiry.id}`} className={inquiry.status === "archived" ? "opacity-60" : undefined}>
+      <div className="flex items-center gap-4 px-5 py-3">
+        <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className={`text-small truncate ${unread ? "font-medium text-ink" : "text-ink"}`}>
+              {inquiry.name}
             </span>
-          </h2>
-          <p className="text-small mt-1 text-graphite-70">
-            <a href={`mailto:${inquiry.email}`} className="underline">
-              {inquiry.email}
-            </a>
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-5">
+            {unread ? <UnreadDot /> : null}
+            <span className="text-small truncate text-graphite-70">{inquiry.companyName}</span>
+          </span>
+          <p className="text-small mt-1 truncate text-graphite-70">{preview}</p>
+        </button>
+
+        <span className={`label shrink-0 rounded-sm px-2 py-1 ${pill.className}`}>{pill.label}</span>
+
+        <time
+          dateTime={inquiry.receivedAt.toISOString()}
+          title={inquiry.receivedAt.toISOString()}
+          className="text-small tabular hidden w-20 shrink-0 text-right text-ink-40 sm:block"
+        >
+          {relativeTime(inquiry.receivedAt)}
+        </time>
+
+        <div className="shrink-0">
           <InquiryActions id={inquiry.id} status={inquiry.status} />
-          <time
-            dateTime={inquiry.receivedAt.toISOString()}
-            title={inquiry.receivedAt.toISOString()}
-            className="text-small tabular w-24 text-right text-ink-40"
-          >
-            {relativeTime(inquiry.receivedAt)}
-          </time>
         </div>
       </div>
-
-      <dl className="mt-5 grid gap-5 sm:grid-cols-2">
-        <Field label="Company" value={inquiry.companyName} />
-        <Field label="Company size" value={inquiry.companySize} />
-        {inquiry.companyWebsite !== null ? (
-          <Field label="Website" value={inquiry.companyWebsite || "Left blank"} />
-        ) : null}
-        {inquiry.contactRole !== null ? (
-          <Field label="Role" value={inquiry.contactRole || "Left blank"} />
-        ) : null}
-        {inquiry.projectBrief !== null ? (
-          <div className="sm:col-span-2">
-            <Field label="Project brief" value={inquiry.projectBrief || "Left blank"} />
-          </div>
-        ) : null}
-      </dl>
-
-      <p className="text-small mt-4 text-ink-40">
-        Received {inquiry.receivedAt.toISOString().replace("T", " ").slice(0, 16)} UTC
-        {inquiry.sourceForm === "home"
-          ? " · the homepage form asks four questions, so the three fields above it does not ask for are absent rather than empty."
-          : null}
-      </p>
-    </article>
+    </li>
   );
 }
 
@@ -107,47 +149,76 @@ export function InboxScreen({
   readonly inquiries: ReadonlyArray<CmsInquiry>;
   readonly isMailEnabled?: boolean;
 }) {
-  const open = inquiries.filter((inquiry) => inquiry.status !== "archived");
-  const archived = inquiries.filter((inquiry) => inquiry.status === "archived");
-  const unread = open.filter((inquiry) => inquiry.status === "new").length;
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [rangeFilter, setRangeFilter] = useState<RangeFilter>("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // A notification email links to #inquiry-<id> — see the anchor on each row below. Opening
+  // straight into that enquiry's detail is what the link is actually for; the anchor is
+  // the fallback for a browser with JavaScript disabled or slow to hydrate.
+  useEffect(() => {
+    const match = /^#inquiry-(.+)$/.exec(window.location.hash);
+    if (match?.[1]) setSelectedId(match[1]);
+  }, []);
+
+  const now = Date.now();
+  const filtered = inquiries.filter(
+    (inquiry) =>
+      (statusFilter === "all" || inquiry.status === statusFilter) &&
+      withinRange(inquiry, rangeFilter, now),
+  );
+  const unreadTotal = inquiries.filter((inquiry) => inquiry.status === "new").length;
+  const selected = selectedId ? (inquiries.find((inquiry) => inquiry.id === selectedId) ?? null) : null;
 
   return (
     <AdminScreen breadcrumb={[{ label: "Inbox" }]} heading="Inbox" description={DESCRIPTION}>
       {isMailEnabled ? (
-        <p className="text-small mb-6 max-w-[70ch] rounded-sm bg-ink-4 px-5 py-4 text-ink">
-          {EMAILED}
-        </p>
+        <p className="text-small mb-6 max-w-[70ch] rounded-sm bg-ink-4 px-5 py-4 text-ink">{EMAILED}</p>
       ) : (
         <p className="text-small mb-6 max-w-[70ch] rounded-sm border border-accent bg-accent-8 px-5 py-4 text-ink">
           {NOT_EMAILED}
         </p>
       )}
 
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        {STATUS_FILTERS.map((entry) => (
+          <FilterButton
+            key={entry.key}
+            active={statusFilter === entry.key}
+            onClick={() => setStatusFilter(entry.key)}
+          >
+            {entry.label}
+          </FilterButton>
+        ))}
+        <span className="mx-1 hidden h-5 w-px bg-hairline sm:block" aria-hidden="true" />
+        {RANGE_FILTERS.map((entry) => (
+          <FilterButton
+            key={entry.key}
+            active={rangeFilter === entry.key}
+            onClick={() => setRangeFilter(entry.key)}
+          >
+            {entry.label}
+          </FilterButton>
+        ))}
+      </div>
+
       <AdminPanel
         label="Enquiries"
-        meta={unread > 0 ? `${unread} unread · ${open.length}` : `${open.length}`}
+        meta={unreadTotal > 0 ? `${unreadTotal} unread · ${filtered.length} shown` : `${filtered.length} shown`}
       >
-        {open.length === 0 ? (
-          <AdminPanelEmpty message={EMPTY} />
+        {filtered.length === 0 ? (
+          <AdminPanelEmpty message={inquiries.length === 0 ? NO_SUBMISSIONS : NO_MATCHES} />
         ) : (
-          <div className="divide-y divide-hairline">
-            {open.map((inquiry) => (
-              <Enquiry key={inquiry.id} inquiry={inquiry} />
+          <ul className="divide-y divide-hairline">
+            {filtered.map((inquiry) => (
+              <Row key={inquiry.id} inquiry={inquiry} onOpen={() => setSelectedId(inquiry.id)} />
             ))}
-          </div>
+          </ul>
         )}
       </AdminPanel>
 
-      {archived.length > 0 ? (
-        <div className="mt-8">
-          <AdminPanel label="Archived" meta={`${archived.length}`}>
-            <div className="divide-y divide-hairline">
-              {archived.map((inquiry) => (
-                <Enquiry key={inquiry.id} inquiry={inquiry} />
-              ))}
-            </div>
-          </AdminPanel>
-        </div>
+      {selected ? (
+        <InquiryDetailDialog inquiry={selected} onClosed={() => setSelectedId(null)} />
       ) : null}
     </AdminScreen>
   );

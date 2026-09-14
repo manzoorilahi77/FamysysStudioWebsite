@@ -65,7 +65,12 @@ export function ValueField({ value, draft, error, isChanged, onChange }: ValueFi
     .filter((entry) => entry !== null)
     .join(" ");
 
-  const locked = !value.pointer;
+  // Absent pointer alone does not mean locked — `CmsMedia.src` has always carried no
+  // pointer while staying fully editable in the database (see its own doc comment), and
+  // the SEO fields are the same shape: no literal in the TypeScript files to point at, but
+  // a real, writable content_strings row all the same. `readOnlyReason` is what actually
+  // says a field cannot be changed; every value that has neither is editable.
+  const locked = !value.pointer && value.readOnlyReason !== undefined;
   const common = {
     id,
     value: draft,

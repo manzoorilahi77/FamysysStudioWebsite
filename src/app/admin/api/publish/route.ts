@@ -3,6 +3,7 @@ import { adminContainer } from "../../../../infrastructure/di/adminContainer";
 import { routesForOwners } from "../../../../infrastructure/cms/routes";
 import { publishedTo } from "../../revalidate";
 import { hasAdminSession, unauthorised } from "../../session";
+import { logActivityFor } from "../activity";
 import { json, parseTarget } from "../shared";
 
 /**
@@ -36,5 +37,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   publishedTo(result.routes);
+  if (result.published > 0) {
+    await logActivityFor(target, "published");
+  }
   return json(result, 200);
 }

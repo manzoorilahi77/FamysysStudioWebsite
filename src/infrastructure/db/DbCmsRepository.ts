@@ -1,4 +1,5 @@
 import type { PoolConnection } from "mysql2/promise";
+import type { CmsActivityAction, CmsActivityEntry } from "../../domain/cms/entities/CmsActivityEntry";
 import type { CmsInquiry, CmsInquiryStatus } from "../../domain/cms/entities/CmsInquiry";
 import type { CmsPage } from "../../domain/cms/entities/CmsPage";
 import type { ContentAddress, ContentFieldAddress } from "../../domain/cms/entities/ContentAddress";
@@ -11,7 +12,12 @@ import { StaticCmsRepository } from "../cms/StaticCmsRepository";
 import { withDrafts } from "../cms/drafts";
 import { derivedId } from "../cms/records";
 import { cachedRows } from "./content/cache";
-import type { ContentDraftDetailRow, ContentStringDetailRow, InquiryRow } from "./content/rows";
+import type {
+  ActivityLogRow,
+  ContentDraftDetailRow,
+  ContentStringDetailRow,
+  InquiryRow,
+} from "./content/rows";
 import { toDate } from "./content/rows";
 import { transaction, write } from "./pool";
 import { mediaKindFromPath } from "./repositories/shared";
@@ -51,6 +57,9 @@ export class DbCmsRepository extends StaticCmsRepository {
 
   /** The preview lays `content_drafts` over `content_strings` — see content/preview.ts. */
   override readonly supportsDraftPreview = true;
+
+  /** The database has a table for it — see `activity_log`, migration 013. */
+  override readonly supportsActivityLog = true;
 
   override async getPages(): Promise<ReadonlyArray<CmsPage>> {
     const [pages, drafts, versions] = await Promise.all([
@@ -342,6 +351,43 @@ export class DbCmsRepository extends StaticCmsRepository {
     if (result.affectedRows === 0) {
       throw new Error("That enquiry is no longer there. Reload the inbox.");
     }
+  }
+
+  /**
+   * Never throws. A save or a publish that already succeeded must not be reported as
+   * failed because the row recording it could not be written — the log is a convenience
+   * for the Dashboard, not part of the guarantee the action itself makes.
+   */
+  override async logActivity(entry: {
+    readonly action: CmsActivityAction;
+    readonly pageLabel: string;
+    readonly sectionLabel?: string;
+  }): Promise<void> {
+    try {
+      await write(
+        `INSERT INTO activity_log (action, page_label, section_label) VALUES (?, ?, ?)`,
+        [entry.action, entry.pageLabel, entry.sectionLabel ?? null],
+      );
+    } catch (error: unknown) {
+      console.error("[admin] Activity could not be logged:", (error as Error)?.name);
+    }
+  }
+
+  override async getRecentActivity(limit: number): Promise<ReadonlyArray<CmsActivityEntry>> {
+    // A bound parameter rather than an inline number, `LIMIT` is one of the few clauses
+    // mysql2's prepared `execute()` will not accept a placeholder for — so the value is
+    // validated as a genuine positive integer and interpolated, the same reasoning
+    // `placeholders()` in pool.ts rests on for its own dynamic SQL shape.
+    const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 15;
+    const found = await cachedRows<ActivityLogRow>(
+      `SELECT * FROM activity_log ORDER BY occurred_at DESC, id DESC LIMIT ${safeLimit}`,
+    );
+    return found.map((entry) => ({
+      action: entry.action,
+      pageLabel: entry.page_label,
+      sectionLabel: entry.section_label,
+      occurredAt: toDate(entry.occurred_at) ?? new Date(0),
+    }));
   }
 }
 

@@ -7,12 +7,14 @@ import type { AdminNavigation } from "../../../application/cms/GetAdminNavigatio
 import { Wordmark } from "../../components/Wordmark";
 
 /**
- * SEVEN PAGES AND AN INBOX. Nothing else, ever again.
+ * A DASHBOARD, SEVEN PAGES, AN SEO SCREEN, AND AN INBOX. Nothing else, ever again.
  *
  * The list is not written here — see `GetAdminNavigation`. What this file decides is only
  * how it behaves: a page expands in place to show the blocks it renders, in the order the
  * page renders them, and selecting one opens its editor beside the sidebar. Nobody has to
- * go back to a list screen to move between two sections of the same page.
+ * go back to a list screen to move between two sections of the same page. Dashboard and SEO
+ * are plain links, the same shape the inbox has always been — a fixed destination with no
+ * section list of its own.
  *
  * WHAT IS OPEN. The page you are on, always — arriving at a section must not leave its
  * page collapsed. Beyond that it is the editor's own toggling, held in state, so opening a
@@ -38,6 +40,31 @@ function DraftDot({ what }: { readonly what: string }) {
   );
 }
 
+/** A plain fixed-destination row — Dashboard, SEO. Same shape the Inbox link has always been. */
+function SidebarLink({
+  href,
+  label,
+  active,
+}: {
+  readonly href: string;
+  readonly label: string;
+  readonly active: boolean;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className={`text-small flex min-h-11 items-center py-2 pl-6 pr-4 transition-colors duration-[180ms] ${
+          active ? "bg-canvas-10 text-canvas" : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"
+        }`}
+        aria-current={active ? "page" : undefined}
+      >
+        {label}
+      </Link>
+    </li>
+  );
+}
+
 export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigation }) {
   const pathname = usePathname();
   const [opened, setOpened] = useState<ReadonlyArray<string>>([]);
@@ -49,6 +76,16 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
       </Link>
 
       <div className="flex flex-col gap-7">
+        <div>
+          <ul>
+            <SidebarLink
+              href={navigation.dashboard.href}
+              label="Dashboard"
+              active={isActive(pathname, navigation.dashboard.href)}
+            />
+          </ul>
+        </div>
+
         <div>
           <p className="label px-6 pb-3 text-canvas-40">Pages</p>
           <ul>
@@ -118,6 +155,16 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
                 </li>
               );
             })}
+          </ul>
+        </div>
+
+        <div>
+          <ul>
+            <SidebarLink
+              href={navigation.seo.href}
+              label="SEO"
+              active={isActive(pathname, navigation.seo.href)}
+            />
           </ul>
         </div>
 

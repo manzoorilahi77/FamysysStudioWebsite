@@ -1,3 +1,4 @@
+import type { CmsActivityAction, CmsActivityEntry } from "../../../domain/cms/entities/CmsActivityEntry";
 import type { CmsInquiry, CmsInquiryStatus } from "../../../domain/cms/entities/CmsInquiry";
 import type { CmsPage } from "../../../domain/cms/entities/CmsPage";
 import type { CmsRecord, CmsValue } from "../../../domain/cms/entities/CmsRecord";
@@ -142,5 +143,24 @@ export class FakeCmsRepository implements CmsRepository {
   async setInquiryStatus(id: string, status: CmsInquiryStatus): Promise<void> {
     if (this.failWith) throw this.failWith;
     this.statuses.push({ id, status });
+  }
+
+  readonly loggedActivity: Array<{
+    action: CmsActivityAction;
+    pageLabel: string;
+    sectionLabel?: string;
+  }> = [];
+  supportsActivityLog = true;
+
+  async logActivity(entry: {
+    readonly action: CmsActivityAction;
+    readonly pageLabel: string;
+    readonly sectionLabel?: string;
+  }): Promise<void> {
+    this.loggedActivity.push({ ...entry });
+  }
+
+  async getRecentActivity(_limit: number): Promise<ReadonlyArray<CmsActivityEntry>> {
+    return [];
   }
 }

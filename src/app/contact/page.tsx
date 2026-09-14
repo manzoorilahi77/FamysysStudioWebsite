@@ -8,7 +8,9 @@ import { Header } from "../../presentation/layout/Header";
 import { ContactFormSection } from "../../presentation/sections/contact/ContactFormSection";
 import { ContactHero } from "../../presentation/sections/contact/ContactHero";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/contact",
@@ -16,6 +18,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Tell Famysys Studio what you are trying to create, who it is for and when you need it. Send a brief and hear back from the person who would direct the work.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Contact", path: "/contact" },
+]);
 
 /**
  * The seventh and last page, and the destination of nearly every call to action on the
@@ -43,6 +50,7 @@ export default async function ContactRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       {/* The only route that passes this. The bar is transparent at scroll 0 everywhere
           else because everywhere else opens on ink; ContactHero opens on canvas, and a
           transparent bar would put canvas nav links on a canvas ground at 1:1. */}

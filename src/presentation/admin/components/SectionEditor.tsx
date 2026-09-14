@@ -70,13 +70,16 @@ export function SectionEditor({
   // See the note at the top of this file: publishing over unsaved typing is silent.
   const publishBlocked = editor.isDirty;
 
-  const setPreview = useCallback(async (enable: boolean) => {
-    await fetch("/admin/api/preview", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ enable }),
-    }).catch(() => undefined);
-  }, []);
+  const setPreview = useCallback(
+    async (enable: boolean) => {
+      await fetch("/admin/api/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ enable, target }),
+      }).catch(() => undefined);
+    },
+    [target],
+  );
 
   const openPreview = useCallback(async () => {
     await setPreview(true);

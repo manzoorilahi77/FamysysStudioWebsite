@@ -3,6 +3,7 @@ import { DomainError } from "../../domain/shared/errors/DomainError";
 import { CtaLabel } from "../../domain/shared/value-objects/CtaLabel";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import { Url } from "../../domain/shared/value-objects/Url";
+import { SITE_ROUTES } from "../../shared/site/site";
 
 /**
  * AN EDIT IS REJECTED BY THE SITE'S OWN RULES, NOT BY A SECOND SET WRITTEN FOR THE ADMIN.
@@ -39,6 +40,23 @@ const ALT_CHECK_ASPECT_RATIO = "4:3" as const;
 const MEDIA_ROOT = "/media/";
 const MEDIA_PATH_MESSAGE =
   'A media file has to be a path under "/media/" — the folder this site serves its own files from.';
+
+/**
+ * THE SAME TWO NUMBERS THE SEO SCREEN COUNTS AGAINST LIVE, AS A HARD FLOOR.
+ *
+ * A live character count in the browser is advice; it can be bypassed by a devtools console
+ * or a request built by hand. These are the same two limits enforced here as well, so a
+ * title or description that is too long for a search result is refused at Save rather than
+ * merely warned about.
+ */
+const SEO_TITLE_MAX = 60;
+const SEO_DESCRIPTION_MAX = 160;
+
+function lengthProblem(candidate: string, max: number, noun: string): string | null {
+  return candidate.length > max
+    ? `${noun} is ${candidate.length} characters — ${max} is the limit search engines reliably show.`
+    : null;
+}
 
 /** Alt text is checked against an image; a file path is checked against whatever it is. */
 function kindForExtension(path: string): "image" | "video" {
@@ -143,6 +161,14 @@ export function validateContentValue(
         return null;
       case "text":
         return null;
+      case "seoTitle":
+        return lengthProblem(candidate, SEO_TITLE_MAX, "The title");
+      case "seoDescription":
+        return lengthProblem(candidate, SEO_DESCRIPTION_MAX, "The description");
+      case "seoCanonical":
+        return (SITE_ROUTES as ReadonlyArray<string>).includes(candidate)
+          ? null
+          : "That is not a real route on this site — the canonical URL has to be a page the site actually serves.";
     }
   } catch (error: unknown) {
     return messageFor(error);

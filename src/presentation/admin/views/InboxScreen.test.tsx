@@ -11,10 +11,10 @@ import { InboxScreen } from "./InboxScreen";
  * `setInquiryStatus` refuses — so a Playwright test of listing, mark-as-read and archive
  * would be a test of an empty list, passing without asserting anything.
  *
- * Rendering the screen here against real enquiries and driving the same two controls is
- * what can actually be proved from this machine. What is NOT proved is that the endpoint
- * behind them writes the row; that is one line of the database checklist in
- * docs/deployment.md.
+ * The list shows one line per enquiry; the full record is behind a modal opened by clicking
+ * the row, which is what most of these tests open before asserting on a field. What is NOT
+ * proved is that the endpoint behind Mark read / Archive writes the row; that is one line of
+ * the database checklist in docs/deployment.md.
  */
 
 const refresh = vi.fn();
@@ -40,11 +40,17 @@ function inquiry(overrides: Partial<CmsInquiry> & Pick<CmsInquiry, "id">): CmsIn
 
 beforeEach(() => {
   refresh.mockReset();
+  window.location.hash = "";
   vi.stubGlobal(
     "fetch",
     vi.fn(async () => new Response("{}", { status: 200 })),
   );
 });
+
+function openRow(name: string) {
+  fireEvent.click(screen.getByRole("button", { name: new RegExp(name) }));
+  return screen.getByRole("dialog");
+}
 
 describe("InboxScreen", () => {
   it("lists enquiries newest first", () => {
@@ -57,12 +63,12 @@ describe("InboxScreen", () => {
       />,
     );
 
-    const names = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent);
-    expect(names[0]).toContain("Newer");
-    expect(names[1]).toContain("Older");
+    const rows = screen.getAllByRole("button", { name: /Newer|Older/ });
+    expect(rows[0]).toHaveTextContent("Newer");
+    expect(rows[1]).toHaveTextContent("Older");
   });
 
-  it("shows every field the sender filled in", () => {
+  it("opens the full record, with every field the sender filled in, on click", () => {
     render(
       <InboxScreen
         inquiries={[
@@ -77,16 +83,17 @@ describe("InboxScreen", () => {
       />,
     );
 
-    expect(screen.getByText("Northwind")).toBeInTheDocument();
-    expect(screen.getByText("50–200")).toBeInTheDocument();
-    expect(screen.getByText("https://northwind.example")).toBeInTheDocument();
-    expect(screen.getByText("Marketing Lead")).toBeInTheDocument();
+    const dialog = openRow("Priya Raman");
+    expect(within(dialog).getByText("Northwind")).toBeInTheDocument();
+    expect(within(dialog).getByText("50–200")).toBeInTheDocument();
+    expect(within(dialog).getByText("https://northwind.example")).toBeInTheDocument();
+    expect(within(dialog).getByText("Marketing Lead")).toBeInTheDocument();
     expect(
-      screen.getByText("Six explainer videos before the end of the quarter."),
+      within(dialog).getByText("Six explainer videos before the end of the quarter."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "priya@example.com" })).toHaveAttribute(
+    expect(within(dialog).getByRole("link", { name: "Reply by email" })).toHaveAttribute(
       "href",
-      "mailto:priya@example.com",
+      expect.stringContaining("mailto:priya@example.com"),
     );
   });
 
@@ -99,22 +106,24 @@ describe("InboxScreen", () => {
       />,
     );
 
+    const dialog = openRow("Priya Raman");
     // Asked and left blank: shown, as blank.
-    expect(screen.getByText("Website")).toBeInTheDocument();
-    expect(screen.getByText("Left blank")).toBeInTheDocument();
+    expect(within(dialog).getByText("Website")).toBeInTheDocument();
+    expect(within(dialog).getByText("Left blank")).toBeInTheDocument();
     // Never asked: absent altogether, not shown as empty.
-    expect(screen.queryByText("Role")).not.toBeInTheDocument();
+    expect(within(dialog).queryByText("Role")).not.toBeInTheDocument();
   });
 
-  it("carries a machine-readable timestamp", () => {
+  it("carries a machine-readable timestamp on the row", () => {
     const { container } = render(<InboxScreen inquiries={[inquiry({ id: "a" })]} />);
     expect(container.querySelector("time")).toHaveAttribute("datetime", "2026-09-01T09:30:00.000Z");
   });
 
-  it("marks an enquiry as read", async () => {
+  it("marks an enquiry as read from the row, inline", async () => {
     render(<InboxScreen inquiries={[inquiry({ id: "abc", status: "new" })]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Mark read" }));
+    const row = screen.getByText("Priya Raman").closest("li") as HTMLElement;
+    fireEvent.click(within(row).getByRole("button", { name: "Mark read" }));
 
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(
@@ -128,11 +137,12 @@ describe("InboxScreen", () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled());
   });
 
-  it("archives an enquiry, and offers no Mark read once it is not new", async () => {
+  it("archives an enquiry from inside the modal, and offers no Mark read once it is not new", async () => {
     render(<InboxScreen inquiries={[inquiry({ id: "abc", status: "read" })]} />);
 
-    expect(screen.queryByRole("button", { name: "Mark read" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+    const dialog = openRow("Priya Raman");
+    expect(within(dialog).queryByRole("button", { name: "Mark read" })).not.toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Archive" }));
 
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(
@@ -142,7 +152,7 @@ describe("InboxScreen", () => {
     );
   });
 
-  it("keeps archived enquiries in their own panel, with a way back", async () => {
+  it("keeps archived enquiries listed, with a way back", async () => {
     render(
       <InboxScreen
         inquiries={[
@@ -152,17 +162,38 @@ describe("InboxScreen", () => {
       />,
     );
 
-    const archived = screen.getByText("Archived").closest("section");
-    expect(archived).not.toBeNull();
-    expect(within(archived as HTMLElement).getByText(/Archived one/)).toBeInTheDocument();
+    const row = screen.getByText("Archived one").closest("li") as HTMLElement;
+    expect(within(row).getByText("Archived")).toBeInTheDocument();
+    fireEvent.click(within(row).getByRole("button", { name: "Put back in the inbox" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Put back in the inbox" }));
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(
         "/admin/api/inquiries",
         expect.objectContaining({ body: JSON.stringify({ id: "gone", status: "read" }) }),
       ),
     );
+  });
+
+  it("filters by status", () => {
+    render(
+      <InboxScreen
+        inquiries={[
+          inquiry({ id: "a", name: "New one", status: "new" }),
+          inquiry({ id: "b", name: "Archived one", status: "archived" }),
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Archived" }));
+    expect(screen.queryByText("New one")).not.toBeInTheDocument();
+    expect(screen.getByText("Archived one")).toBeInTheDocument();
+  });
+
+  it("opens the enquiry named in the URL hash on load", () => {
+    window.location.hash = "#inquiry-abc";
+    render(<InboxScreen inquiries={[inquiry({ id: "abc" })]} />);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("says a failure happened rather than looking like it worked", async () => {
@@ -175,7 +206,8 @@ describe("InboxScreen", () => {
     );
     render(<InboxScreen inquiries={[inquiry({ id: "abc" })]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Mark read" }));
+    const row = screen.getByText("Priya Raman").closest("li") as HTMLElement;
+    fireEvent.click(within(row).getByRole("button", { name: "Mark read" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("There is no inbox.");
     expect(refresh).not.toHaveBeenCalled();

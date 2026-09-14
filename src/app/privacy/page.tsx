@@ -7,7 +7,9 @@ import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
 import { LegalDocumentPage } from "../../presentation/sections/legal/LegalDocumentPage";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/privacy",
@@ -15,6 +17,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "What this website collects when you send an enquiry, what it does not, who can see it, how long it is kept, and what you can ask us to do with it.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Privacy Policy", path: "/privacy" },
+]);
 
 /**
  * The second of the two legal documents. Every clause was checked against what this site
@@ -32,6 +39,7 @@ export default async function PrivacyRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} solidAtTop />
       <main id="main-content">
         <LegalDocumentPage document={document} />

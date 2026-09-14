@@ -7,7 +7,9 @@ import { Footer } from "../../presentation/layout/Footer";
 import { Header } from "../../presentation/layout/Header";
 import { LegalDocumentPage } from "../../presentation/sections/legal/LegalDocumentPage";
 import { toFooterContentView, toNavigationMenuView } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/terms",
@@ -15,6 +17,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "The terms on which this website is published: what it is, how it may be used, how an enquiry is treated, and where the work itself is governed.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Terms & Conditions", path: "/terms" },
+]);
 
 /**
  * One of the two documents the footer's LEGAL column has linked since it was rebuilt and
@@ -32,6 +39,7 @@ export default async function TermsRoute() {
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
       <Header navigation={navigationView} solidAtTop />
       <main id="main-content">
         <LegalDocumentPage document={document} />

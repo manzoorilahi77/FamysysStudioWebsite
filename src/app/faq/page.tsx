@@ -13,7 +13,9 @@ import {
   toFooterContentView,
   toNavigationMenuView,
 } from "../../presentation/lib/viewModels";
+import { JsonLd } from "../../presentation/seo/JsonLd";
 import { pageMetadata } from "../../shared/site/metadata";
+import { breadcrumbSchema, faqPageSchema } from "../../shared/site/structured-data";
 
 export const metadata: Metadata = pageMetadata({
   route: "/faq",
@@ -21,6 +23,11 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Every question asked across the site, in one place with the answers open — who the studio works with, what it makes, how the work runs, and what it costs.",
 });
+
+const BREADCRUMB = breadcrumbSchema([
+  { name: "Famysys Studio", path: "/" },
+  { name: "Questions", path: "/faq" },
+]);
 
 /**
  * EVERY QUESTION ON THE SITE, ON ONE PAGE.
@@ -48,9 +55,12 @@ export default async function FaqRoute() {
 
   const navigationView = toNavigationMenuView(navigation);
   const pageView = toFaqPageView(page);
+  const faqSchema = faqPageSchema(page.groups);
 
   return (
     <>
+      <JsonLd data={BREADCRUMB} />
+      <JsonLd data={faqSchema} />
       <Header navigation={navigationView} solidAtTop />
       <main id="main-content">
         <FaqHero hero={pageView.hero} />
