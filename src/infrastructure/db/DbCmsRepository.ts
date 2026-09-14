@@ -1,3 +1,4 @@
+import type { PoolConnection } from "mysql2/promise";
 import type { CmsInquiry, CmsInquiryStatus } from "../../domain/cms/entities/CmsInquiry";
 import type { CmsPage } from "../../domain/cms/entities/CmsPage";
 import type { ContentAddress, ContentFieldAddress } from "../../domain/cms/entities/ContentAddress";
@@ -13,6 +14,7 @@ import { cachedRows } from "./content/cache";
 import type { ContentDraftDetailRow, ContentStringDetailRow, InquiryRow } from "./content/rows";
 import { toDate } from "./content/rows";
 import { transaction, write } from "./pool";
+import { mediaKindFromPath } from "./repositories/shared";
 
 /**
  * THE PANEL, OVER THE DATABASE.
@@ -186,6 +188,8 @@ export class DbCmsRepository extends StaticCmsRepository {
             "One of these strings changed after this edit was saved, so nothing was published. Reload the panel, check what it now says, and make the change again.",
           );
         }
+
+        await syncStructuralMedia(connection, draft);
       }
 
       await connection.execute(
@@ -339,6 +343,95 @@ export class DbCmsRepository extends StaticCmsRepository {
       throw new Error("That enquiry is no longer there. Reload the inbox.");
     }
   }
+}
+
+/**
+ * WHICH FIELD, ON WHICH COLLECTION, IS A STRUCTURAL MEDIA PATH — as opposed to plain copy.
+ *
+ * A collection record's file lives in its own table column (`capabilities.media_path`
+ * and so on — see `shared.ts`'s `media()`, which is what the public site actually reads),
+ * while `content_strings` carries only its ROW: the draft/version/conflict machinery, the
+ * same as any other field. Publish is the one moment the two have to be kept in step —
+ * moving the draft's value into `content_strings` is what every field gets; the column
+ * also being written is the part specific to a media file. Case studies carry two of
+ * these — the homepage tile's cover and the page's own — which is why this is a list per
+ * collection rather than one column.
+ */
+interface MediaColumnTarget {
+  readonly table: string;
+  readonly pathColumn: string;
+  readonly kindColumn: string;
+}
+
+const COLLECTION_MEDIA_COLUMNS: Record<
+  string,
+  ReadonlyArray<{ readonly fieldKey: string; readonly target: MediaColumnTarget }>
+> = {
+  capabilities: [
+    {
+      fieldKey: "media-src",
+      target: { table: "capabilities", pathColumn: "media_path", kindColumn: "media_kind" },
+    },
+  ],
+  "process-steps": [
+    {
+      fieldKey: "media-src",
+      target: { table: "process_steps", pathColumn: "media_path", kindColumn: "media_kind" },
+    },
+  ],
+  "engagement-tiers": [
+    {
+      fieldKey: "media-src",
+      target: { table: "engagement_tiers", pathColumn: "media_path", kindColumn: "media_kind" },
+    },
+  ],
+  "case-studies": [
+    {
+      fieldKey: "media-src",
+      target: {
+        table: "case_studies",
+        pathColumn: "detail_media_path",
+        kindColumn: "detail_media_kind",
+      },
+    },
+    {
+      fieldKey: "media-src-2",
+      target: {
+        table: "case_studies",
+        pathColumn: "home_media_path",
+        kindColumn: "home_media_kind",
+      },
+    },
+  ],
+};
+
+/**
+ * Runs after a collection record's `content_strings` row is published. A no-op for
+ * anything that is not one of the mapped media fields above — copy, alt text, a
+ * page-section field — all of which are already fully handled by the generic UPDATE.
+ *
+ * Table and column names come only from the closed map above, never from `draft` — the
+ * same reasoning `STRUCTURAL_TABLE` below rests on for its own interpolated names.
+ */
+async function syncStructuralMedia(
+  connection: PoolConnection,
+  draft: ContentDraftDetailRow,
+): Promise<void> {
+  if (draft.owner_kind !== "collection_record") return;
+  const separator = draft.owner_key.indexOf(":");
+  if (separator === -1) return;
+  const collectionId = draft.owner_key.slice(0, separator);
+  const recordSlug = draft.owner_key.slice(separator + 1);
+
+  const target = COLLECTION_MEDIA_COLUMNS[collectionId]?.find(
+    (entry) => entry.fieldKey === draft.field_key,
+  )?.target;
+  if (!target) return;
+
+  await connection.execute(
+    `UPDATE \`${target.table}\` SET \`${target.pathColumn}\` = ?, \`${target.kindColumn}\` = ? WHERE slug = ?`,
+    [draft.value, mediaKindFromPath(draft.value), recordSlug],
+  );
 }
 
 /**

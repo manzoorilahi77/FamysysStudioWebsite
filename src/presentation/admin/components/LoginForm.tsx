@@ -59,7 +59,7 @@ export function LoginForm({ next }: { readonly next?: string | undefined }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
-      <div className="w-full max-w-[22rem]">
+      <div className="enter-fade w-full max-w-[22rem]">
         <Wordmark alt="Famysys Studio" className="h-7" />
 
         <h1 className="text-display-s mt-10 text-ink">Sign in</h1>

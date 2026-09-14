@@ -1,6 +1,6 @@
 import type { CmsRecord } from "../../../domain/cms/entities/CmsRecord";
 import type { MarketingContent } from "../marketingContent";
-import { ctaFields, field, list, paragraph, readOnly, readOnlyList, toRecord } from "../records";
+import { ctaFields, field, list, media, paragraph, readOnly, readOnlyList, toRecord } from "../records";
 import {
   READ_ONLY,
   differentiator,
@@ -74,19 +74,17 @@ export function homeSections(
         {
           label: "Accordion bands",
           description:
-            "The six bands beside the type. Their file names are not copy, and the numeral beside each label is the band's position, so neither is editable.",
+            "The six bands beside the type. The numeral beside each label is the band's position, so that is not editable — the picture and its alt text are.",
           lists: [
             list(
               "Band labels",
               homepage.hero.bands.map((band) => band.label),
               (index) => heroBands(index, "label"),
             ),
-            list(
-              "Band alt text",
-              homepage.hero.bands.map((band) => band.media.alt),
-              (index) => heroBands(index, "alt"),
-            ),
           ],
+          media: homepage.hero.bands.map((band, index) =>
+            media(`Band ${index + 1} image`, band.media, heroBands(index, "alt")),
+          ),
         },
       ],
     }),
@@ -151,13 +149,11 @@ export function homeSections(
               homepage.differentiator.elements.map((item) => item.description),
               (index) => differentiator("elements", index, "description"),
             ),
-            list(
-              "Element alt text",
-              homepage.differentiator.elements.map((item) => item.media.alt),
-              // `differentiatorImage(file, alt)` — the alt is argument 1.
-              (index) => differentiator("elements", index, "media", 1),
-            ),
           ],
+          // `differentiatorImage(file, alt)` — the alt is argument 1.
+          media: homepage.differentiator.elements.map((item, index) =>
+            media(`Element ${index + 1} image`, item.media, differentiator("elements", index, "media", 1)),
+          ),
         },
       ],
     }),
@@ -269,13 +265,11 @@ export function homeSections(
               homepage.whyFamysys.reasons.map((reason) => reason.description),
               (index) => whyFamysys("reasons", index, "description"),
             ),
-            list(
-              "Reason alt text",
-              homepage.whyFamysys.reasons.map((reason) => reason.media.alt),
-              // `reasonImage(file, alt)` — the alt is argument 1.
-              (index) => whyFamysys("reasons", index, "media", 1),
-            ),
           ],
+          // `reasonImage(file, alt)` — the alt is argument 1.
+          media: homepage.whyFamysys.reasons.map((reason, index) =>
+            media(`Reason ${index + 1} image`, reason.media, whyFamysys("reasons", index, "media", 1)),
+          ),
         },
       ],
     }),

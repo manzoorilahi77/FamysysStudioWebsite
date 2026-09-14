@@ -183,7 +183,12 @@ async function seedValue(
     listKey,
     sortOrder,
     value.approval === "client" ? 1 : 0,
-    value.pointer ? 1 : 0,
+    // Not `value.pointer ? 1 : 0`: a media file's path carries no pointer even when it IS
+    // editable (see `CmsMedia.src`), so pointer presence cannot answer this for those two
+    // kinds. `readOnlyReason` is the one signal every kind sets consistently — a value has
+    // exactly one of a pointer or a reason, except mediaSrc/mediaPoster, which have a
+    // reason only when NOT editable and nothing else structural to check either way.
+    value.readOnlyReason ? 0 : 1,
     value.readOnlyReason ?? null,
     value.pointer?.file ?? null,
     value.pointer?.symbol ?? null,
@@ -224,6 +229,13 @@ async function seedRecordStrings(
   for (const group of record.groups) {
     for (const media of group.media) {
       await seedValue(connection, ownerKind, ownerKey, media.alt, null, order++);
+      // The file and its poster still, seeded the same way as the alt text beside them.
+      // Both were skipped here previously, which is why no media block's file has ever
+      // had a row to save a replacement against — see migration 012.
+      if (media.src) await seedValue(connection, ownerKind, ownerKey, media.src, null, order++);
+      if (media.posterValue) {
+        await seedValue(connection, ownerKind, ownerKey, media.posterValue, null, order++);
+      }
     }
   }
 }

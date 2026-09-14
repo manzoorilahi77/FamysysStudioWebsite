@@ -5,7 +5,7 @@ import type { ServiceCatalogRepository } from "../../../domain/services/reposito
 import { StaticServiceCatalogRepository } from "../../content/repositories/StaticServiceCatalogRepository";
 import { ContentStore } from "../content/ContentStore";
 import { closingCta } from "./DbMarketingContentRepository";
-import { capabilities, media, pageFaqItems, processSteps, slug } from "./shared";
+import { capabilities, media, pageFaqItems, pageMedia, processSteps, slug } from "./shared";
 
 /**
  * /creative-services, read from the database.
@@ -57,7 +57,7 @@ export class DbServiceCatalogRepository implements ServiceCatalogRepository {
         heading: page.text(hero, "heading"),
         body: page.text(hero, "body"),
         cta: page.cta(hero, "cta"),
-        media: mediaWithAlt(shape.hero.media, page.text(hero, "media-alt")),
+        media: pageMedia(page, hero, 0, shape.hero.media.aspectRatio),
       },
       indexLabel: page.text(index, "index-label"),
       deliverablesLabel: page.text(index, "deliverables-label"),
@@ -106,23 +106,4 @@ export class DbServiceCatalogRepository implements ServiceCatalogRepository {
       closingCta: closingCta(page, "creative-services:closing-cta"),
     };
   }
-}
-
-/** The file stays as the module has it; the description of it comes from the database. */
-export function mediaWithAlt(
-  reference: {
-    readonly src: { value: string };
-    readonly kind: string;
-    readonly aspectRatio: string;
-  },
-  alt: string,
-) {
-  return media(
-    {
-      media_path: reference.src.value,
-      media_kind: reference.kind,
-      media_ratio: reference.aspectRatio,
-    },
-    alt,
-  );
 }

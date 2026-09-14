@@ -58,6 +58,15 @@ function applyToRecord(record: CmsRecord, drafts: DraftIndex, versions: VersionI
         media: group.media.map((entry) => ({
           ...entry,
           alt: stamp(entry.alt, prefix, drafts, versions),
+          // The file and its poster still are saved and drafted the same way the alt
+          // text is — see `CmsMedia.src`/`posterValue` — but were never laid back onto
+          // the read model here, so a saved (unpublished) replacement's `draftValue` was
+          // always empty and the panel fell straight back to the published file on the
+          // next load. Same shape of gap as db-seed.ts skipping these two fields.
+          ...(entry.src ? { src: stamp(entry.src, prefix, drafts, versions) } : {}),
+          ...(entry.posterValue
+            ? { posterValue: stamp(entry.posterValue, prefix, drafts, versions) }
+            : {}),
         })),
       }))
     : record.groups;

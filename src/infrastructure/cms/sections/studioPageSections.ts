@@ -315,14 +315,16 @@ export function aboutSections(page: AboutPage, updatedAt: Date | null): Readonly
               ),
               multiline: true,
             },
-            // Each claim's image is its own top-level constant in about.content.ts, in the
-            // order the claims are written.
-            list(
-              "Claim alt text",
-              page.approach.claims.map((claim) => claim.media.alt),
-              (index) => aboutMediaAlt(CLAIM_MEDIA_CONSTANTS[index] ?? ""),
-            ),
           ],
+          // Each claim's image is its own top-level constant in about.content.ts, in the
+          // order the claims are written.
+          media: page.approach.claims.map((claim, index) =>
+            media(
+              `Claim ${index + 1} image`,
+              claim.media,
+              aboutMediaAlt(CLAIM_MEDIA_CONSTANTS[index] ?? ""),
+            ),
+          ),
         },
       ],
     }),

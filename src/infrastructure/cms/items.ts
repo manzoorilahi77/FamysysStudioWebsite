@@ -298,15 +298,6 @@ export function caseStudyCards(
               piece.whyThisPiece,
               pieceDrafts(piece.title, "whyThisPiece"),
             ),
-            // The homepage grid and the Selected Work page show DIFFERENT photographs of
-            // the same planned piece, so there are two alt texts in two files. This one is
-            // the homepage tile's; the page's own is on the image below.
-            field(
-              "Homepage cover alt text",
-              homepageCovers[index]?.media.alt ?? "",
-              plannedPieces(index, "coverAlt"),
-              "mediaAlt",
-            ),
           ],
           lists: [
             readOnlyList(
@@ -318,7 +309,14 @@ export function caseStudyCards(
         },
         {
           label: "Image",
-          media: [media("Page cover", piece.media, pieceDrafts(piece.title, "imageAlt"))],
+          // The homepage grid and the Selected Work page show DIFFERENT photographs of the
+          // same planned piece — two files, two independently replaceable images.
+          media: [
+            media("Page cover", piece.media, pieceDrafts(piece.title, "imageAlt")),
+            ...(homepageCovers[index]
+              ? [media("Homepage cover", homepageCovers[index].media, plannedPieces(index, "coverAlt"))]
+              : []),
+          ],
         },
       ],
     }),

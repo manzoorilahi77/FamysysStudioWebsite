@@ -13,8 +13,8 @@ import type {
   WhatWeDoIntro,
 } from "../../../domain/marketing/repositories/MarketingContentRepository";
 import { StaticMarketingContentRepository } from "../../content/repositories/StaticMarketingContentRepository";
-import { ContentStore, mediaFrom } from "../content/ContentStore";
-import { collectionRecordStore, faqItems, homeTiers } from "./shared";
+import { ContentStore } from "../content/ContentStore";
+import { collectionRecordStore, faqItems, homeTiers, pageMedia } from "./shared";
 
 /**
  * THE HOMEPAGE, READ FROM THE DATABASE.
@@ -24,12 +24,11 @@ import { collectionRecordStore, faqItems, homeTiers } from "./shared";
  * field keys the admin panel shows — and nothing above this layer can tell.
  *
  * WHAT STILL COMES FROM THE CONTENT MODULE, AND WHY.
- * The image files behind the hero accordion, the four differentiator cards and the five
- * reasons: their PATHS and aspect ratios. Those are not copy — nobody edits them in a
- * text field, they are files that have to exist on disk in a particular shape — so they
- * are structure the module still owns, while every word beside them, alt text included,
- * comes from the database. The moment media upload exists they move too, and this class
- * is where that change lands.
+ * The ASPECT RATIO of the hero accordion, the four differentiator cards and the five
+ * reasons — a layout decision for the slot, never a property of whichever file sits in
+ * it, so it stays structure. The file itself and its alt text both come from the
+ * database now (see `pageMedia` in `./shared`), which is what makes a save reach the
+ * live page at all.
  *
  * One store per read rather than one for the whole class: these methods are called from
  * server components during a build, and a cached store would serve a page from a snapshot
@@ -69,7 +68,6 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
     const owner = "home:differentiator";
     const titles = store.list(owner, "element-titles");
     const descriptions = store.list(owner, "element-descriptions");
-    const alts = store.list(owner, "element-alt-text");
     return {
       heading: store.text(owner, "heading"),
       body: store.text(owner, "body"),
@@ -78,7 +76,7 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
       elements: titles.map((title, index) => ({
         title,
         description: descriptions[index] ?? "",
-        media: mediaAt(shape.elements, index, alts[index] ?? ""),
+        media: pageMedia(store, owner, index, aspectRatioAt(shape.elements, index, "element")),
       })),
     };
   }
@@ -124,14 +122,13 @@ export class DbMarketingContentRepository implements MarketingContentRepository 
     const owner = "home:why-famysys";
     const titles = store.list(owner, "reason-titles");
     const descriptions = store.list(owner, "reason-descriptions");
-    const alts = store.list(owner, "reason-alt-text");
     return {
       heading: store.text(owner, "heading"),
       body: store.text(owner, "body"),
       reasons: titles.map((title, index) => ({
         title,
         description: descriptions[index] ?? "",
-        media: mediaAt(shape.reasons, index, alts[index] ?? ""),
+        media: pageMedia(store, owner, index, aspectRatioAt(shape.reasons, index, "reason")),
       })),
     };
   }
@@ -192,37 +189,29 @@ export function faqBlockFrom(items: ReadonlyArray<FaqItem>): FaqBlock {
 }
 
 /**
- * The file and its shape from the structural entity, the alt text from the database.
- *
- * An index past the end means the database has more strings than the module has images,
- * which is a seeding mismatch rather than something to paper over — it throws, naming the
- * index, the same way a missing key does.
+ * The one thing still taken from the content module for one of these repeated blocks: its
+ * slot's aspect ratio, by position. An index past the end means the database has more
+ * rows than the module has images — a seeding mismatch rather than something to paper
+ * over, so it throws, naming which block, the same way a missing key does.
  */
-function mediaAt(
-  shape: ReadonlyArray<{
-    readonly media: {
-      readonly src: { value: string };
-      readonly kind: string;
-      readonly aspectRatio: string;
-    };
-  }>,
+function aspectRatioAt(
+  shape: ReadonlyArray<{ readonly media: { readonly aspectRatio: MediaRef["aspectRatio"] } }>,
   index: number,
-  alt: string,
-) {
+  noun: string,
+): MediaRef["aspectRatio"] {
   const found = shape[index];
   if (!found) {
     throw new Error(
-      `No image for element ${index}. The content module defines ${shape.length}; the database has more.`,
+      `No ${noun} shape at position ${index}. The content module defines ${shape.length}; the database has more.`,
     );
   }
-  return mediaFrom(found.media.src.value, found.media.kind, found.media.aspectRatio, alt);
+  return found.media.aspectRatio;
 }
 
 /**
- * The accordion's bands. Two lists that have to line up by index — the label and the alt
- * text of the same band — read once each and zipped against the image paths the content
- * module still owns. The labels are the list of record: a band with no label is a band
- * the accordion cannot caption, so a missing alt is the error rather than a silent "".
+ * The accordion's bands. The label is the list of record — a band with no label is a band
+ * the accordion cannot caption — and the file and alt text beside it are read by position
+ * from the same section, through `pageMedia`.
  */
 function bands(
   store: ContentStore,
@@ -230,39 +219,8 @@ function bands(
   shape: ReadonlyArray<{ readonly media: MediaRef }>,
 ) {
   const labels = store.list(owner, "band-labels");
-  const alts = store.list(owner, "band-alt-text");
-  return labels.map((label, index) => {
-    const alt = alts[index];
-    if (alt === undefined) {
-      throw new Error(
-        `No alt text for band ${index}. The database has ${labels.length} band labels and ${alts.length} alt strings.`,
-      );
-    }
-    return {
-      label,
-      media: withAlt(
-        shape.map((band) => band.media),
-        index,
-        alt,
-      ),
-    };
-  });
-}
-
-function withAlt(
-  shape: ReadonlyArray<{
-    readonly src: { value: string };
-    readonly kind: string;
-    readonly aspectRatio: string;
-  }>,
-  index: number,
-  alt: string,
-) {
-  const found = shape[index];
-  if (!found) {
-    throw new Error(
-      `No image for band ${index}. The content module defines ${shape.length}; the database has more.`,
-    );
-  }
-  return mediaFrom(found.src.value, found.kind, found.aspectRatio, alt);
+  return labels.map((label, index) => ({
+    label,
+    media: pageMedia(store, owner, index, aspectRatioAt(shape, index, "band")),
+  }));
 }

@@ -2,14 +2,13 @@ import type { CmsValue } from "../../../domain/cms/entities/CmsRecord";
 import { autoGrowTextarea } from "../../lib/autoGrowTextarea";
 
 /**
- * One string, and everything an editor needs to know before changing it: whose words they
- * are, what the site is currently serving if this is a draft, where else the string
- * appears, and — when it cannot be changed here — why not.
+ * One string, and everything an editor needs to know before changing it: what the site is
+ * currently serving if this is a draft, where else the string appears, and — when it
+ * cannot be changed here — why not.
  *
  * The annotations are the reason this is not a plain labelled input. A CMS that shows only
- * the field lets someone rewrite the client's own headline believing it is placeholder
- * copy, and lets them change a sentence that six other pages also print without ever seeing
- * the other six.
+ * the field lets someone change a sentence that six other pages also print without ever
+ * seeing the other six.
  */
 
 /** How many other locations to name before summarising the rest. */
@@ -61,7 +60,6 @@ export function ValueField({ value, draft, error, isChanged, onChange }: ValueFi
     error ? `${id}-error` : null,
     value.readOnlyReason ? `${id}-locked` : null,
     value.draftValue !== undefined ? `${id}-live` : null,
-    value.approval === "client" ? `${id}-approval` : null,
     value.usedElsewhere.length > 0 ? `${id}-usage` : null,
   ]
     .filter((entry) => entry !== null)
@@ -84,11 +82,6 @@ export function ValueField({ value, draft, error, isChanged, onChange }: ValueFi
         <label htmlFor={id} className="label text-ink-60">
           {value.label}
         </label>
-        {value.approval === "client" ? (
-          <span className="label rounded-sm bg-accent-8 px-2 py-1 text-accent">Client copy</span>
-        ) : (
-          <span className="label rounded-sm bg-ink-4 px-2 py-1 text-ink-60">Drafted copy</span>
-        )}
         {value.draftValue !== undefined ? (
           <span className="label rounded-sm border border-accent px-2 py-1 text-accent">
             Saved, not published
@@ -124,13 +117,6 @@ export function ValueField({ value, draft, error, isChanged, onChange }: ValueFi
       {value.draftValue !== undefined ? (
         <p id={`${id}-live`} className="text-small mt-2 text-ink-40">
           Live on the site: <span className="text-graphite-70">{value.value}</span>
-        </p>
-      ) : null}
-
-      {value.approval === "client" && (isChanged || value.draftValue !== undefined) ? (
-        <p id={`${id}-approval`} className="text-small mt-2 text-accent">
-          This is the client&rsquo;s own copy, taken verbatim from their brief. Changing it is
-          changing approved content — the brief is the source, not this panel.
         </p>
       ) : null}
 

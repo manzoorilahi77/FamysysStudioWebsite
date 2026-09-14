@@ -3,14 +3,14 @@ import type { AboutRepository } from "../../../domain/about/repositories/AboutRe
 import { StaticAboutRepository } from "../../content/repositories/StaticAboutRepository";
 import { ContentStore } from "../content/ContentStore";
 import { closingCta } from "./DbMarketingContentRepository";
-import { mediaWithAlt } from "./DbServiceCatalogRepository";
+import { pageMedia } from "./shared";
 
 /**
  * /about, read from the database.
  *
  * The page carries six images and no collection, so it is the simplest of the five: every
- * field below is a string, and the only thing taken from the module is which file sits
- * beside which block.
+ * field below is a string, and the only thing taken from the module is each image slot's
+ * aspect ratio — see `pageMedia` in `./shared` for the file and alt text.
  *
  * `contributesLabel` and `stopsLabel` are per-panel in the entity but one pair of words
  * on the page — the panel edits them once, under the section, and they are applied to all
@@ -34,7 +34,6 @@ export class DbAboutRepository implements AboutRepository {
     const claimTitles = store.list(approach, "claim-titles");
     const claims = store.list(approach, "claims");
     const practice = store.list(approach, "in-practice");
-    const claimAlts = store.list(approach, "claim-alt-text");
 
     const panelNames = store.list(inputs, "panel-names");
     const contributes = store.list(inputs, "contributes");
@@ -49,7 +48,7 @@ export class DbAboutRepository implements AboutRepository {
         eyebrow: store.text(hero, "eyebrow"),
         heading: store.text(hero, "heading"),
         body: store.text(hero, "body"),
-        media: mediaWithAlt(shape.hero.media, store.text(hero, "media-alt")),
+        media: pageMedia(store, hero, 0, shape.hero.media.aspectRatio),
       },
       belief: {
         label: store.text(belief, "label"),
@@ -64,9 +63,11 @@ export class DbAboutRepository implements AboutRepository {
           title,
           claim: claims[index] ?? "",
           practice: practice[index] ?? "",
-          media: mediaWithAlt(
-            shape.approach.claims[index]?.media ?? shape.hero.media,
-            claimAlts[index] ?? "",
+          media: pageMedia(
+            store,
+            approach,
+            index,
+            shape.approach.claims[index]?.media.aspectRatio ?? shape.hero.media.aspectRatio,
           ),
         })),
       },
@@ -97,7 +98,7 @@ export class DbAboutRepository implements AboutRepository {
         eyebrow: store.text(ecosystem, "eyebrow"),
         heading: store.text(ecosystem, "heading"),
         paragraphs: store.list(ecosystem, "paragraphs"),
-        media: mediaWithAlt(shape.ecosystem.media, store.text(ecosystem, "media-alt")),
+        media: pageMedia(store, ecosystem, 0, shape.ecosystem.media.aspectRatio),
         link: store.cta(ecosystem, "link"),
       },
       direction: {
@@ -107,7 +108,7 @@ export class DbAboutRepository implements AboutRepository {
         ambition: store.text(direction, "ambition"),
         presentLabel: store.text(direction, "present-label"),
         present: store.text(direction, "present"),
-        media: mediaWithAlt(shape.direction.media, store.text(direction, "media-alt")),
+        media: pageMedia(store, direction, 0, shape.direction.media.aspectRatio),
       },
       closingCta: closingCta(store, "about:closing-cta"),
     };

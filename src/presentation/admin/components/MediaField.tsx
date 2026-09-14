@@ -39,6 +39,13 @@ import { ValueField } from "./ValueField";
  * rather than a missing feature: a hand-typed path is a 404 that looks exactly like a
  * working field until someone loads the page. The only ways to set it are to upload a file
  * or to undo back to the published one.
+ *
+ * REMOVE CLEARS THE DRAFT, NOT THE SLOT. A slot's file is a required field the same way its
+ * alt text is — `validateContentValue` rejects an empty `mediaSrc` the way it rejects an
+ * empty heading — so "Remove" cannot leave the site with nothing there; it clears the box
+ * and says so, the same rejection Save would already produce, stated before the click
+ * rather than after it. It exists for the editor who wants the old file gone and a new one
+ * chosen deliberately, rather than replaced in the same motion.
  */
 
 const ACCEPT = ACCEPTED_EXTENSIONS.map((extension) => `.${extension}`).join(",");
@@ -119,11 +126,20 @@ export function MediaField({
   const [frame, setFrame] = useState(0);
 
   const canReplace = media.src !== undefined && media.src.readOnlyReason === undefined;
-  const shown = isSrcChanged ? srcDraft : media.path;
+  // `srcDraft`/`posterDraft` already resolve box override, then saved-but-unpublished
+  // draft, then published value, in that order (see `currentValue` and how RecordFields
+  // builds these props) — so they are what belongs on screen in every state. Gating them
+  // behind `isSrcChanged` was wrong: that flag goes false the moment a draft is SAVED
+  // (the box is cleared), at which point the preview fell back to `media.path` — the
+  // still-published, now-stale file — even though a newer, saved-but-unpublished one
+  // exists. That is the bug behind "I replaced the image, saved the draft, and the old
+  // one came back."
+  const shown = srcDraft;
+  const isRemoved = shown === "";
   // What is ON SCREEN decides the element, not what the record stores: a slot holding a JPEG
   // today shows a video the moment one is chosen for it.
-  const showingVideo = isSrcChanged ? isVideoPath(srcDraft) : media.kind === "video";
-  const shownPoster = isSrcChanged ? posterDraft : media.poster;
+  const showingVideo = isVideoPath(shown);
+  const shownPoster = posterDraft;
 
   const choose = useCallback(() => {
     setUpload({ kind: "idle" });
@@ -220,13 +236,34 @@ export function MediaField({
     onPosterChange(media.poster ?? "");
   }, [media.path, media.poster, onPosterChange, onSrcChange]);
 
+  // Clears the reference rather than deleting the underlying file — nothing on the site
+  // moves until this is saved and published, same as a replacement. The slot is never
+  // actually left empty on the live site: `mediaSrc` rejects an empty value at Save, the
+  // same rule that rejects any other required field, so the message below is not a special
+  // case invented for this button — it is what already happens, said before the click.
+  const remove = useCallback(() => {
+    setUpload({ kind: "idle" });
+    setChosenVideo(null);
+    setFrame(0);
+    onSrcChange("");
+    if (posterDraft) onPosterChange("");
+  }, [onPosterChange, onSrcChange, posterDraft]);
+
   const busy = upload.kind === "sending";
 
   return (
     <div className="grid gap-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
       <figure className="m-0">
-        <div className="overflow-hidden rounded-sm border border-ink-12 bg-canvas">
-          {showingVideo ? (
+        <div
+          className={`flex overflow-hidden rounded-sm border ${
+            isRemoved
+              ? "aspect-square items-center justify-center border-dashed border-ink-12 bg-canvas"
+              : "border-ink-12 bg-canvas"
+          }`}
+        >
+          {isRemoved ? (
+            <p className="text-small px-4 text-center text-graphite-70">Removed</p>
+          ) : showingVideo ? (
             <video
               // Keyed on the path so a replacement actually reloads: React keeps the same
               // element otherwise, and the browser keeps the old first frame with it.
@@ -245,9 +282,12 @@ export function MediaField({
           )}
         </div>
         <figcaption className="text-small mt-2 break-words text-ink-40">
-          {media.label} · {showingVideo ? "video" : "image"} · {media.aspectRatio}
+          {media.label} · {isRemoved ? "no file" : showingVideo ? "video" : "image"} ·{" "}
+          {media.aspectRatio}
           <br />
-          <span className={isSrcChanged ? "text-accent" : "text-graphite-70"}>{shown}</span>
+          <span className={isSrcChanged ? "text-accent" : "text-graphite-70"}>
+            {isRemoved ? "(none)" : shown}
+          </span>
         </figcaption>
       </figure>
 
@@ -278,6 +318,11 @@ export function MediaField({
                 >
                   Use a different still ({(frame % FRAME_OFFSETS.length) + 1} of{" "}
                   {FRAME_OFFSETS.length})
+                </button>
+              ) : null}
+              {!isRemoved ? (
+                <button type="button" onClick={remove} disabled={busy} className={QUIET}>
+                  Remove
                 </button>
               ) : null}
               {isSrcChanged ? (
@@ -313,7 +358,7 @@ export function MediaField({
               id={`${fieldId}-upload`}
               aria-live="polite"
               className={`text-small mt-3 max-w-[70ch] ${
-                upload.kind === "failed" || srcError || posterError
+                upload.kind === "failed" || srcError || posterError || isRemoved
                   ? "text-accent"
                   : "text-graphite-70"
               }`}
@@ -326,9 +371,11 @@ export function MediaField({
                     ? upload.message
                     : upload.kind === "reused"
                       ? "That file was already on the server, so it was reused rather than copied. The path is unchanged."
-                      : isSrcChanged
-                        ? `Not saved, and not live. The site is still showing ${media.path}. Save the draft, then Publish.`
-                        : "Uploading a file does not change the site — it becomes an unsaved edit here, like any other.")}
+                      : isRemoved
+                        ? `Removed here, but not saved and not live — the site is still showing ${media.path}. This slot cannot be saved empty: the site always renders something here, so Save will reject it until a replacement is uploaded. Upload a file, or Undo.`
+                        : isSrcChanged
+                          ? `Not saved, and not live. The site is still showing ${media.path}. Save the draft, then Publish.`
+                          : "Uploading a file does not change the site — it becomes an unsaved edit here, like any other.")}
             </p>
           </div>
         ) : (

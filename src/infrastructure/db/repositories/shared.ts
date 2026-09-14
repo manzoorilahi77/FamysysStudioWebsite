@@ -4,7 +4,7 @@ import type {
   EngagementTier,
 } from "../../../domain/marketing/entities/EngagementTier";
 import { Slug } from "../../../domain/shared/value-objects/Slug";
-import type { MediaRef } from "../../../domain/shared/value-objects/MediaRef";
+import type { AspectRatio, MediaKind, MediaRef } from "../../../domain/shared/value-objects/MediaRef";
 import { derivedId } from "../../cms/records";
 import { splitListSentence } from "../../content/static/ways-to-work.content";
 import { ContentStore, mediaFrom } from "../content/ContentStore";
@@ -257,4 +257,45 @@ export function media(
   alt: string,
 ): MediaRef {
   return mediaFrom(row.media_path, row.media_kind, row.media_ratio, alt);
+}
+
+// ---------------------------------------------------------------------------
+// Page-section media — a picture that belongs to a section directly rather than to a
+// collection record (the hero, the accordion bands, the differentiator cards, the About
+// page's six images). See `toMedia` in `infrastructure/cms/records.ts`: the Nth media
+// block on a section is seeded under "media-src"/"media-alt" for N=0 and
+// "media-src-{N+1}"/"media-alt-{N+1}" after that — the same numbering `uniqueId` gives it
+// in the admin model, so a save addresses the same row this reads.
+// ---------------------------------------------------------------------------
+
+function mediaFieldKey(base: string, index: number): string {
+  return index === 0 ? base : `${base}-${index + 1}`;
+}
+
+/**
+ * Sniffed from the extension, the same rule the upload and the save validator use — a
+ * path is the one part of this that can change to a different kind of file.
+ *
+ * Exported for `DbCmsRepository.publishDrafts`, which needs the same answer when it
+ * writes a collection record's `media_kind` column alongside its `media_path`.
+ */
+export function mediaKindFromPath(path: string): MediaKind {
+  return /\.(mp4|webm|mov|m4v)$/i.test(path) ? "video" : "image";
+}
+
+/**
+ * A page-section media field, read the way a save actually reaches it: the file and its
+ * alt text both from `content_strings`, so a published replacement shows. The aspect
+ * ratio still comes from the content module — it is never a `CmsValue`, because it is a
+ * layout decision for the slot rather than a property of whichever file is in it.
+ */
+export function pageMedia(
+  store: ContentStore,
+  owner: string,
+  index: number,
+  aspectRatio: AspectRatio,
+): MediaRef {
+  const src = store.text(owner, mediaFieldKey("media-src", index));
+  const alt = store.text(owner, mediaFieldKey("media-alt", index));
+  return mediaFrom(src, mediaKindFromPath(src), aspectRatio, alt);
 }
