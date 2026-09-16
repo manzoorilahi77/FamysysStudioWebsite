@@ -71,6 +71,8 @@ const CONNECT_SOURCES = [
   "https://*.google-analytics.com",
 ];
 
+const IMG_SOURCES = ["'self'", "data:", "https://www.googletagmanager.com"];
+
 const CSP = [
   `default-src 'self'`,
   `script-src ${SCRIPT_SOURCES.join(" ")}`,
@@ -78,7 +80,7 @@ const CSP = [
   // GA4 falls back to an image-pixel beacon (`/td?...`) served from the SAME host as the
   // gtag.js loader, not from google-analytics.com — found by actually loading a page with
   // GA4 enabled and watching the console, not by reading GA's docs.
-  `img-src 'self' data: https://www.googletagmanager.com`,
+  `img-src ${IMG_SOURCES.join(" ")}`,
   `font-src 'self'`,
   `connect-src ${CONNECT_SOURCES.join(" ")}`,
   `frame-ancestors 'none'`,
@@ -87,10 +89,84 @@ const CSP = [
   `object-src 'none'`,
 ].join("; ");
 
-export function middleware(_request: NextRequest): NextResponse {
+/**
+ * THE CAPABILITY DECK'S OWN POLICY, AND WHY IT IS A SECOND CSP RATHER THAN A WIDER FIRST
+ * ONE.
+ *
+ * /capability-deck is a ported presentation deck (see src/app/capability-deck/page.tsx)
+ * whose Selected Work slide is not screenshots — it is live third-party content. It frames
+ * 23 Google Drive clips, streams some of them through a `<video>` off Drive's download
+ * host, shows Drive's own thumbnails, frames seven client sites so a viewer can scroll the
+ * real thing, and frames the parent company's corporate deck. Under the policy above,
+ * where `default-src 'self'` covers `frame-src` and `media-src` by omission, every one of
+ * those is refused and the slide renders as empty boxes.
+ *
+ * WHAT IS DELIBERATELY NOT DONE: adding these origins to the CSP above. That policy is
+ * what /admin, the login endpoint and the contact form run under, and `frame-src` opened
+ * site-wide would let any page on the site embed any of these origins — a clickjacking
+ * surface on the panel in exchange for a feature on one marketing page. Nine origins that
+ * one route needs are that route's business, so the route carries them.
+ *
+ * WHAT THIS DOES NOT WEAKEN. `frame-ancestors 'none'` and `X-Frame-Options: DENY` are
+ * untouched and mean the opposite thing — they are about this site being framed BY others,
+ * which stays forbidden everywhere including here. `script-src`, `connect-src`,
+ * `form-action`, `base-uri` and `object-src` are identical to the site policy: none of
+ * these origins may run script on the page, receive a fetch, or receive a form post. They
+ * may be displayed, and nothing more.
+ *
+ * ADDING A PROJECT TO THE DECK WITH A NEW `previewUrl` NEEDS ITS ORIGIN ADDED HERE, or the
+ * card silently shows an empty frame. That coupling is the cost of the narrow scope and is
+ * the reason the list below names each origin against what uses it.
+ */
+const DECK_FRAME_SOURCES = [
+  "'self'",
+  // The 23 Selected Work clips, as Drive's own /preview player.
+  "https://drive.google.com",
+  // The Presentation category embeds the parent company's corporate deck.
+  "https://famysys.com",
+  // The seven Websites cards that frame the live site rather than a screenshot.
+  // Kept in the same order as `websiteProjects` in the deck's content.ts.
+  "https://www.bashafood.in",
+  "https://ferrobid.aspirasys.in",
+  "https://royal.aspirasys.in",
+  "https://studiominiminds.com",
+  "https://kkmkeychains.in",
+  "https://tnhajsociety.org",
+  "https://bvaglobal.ai",
+];
+
+const DECK_CSP = [
+  `default-src 'self'`,
+  `script-src ${SCRIPT_SOURCES.join(" ")}`,
+  `style-src 'self' 'unsafe-inline'`,
+  // Drive serves a clip's poster from drive.google.com/thumbnail, which redirects to a
+  // googleusercontent host — both are named because a redirect target is checked too.
+  `img-src ${IMG_SOURCES.join(" ")} https://drive.google.com https://*.googleusercontent.com`,
+  `font-src 'self'`,
+  `connect-src ${CONNECT_SOURCES.join(" ")}`,
+  // The desktop fast path plays a clip through a native <video> pointed at Drive's
+  // download endpoint, falling back to the /preview iframe above when that fails. Both
+  // hosts it tries are named — see driveStreamCandidates() in VideoGallery.tsx.
+  `media-src 'self' https://drive.google.com https://docs.google.com`,
+  `frame-src ${DECK_FRAME_SOURCES.join(" ")}`,
+  `frame-ancestors 'none'`,
+  `base-uri 'self'`,
+  `form-action 'self'`,
+  `object-src 'none'`,
+].join("; ");
+
+/** The deck route and the assets served beneath it. */
+function isCapabilityDeck(pathname: string): boolean {
+  return pathname === "/capability-deck" || pathname.startsWith("/capability-deck/");
+}
+
+export function middleware(request: NextRequest): NextResponse {
   const response = NextResponse.next();
 
-  response.headers.set("Content-Security-Policy", CSP);
+  response.headers.set(
+    "Content-Security-Policy",
+    isCapabilityDeck(request.nextUrl.pathname) ? DECK_CSP : CSP,
+  );
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");

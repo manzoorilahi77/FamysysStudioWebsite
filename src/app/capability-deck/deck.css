@@ -1,0 +1,333 @@
+/* ==========================================================================
+   Capability Deck — the presentation deck, ported from Imran Ifraz's
+   standalone Vite build (github.com/imranifraz/famysys-web-dec).
+
+   This is HIS stylesheet. The rules, the values they resolve to, the type
+   utilities and the breakpoints are unchanged from his src/styles/global.css;
+   what changed is where the colours come from and what the page-level rules
+   are allowed to touch.
+
+   WHY THE COLOURS ARE NOW var() RATHER THAN HEX, AND WHY THAT IS NOT A
+   REINTERPRETATION OF HIS DESIGN.
+
+   His file's own header says the palette was read off the live site's computed
+   custom properties, and every value checks out byte-identical against
+   colors.generated.css — his --color-cream IS --color-text-on-dark, his
+   --color-ink IS --color-section-alt, his accent pair IS the Claret pair. He
+   built this on THIS project's design system; he just froze it as literals
+   because his repo had no access to colors.ts. Pointing the same names at the
+   same tokens renders identically today and keeps the deck on the palette if
+   colors.ts is ever switched, instead of silently stranding it on the old one.
+
+   WHY THESE LIVE ON .capability-deck RATHER THAN :root.
+
+   Two of his names collide with the site's own and mean different things: his
+   --color-ink is the section-alt green (#1E3A31), the site's is the dark
+   background (#12251F). Declaring his set on the deck's own root shadows them
+   for his subtree only and leaves the rest of the site's token layer alone.
+   --deck-ground-raised below captures the site's --color-ink on :root — BEFORE
+   the shadow applies — because a custom property declared on an element
+   resolves other custom properties against that same element, so
+   `--color-ink-raised: var(--color-ink)` inside the block would otherwise read
+   his own redefinition rather than the site's token.
+
+   His four accent names (--color-accent, --color-accent-on-dark,
+   --color-accent-warm, --color-accent-highlight) are deliberately NOT
+   redeclared: the site publishes those exact names with those exact values, so
+   they already inherit correctly and a redeclaration would be a self-reference.
+   ========================================================================== */
+
+:root {
+  /* The site's --color-ink (#12251F), captured before the deck shadows that
+     name. This is his --color-ink-raised. */
+  --deck-ground-raised: var(--color-ink);
+}
+
+.capability-deck {
+  /* Brand palette — his names, the site's live tokens. */
+  --color-cream: var(--color-text-on-dark);
+  --color-cream-dim: var(--color-canvas-80);
+  --color-cream-faint: var(--color-canvas-40);
+  --color-cream-ghost: var(--color-canvas-16);
+
+  /* Dark canvas */
+  --color-ink: var(--color-section-alt);
+  --color-ink-raised: var(--deck-ground-raised);
+  --color-ink-line: var(--color-hairline-on-section-alt);
+  --color-bg-outer: var(--color-header-ground);
+
+  --color-fg: var(--color-cream);
+  --color-bg: var(--color-ink);
+
+  /* Accent hovers. The four base accent names are inherited, not redeclared —
+     see the header. */
+  --color-accent-hover: var(--color-primary-button-hover);
+  --color-accent-hover-on-dark: var(--color-primary-button-hover-on-dark);
+
+  /* ----------------------------------------------------------------------
+     HIS FOUR OFF-PALETTE COLOURS, kept at his exact values.
+
+     These are the only colours in his build that are NOT this site's. They are
+     his choices for three specific jobs, and converting them to the nearest
+     palette entry would change what he shipped — so they are named here rather
+     than mapped. A named variable in a stylesheet is also how they stop
+     tripping the one-palette lint rule, which governs .ts/.tsx/.js/.jsx only.
+     Flagged in the integration report as a deliberate divergence.
+     ---------------------------------------------------------------------- */
+  /* Navy behind the live deck-in-a-deck embed, showing while the iframe loads
+     and around it once it has. Not a palette green. */
+  --deck-embed-backdrop: #0a1628;
+  /* Top stop of the video-gallery fallback gradient — a lighter green than
+     section-alt, with no token equivalent. */
+  --deck-video-gradient-top: #1a3229;
+  /* Pure white behind an external site's iframe, so a site that paints no
+     background of its own does not show the deck's green through it. The
+     site's own card colour (#FCF8EE) is a warm cream and would tint it. */
+  --deck-preview-paper: #ffffff;
+
+  /* ----------------------------------------------------------------------
+     SCRIMS. His component style objects carried these as frozen rgba() of the
+     same two grounds — rgba(11,22,19,a) is --color-header-ground and
+     rgba(18,37,31,a) is --color-section-alt. color-mix against `transparent`
+     at the same percentage is exactly that colour at that alpha, so these
+     render identically and follow a palette change like everything else.
+     ---------------------------------------------------------------------- */
+  --deck-scrim-ground-20: color-mix(in srgb, var(--color-header-ground) 20%, transparent);
+  --deck-scrim-ground-50: color-mix(in srgb, var(--color-header-ground) 50%, transparent);
+  --deck-scrim-ground-72: color-mix(in srgb, var(--color-header-ground) 72%, transparent);
+  --deck-scrim-ground-78: color-mix(in srgb, var(--color-header-ground) 78%, transparent);
+  --deck-scrim-ground-82: color-mix(in srgb, var(--color-header-ground) 82%, transparent);
+  --deck-scrim-alt-90: color-mix(in srgb, var(--color-section-alt) 90%, transparent);
+  --deck-scrim-alt-92: color-mix(in srgb, var(--color-section-alt) 92%, transparent);
+
+  --radius-sm: 4px;
+
+  /* Typography. His index.html pulled Jost and Instrument Serif Italic from
+     Google Fonts; this site already self-hosts both through next/font, so these
+     point at those rather than loading a second copy. Same two typefaces. */
+  --font-display: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-accent: var(--font-instrument-serif), ui-serif, Georgia, serif;
+
+  /* Presentation canvas (fixed design resolution, scaled to fit viewport) */
+  --stage-w: 1920px;
+  --stage-h: 1080px;
+
+  /* Motion */
+  --ease-lux: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-slide: 0.72s;
+  --dur-section: 1.05s;
+
+  color-scheme: dark;
+}
+
+/* His `html, body, #root { height: 100% }` and `body { overflow: hidden }`.
+   GUARDED BY :has() rather than left as bare element rules: this stylesheet
+   only ships with this route, but a bare `body { overflow: hidden }` would take
+   the whole site down with it if it ever reached a shared CSS chunk. The guard
+   costs nothing here and cannot misfire on the other seven pages. */
+html:has(.capability-deck),
+body:has(.capability-deck) {
+  height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+
+body:has(.capability-deck) {
+  background: var(--color-header-ground);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+.capability-deck {
+  height: 100%;
+  height: 100dvh;
+  background: var(--color-bg-outer);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+}
+
+.capability-deck *,
+.capability-deck *::before,
+.capability-deck *::after {
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------------
+   THE SITE'S RESET, UNDONE FOR HIS SUBTREE.
+
+   Tailwind's preflight normalises margins, list styling and form-control fonts
+   across the whole site. His build has no Tailwind, so every element he did not
+   style himself fell back to the browser's own defaults — and a number of them
+   do exactly that. Preflight reaching into his subtree was not cosmetic:
+
+     - `SectionHeadline` renders one `<h2>` per slide with no margin of its own.
+       His carries `margin: 73.04px 0` (0.83em at 88px); zeroed, every slide's
+       content block rose 61px and the bottom row of Services and Ways to Work
+       was pushed off the stage entirely.
+     - The CTA slide's body `<p>` has no inline margin. His carries 23px (1em);
+       zeroed, the paragraph and the button below it moved up ~20px.
+     - Buttons without an inline font-size take the UA's 13.3333px and its
+       `1px 6px` padding. Preflight makes them inherit 16px with no padding,
+       which changed the size of the gallery's own controls.
+     - Preflight gives `html` `line-height: 1.5`, and everything he did not
+       give a line-height inherits it; his page inherits the UA's `normal`.
+       That is 0.5px more per line at 15-16px: every slide's content sat 0.5px
+       lower (1px on screen at 0.8333 scale) and the Ways to Work cards grew
+       5px, which is what their tag rows' `margin-top: auto` then absorbed.
+
+   `revert` rolls each property back to the user-agent value rather than
+   restating it, so this stays correct if those defaults ever differ by browser,
+   and it is exactly what his page resolved to. An inline style still wins over
+   it, which is why every element his components DO style is untouched — checked
+   by walking all twelve slides in both builds and diffing the computed
+   margin, padding, list-style, font-size and font-weight of every element.
+   --------------------------------------------------------------------------- */
+
+/* line-height is the one that `revert` cannot undo: the UA sets no line-height
+   on these elements, so reverting just inherits preflight's 1.5 again. `normal`
+   is stated instead, on the deck root and on body — body because both
+   galleries portal their expand modal there, outside `.capability-deck`. */
+body:has(.capability-deck),
+.capability-deck {
+  line-height: normal;
+}
+
+.capability-deck h1,
+.capability-deck h2,
+.capability-deck h3,
+.capability-deck h4,
+.capability-deck h5,
+.capability-deck h6,
+.capability-deck p,
+.capability-deck blockquote,
+.capability-deck figure,
+.capability-deck pre,
+.capability-deck dl,
+.capability-deck dd {
+  margin-block: revert;
+}
+
+.capability-deck ul,
+.capability-deck ol {
+  margin-block: revert;
+  padding-inline-start: revert;
+  list-style: revert;
+}
+
+.capability-deck button {
+  font-size: revert;
+  padding: revert;
+}
+
+.capability-deck img,
+.capability-deck video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Tailwind's preflight already unsets most button styling, but his deck relies
+   on the inherited colour and the pointer cursor specifically. */
+.capability-deck button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.capability-deck a {
+  color: inherit;
+}
+
+.capability-deck ::selection {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Focus visibility for keyboard users */
+.capability-deck :focus-visible {
+  outline: 1.5px solid var(--color-cream);
+  outline-offset: 4px;
+}
+
+/* ---- shared typographic utilities used across slides ---- */
+
+.capability-deck .eyebrow {
+  font-family: var(--font-body);
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-cream-dim);
+  font-weight: 500;
+}
+
+.capability-deck .display-xl {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: var(--color-fg);
+}
+
+.capability-deck .display-lg {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--color-fg);
+}
+
+.capability-deck .body-lg {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-cream-dim);
+}
+
+.capability-deck .hairline {
+  height: 1px;
+  width: 100%;
+  background: var(--color-ink-line);
+  border: none;
+}
+
+.capability-deck .vhairline {
+  width: 1px;
+  background: var(--color-ink-line);
+  border: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capability-deck *,
+  .capability-deck *::before,
+  .capability-deck *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .capability-deck .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+  }
+
+  .capability-deck .display-xl,
+  .capability-deck .display-lg {
+    line-height: 1.12;
+  }
+
+  .capability-deck .body-lg {
+    line-height: 1.45;
+  }
+}

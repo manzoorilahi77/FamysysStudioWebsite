@@ -454,13 +454,20 @@ export const footerContent: FooterContent = {
   // Studio's footer is a list of links and a button in the middle of it would be the only
   // object in the band.
   //
-  // THERE IS NO FILE YET, so `href` is null and the label opens the dialog below instead —
-  // the same arrangement Instagram and YouTube use, for the same reason: a name that does
-  // nothing when pressed reads as broken, and a link to nowhere is worse. The client has
-  // said the URL will follow. Supplying it is one edit: put it here and the label becomes
-  // a link that opens in a new tab, and the dialog stops.
+  // THE DECK NOW EXISTS, and it is a route rather than a file. It was built separately by
+  // Imran Ifraz as a standalone Vite application and ported here as /capability-deck — see
+  // src/presentation/capability-deck/ and docs/capability-deck-port.md.
   //
-  // TODO(client): the deck's URL, once the deck exists.
+  // WITH `href` SET, FooterDeck RENDERS AN ANCHOR rather than the button-and-dialog pair,
+  // opening in a new tab with the "(opens in a new tab)" note for screen readers. That is
+  // the behaviour the component was already written for; nothing in the footer changed to
+  // switch it on. `pending` stays below because it is the copy that returns if the URL is
+  // ever removed again, and deleting it would make that a two-file change instead of one.
+  //
+  // A ROOT-RELATIVE PATH, NOT AN ABSOLUTE URL: `Url` accepts both, and a relative one keeps
+  // the link working on a preview deploy and in local development, where an absolute
+  // studio.famysys.com would send a reviewer to production instead of to what they are
+  // reviewing. `Url.isExternal` reads false for it, which is correct — it is this site.
   //
   // TODO(client): the label. famysys.com calls its own "Corporate Capability Deck"; the
   // Studio's is named "Capability Deck" here because "Corporate" is the parent's word for
@@ -468,10 +475,9 @@ export const footerContent: FooterContent = {
   // will carry, because the footer prints it on every page.
   capabilityDeck: {
     label: "Capability Deck",
-    href: null,
-    // TODO(client): expanded copy — draft, pending approval. Says what is true (the deck
-    // is being prepared), and where the same material is meanwhile (this site). It does
-    // not apologise and it does not promise a date, because no date has been given.
+    href: Url.create("/capability-deck"),
+    // Retained deliberately — see the note above. This is what the label says again if the
+    // deck is ever withdrawn, and it costs nothing to keep.
     pending: {
       eyebrow: "In preparation",
       body: "The deck is being put together. Until it is ready, what it will hold — the services, the way of working and the engagement models — is set out across this site.",

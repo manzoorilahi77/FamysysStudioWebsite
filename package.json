@@ -33,6 +33,8 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "framer-motion": "11.18.2",
+    "lucide-react": "0.544.0",
     "mysql2": "^3.24.3",
     "next": "^15.1.0",
     "react": "^19.0.0",
