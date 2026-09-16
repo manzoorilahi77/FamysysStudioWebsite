@@ -21,3 +21,12 @@ allowBuilds:
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
+
+# Patch-level security overrides for transitive dev-only dependencies. Runtime deps are
+# never overridden here — a transitive bump under `dependencies` needs the same review a
+# direct bump would get, not a drive-by pin.
+overrides:
+  # eslint-plugin-boundaries -> @boundaries/elements -> handlebars. Multiple CVEs (AST type
+  # confusion JS injection, prototype pollution) fixed in 4.7.9; lint-time only, never
+  # reaches the built site.
+  handlebars: ^4.7.9

@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
   // free.
   output: "standalone",
   reactStrictMode: true,
+  // Don't announce the framework on every response. The real security headers
+  // (CSP, X-Frame-Options, HSTS, ...) are set per-request in middleware.ts, where the CSP
+  // nonce lives — a static header here can't carry a per-request value.
+  poweredByHeader: false,
   // Drop the image optimiser from the traced bundle. `images.unoptimized` switches it off,
   // but sharp and its 19 MB of platform binaries are still reachable from the server entry
   // and are still copied without this.

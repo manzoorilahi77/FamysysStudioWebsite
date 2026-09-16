@@ -1,9 +1,31 @@
 "use client";
 
+import { useEffect } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+  }
+}
+
+/**
+ * gtag is called from a bundled, same-origin script chunk (this file, compiled) rather
+ * than from a literal inline `<script>` tag, so the page's Content-Security-Policy
+ * (middleware.ts) never needs `'unsafe-inline'` or a nonce threaded down to this
+ * component just to let analytics boot.
+ */
+function initializeGtag(measurementId: string): void {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(...args: unknown[]): void {
+    window.dataLayer?.push(args);
+  }
+  gtag("js", new Date());
+  gtag("config", measurementId);
+}
 
 /**
  * Off in every environment but production, and off under /admin even there: an internal
@@ -16,25 +38,18 @@ const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
 export function GoogleAnalytics() {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin") ?? false;
+  const enabled = process.env.NODE_ENV === "production" && !isAdminRoute && !!GA_MEASUREMENT_ID;
 
-  if (process.env.NODE_ENV !== "production" || isAdminRoute || !GA_MEASUREMENT_ID) {
-    return null;
-  }
+  useEffect(() => {
+    if (enabled && GA_MEASUREMENT_ID) initializeGtag(GA_MEASUREMENT_ID);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}');
-        `}
-      </Script>
-    </>
+    <Script
+      src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+      strategy="afterInteractive"
+    />
   );
 }

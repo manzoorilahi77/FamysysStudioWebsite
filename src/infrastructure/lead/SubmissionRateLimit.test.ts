@@ -47,9 +47,9 @@ describe("SubmissionRateLimit", () => {
 });
 
 describe("clientAddress", () => {
-  it("takes the first address the proxy forwarded", () => {
+  it("takes the last address, the one the proxy itself appended", () => {
     expect(clientAddress(new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }))).toBe(
-      "203.0.113.7",
+      "10.0.0.1",
     );
   });
 

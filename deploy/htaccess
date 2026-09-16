@@ -1,3 +1,9 @@
+# RETIRED 2026-09-16. This was studio.famysys.com's Apache config on the old cPanel host
+# (aspirfxc@66.116.197.244). The site now runs on a CloudPanel VPS (187.7.16.244), which
+# uses nginx and a "Reverse Proxy" vhost configured through the CloudPanel UI, not a
+# docroot .htaccess file — see docs/deployment.md. Kept only for the old server, which
+# still exists as a rollback target until DNS is cut over; not used by the current deploy.
+#
 # studio.famysys.com — the docroot holds no site any more.
 #
 # The seven pages, the admin panel and the two endpoints are all served by the Node

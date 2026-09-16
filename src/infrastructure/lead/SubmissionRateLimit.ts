@@ -13,9 +13,11 @@
  * submission. The moment a second instance exists this needs a shared store, the way
  * `login_attempts` is one for sign-in.
  *
- * The address comes from `x-forwarded-for` behind cPanel's proxy, which anyone can set, so
- * this is a brake on the careless rather than a wall against the determined — the same
- * trade the login route states. Nothing here is persisted or logged.
+ * The address comes from the LAST entry of `x-forwarded-for` — the hop Apache's mod_proxy
+ * itself appends, not anything a client can prepend — the same reasoning the login route
+ * states. A caller can still get a fresh bucket by submitting from a genuinely different
+ * address, which no header trick closes: a brake on the careless rather than a wall
+ * against the determined. Nothing here is persisted or logged.
  */
 
 export const SUBMISSION_LIMIT = 5;
@@ -63,6 +65,7 @@ export class SubmissionRateLimit {
 
 /** The client address as the proxy reports it; one shared bucket when it reports none. */
 export function clientAddress(headers: Headers): string {
-  const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const chain = headers.get("x-forwarded-for")?.split(",") ?? [];
+  const forwarded = chain[chain.length - 1]?.trim();
   return forwarded || headers.get("x-real-ip")?.trim() || "unknown";
 }

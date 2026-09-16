@@ -9,15 +9,18 @@
  * new release beside the old one and moves the symlink; PM2 restarts and follows it. That
  * is also what makes a rollback a symlink move rather than a re-upload.
  *
- * THE ENVIRONMENT COMES FROM `node --env-file`, not from a .env beside the app. The
- * standalone server reads PORT and HOSTNAME out of process.env before Next's own env
- * loading runs, so a .env in the working directory arrives too late for them: the first
- * deploy came up on 0.0.0.0:3000 — every port but the one Apache proxies to, and every
- * interface on a host shared with 218 other sites. `--env-file` is read by Node itself,
- * before a line of application code, which is early enough for both.
+ * `script` IS `start-server.mjs`, NOT `server.js` DIRECTLY. It used to be server.js, with
+ * PM2's `interpreter_args`/`node_args` set to `--env-file=shared/.env` so Node would load
+ * the credentials before any application code ran. That does not work: confirmed by
+ * isolated testing (2026-09-16) that PM2 v7 does not reliably thread that flag through to
+ * server.js's own process.env, on EITHER server this app has run on — the admin login has
+ * been broken by exactly this since 2026-09-09, since before this server existed.
+ * `start-server.mjs` (in `scripts/`, copied beside `server.js` by `deploy.mjs`) calls
+ * `process.loadEnvFile()` — the same parser `--env-file` itself uses — directly, then
+ * imports `server.js`, removing PM2's spawn construction from the loading path entirely.
  *
- * It also reads values literally, with no variable expansion — so the bcrypt hash in that
- * file has its dollars INTACT, where .env.local needs them backslash-escaped for Next.
+ * It reads values literally, with no variable expansion — so the bcrypt hash in that file
+ * has its dollars INTACT, where .env.local needs them backslash-escaped for Next.
  * The two files look alike and are not interchangeable.
  *
  * ONE INSTANCE, FORK MODE. This box runs fifteen other Node processes and 218 sites on
@@ -32,9 +35,8 @@ module.exports = {
   apps: [
     {
       name: "fsstudios",
-      script: "/home/aspirfxc/apps/fsstudios/current/server.js",
-      cwd: "/home/aspirfxc/apps/fsstudios/current",
-      interpreter_args: "--env-file=/home/aspirfxc/apps/fsstudios/shared/.env",
+      script: "/home/shafwan/apps/fsstudios/current/start-server.mjs",
+      cwd: "/home/shafwan/apps/fsstudios/current",
 
       instances: 1,
       exec_mode: "fork",
@@ -54,8 +56,8 @@ module.exports = {
         NODE_ENV: "production",
       },
 
-      error_file: "/home/aspirfxc/apps/fsstudios/logs/error.log",
-      out_file: "/home/aspirfxc/apps/fsstudios/logs/out.log",
+      error_file: "/home/shafwan/apps/fsstudios/logs/error.log",
+      out_file: "/home/shafwan/apps/fsstudios/logs/out.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
     },
   ],

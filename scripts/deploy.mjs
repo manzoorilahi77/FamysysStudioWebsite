@@ -24,11 +24,11 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const HOST = process.env.DEPLOY_HOST ?? "aspirfxc@studio.famysys.com";
-const REMOTE_ROOT = process.env.DEPLOY_ROOT ?? "/home/aspirfxc/apps/fsstudios";
-const PM2 = "/home/aspirfxc/.nvm/versions/node/v22.21.1/bin/pm2";
+const HOST = process.env.DEPLOY_HOST ?? "shafwan@187.7.16.244";
+const REMOTE_ROOT = process.env.DEPLOY_ROOT ?? "/home/shafwan/apps/fsstudios";
+const PM2 = "/home/shafwan/.nvm/versions/node/v20.20.2/bin/pm2";
 const PM2_APP = "fsstudios";
-const LOCAL_PORT = 6570; // must match deploy/htaccess and shared/.env
+const LOCAL_PORT = 8000; // must match the CloudPanel Reverse Proxy target and shared/.env
 const KEEP_RELEASES = 5;
 
 /**
@@ -168,6 +168,12 @@ try {
   if (needsPublic)
     cpSync(path.join(ROOT, "public"), path.join(standalone, "public"), { recursive: true });
 
+  // The launcher PM2 actually starts (see docs/deployment.md — PM2's interpreter_args/
+  // node_args does not reliably reach server.js's own process.env). It has to sit beside
+  // server.js in the release root explicitly, the same reason static/public are copied in
+  // above rather than relying on Next's tracer to have found it.
+  cpSync(path.join(ROOT, "scripts", "start-server.mjs"), path.join(standalone, "start-server.mjs"));
+
   // ORDER MATTERS AND tar WILL TELL YOU SO: an --exclude after the operand it should apply
   // to is positional, affects nothing, and warns rather than fails. Every exclude goes
   // before the first -C.
@@ -223,17 +229,22 @@ try {
   ]);
 
   say("Unpacking…");
+  // NO `.env` SYMLINK IN THE RELEASE DIRECTORY. There used to be one here — the same idea
+  // as below, credentials outside the release so a rollback doesn't roll them back — but
+  // it actively broke the app: Next.js auto-loads any `.env` file it finds in its own cwd
+  // as part of its own bootstrap, and that second, uncoordinated load was silently
+  // clearing every variable `start-server.mjs` had just correctly set moments earlier.
+  // Confirmed by isolated testing (2026-09-16) — with the symlink present, login was
+  // permanently 503 "Missing environment variable"; with it absent, correct. The launcher
+  // now reads `shared/.env` directly and explicitly, so this symlink is not just harmful,
+  // it is redundant — the credentials still live outside the release either way.
   remote(
     "cd " +
       releaseDir +
       " && tar -xzf release.tgz && rm -f release.tgz && " +
-      // The environment lives outside the release, so a rollback does not roll back the
-      // credentials and a release directory can be deleted without thought.
-      "ln -sfn " +
-      REMOTE_ROOT +
-      "/shared/.env " +
+      "test -f " +
       releaseDir +
-      "/.env && " +
+      "/start-server.mjs && " +
       "test -f " +
       releaseDir +
       "/server.js",
