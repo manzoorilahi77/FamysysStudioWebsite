@@ -14,6 +14,7 @@ import bcrypt from "bcryptjs";
  * what it does; running fifty comparisons at cost 12 in a test file would make the suite
  * slow for a property this shape of test does not need.
  */
+// allow-secret: test fixture — a well-known example phrase, not the admin password
 const TEST_PASSWORD = "correct horse battery staple";
 const TEST_HASH = bcrypt.hashSync(TEST_PASSWORD, 4);
 
@@ -69,6 +70,7 @@ const { attemptLogin, clearFailures, MAX_ATTEMPTS, clientKey } = await import(".
 
 beforeEach(() => {
   table = [];
+  // allow-secret: test fixture — the hash of TEST_PASSWORD above, set for this process only
   process.env.ADMIN_PASSWORD_HASH = TEST_HASH;
 });
 
