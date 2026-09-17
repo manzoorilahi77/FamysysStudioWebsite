@@ -9,7 +9,7 @@ import type {
 } from "../../domain/capability-deck/repositories/CapabilityDeckRepository";
 import { ContentConflictError } from "../../domain/capability-deck/repositories/CapabilityDeckRepository";
 import type { ContentAddress, ContentFieldAddress } from "../../domain/cms/entities/ContentAddress";
-import type { CmsRecord } from "../../domain/cms/entities/CmsRecord";
+import type { CmsItemGroup, CmsRecord } from "../../domain/cms/entities/CmsRecord";
 import { derivedId } from "../cms/records";
 import { buildDeckSlideRecords } from "./deckRecords";
 import { staticDeckSource } from "./StaticCapabilityDeckRepository";
@@ -21,6 +21,18 @@ interface DeckSlideRow extends RowDataPacket {
   slide_key: string;
   sort_order: number;
   updated_at: string;
+}
+/**
+ * Which of a static item group's built records currently exist, and in what order. Rows
+ * are keyed `<collectionId>:<builtRecord.id>` in `deck_items.item_key` — the same scheme
+ * Task 8's seed script writes, so a read here never has to invent a second one.
+ */
+interface DeckItemRow extends RowDataPacket {
+  item_key: string;
+  collection_id: string;
+  media_path: string | null;
+  media_kind: "image" | "video" | null;
+  sort_order: number;
 }
 interface ContentStringRow extends RowDataPacket {
   owner_kind: string;
@@ -78,8 +90,11 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
   readonly supportsRecordChanges = true;
 
   async getDeck(): Promise<CapabilityDeckDocument> {
-    const [slideRows, { published }] = await Promise.all([
+    const [slideRows, itemRows, { published }] = await Promise.all([
       cachedRows<DeckSlideRow>("SELECT slide_key, sort_order, updated_at FROM deck_slides ORDER BY sort_order"),
+      cachedRows<DeckItemRow>(
+        "SELECT item_key, collection_id, media_path, media_kind, sort_order FROM deck_items ORDER BY collection_id, sort_order",
+      ),
       loadStrings(),
     ]);
 
@@ -87,6 +102,18 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
     // only asks "does content_strings have anything newer than the seed for this exact
     // field", by the id the static build already produced — never by re-deriving order.
     const staticRecords = buildDeckSlideRecords(staticDeckSource(), null);
+
+    // One entry per collection_id, in sort_order (the query is already ordered that way,
+    // so pushing in read order is enough — nothing here re-sorts).
+    const itemRowsByCollection = new Map<string, DeckItemRow[]>();
+    for (const row of itemRows) {
+      const existing = itemRowsByCollection.get(row.collection_id);
+      if (existing) {
+        existing.push(row);
+      } else {
+        itemRowsByCollection.set(row.collection_id, [row]);
+      }
+    }
 
     function overlayPublished(record: CmsRecord, ownerKind: "deck_slide" | "deck_item", ownerKey: string): CmsRecord {
       const groups = record.groups.map((group) => ({
@@ -104,11 +131,71 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
       return { ...record, groups };
     }
 
+    /**
+     * An item-kind field is the exact same overlay `overlayPublished` already does for a
+     * slide — the only difference is the owner kind and which row's key is used — so this
+     * reuses it rather than a parallel copy of `resolveText`'s lookup.
+     */
+    function overlayItem(record: CmsRecord, itemKey: string): CmsRecord {
+      return overlayPublished(record, "deck_item", itemKey);
+    }
+
+    /**
+     * An uploaded image REPLACES the seed's path outright — there is no field on the item
+     * for it to be "published" through, the same way `capabilities`/`process_steps` already
+     * swap `media_path` after an upload rather than routing it through `content_strings`.
+     * Both the display path and the editable "File" value are updated together, because
+     * `toMedia` always sets them from the same source and a mismatch would show one image
+     * while claiming to hold the other.
+     */
+    function applyMediaPathOverride(record: CmsRecord, mediaPath: string): CmsRecord {
+      const groups = record.groups.map((group) => ({
+        ...group,
+        media: group.media.map((m) => ({
+          ...m,
+          path: mediaPath,
+          ...(m.src ? { src: { ...m.src, value: mediaPath } } : {}),
+        })),
+      }));
+      return { ...record, groups };
+    }
+
+    /**
+     * WHICH OF A GROUP'S BUILT RECORDS ARE CURRENTLY PLACED, AND IN WHAT ORDER — read from
+     * `deck_items` exactly the way slide placement is read from `deck_slides` above. No rows
+     * yet for this collection (a fresh checkout before Task 8's seed has run, or a slide
+     * whose items were never seeded) means "nothing to say otherwise": the static build is
+     * returned unchanged, so the panel never shows an empty list where the seed simply
+     * hasn't run. A `deck_items` row that doesn't match up with a static-built record is left
+     * out — the seed can only ever have written keys the same builder produced.
+     */
+    function overlayItemGroup(group: CmsItemGroup): CmsItemGroup {
+      const dbRows = itemRowsByCollection.get(group.collectionId);
+      if (!dbRows || dbRows.length === 0) return group;
+
+      const byItemKey = new Map(group.records.map((record) => [`${group.collectionId}:${record.id}`, record]));
+      const records = dbRows
+        .map((row) => {
+          const builtRecord = byItemKey.get(row.item_key);
+          if (!builtRecord) return undefined;
+          const overlaid = overlayItem(builtRecord, row.item_key);
+          return row.media_kind === "image" && row.media_path
+            ? applyMediaPathOverride(overlaid, row.media_path)
+            : overlaid;
+        })
+        .filter((record): record is CmsRecord => record !== undefined);
+
+      return { ...group, records };
+    }
+
     const orderedSlideKeys = slideRows.map((r) => r.slide_key);
     const slides = orderedSlideKeys
       .map((slideKey) => {
         const built = staticRecords.get(slideKey);
-        return built ? overlayPublished(built, "deck_slide", slideKey) : undefined;
+        if (!built) return undefined;
+        const withFields = overlayPublished(built, "deck_slide", slideKey);
+        const withItems: CmsRecord = { ...withFields, items: withFields.items.map(overlayItemGroup) };
+        return withItems;
       })
       .filter((r): r is CmsRecord => r !== undefined);
 

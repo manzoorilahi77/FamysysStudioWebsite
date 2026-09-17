@@ -47,4 +47,66 @@ describe("DbCapabilityDeckRepository.getDeck", () => {
     const eyebrow = cover.groups[0]!.values.find((v) => v.label === "Eyebrow")!;
     expect(eyebrow.value).toBe("Edited Brand");
   });
+
+  it("falls back to the static build's items, unchanged, when deck_items has no rows for that collection yet", async () => {
+    rows.deckSlides = [{ slide_key: "how-we-work", sort_order: 0, updated_at: "2026-01-01 00:00:00.000" }];
+    const repo = new DbCapabilityDeckRepository();
+    const deck = await repo.getDeck();
+    const howWeWork = deck.slides.find((s) => s.id === "how-we-work")!;
+    const stepsGroup = howWeWork.items.find((g) => g.collectionId === "how-we-work:steps")!;
+    expect(stepsGroup.records.length).toBeGreaterThan(0);
+    expect(stepsGroup.records.map((r) => r.id)).toEqual([
+      "how-we-work:steps-0", "how-we-work:steps-1", "how-we-work:steps-2", "how-we-work:steps-3", "how-we-work:steps-4",
+    ]);
+  });
+
+  it("orders and filters an item group's records by deck_items.sort_order/item_key, and overlays a published item field", async () => {
+    rows.deckSlides = [{ slide_key: "how-we-work", sort_order: 0, updated_at: "2026-01-01 00:00:00.000" }];
+    rows.deckItems = [
+      { item_key: "how-we-work:steps:how-we-work:steps-1", collection_id: "how-we-work:steps", media_path: null, media_kind: null, sort_order: 0 },
+      { item_key: "how-we-work:steps:how-we-work:steps-0", collection_id: "how-we-work:steps", media_path: null, media_kind: null, sort_order: 1 },
+    ];
+    rows.contentStrings = [
+      {
+        owner_kind: "deck_item",
+        owner_key: "how-we-work:steps:how-we-work:steps-1",
+        field_key: "title",
+        value: "Edited Step Title",
+      },
+    ];
+    const repo = new DbCapabilityDeckRepository();
+    const deck = await repo.getDeck();
+    const howWeWork = deck.slides.find((s) => s.id === "how-we-work")!;
+    const stepsGroup = howWeWork.items.find((g) => g.collectionId === "how-we-work:steps")!;
+
+    // Reordered to the DB's sort_order, and every static record without a deck_items row
+    // (steps 2 and 3 here) is left out — the same way an un-placed slide is left out.
+    expect(stepsGroup.records.map((r) => r.id)).toEqual(["how-we-work:steps-1", "how-we-work:steps-0"]);
+
+    const editedStep = stepsGroup.records[0]!;
+    const title = editedStep.groups[0]!.values.find((v) => v.label === "Title")!;
+    expect(title.value).toBe("Edited Step Title");
+  });
+
+  it("swaps an item's media path when the row carries an uploaded image", async () => {
+    rows.deckSlides = [{ slide_key: "selected-work", sort_order: 0, updated_at: "2026-01-01 00:00:00.000" }];
+    rows.deckItems = [
+      {
+        item_key: "selected-work:print:banners:chennai-sheek-king-menu",
+        collection_id: "selected-work:print:banners",
+        media_path: "/uploads/custom-banner.jpg",
+        media_kind: "image",
+        sort_order: 0,
+      },
+    ];
+    const repo = new DbCapabilityDeckRepository();
+    const deck = await repo.getDeck();
+    const selectedWork = deck.slides.find((s) => s.id === "selected-work")!;
+    const bannersGroup = selectedWork.items.find((g) => g.collectionId === "selected-work:print:banners")!;
+
+    expect(bannersGroup.records).toHaveLength(1);
+    const media = bannersGroup.records[0]!.groups[0]!.media[0]!;
+    expect(media.path).toBe("/uploads/custom-banner.jpg");
+    expect(media.src?.value).toBe("/uploads/custom-banner.jpg");
+  });
 });
