@@ -682,3 +682,25 @@ export const portfolioCategories: ReadonlyArray<PortfolioCategory> = [
     embedUrl: 'https://famysys.com/corporate/',
   },
 ]
+
+// Promoted out of CoverSlide.tsx's inline JSX literals so the cover has a real content
+// home the same way every other slide does — see docs/capability-deck-port.md for why
+// these two slides originally had none.
+export const coverContent = {
+  brand: 'Famysys Studio',
+  headlineLine1: 'Where creativity',
+  headlineAccent: 'meets speed.',
+  supporting: 'Design • Video • AI Content • Motion • Product Visuals',
+  decorativeLabel: 'Corporate Deck',
+  logoMark: '/capability-deck/famysys-logo.png',
+}
+
+// Promoted out of CTASlide.tsx's inline JSX literals — copy sourced from the live
+// studio.famysys.com contact/CTA section, unchanged from what was already there.
+export const ctaContent = {
+  headline: "Have a creative requirement? Let's talk.",
+  body: "Tell us what you're trying to create. We'll help you determine the right approach, scope and production model.",
+  ctaLabel: 'Start a Conversation',
+  ctaHref: 'https://studio.famysys.com/',
+  caption: 'Project-based when you need it. Ongoing when you need more.',
+}
