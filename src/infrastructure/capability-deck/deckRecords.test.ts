@@ -75,4 +75,19 @@ describe("buildDeckSlideRecords", () => {
     const cta = records.get("lets-talk")!;
     expect(cta.groups[0]!.values.some((v) => v.value === content.ctaContent.headline)).toBe(true);
   });
+
+  it("every top-level slide record carries a deck_slide address", () => {
+    const cover = buildDeckSlideRecords(fixtureSource(), null).get("cover")!;
+    expect(cover.address).toEqual({ kind: "deck_slide", key: "cover" });
+  });
+
+  it("selected-work's video items carry a deck_item address keyed by their collection", () => {
+    const record = buildDeckSlideRecords(fixtureSource(), null).get("selected-work")!;
+    const ugc = record.items.find((g) => g.collectionId === "selected-work:ugc")!;
+    const firstVideo = ugc.records[0]!;
+    expect(firstVideo.address).toEqual({
+      kind: "deck_item",
+      key: `selected-work:ugc:${firstVideo.id}`,
+    });
+  });
 });

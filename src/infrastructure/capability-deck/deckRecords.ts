@@ -1,4 +1,5 @@
 // src/infrastructure/capability-deck/deckRecords.ts
+import type { ContentAddress } from "../../domain/cms/entities/ContentAddress";
 import type { CmsRecord, CmsValueKind } from "../../domain/cms/entities/CmsRecord";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import { media, toRecord } from "../cms/records";
@@ -78,6 +79,21 @@ function imageMedia(label: string, path: string, alt: string): ReturnType<typeof
   );
 }
 
+/** Every top-level slide is addressed by its own slide id — see `DECK_SLIDE_CATALOG`. */
+function slideAddress(slideId: string): ContentAddress {
+  return { kind: "deck_slide", key: slideId };
+}
+
+/**
+ * Every repeatable card inside a slide's item groups is addressed by its collection plus
+ * its own record id — the same `${collectionId}:${itemId}` formula `deck_items.item_key`
+ * already uses (Task 7's read-overlay, Task 8's seed script), so this is not a new key
+ * scheme, just applying the existing one to `.address` too.
+ */
+function itemAddress(collectionId: string, itemId: string): ContentAddress {
+  return { kind: "deck_item", key: `${collectionId}:${itemId}` };
+}
+
 // ---------------------------------------------------------------------------
 // Cover
 // ---------------------------------------------------------------------------
@@ -89,6 +105,7 @@ function coverRecord(source: CapabilityDeckSource, updatedAt: Date | null): CmsR
     title: "Cover",
     summary: "The opening slide — brand, headline and the deck's own background mark.",
     updatedAt,
+    address: slideAddress("cover"),
     groups: [
       {
         label: "Headline & copy",
@@ -142,6 +159,7 @@ function whoWeAreRecord(source: CapabilityDeckSource, updatedAt: Date | null): C
     title: "Who We Are",
     summary: "Headline, the two highlights and the two vision/mission statements.",
     updatedAt,
+    address: slideAddress("who-we-are"),
     groups,
   });
 }
@@ -165,20 +183,23 @@ function stepLikeRecord(
     title,
     summary,
     updatedAt,
+    address: slideAddress(slideId),
     items: [
       {
         label: title,
         collectionId,
         canChange: true,
-        records: cards.map((card, index) =>
-          toRecord({
-            id: `${collectionId}-${index}`,
+        records: cards.map((card, index) => {
+          const itemId = `${collectionId}-${index}`;
+          return toRecord({
+            id: itemId,
             title: card.title,
             summary: card.copy,
             updatedAt,
+            address: itemAddress(collectionId, itemId),
             groups: [{ label: "Copy", values: [textField("Title", card.title), paragraphField("Copy", card.copy)] }],
-          }),
-        ),
+          });
+        }),
       },
     ],
   });
@@ -201,17 +222,20 @@ function servicesRecord(source: CapabilityDeckSource, updatedAt: Date | null): C
     title: "Services",
     summary: "The service categories shown as cards.",
     updatedAt,
+    address: slideAddress("services"),
     items: [
       {
         label: "Services",
         collectionId: "services:categories",
         canChange: true,
-        records: source.serviceCategories.map((category, index) =>
-          toRecord({
-            id: `services-categories-${index}`,
+        records: source.serviceCategories.map((category, index) => {
+          const itemId = `services-categories-${index}`;
+          return toRecord({
+            id: itemId,
             title: category.title,
             summary: category.tagline,
             updatedAt,
+            address: itemAddress("services:categories", itemId),
             groups: [
               {
                 label: "Copy",
@@ -219,8 +243,8 @@ function servicesRecord(source: CapabilityDeckSource, updatedAt: Date | null): C
                 lists: [textList("Examples", category.examples)],
               },
             ],
-          }),
-        ),
+          });
+        }),
       },
     ],
   });
@@ -238,17 +262,20 @@ function waysToWorkRecord(source: CapabilityDeckSource, updatedAt: Date | null):
     title: "Ways to Work",
     summary: "The engagement models shown as cards.",
     updatedAt,
+    address: slideAddress("ways-to-work"),
     items: [
       {
         label: "Engagement models",
         collectionId: "ways-to-work:engagements",
         canChange: true,
-        records: source.engagementModels.map((tier, index) =>
-          toRecord({
-            id: `ways-to-work-engagements-${index}`,
+        records: source.engagementModels.map((tier, index) => {
+          const itemId = `ways-to-work-engagements-${index}`;
+          return toRecord({
+            id: itemId,
             title: tier.title,
             summary: tier.audience,
             updatedAt,
+            address: itemAddress("ways-to-work:engagements", itemId),
             groups: [
               {
                 label: "Copy",
@@ -260,8 +287,8 @@ function waysToWorkRecord(source: CapabilityDeckSource, updatedAt: Date | null):
                 lists: [textList("Examples", tier.examples)],
               },
             ],
-          }),
-        ),
+          });
+        }),
       },
     ],
   });
@@ -278,6 +305,7 @@ function ctaRecord(source: CapabilityDeckSource, updatedAt: Date | null): CmsRec
     title: "Let's Talk",
     summary: "The closing call to action.",
     updatedAt,
+    address: slideAddress("lets-talk"),
     groups: [
       {
         label: "Copy",
@@ -311,20 +339,22 @@ function videoItemGroup(label: string, collectionId: string, videos: ReadonlyArr
     label,
     collectionId,
     canChange: true,
-    records: videos.map((video, index) =>
-      toRecord({
-        id: `${collectionId}-${index}`,
+    records: videos.map((video, index) => {
+      const itemId = `${collectionId}-${index}`;
+      return toRecord({
+        id: itemId,
         title: video.title,
         summary: video.src,
         updatedAt,
+        address: itemAddress(collectionId, itemId),
         groups: [
           {
             label: "Copy",
             values: [textField("Title", video.title), textField("Google Drive link", video.src, "driveVideoId")],
           },
         ],
-      }),
-    ),
+      });
+    }),
   };
 }
 
@@ -339,6 +369,7 @@ function websiteItemGroup(projects: ReadonlyArray<DeckProjectLike>, updatedAt: D
         title: project.title,
         summary: project.summary,
         updatedAt,
+        address: itemAddress("selected-work:websites", project.key),
         groups: [
           {
             label: "Copy",
@@ -372,11 +403,13 @@ function printItemGroup(label: string, collectionId: string, images: ReadonlyArr
     canChange: true,
     records: images.map((image, index) => {
       const title = image.title ?? `${label} ${index + 1}`;
+      const itemId = image.key ?? `${collectionId}-${index}`;
       return toRecord({
-        id: image.key ?? `${collectionId}-${index}`,
+        id: itemId,
         title,
         summary: label,
         updatedAt,
+        address: itemAddress(collectionId, itemId),
         groups: [
           {
             label: "Image",
@@ -453,6 +486,7 @@ function selectedWorkRecord(source: CapabilityDeckSource, updatedAt: Date | null
     title: "Selected Work",
     summary: "The seven portfolio categories: their copy, and every video, website entry and print image inside them.",
     updatedAt,
+    address: slideAddress("selected-work"),
     groups,
     items,
   });
