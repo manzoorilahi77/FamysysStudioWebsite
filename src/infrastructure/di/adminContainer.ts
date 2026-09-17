@@ -3,6 +3,8 @@ import type { CmsContentRepositories } from "../cms/StaticCmsRepository";
 import { DbCmsRepository } from "../db/DbCmsRepository";
 import { contentSource } from "../db/env";
 import { container } from "./container";
+import { StaticCapabilityDeckRepository } from "../capability-deck/StaticCapabilityDeckRepository";
+import { DbCapabilityDeckRepository } from "../capability-deck/DbCapabilityDeckRepository";
 
 /**
  * The admin panel's composition root, kept apart from the site's.
@@ -42,4 +44,8 @@ export const adminContainer = {
     contentSource() === "database"
       ? new DbCmsRepository(repositories)
       : new StaticCmsRepository(repositories),
+  capabilityDeck:
+    contentSource() === "database"
+      ? new DbCapabilityDeckRepository()
+      : new StaticCapabilityDeckRepository(),
 } as const;
