@@ -16,6 +16,7 @@ import { staticDeckSource } from "./StaticCapabilityDeckRepository";
 import { cachedRows } from "../db/content/cache";
 import { transaction, write } from "../db/pool";
 import { toDate } from "../db/content/rows";
+import { applyToRecord } from "../cms/drafts";
 
 interface DeckSlideRow extends RowDataPacket {
   slide_key: string;
@@ -90,13 +91,21 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
   readonly supportsRecordChanges = true;
 
   async getDeck(): Promise<CapabilityDeckDocument> {
-    const [slideRows, itemRows, { published }] = await Promise.all([
+    const [slideRows, itemRows, { published, drafts }] = await Promise.all([
       cachedRows<DeckSlideRow>("SELECT slide_key, sort_order, updated_at FROM deck_slides ORDER BY sort_order"),
       cachedRows<DeckItemRow>(
         "SELECT item_key, collection_id, media_path, media_kind, sort_order FROM deck_items ORDER BY collection_id, sort_order",
       ),
       loadStrings(),
     ]);
+
+    // `published`'s keys are already `${owner_kind}:${owner_key}:${field_key}` — the exact
+    // shape `applyToRecord`'s `VersionIndex` addresses a value by (`field_key` IS
+    // `CmsValue.id`, both derived from the label by the same `derivedId`), so the version
+    // number is carried across with no re-keying.
+    const versions = new Map<string, number>(
+      [...published.entries()].map(([key, entry]) => [key, entry.version]),
+    );
 
     // The static-shaped build gives every field its id, label, kind and order; this pass
     // only asks "does content_strings have anything newer than the seed for this exact
@@ -195,7 +204,11 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
         if (!built) return undefined;
         const withFields = overlayPublished(built, "deck_slide", slideKey);
         const withItems: CmsRecord = { ...withFields, items: withFields.items.map(overlayItemGroup) };
-        return withItems;
+        // A saved-but-unpublished edit is laid over the published value last, on the fully
+        // assembled slide (own fields AND every placed item's), the same way the seven
+        // pages already do it — one recursive pass, over `record.items[].records` included,
+        // that also recomputes `.status` to "draft" wherever something in the tree has one.
+        return applyToRecord(withItems, drafts, versions);
       })
       .filter((r): r is CmsRecord => r !== undefined);
 

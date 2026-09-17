@@ -44,7 +44,7 @@ function stamp(
   };
 }
 
-function applyToRecord(record: CmsRecord, drafts: DraftIndex, versions: VersionIndex): CmsRecord {
+export function applyToRecord(record: CmsRecord, drafts: DraftIndex, versions: VersionIndex): CmsRecord {
   const prefix = record.address ? addressKey(record.address) : null;
 
   const groups = prefix

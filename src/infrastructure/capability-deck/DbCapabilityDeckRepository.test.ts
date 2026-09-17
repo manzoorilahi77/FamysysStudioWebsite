@@ -1,12 +1,18 @@
 // src/infrastructure/capability-deck/DbCapabilityDeckRepository.test.ts
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-const rows = vi.hoisted(() => ({ deckSlides: [] as any[], deckItems: [] as any[], contentStrings: [] as any[] }));
+const rows = vi.hoisted(() => ({
+  deckSlides: [] as any[],
+  deckItems: [] as any[],
+  contentStrings: [] as any[],
+  contentDrafts: [] as any[],
+}));
 
 vi.mock("../db/content/cache", () => ({
   cachedRows: vi.fn(async (sql: string) => {
     if (sql.includes("FROM deck_slides")) return rows.deckSlides;
     if (sql.includes("FROM deck_items")) return rows.deckItems;
+    if (sql.includes("FROM content_drafts")) return rows.contentDrafts;
     if (sql.includes("FROM content_strings")) return rows.contentStrings;
     return [];
   }),
@@ -25,6 +31,7 @@ beforeEach(() => {
   ];
   rows.deckItems = [];
   rows.contentStrings = [];
+  rows.contentDrafts = [];
 });
 
 describe("DbCapabilityDeckRepository.getDeck", () => {
@@ -108,5 +115,27 @@ describe("DbCapabilityDeckRepository.getDeck", () => {
     const media = bannersGroup.records[0]!.groups[0]!.media[0]!;
     expect(media.path).toBe("/uploads/custom-banner.jpg");
     expect(media.src?.value).toBe("/uploads/custom-banner.jpg");
+  });
+
+  it("lays a saved-but-unpublished content_drafts value onto its field as draftValue, and marks the slide as draft", async () => {
+    rows.contentDrafts = [
+      { owner_kind: "deck_slide", owner_key: "cover", field_key: "eyebrow", value: "Draft Brand" },
+    ];
+    const repo = new DbCapabilityDeckRepository();
+    const deck = await repo.getDeck();
+    const cover = deck.slides.find((s) => s.id === "cover")!;
+    const eyebrow = cover.groups[0]!.values.find((v) => v.label === "Eyebrow")!;
+
+    // The published value is untouched — a draft is a layer on top, never a replacement.
+    expect(eyebrow.value).not.toBe("Draft Brand");
+    expect(eyebrow.draftValue).toBe("Draft Brand");
+    expect(cover.status).toBe("draft");
+  });
+
+  it("reports a slide with no drafts anywhere in it as published", async () => {
+    const repo = new DbCapabilityDeckRepository();
+    const deck = await repo.getDeck();
+    const cover = deck.slides.find((s) => s.id === "cover")!;
+    expect(cover.status).toBe("published");
   });
 });
