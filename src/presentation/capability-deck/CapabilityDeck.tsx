@@ -1,6 +1,6 @@
 "use client";
 
-import type { PublishedCapabilityDeck } from "../../infrastructure/capability-deck/getCapabilityDeckContent";
+import type { PublishedCapabilityDeck } from "../../domain/capability-deck/entities/PublishedCapabilityDeck";
 import type { SlideEntry } from "./types";
 import { PresentationShell } from "./components/PresentationShell";
 import CoverSlide from "./slides/CoverSlide";

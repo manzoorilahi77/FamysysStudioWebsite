@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { buildDeckSlideRecords } from "./deckRecords";
 import * as content from "../../presentation/capability-deck/data/content";
-import type { CapabilityDeckSource } from "./deckRecords";
+import type { CapabilityDeckSource } from "../../domain/capability-deck/entities/CapabilityDeckSource";
 
 function fixtureSource(): CapabilityDeckSource {
   return {

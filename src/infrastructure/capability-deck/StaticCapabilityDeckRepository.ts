@@ -1,10 +1,10 @@
 import { DECK_SLIDE_CATALOG } from "../../domain/capability-deck/entities/DeckSlideCatalog";
 import type { CapabilityDeckDocument } from "../../domain/capability-deck/entities/CapabilityDeckDocument";
 import type { CapabilityDeckRepository, ContentEdit, NewCmsRecord } from "../../domain/capability-deck/repositories/CapabilityDeckRepository";
+import type { CapabilityDeckSource } from "../../domain/capability-deck/entities/CapabilityDeckSource";
 import type { ContentAddress, ContentFieldAddress } from "../../domain/cms/entities/ContentAddress";
 import * as content from "../../presentation/capability-deck/data/content";
 import { buildDeckSlideRecords } from "./deckRecords";
-import type { CapabilityDeckSource } from "./deckRecords";
 
 const NO_STORE =
   "The Capability Deck cannot be edited while the site reads its content from the TypeScript " +

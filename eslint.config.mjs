@@ -130,26 +130,6 @@ export default tseslint.config(
     },
   },
   {
-    // THE PUBLIC DECK'S OWN CONTENT SHAPE, read from infrastructure/ by presentation/ — the
-    // reverse direction of the override above. `CapabilityDeckSource` (infrastructure/capability-deck/
-    // deckRecords.ts) and `PublishedCapabilityDeck` (infrastructure/capability-deck/getCapabilityDeckContent.ts)
-    // are the plain content shape every slide component and the shell now receive as a prop, so
-    // `SlideProps`/`PresentationShellProps` and the two component files that pass that prop down
-    // through the dynamic-import boundary all need a type-only import of it. See Task 16 in
-    // docs/superpowers/plans/2026-09-17-capability-deck-cms.md — a deck-specific type shape was kept
-    // out of domain/ rather than invented a second time, so this is the narrow, named exception
-    // rather than a general presentation-may-import-infrastructure rule.
-    files: [
-      "src/presentation/capability-deck/types.ts",
-      "src/presentation/capability-deck/CapabilityDeck.tsx",
-      "src/presentation/capability-deck/CapabilityDeckMount.tsx",
-      "src/presentation/capability-deck/components/PresentationShell.tsx",
-    ],
-    rules: {
-      "boundaries/element-types": "off",
-    },
-  },
-  {
     // THE ONE-PALETTE RULE.
     // ---------------------------------------------------------------------------
     // src/shared/design/colors.ts is the only file in the repository allowed to name a

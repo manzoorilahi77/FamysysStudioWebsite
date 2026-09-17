@@ -1,59 +1,10 @@
 // src/infrastructure/capability-deck/deckRecords.ts
 import type { ContentAddress } from "../../domain/cms/entities/ContentAddress";
 import type { CmsRecord, CmsValueKind } from "../../domain/cms/entities/CmsRecord";
+import type { CapabilityDeckSource } from "../../domain/capability-deck/entities/CapabilityDeckSource";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import { media, toRecord } from "../cms/records";
 import type { GroupInput, ItemGroupInput, ListInput, ValueInput } from "../cms/records";
-
-/**
- * THE DECK'S OWN SOURCE SHAPE — the same plain objects `data/content.ts` already exports,
- * named here so both repositories (Task 6: static, Task 7: database) can produce one and
- * this file does not need to know which produced it.
- *
- * `portfolioCategories` keeps content.ts's own shape (see types.ts's `PortfolioCategory`)
- * rather than a deck-specific reshaping: the seven categories are structurally fixed (see
- * the design note above this task), so there is nothing to gain from inventing a second
- * shape for data that is read exactly once, here.
- */
-export interface CapabilityDeckSource {
-  readonly cover: {
-    readonly brand: string;
-    readonly headlineLine1: string;
-    readonly headlineAccent: string;
-    readonly supporting: string;
-    readonly decorativeLabel: string;
-    readonly logoMark: string;
-  };
-  readonly whoWeAre: {
-    readonly headline: string;
-    readonly copy: string;
-    readonly highlights: ReadonlyArray<{ readonly title: string; readonly copy: string }>;
-    readonly established: string;
-    readonly locations: string;
-    readonly visionMission: ReadonlyArray<{ readonly title: string; readonly copy: string }>;
-  };
-  readonly processSteps: ReadonlyArray<{ readonly index: string; readonly title: string; readonly copy: string }>;
-  readonly serviceCategories: ReadonlyArray<{
-    readonly title: string;
-    readonly tagline: string;
-    readonly examples: ReadonlyArray<string>;
-  }>;
-  readonly engagementModels: ReadonlyArray<{
-    readonly tag: string;
-    readonly title: string;
-    readonly audience: string;
-    readonly examples: ReadonlyArray<string>;
-  }>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- content.ts's own type, imported by the two repositories that populate this field
-  readonly portfolioCategories: ReadonlyArray<any>;
-  readonly cta: {
-    readonly headline: string;
-    readonly body: string;
-    readonly ctaLabel: string;
-    readonly ctaHref: string;
-    readonly caption: string;
-  };
-}
 
 /** A plain editable line, with no static-file pointer — see Task 5's design note on why. */
 function textField(label: string, value: string, kind: CmsValueKind = "text"): ValueInput {

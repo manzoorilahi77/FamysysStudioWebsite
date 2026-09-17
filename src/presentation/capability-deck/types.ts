@@ -9,7 +9,7 @@
  */
 
 import type { ReactElement } from "react";
-import type { CapabilityDeckSource } from "../../infrastructure/capability-deck/deckRecords";
+import type { CapabilityDeckSource } from "../../domain/capability-deck/entities/CapabilityDeckSource";
 
 // ---------------------------------------------------------------------------
 // Slides

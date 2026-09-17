@@ -4,13 +4,8 @@ import { derivedId } from "../cms/records";
 import { cachedRows } from "../db/content/cache";
 import { DECK_SLIDE_CATALOG } from "../../domain/capability-deck/entities/DeckSlideCatalog";
 import * as staticContent from "../../presentation/capability-deck/data/content";
-import type { CapabilityDeckSource } from "./deckRecords";
+import type { PublishedCapabilityDeck } from "../../domain/capability-deck/entities/PublishedCapabilityDeck";
 import type { RowDataPacket } from "mysql2/promise";
-
-export interface PublishedCapabilityDeck {
-  readonly enabledSlideKeys: ReadonlyArray<string>;
-  readonly source: CapabilityDeckSource;
-}
 
 interface DeckItemRow extends RowDataPacket {
   item_key: string;

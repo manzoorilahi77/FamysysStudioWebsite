@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { PublishedCapabilityDeck } from "../../infrastructure/capability-deck/getCapabilityDeckContent";
+import type { PublishedCapabilityDeck } from "../../domain/capability-deck/entities/PublishedCapabilityDeck";
 
 /**
  * MOUNTS THE DECK IN THE BROWSER ONLY, AND THIS IS THE ONE THING THE PORT COULD NOT
