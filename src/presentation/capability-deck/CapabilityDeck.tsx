@@ -1,38 +1,34 @@
 "use client";
 
-/**
- * His src/App.jsx, unchanged in substance: the same six slides in the same
- * order, with How We Work left commented out exactly where he left it.
- *
- * THE ONE CLIENT DIRECTIVE FOR THE WHOLE DECK. Everything under it — the shell,
- * the slides, the galleries, the hooks — is a client module by virtue of being
- * imported from here, so no other file in the port needs the directive. The deck
- * is entirely interactive (keyboard, wheel, swipe, fullscreen, AnimatePresence),
- * so there is nothing here that would benefit from rendering on the server.
- */
-
+import type { PublishedCapabilityDeck } from "../../infrastructure/capability-deck/getCapabilityDeckContent";
 import type { SlideEntry } from "./types";
 import { PresentationShell } from "./components/PresentationShell";
 import CoverSlide from "./slides/CoverSlide";
 import WhoWeAreSlide from "./slides/WhoWeAreSlide";
-// How We Work is temporarily disabled — re-add its entry below (between
-// Who We Are and Services, its original position) to bring it back.
-// import HowWeWorkSlide from './slides/HowWeWorkSlide'
+import HowWeWorkSlide from "./slides/HowWeWorkSlide";
 import WaysToWorkSlide from "./slides/WaysToWorkSlide";
 import ServicesSlide from "./slides/ServicesSlide";
 import SelectedWorkSlide from "./slides/SelectedWorkSlide";
 import CTASlide from "./slides/CTASlide";
 
-const slides: ReadonlyArray<SlideEntry> = [
-  { id: "cover", title: "Cover", Component: CoverSlide },
-  { id: "who-we-are", title: "Who We Are", Component: WhoWeAreSlide },
-  // { id: 'how-we-work', title: 'How We Work', Component: HowWeWorkSlide },
-  { id: "services", title: "Services", Component: ServicesSlide },
-  { id: "selected-work", title: "Selected Work", Component: SelectedWorkSlide },
-  { id: "ways-to-work", title: "Ways to Work", Component: WaysToWorkSlide },
-  { id: "lets-talk", title: "Let's Talk", Component: CTASlide },
-];
+/** Every slide type that exists in code — see domain/capability-deck/entities/DeckSlideCatalog.ts, which this mirrors. */
+const SLIDE_COMPONENTS: Readonly<Record<string, { readonly title: string; readonly Component: SlideEntry["Component"] }>> = {
+  cover: { title: "Cover", Component: CoverSlide },
+  "who-we-are": { title: "Who We Are", Component: WhoWeAreSlide },
+  "how-we-work": { title: "How We Work", Component: HowWeWorkSlide },
+  services: { title: "Services", Component: ServicesSlide },
+  "selected-work": { title: "Selected Work", Component: SelectedWorkSlide },
+  "ways-to-work": { title: "Ways to Work", Component: WaysToWorkSlide },
+  "lets-talk": { title: "Let's Talk", Component: CTASlide },
+};
 
-export function CapabilityDeck() {
-  return <PresentationShell slides={slides} />;
+export function CapabilityDeck({ deck }: { readonly deck: PublishedCapabilityDeck }) {
+  const slides: ReadonlyArray<SlideEntry> = deck.enabledSlideKeys
+    .map((slideKey) => {
+      const entry = SLIDE_COMPONENTS[slideKey];
+      return entry ? { id: slideKey, title: entry.title, Component: entry.Component } : undefined;
+    })
+    .filter((entry): entry is SlideEntry => entry !== undefined);
+
+  return <PresentationShell slides={slides} content={deck.source} />;
 }

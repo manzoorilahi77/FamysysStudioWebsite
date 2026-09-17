@@ -1,12 +1,13 @@
+import type { SlideProps } from '../types'
 import type { CSSProperties } from 'react'
 import { Layer } from '../components/Layer'
 import { SectionHeadline } from '../components/SectionHeadline'
 import { useIsMobile } from '../components/ViewportContext'
 import { DEPTH } from '../components/motion'
 import { safeInsets } from '../components/layout'
-const logoMark = "/capability-deck/famysys-logo.png";
 
-export default function CoverSlide() {
+export default function CoverSlide({ content }: SlideProps) {
+  const { cover } = content
   const isMobile = useIsMobile()
   const SAFE = safeInsets(isMobile)
 
@@ -20,7 +21,7 @@ export default function CoverSlide() {
         alignItems: isMobile ? 'flex-end' : 'flex-end',
       }}>
         <img
-          src={logoMark}
+          src={cover.logoMark}
           alt=""
           aria-hidden="true"
           style={{
@@ -41,25 +42,25 @@ export default function CoverSlide() {
         paddingBottom: isMobile ? SAFE.bottom : 0,
       }}>
         <span className="eyebrow" style={{ ...styles.brand, fontSize: isMobile ? '12px' : '17px' }}>
-          Famysys Studio
+          {cover.brand}
         </span>
         <SectionHeadline
           as="h1"
           className="display-xl"
           style={{ ...styles.headline, fontSize: isMobile ? '36px' : '96px', maxWidth: isMobile ? 'none' : '1300px' }}
         >
-          Where creativity
+          {cover.headlineLine1}
           <br />
-          meets <em style={styles.headlineAccent}>speed.</em>
+          <em style={styles.headlineAccent}>{cover.headlineAccent}</em>
         </SectionHeadline>
         <p style={{ ...styles.supporting, fontSize: isMobile ? '14px' : '20px' }}>
-          Design • Video • AI Content • Motion • Product Visuals
+          {cover.supporting}
         </p>
       </Layer>
 
       {!isMobile && (
         <Layer depth={DEPTH.decorative} style={{ ...styles.decorative, right: SAFE.side, top: SAFE.top - 40 }}>
-          <span style={styles.decorativeLabel}>Corporate Deck</span>
+          <span style={styles.decorativeLabel}>{cover.decorativeLabel}</span>
         </Layer>
       )}
     </div>

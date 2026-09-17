@@ -8,9 +8,9 @@ import { GhostNumeral } from '../components/GhostNumeral'
 import { useIsMobile } from '../components/ViewportContext'
 import { DEPTH } from '../components/motion'
 import { safeInsets } from '../components/layout'
-import { whoWeAre } from '../data/content'
 
-export default function WhoWeAreSlide({ meta }: SlideProps) {
+export default function WhoWeAreSlide({ meta, content }: SlideProps) {
+  const { whoWeAre } = content
   const isMobile = useIsMobile()
   const SAFE = safeInsets(isMobile)
 

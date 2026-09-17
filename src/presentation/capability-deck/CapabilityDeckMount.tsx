@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { PublishedCapabilityDeck } from "../../infrastructure/capability-deck/getCapabilityDeckContent";
 
 /**
  * MOUNTS THE DECK IN THE BROWSER ONLY, AND THIS IS THE ONE THING THE PORT COULD NOT
@@ -35,6 +36,6 @@ const Deck = dynamic(() => import("./CapabilityDeck").then((m) => m.CapabilityDe
   ssr: false,
 });
 
-export function CapabilityDeckMount() {
-  return <Deck />;
+export function CapabilityDeckMount({ deck }: { readonly deck: PublishedCapabilityDeck }) {
+  return <Deck deck={deck} />;
 }

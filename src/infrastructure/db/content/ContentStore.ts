@@ -40,7 +40,7 @@ interface StoredValue {
   readonly sortOrder: number;
 }
 
-export type ContentOwnerKind = "page_section" | "collection_record" | "media_asset";
+export type ContentOwnerKind = "page_section" | "collection_record" | "media_asset" | "deck_slide" | "deck_item";
 
 export class ContentStore {
   private constructor(private readonly byOwner: Map<string, Map<string, StoredValue>>) {}

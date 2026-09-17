@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CapabilityDeckMount } from "../../presentation/capability-deck/CapabilityDeckMount";
+import { getPublishedCapabilityDeck } from "../../infrastructure/di/capabilityDeckContainer";
 import "./deck.css";
 
 /**
@@ -38,10 +39,11 @@ export const metadata: Metadata = {
  * what `body:has()` in deck.css keys the page-level rules off, so it has to be in the
  * first HTML or the page flashes the site's cream canvas before the bundle arrives.
  */
-export default function CapabilityDeckRoute() {
+export default async function CapabilityDeckRoute() {
+  const deck = await getPublishedCapabilityDeck();
   return (
     <div className="capability-deck">
-      <CapabilityDeckMount />
+      <CapabilityDeckMount deck={deck} />
     </div>
   );
 }

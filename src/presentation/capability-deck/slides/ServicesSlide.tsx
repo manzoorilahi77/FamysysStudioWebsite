@@ -9,9 +9,9 @@ import { GhostNumeral } from '../components/GhostNumeral'
 import { useIsMobile } from '../components/ViewportContext'
 import { DEPTH } from '../components/motion'
 import { safeInsets } from '../components/layout'
-import { serviceCategories } from '../data/content'
 
-export default function ServicesSlide({ meta }: SlideProps) {
+export default function ServicesSlide({ meta, content }: SlideProps) {
+  const { serviceCategories } = content
   const isMobile = useIsMobile()
   const SAFE = safeInsets(isMobile)
 
@@ -45,8 +45,7 @@ export default function ServicesSlide({ meta }: SlideProps) {
         <StaggerGroup
           style={{
             ...styles.grid,
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-            gridTemplateRows: isMobile ? 'auto' : 'repeat(2, auto)',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))',
             columnGap: isMobile ? '18px' : '56px',
             rowGap: isMobile ? '18px' : '40px',
             alignContent: 'start',

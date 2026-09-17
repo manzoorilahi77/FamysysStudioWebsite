@@ -15,7 +15,6 @@ import { useIsMobile } from '../components/ViewportContext'
 import { useReducedMotionPref } from '../components/MotionPrefContext'
 import { DEPTH, EASE_LUX } from '../components/motion'
 import { safeInsets } from '../components/layout'
-import { portfolioCategories } from '../data/content'
 import type {
   DeckImage,
   DeckProcess,
@@ -30,7 +29,8 @@ import type {
 // local state) so its next/prev arrows can step through tabs before
 // falling through to the adjacent slide without reaching into this
 // component via a ref — see the comment in PresentationShell.jsx for why.
-export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTabChange }: SlideProps) {
+export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTabChange, content }: SlideProps) {
+  const { portfolioCategories } = content
   const isPresent = useIsPresent()
   const isMobile = useIsMobile()
   const reducedMotion = useReducedMotionPref()

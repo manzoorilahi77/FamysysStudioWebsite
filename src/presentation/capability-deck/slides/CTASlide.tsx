@@ -11,7 +11,8 @@ import { safeInsets } from '../components/layout'
 
 // Copy sourced directly from the live studio.famysys.com contact/CTA
 // section — not invented for the deck.
-export default function CTASlide({ meta }: SlideProps) {
+export default function CTASlide({ meta, content }: SlideProps) {
+  const { cta } = content
   const isMobile = useIsMobile()
   const SAFE = safeInsets(isMobile)
 
@@ -42,18 +43,17 @@ export default function CTASlide({ meta }: SlideProps) {
         <div style={{ ...styles.top, gap: isMobile ? '16px' : '26px' }}>
           <SectionLabel index={meta.index} total={meta.total} title={meta.title} />
           <SectionHeadline className="display-lg" style={{ ...styles.headline, fontSize: isMobile ? '34px' : '86px' }}>
-            Have a creative requirement? Let&rsquo;s talk.
+            {cta.headline}
           </SectionHeadline>
           <p className="body-lg" style={{ ...styles.copy, fontSize: isMobile ? '15px' : '23px' }}>
-            Tell us what you&rsquo;re trying to create. We&rsquo;ll help you determine the right
-            approach, scope and production model.
+            {cta.body}
           </p>
         </div>
 
         <div style={{ ...styles.ctaBlock, gap: isMobile ? '14px' : '20px' }}>
-          <CTAButton href="https://studio.famysys.com/">Start a Conversation</CTAButton>
+          <CTAButton href={cta.ctaHref}>{cta.ctaLabel}</CTAButton>
           <span style={{ ...styles.ctaCaption, fontSize: isMobile ? '12px' : '14px' }}>
-            Project-based when you need it. Ongoing when you need more.
+            {cta.caption}
           </span>
         </div>
 

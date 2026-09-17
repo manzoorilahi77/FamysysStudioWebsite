@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Variants } from 'framer-motion'
 import type { Direction, SlideEntry, TransitionPreset } from '../types'
+import type { CapabilityDeckSource } from '../../../infrastructure/capability-deck/deckRecords'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Maximize, Minimize } from 'lucide-react'
 import { useKeyboardNav } from '../hooks/useKeyboardNav'
@@ -69,9 +70,10 @@ function wrapperVariants(reducedMotion: boolean): Variants {
 
 interface PresentationShellProps {
   readonly slides: ReadonlyArray<SlideEntry>
+  readonly content: CapabilityDeckSource
 }
 
-export function PresentationShell({ slides }: PresentationShellProps) {
+export function PresentationShell({ slides, content }: PresentationShellProps) {
   const [[index, direction], setState] = useState<[number, Direction]>([0, 0])
   const [selectedWorkTab, setSelectedWorkTab] = useState(0)
   const { scale, stageWidth, stageHeight, isMobile } = useStageScale()
@@ -222,6 +224,7 @@ export function PresentationShell({ slides }: PresentationShellProps) {
                     active
                     activeTab={selectedWorkTab}
                     onActiveTabChange={setSelectedWorkTab}
+                    content={content}
                   />
                 </TransitionPresetProvider>
               </MotionPrefProvider>

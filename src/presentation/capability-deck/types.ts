@@ -9,6 +9,7 @@
  */
 
 import type { ReactElement } from "react";
+import type { CapabilityDeckSource } from "../../infrastructure/capability-deck/deckRecords";
 
 // ---------------------------------------------------------------------------
 // Slides
@@ -31,6 +32,7 @@ export interface SlideProps {
   readonly active: boolean;
   readonly activeTab: number;
   readonly onActiveTabChange: (index: number) => void;
+  readonly content: CapabilityDeckSource;
 }
 
 /**

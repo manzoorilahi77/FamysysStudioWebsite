@@ -1,22 +1,16 @@
 import { contentSource } from "../db/env";
-import { DbCapabilityDeckRepository } from "../capability-deck/DbCapabilityDeckRepository";
-import { StaticCapabilityDeckRepository } from "../capability-deck/StaticCapabilityDeckRepository";
+import { withStaticFallback } from "../db/fallback";
+import { readDeckContentFromDatabase, readDeckContentFromFiles } from "../capability-deck/getCapabilityDeckContent";
 
 /**
- * THE PUBLIC ROUTE'S OWN READ, kept apart from `adminContainer` for the same reason that
- * file is kept apart from `container`: this one is imported by `app/capability-deck/page.tsx`,
- * which every visitor's request runs, so it must not pull in anything the admin screens need
- * but a visitor's request should not pay for.
- *
- * It is also, deliberately, a SEPARATE instance from `adminContainer.capabilityDeck` rather
- * than a shared one — the two call sites have nothing to hand each other and constructing a
- * repository is cheap; sharing one would be a reason for the public route to import from
- * `infrastructure/di/adminContainer.ts`, which is reserved for `src/app/admin` by convention.
+ * Wrapped in the same `withStaticFallback` every other repository in container.ts gets: a
+ * database that cannot be REACHED hands this route over to the static files too, instead of
+ * taking /capability-deck's prerender down while every other route survives the same outage.
+ * See db/fallback.ts for why that fallback is deliberately narrow (a missing field still
+ * throws) and container.ts for the same pattern applied to every other page's repositories.
  */
-const repository =
-  contentSource() === "database" ? new DbCapabilityDeckRepository() : new StaticCapabilityDeckRepository();
+const database = withStaticFallback({ read: readDeckContentFromDatabase }, { read: readDeckContentFromFiles });
 
-/** What the public render needs: published-only content, in deck order, nothing about drafts. */
 export async function getPublishedCapabilityDeck() {
-  return repository.getDeck();
+  return contentSource() === "database" ? database.read() : readDeckContentFromFiles();
 }
