@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { DECK_PREVIEW_ORIGINS } from "./shared/site/deckPreviewOrigins";
 
 /**
  * SECURITY HEADERS, ON EVERY RESPONSE.
@@ -122,17 +123,10 @@ const DECK_FRAME_SOURCES = [
   "'self'",
   // The 23 Selected Work clips, as Drive's own /preview player.
   "https://drive.google.com",
-  // The Presentation category embeds the parent company's corporate deck.
-  "https://famysys.com",
-  // The seven Websites cards that frame the live site rather than a screenshot.
-  // Kept in the same order as `websiteProjects` in the deck's content.ts.
-  "https://www.bashafood.in",
-  "https://ferrobid.aspirasys.in",
-  "https://royal.aspirasys.in",
-  "https://studiominiminds.com",
-  "https://kkmkeychains.in",
-  "https://tnhajsociety.org",
-  "https://bvaglobal.ai",
+  // The parent company's corporate deck, the Websites gallery's live-framed sites, and any
+  // other origin the Capability Deck CMS is allowed to display live — see
+  // deckPreviewOrigins.ts for why this is imported rather than repeated here.
+  ...DECK_PREVIEW_ORIGINS,
 ];
 
 const DECK_CSP = [
