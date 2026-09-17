@@ -113,6 +113,23 @@ export default tseslint.config(
     },
   },
   {
+    // The Capability Deck's static/seed content module (src/presentation/capability-deck/data/content.ts)
+    // is data, not UI — an artifact of the deck having been ported as a pure frontend feature before
+    // the CMS work began. Unlike the seven existing pages (whose static content correctly lives under
+    // src/infrastructure/content/static/), this file has not been relocated out of presentation/, because
+    // doing so would require updating every live slide component that still imports it directly. These
+    // two infrastructure files are the deck's static/database repository and its public-route content
+    // reader — both need to read that data module directly as the deck's structural template and
+    // fallback source. See docs/superpowers/plans/2026-09-17-capability-deck-cms.md for the full reasoning.
+    files: [
+      "src/infrastructure/capability-deck/StaticCapabilityDeckRepository.ts",
+      "src/infrastructure/capability-deck/getCapabilityDeckContent.ts",
+    ],
+    rules: {
+      "boundaries/element-types": "off",
+    },
+  },
+  {
     // THE ONE-PALETTE RULE.
     // ---------------------------------------------------------------------------
     // src/shared/design/colors.ts is the only file in the repository allowed to name a

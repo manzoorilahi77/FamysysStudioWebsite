@@ -5,6 +5,7 @@ import { CtaLabel } from "../../domain/shared/value-objects/CtaLabel";
 import { DriveVideoUrl } from "../../domain/shared/value-objects/DriveVideoUrl";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import { Url } from "../../domain/shared/value-objects/Url";
+import { DECK_PREVIEW_ORIGINS } from "../../shared/site/deckPreviewOrigins";
 import { SITE_ROUTES } from "../../shared/site/site";
 
 /**
@@ -126,7 +127,7 @@ export function validateContentValue(
         DriveVideoUrl.create(candidate);
         return null;
       case "websiteOrigin":
-        AllowedWebsiteUrl.create(candidate);
+        AllowedWebsiteUrl.create(candidate, DECK_PREVIEW_ORIGINS);
         return null;
       case "mediaSrc": {
         const badPath = mediaPathProblem(candidate);

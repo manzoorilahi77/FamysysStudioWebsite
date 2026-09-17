@@ -1,12 +1,50 @@
 // src/infrastructure/capability-deck/DbCapabilityDeckRepository.test.ts
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+/**
+ * Mirrors the shape of the row interfaces `DbCapabilityDeckRepository.ts` declares for its
+ * own queries (`DeckSlideRow`, `DeckItemRow`, `ContentStringRow`, `ContentDraftRow`), minus
+ * the `RowDataPacket` brand those carry in production — these are plain fixtures, not
+ * results actually round-tripped through the mysql2 driver, so a local shape is enough to
+ * keep the mock data honest without reaching into infrastructure internals.
+ */
+interface MockDeckSlideRow {
+  slide_key: string;
+  sort_order: number;
+  updated_at: string;
+}
+interface MockDeckItemRow {
+  item_key: string;
+  collection_id: string;
+  media_path: string | null;
+  media_kind: "image" | "video" | null;
+  sort_order: number;
+}
+interface MockContentStringRow {
+  owner_kind: string;
+  owner_key: string;
+  field_key: string;
+  value: string;
+  version?: number;
+}
+interface MockContentDraftRow {
+  owner_kind: string;
+  owner_key: string;
+  field_key: string;
+  value: string;
+}
+
 const rows = vi.hoisted(() => ({
-  deckSlides: [] as any[],
-  deckItems: [] as any[],
-  contentStrings: [] as any[],
-  contentDrafts: [] as any[],
+  deckSlides: [] as MockDeckSlideRow[],
+  deckItems: [] as MockDeckItemRow[],
+  contentStrings: [] as MockContentStringRow[],
+  contentDrafts: [] as MockContentDraftRow[],
 }));
+
+/** The one method `transaction()`'s callback ever calls on the connection it is handed. */
+interface MockConnection {
+  execute: (sql: string, params?: ReadonlyArray<unknown>) => Promise<[unknown, unknown]>;
+}
 
 vi.mock("../db/content/cache", () => ({
   cachedRows: vi.fn(async (sql: string) => {
@@ -18,7 +56,9 @@ vi.mock("../db/content/cache", () => ({
   }),
 }));
 vi.mock("../db/pool", () => ({
-  transaction: vi.fn(async (fn: any) => fn({ execute: vi.fn(async () => [[], {}]) })),
+  transaction: vi.fn(async (fn: (connection: MockConnection) => Promise<unknown>) =>
+    fn({ execute: vi.fn(async (): Promise<[unknown, unknown]> => [[], {}]) }),
+  ),
   write: vi.fn(async () => ({ affectedRows: 1 })),
 }));
 
