@@ -45,6 +45,9 @@ import { StaticMarketingContentRepository } from "../src/infrastructure/content/
 import { StaticPortfolioRepository } from "../src/infrastructure/content/repositories/StaticPortfolioRepository";
 import { StaticProcessRepository } from "../src/infrastructure/content/repositories/StaticProcessRepository";
 import { StaticServiceCatalogRepository } from "../src/infrastructure/content/repositories/StaticServiceCatalogRepository";
+import { staticDeckSource } from "../src/infrastructure/capability-deck/StaticCapabilityDeckRepository";
+import { buildDeckSlideRecords } from "../src/infrastructure/capability-deck/deckRecords";
+import { DECK_SLIDE_CATALOG } from "../src/domain/capability-deck/entities/DeckSlideCatalog";
 
 /**
  * THE SEED CONSTRUCTS ITS OWN REPOSITORIES, AND NEVER IMPORTS THE COMPOSITION ROOT.
@@ -136,7 +139,7 @@ async function run(
 // content_strings — the same statement for every string on the site.
 // ---------------------------------------------------------------------------
 
-type OwnerKind = "page_section" | "collection_record" | "media_asset";
+type OwnerKind = "page_section" | "collection_record" | "media_asset" | "deck_slide" | "deck_item";
 
 /**
  * `value` and `version` are absent from the UPDATE clause on purpose: a re-seed refreshes
@@ -499,6 +502,58 @@ async function seedMedia(connection: Connection): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Capability Deck. Structure (deck_slides/deck_items) comes from the catalog and the
+// content.ts-shaped source; strings come from the same CmsRecord walk seedRecordStrings
+// already does for the seven pages.
+// ---------------------------------------------------------------------------
+
+async function seedCapabilityDeck(connection: Connection): Promise<void> {
+  const records = buildDeckSlideRecords(staticDeckSource(), null);
+
+  for (const [index, entry] of DECK_SLIDE_CATALOG.entries()) {
+    await run(
+      connection,
+      "deck_slides",
+      `INSERT INTO deck_slides (slide_key, sort_order) VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE sort_order = ${force ? "VALUES(sort_order)" : "sort_order"}`,
+      [entry.slideKey, index],
+    );
+
+    const slide = records.get(entry.slideKey);
+    if (!slide) continue;
+
+    await seedRecordStrings(connection, "deck_slide", entry.slideKey, slide);
+
+    for (const group of slide.items) {
+      for (const [itemIndex, item] of group.records.entries()) {
+        const itemKey = `${group.collectionId}:${item.id}`;
+        const isImageCollection = group.collectionId.startsWith("selected-work:print:");
+        const mediaBlock = item.groups.flatMap((g) => g.media)[0];
+
+        await run(
+          connection,
+          "deck_items",
+          `INSERT INTO deck_items (item_key, collection_id, media_path, media_kind, sort_order)
+           VALUES (?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+             media_path = ${force ? "VALUES(media_path)" : "media_path"},
+             sort_order = ${force ? "VALUES(sort_order)" : "sort_order"}`,
+          [
+            itemKey,
+            group.collectionId,
+            isImageCollection ? (mediaBlock?.path ?? null) : null,
+            isImageCollection ? "image" : null,
+            itemIndex,
+          ],
+        );
+
+        await seedRecordStrings(connection, "deck_item", itemKey, item);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 /**
  * The table name is interpolated, which is the one place in the project that happens. It
@@ -546,6 +601,7 @@ async function main(): Promise<void> {
     await seedFaq(connection);
     await seedCollectionStrings(connection);
     await seedMedia(connection);
+    await seedCapabilityDeck(connection);
     if (dryRun) await connection.rollback();
     else await connection.commit();
 
