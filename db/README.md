@@ -43,6 +43,7 @@ version's effect and this cannot undo it. Fix a mistake with a new migration.
 | `006_inquiries.sql`         | Contact form submissions.                                         |
 | `007_login_attempts.sql`    | The login rate limiter's counter.                                 |
 | `008_content_drafts.sql`    | Saved-but-unpublished edits, kept out of what the site reads.     |
+| `015_capability_deck.sql`   | `deck_slides`/`deck_items`, and the deck's owner/value kinds.      |
 
 ## How the schema is shaped, and why
 
