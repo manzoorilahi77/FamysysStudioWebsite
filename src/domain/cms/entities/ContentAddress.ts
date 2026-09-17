@@ -15,7 +15,13 @@
  * true by construction rather than by validation.
  */
 export interface ContentAddress {
-  readonly kind: "page_section" | "collection_record";
+  /**
+   * "deck_slide" and "deck_item" address the Capability Deck's own parallel structure — a
+   * slide, or a repeatable card inside one (a video, a website entry, a print image). The
+   * deck is not one of the seven fixed pages, so it does not use "page_section", but its
+   * writes go through this same address/edit/conflict machinery rather than a second one.
+   */
+  readonly kind: "page_section" | "collection_record" | "deck_slide" | "deck_item";
   /** "home:hero", "capabilities:creative-design". */
   readonly key: string;
 }

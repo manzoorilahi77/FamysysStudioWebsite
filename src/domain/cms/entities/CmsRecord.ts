@@ -55,7 +55,11 @@ export type CmsValueKind =
   | "mediaPoster"
   | "seoTitle"
   | "seoDescription"
-  | "seoCanonical";
+  | "seoCanonical"
+  /** A Google Drive share link/id, normalized to its `/preview` embed form — see DriveVideoUrl. */
+  | "driveVideoId"
+  /** A URL whose origin must be on the deck's CSP allowlist — see AllowedWebsiteUrl. */
+  | "websiteOrigin";
 
 /** One string an editor can see, and — when it has a pointer — change. */
 export interface CmsValue {

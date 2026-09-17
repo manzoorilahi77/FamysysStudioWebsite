@@ -1,6 +1,8 @@
 import type { CmsValue } from "../../domain/cms/entities/CmsRecord";
 import { DomainError } from "../../domain/shared/errors/DomainError";
+import { AllowedWebsiteUrl } from "../../domain/shared/value-objects/AllowedWebsiteUrl";
 import { CtaLabel } from "../../domain/shared/value-objects/CtaLabel";
+import { DriveVideoUrl } from "../../domain/shared/value-objects/DriveVideoUrl";
 import { MediaRef } from "../../domain/shared/value-objects/MediaRef";
 import { Url } from "../../domain/shared/value-objects/Url";
 import { SITE_ROUTES } from "../../shared/site/site";
@@ -119,6 +121,12 @@ export function validateContentValue(
         return null;
       case "url":
         Url.create(candidate);
+        return null;
+      case "driveVideoId":
+        DriveVideoUrl.create(candidate);
+        return null;
+      case "websiteOrigin":
+        AllowedWebsiteUrl.create(candidate);
         return null;
       case "mediaSrc": {
         const badPath = mediaPathProblem(candidate);

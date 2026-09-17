@@ -84,3 +84,32 @@ describe("mediaPoster", () => {
     ).toBeNull();
   });
 });
+
+describe("driveVideoId", () => {
+  const field = { id: "src", label: "Video", value: "", kind: "driveVideoId" as const, multiline: false, approval: "drafted" as const, usedElsewhere: [] };
+
+  it("accepts a Drive share link", () => {
+    expect(validateContentValue(field, "https://drive.google.com/file/d/abc123/view")).toBeNull();
+  });
+
+  it("rejects a non-Drive URL", () => {
+    expect(validateContentValue(field, "https://example.com/video.mp4")).toMatch(/Google Drive/);
+  });
+
+  it("rejects empty", () => {
+    expect(validateContentValue(field, "")).toBe("This cannot be empty.");
+  });
+});
+
+describe("websiteOrigin", () => {
+  const field = { id: "previewUrl", label: "Live preview", value: "", kind: "websiteOrigin" as const, multiline: false, approval: "drafted" as const, usedElsewhere: [] };
+
+  it("accepts an allowlisted origin", () => {
+    expect(validateContentValue(field, "https://www.bashafood.in/")).toBeNull();
+  });
+
+  it("rejects an origin that is not allowlisted, naming the allowed ones", () => {
+    const message = validateContentValue(field, "https://not-allowed.example/");
+    expect(message).toMatch(/bashafood\.in/);
+  });
+});
