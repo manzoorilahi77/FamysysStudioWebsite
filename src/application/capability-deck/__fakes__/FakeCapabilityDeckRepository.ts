@@ -4,6 +4,7 @@ import type {
   ContentEdit,
   NewCmsRecord,
 } from "../../../domain/capability-deck/repositories/CapabilityDeckRepository";
+import type { CmsRecord } from "../../../domain/cms/entities/CmsRecord";
 import type { ContentAddress, ContentFieldAddress } from "../../../domain/cms/entities/ContentAddress";
 
 /** An in-memory stand-in, mirroring `application/cms/__fakes__/FakeCmsRepository.ts`'s shape. */
@@ -71,15 +72,15 @@ export class FakeCapabilityDeckRepository implements CapabilityDeckRepository {
   async logActivity(): Promise<void> {}
 }
 
-function applyPublish(record: any, ownerKey: string, field: string, value: string): any {
+function applyPublish(record: CmsRecord, ownerKey: string, field: string, value: string): CmsRecord {
   if (record.id === ownerKey || (record.address && record.address.key === ownerKey)) {
     return {
       ...record,
-      groups: record.groups.map((g: any) => ({
+      groups: record.groups.map((g) => ({
         ...g,
-        values: g.values.map((v: any) => (v.id === field ? { ...v, value } : v)),
+        values: g.values.map((v) => (v.id === field ? { ...v, value } : v)),
       })),
     };
   }
-  return { ...record, items: record.items.map((g: any) => ({ ...g, records: g.records.map((r: any) => applyPublish(r, ownerKey, field, value)) })) };
+  return { ...record, items: record.items.map((g) => ({ ...g, records: g.records.map((r) => applyPublish(r, ownerKey, field, value)) })) };
 }
