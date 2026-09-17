@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { AdminNavigation } from "../../../application/cms/GetAdminNavigation";
+import type { CapabilityDeckNavigation } from "../../../application/capability-deck/GetCapabilityDeckNavigation";
 import { Wordmark } from "../../components/Wordmark";
 
 /**
@@ -65,9 +66,16 @@ function SidebarLink({
   );
 }
 
-export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigation }) {
+export function AdminSidebar({
+  navigation,
+  capabilityDeck,
+}: {
+  readonly navigation: AdminNavigation;
+  readonly capabilityDeck: CapabilityDeckNavigation;
+}) {
   const pathname = usePathname();
   const [opened, setOpened] = useState<ReadonlyArray<string>>([]);
+  const [deckOpen, setDeckOpen] = useState(false);
 
   return (
     <nav aria-label="Admin sections" className="flex h-full flex-col gap-8 py-7">
@@ -155,6 +163,52 @@ export function AdminSidebar({ navigation }: { readonly navigation: AdminNavigat
                 </li>
               );
             })}
+          </ul>
+        </div>
+
+        <div>
+          <p className="label px-6 pb-3 text-canvas-40">Capability Deck</p>
+          <ul>
+            <li>
+              <div className="flex items-stretch">
+                <Link
+                  href={capabilityDeck.href}
+                  className={`text-small flex min-h-11 min-w-0 flex-1 items-center truncate py-2 pl-6 pr-2 transition-colors duration-[180ms] ${
+                    pathname === capabilityDeck.href ? "bg-canvas-10 text-canvas" : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"
+                  }`}
+                  aria-current={pathname === capabilityDeck.href ? "page" : undefined}
+                >
+                  Capability Deck
+                  {capabilityDeck.status === "draft" ? <DraftDot what="Capability Deck" /> : null}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDeckOpen((c) => !c)}
+                  aria-expanded={deckOpen}
+                  aria-controls="admin-nav-capability-deck"
+                  aria-label={`${deckOpen ? "Collapse" : "Expand"} Capability Deck`}
+                  className="flex min-h-11 min-w-11 items-center justify-center px-4 text-canvas-40 transition-colors duration-[180ms] hover:text-canvas"
+                >
+                  <span aria-hidden="true" className="text-small">{deckOpen ? "−" : "+"}</span>
+                </button>
+              </div>
+              <ul id="admin-nav-capability-deck" hidden={!(deckOpen || isActive(pathname, capabilityDeck.href))}>
+                {capabilityDeck.slides.map((slide) => (
+                  <li key={slide.id}>
+                    <Link
+                      href={slide.href}
+                      className={`text-small flex min-h-11 items-center py-1.5 pl-10 pr-4 transition-colors duration-[180ms] ${
+                        pathname === slide.href ? "bg-canvas-10 text-canvas" : "text-canvas-60 hover:bg-canvas-4 hover:text-canvas"
+                      }`}
+                      aria-current={pathname === slide.href ? "page" : undefined}
+                    >
+                      {slide.label}
+                      {slide.status === "draft" ? <DraftDot what={slide.label} /> : null}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </li>
           </ul>
         </div>
 

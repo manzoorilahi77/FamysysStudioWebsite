@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { AdminNavigation } from "../../../application/cms/GetAdminNavigation";
+import type { CapabilityDeckNavigation } from "../../../application/capability-deck/GetCapabilityDeckNavigation";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { useScrollLock } from "../../hooks/useScrollLock";
@@ -32,9 +33,11 @@ import { AdminSidebar } from "./AdminSidebar";
  */
 export function AdminShell({
   navigation,
+  capabilityDeck,
   children,
 }: {
   readonly navigation: AdminNavigation;
+  readonly capabilityDeck: CapabilityDeckNavigation;
   readonly children: ReactNode;
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -130,7 +133,7 @@ export function AdminShell({
               Close
             </button>
           </div>
-          <AdminSidebar navigation={navigation} />
+          <AdminSidebar navigation={navigation} capabilityDeck={capabilityDeck} />
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { GetAdminNavigation } from "../../../application/cms/GetAdminNavigation";
+import { GetCapabilityDeckNavigation } from "../../../application/capability-deck/GetCapabilityDeckNavigation";
 import { adminContainer } from "../../../infrastructure/di/adminContainer";
 import { AdminShell } from "../../../presentation/admin/components/AdminShell";
 import { requireAdminSession } from "../session";
@@ -23,6 +24,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminPanelLayout({ children }: { readonly children: ReactNode }) {
   await requireAdminSession();
   const navigation = await new GetAdminNavigation(adminContainer.cms).execute();
+  const capabilityDeckNav = await new GetCapabilityDeckNavigation(adminContainer.capabilityDeck).execute();
 
-  return <AdminShell navigation={navigation}>{children}</AdminShell>;
+  return (
+    <AdminShell navigation={navigation} capabilityDeck={capabilityDeckNav}>
+      {children}
+    </AdminShell>
+  );
 }
