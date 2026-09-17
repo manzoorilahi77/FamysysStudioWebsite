@@ -41,23 +41,30 @@ function slideAt(slides: ReadonlyArray<SlideEntry>, index: number): SlideEntry {
   return slides[index] as SlideEntry
 }
 
-const wrapperVariants: Variants = {
-  enter: {},
-  center: {
-    transition: { staggerChildren: 0.02 },
-  },
-  // Force the whole outgoing slide invisible even if a nested Layer exit
-  // stalls or AnimatePresence leaves the node mounted briefly. Transparent
-  // stage + partial Layer opacity previously let Selected Work (Website tab)
-  // bleed through Ways to Work / CTA as a stacked overlay.
-  exit: {
-    opacity: 0,
-    // Opacity alone still leaves the exiting node in the hit-test tree —
-    // it silently ate clicks on the live slide (tabs) while footer chrome
-    // (z-index 20, outside the slide) kept working.
-    pointerEvents: 'none',
-    transition: { duration: 0.35, ease: EASE_LUX, staggerChildren: 0.01, staggerDirection: -1 },
-  },
+// Reduced-motion viewers still get the pointerEvents/opacity exit guard below
+// (it's a correctness fix, not a motion flourish) but skip the staggered
+// children and get a fast plain fade instead of the full-duration transition.
+function wrapperVariants(reducedMotion: boolean): Variants {
+  return {
+    enter: {},
+    center: {
+      transition: reducedMotion ? { duration: 0.15 } : { staggerChildren: 0.02 },
+    },
+    // Force the whole outgoing slide invisible even if a nested Layer exit
+    // stalls or AnimatePresence leaves the node mounted briefly. Transparent
+    // stage + partial Layer opacity previously let Selected Work (Website tab)
+    // bleed through Ways to Work / CTA as a stacked overlay.
+    exit: {
+      opacity: 0,
+      // Opacity alone still leaves the exiting node in the hit-test tree —
+      // it silently ate clicks on the live slide (tabs) while footer chrome
+      // (z-index 20, outside the slide) kept working.
+      pointerEvents: 'none',
+      transition: reducedMotion
+        ? { duration: 0.12 }
+        : { duration: 0.35, ease: EASE_LUX, staggerChildren: 0.01, staggerDirection: -1 },
+    },
+  }
 }
 
 interface PresentationShellProps {
@@ -202,7 +209,7 @@ export function PresentationShell({ slides }: PresentationShellProps) {
             <motion.div
               key={`${slideAt(slides, index).id}-${navSeq.current}`}
               custom={direction}
-              variants={wrapperVariants}
+              variants={wrapperVariants(reducedMotion)}
               initial="enter"
               animate="center"
               exit="exit"

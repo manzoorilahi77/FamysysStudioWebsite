@@ -14,7 +14,7 @@ export function ProgressIndicator({ index, total, onJump, compact = false }: Pro
       <span style={compact ? styles.countCompact : styles.count} aria-hidden="true">
         {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
       </span>
-      <div style={styles.track}>
+      <div style={compact ? styles.trackCompact : styles.track}>
         {Array.from({ length: total }).map((_, i) => (
           <button
             key={i}
@@ -76,11 +76,29 @@ const styles = {
     gap: '6px',
     minWidth: 0,
   },
+  // Fills whatever width wrapCompact (flex: 1) leaves after the slide count
+  // and the fixed-width nav buttons, so each segment's tap target grows with
+  // the viewport instead of staying pinned to a fixed px value that's fine
+  // on a tablet and far under a 44px touch target on a 320px phone.
+  trackCompact: {
+    display: 'flex',
+    flex: 1,
+    gap: '4px',
+    minWidth: 0,
+  },
   segmentButton: {
     padding: '10px 0',
   },
+  // Visual dot stays slim (segmentCompact below); the button itself is the
+  // real hit target — flex: 1 so it shares trackCompact's width equally with
+  // its siblings, and vertical padding brings it to a 44px-tall tap area.
   segmentButtonCompact: {
-    padding: '8px 0',
+    flex: 1,
+    minWidth: '20px',
+    padding: '21px 0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   segment: {
     display: 'block',
@@ -93,7 +111,7 @@ const styles = {
   },
   segmentCompact: {
     display: 'block',
-    width: '18px',
+    width: '100%',
     height: '2px',
     background: 'var(--color-ink-line)',
     borderRadius: '2px',

@@ -28,7 +28,15 @@ export default function CTASlide({ meta }: SlideProps) {
           left: SAFE.side,
           right: SAFE.side,
           gap: isMobile ? '28px' : '56px',
-          paddingBottom: isMobile ? SAFE.bottom : 0,
+          ...(isMobile
+            ? {
+                top: SAFE.top,
+                bottom: SAFE.bottom,
+                overflow: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain',
+              }
+            : null),
         }}
       >
         <div style={{ ...styles.top, gap: isMobile ? '16px' : '26px' }}>
@@ -48,21 +56,32 @@ export default function CTASlide({ meta }: SlideProps) {
             Project-based when you need it. Ongoing when you need more.
           </span>
         </div>
+
+        {/* Below the fold on very short viewports (landscape phones) this scrolls into
+            view instead of overlapping the button — see the mobile branch above, which
+            drops the independent bottom-anchored positioning the desktop layer still uses. */}
+        {isMobile && (
+          <p style={{ ...styles.statementText, fontSize: '18px', flexShrink: 0 }}>
+            Project today. Creative partner tomorrow.
+          </p>
+        )}
       </Layer>
 
-      <Layer
-        depth={DEPTH.decorative}
-        style={{
-          ...styles.statement,
-          left: SAFE.side,
-          right: SAFE.side,
-          bottom: isMobile ? SAFE.bottom + 8 : 130,
-        }}
-      >
-        <p style={{ ...styles.statementText, fontSize: isMobile ? '18px' : '32px' }}>
-          Project today. Creative partner tomorrow.
-        </p>
-      </Layer>
+      {!isMobile && (
+        <Layer
+          depth={DEPTH.decorative}
+          style={{
+            ...styles.statement,
+            left: SAFE.side,
+            right: SAFE.side,
+            bottom: 130,
+          }}
+        >
+          <p style={{ ...styles.statementText, fontSize: '32px' }}>
+            Project today. Creative partner tomorrow.
+          </p>
+        </Layer>
+      )}
     </div>
   )
 }

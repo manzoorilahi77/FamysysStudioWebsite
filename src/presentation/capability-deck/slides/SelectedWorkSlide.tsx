@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import type { MotionStyle } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
@@ -12,6 +12,7 @@ import { WebsiteGallery } from '../components/WebsiteGallery'
 import { PresentationEmbed } from '../components/PresentationEmbed'
 import { GhostNumeral } from '../components/GhostNumeral'
 import { useIsMobile } from '../components/ViewportContext'
+import { useReducedMotionPref } from '../components/MotionPrefContext'
 import { DEPTH, EASE_LUX } from '../components/motion'
 import { safeInsets } from '../components/layout'
 import { portfolioCategories } from '../data/content'
@@ -32,9 +33,23 @@ import type {
 export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTabChange }: SlideProps) {
   const isPresent = useIsPresent()
   const isMobile = useIsMobile()
+  const reducedMotion = useReducedMotionPref()
   const SAFE = safeInsets(isMobile)
   const tab = activeTab
   const [subTab, setSubTab] = useState(0)
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+
+  // The tab strip scrolls horizontally on narrow viewports (7 category labels
+  // don't fit below ~768px), so stepping to it via next/prev or swipe can land
+  // on a tab that's scrolled off-screen with no visible indication which one
+  // is active. Keep whichever tab is current in view.
+  useEffect(() => {
+    tabRefs.current[tab]?.scrollIntoView({
+      behavior: reducedMotion ? 'auto' : 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    })
+  }, [tab, reducedMotion])
   const [activeProject, setActiveProject] = useState(0)
   const current = portfolioCategories[tab] as PortfolioCategory
   const hasProjects = Array.isArray(current.projects)
@@ -347,6 +362,9 @@ export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTab
           {portfolioCategories.map((c, i) => (
             <button
               key={c.key}
+              ref={(el) => {
+                tabRefs.current[i] = el
+              }}
               type="button"
               role="tab"
               aria-selected={i === tab}

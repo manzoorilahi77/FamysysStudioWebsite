@@ -28,7 +28,7 @@ export default function WaysToWorkSlide({ meta }: SlideProps) {
           left: SAFE.side,
           right: SAFE.side,
           top: isMobile ? 64 : 140,
-          bottom: isMobile ? SAFE.bottom : 220,
+          bottom: SAFE.bottom,
           gap: isMobile ? '20px' : '40px',
           overflow: isMobile ? 'auto' : 'hidden',
           WebkitOverflowScrolling: 'touch',
