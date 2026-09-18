@@ -170,29 +170,77 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
     }
 
     /**
-     * WHICH OF A GROUP'S BUILT RECORDS ARE CURRENTLY PLACED, AND IN WHAT ORDER — read from
+     * A NEW ENTRY HAS NO STATIC TEMPLATE, BUT NEEDS THE SAME SHAPE AS ITS SIBLINGS to be
+     * editable at all: the same fields, in the same order, with the same kinds — just
+     * empty, so `overlayItem` fills in only what was actually saved for it. Any existing
+     * sibling in the same collection carries that shape; without one (the collection's
+     * very first entry was created empty), the bare title `createItem` itself writes is the
+     * only field there is anything to show.
+     */
+    function blankRecordLike(
+      template: CmsRecord | undefined,
+      collectionId: string,
+      bareId: string,
+    ): CmsRecord {
+      const address = itemAddressFor(collectionId, bareId);
+      if (!template) {
+        return {
+          id: bareId,
+          title: "(untitled)",
+          summary: "",
+          status: "published",
+          updatedAt: null,
+          address,
+          groups: [{ id: "copy", label: "Copy", values: [textFieldLike("title", "Title")], lists: [], media: [] }],
+          items: [],
+        };
+      }
+      const groups = template.groups.map((group) => ({
+        ...group,
+        values: group.values.map((v) => ({ ...v, value: "" })),
+        lists: group.lists.map((list) => ({ ...list, items: [] })),
+        media: group.media.map((m) => ({
+          ...m,
+          path: "",
+          alt: { ...m.alt, value: "" },
+          ...(m.src ? { src: { ...m.src, value: "" } } : {}),
+        })),
+      }));
+      return { ...template, id: bareId, title: "(untitled)", summary: "", address, groups, items: [] };
+    }
+
+    function textFieldLike(id: string, label: string): CmsRecord["groups"][number]["values"][number] {
+      return { id, label, value: "", kind: "text", multiline: false, approval: "drafted", usedElsewhere: [] };
+    }
+
+    function itemAddressFor(collectionId: string, bareId: string): ContentAddress {
+      return { kind: "deck_item", key: `${collectionId}:${bareId}` };
+    }
+
+    /**
+     * WHICH OF A GROUP'S RECORDS ARE CURRENTLY PLACED, AND IN WHAT ORDER — read from
      * `deck_items` exactly the way slide placement is read from `deck_slides` above. No rows
      * yet for this collection (a fresh checkout before Task 8's seed has run, or a slide
      * whose items were never seeded) means "nothing to say otherwise": the static build is
      * returned unchanged, so the panel never shows an empty list where the seed simply
-     * hasn't run. A `deck_items` row that doesn't match up with a static-built record is left
-     * out — the seed can only ever have written keys the same builder produced.
+     * hasn't run. A `deck_items` row that doesn't match a static-built record is a genuinely
+     * new entry (`createItem`'s own row) rather than something to drop — it is built from a
+     * sibling's shape instead, blanked, and overlaid the same way every other item is.
      */
     function overlayItemGroup(group: CmsItemGroup): CmsItemGroup {
       const dbRows = itemRowsByCollection.get(group.collectionId);
       if (!dbRows || dbRows.length === 0) return group;
 
       const byItemKey = new Map(group.records.map((record) => [`${group.collectionId}:${record.id}`, record]));
-      const records = dbRows
-        .map((row) => {
-          const builtRecord = byItemKey.get(row.item_key);
-          if (!builtRecord) return undefined;
-          const overlaid = overlayItem(builtRecord, row.item_key);
-          return row.media_kind === "image" && row.media_path
-            ? applyMediaPathOverride(overlaid, row.media_path)
-            : overlaid;
-        })
-        .filter((record): record is CmsRecord => record !== undefined);
+      const template = group.records[0];
+      const records = dbRows.map((row) => {
+        const bareId = row.item_key.slice(group.collectionId.length + 1);
+        const builtRecord = byItemKey.get(row.item_key) ?? blankRecordLike(template, group.collectionId, bareId);
+        const resolvedTitle = resolveText(published, "deck_item", row.item_key, "Title", builtRecord.title);
+        const overlaid = overlayItem(builtRecord, row.item_key);
+        const named: CmsRecord = { ...overlaid, title: resolvedTitle, summary: overlaid.summary || resolvedTitle };
+        return row.media_kind === "image" && row.media_path ? applyMediaPathOverride(named, row.media_path) : named;
+      });
 
       return { ...group, records };
     }
@@ -375,7 +423,7 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
   async reorderItems(collectionId: string, orderedItemIds: ReadonlyArray<string>): Promise<void> {
     await transaction(async (connection) => {
       for (const [index, itemId] of orderedItemIds.entries()) {
-        await connection.execute("UPDATE deck_items SET sort_order = ? WHERE item_key = ?", [`${collectionId}:${itemId}`, index]);
+        await connection.execute("UPDATE deck_items SET sort_order = ? WHERE item_key = ?", [index, `${collectionId}:${itemId}`]);
       }
     });
   }

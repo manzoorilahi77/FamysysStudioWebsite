@@ -114,11 +114,18 @@ export async function readDeckContentFromDatabase(): Promise<PublishedCapability
         ...category,
         projects: rows.map((row, i) => {
           const fallback = category.projects?.[i];
+          // `bullets` is read from the store rather than spread from `fallback`: a brand-new
+          // entry (created in the panel, no static counterpart) has no `fallback` at all, and
+          // `{...undefined}` carries nothing — leaving `bullets` undefined crashes the public
+          // page's `.map()` over it. Reading the saved list (empty when nothing was ever
+          // added) is correct for both an existing entry AND a new one.
           return {
             ...fallback,
+            key: fallback?.key ?? row.item_key.slice("selected-work:websites".length + 1),
             title: text(itemStore, "deck_item", row.item_key, "Title", fallback?.title ?? ""),
             summary: text(itemStore, "deck_item", row.item_key, "Summary", fallback?.summary ?? ""),
             url: text(itemStore, "deck_item", row.item_key, "Full-deck link", fallback?.url ?? ""),
+            bullets: itemStore.list(row.item_key, "bullets"),
             ...(fallback?.previewUrl !== undefined
               ? { previewUrl: text(itemStore, "deck_item", row.item_key, "Live preview URL", fallback.previewUrl) }
               : {}),
