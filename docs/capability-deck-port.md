@@ -164,3 +164,11 @@ Those sites are also outside our control. Any of them can add
 `X-Frame-Options: DENY` and its card will go blank without anything here changing — which
 already happened to `hajj-umrah` in his repo, and is why that entry carries a screenshot
 and a `liveUrl` instead of a `previewUrl`.
+
+## Known trade-off: CTA slide on short landscape phones
+
+At very short viewport heights (~390px, e.g. a phone in landscape) the `lets-talk` slide's
+caption and closing statement sit below the fold of their `overflow: auto` container with
+no scroll affordance — same no-hint-to-scroll pattern already accepted on Services and Ways
+to Work at short heights, not a regression (2026-09-17 mobile-responsiveness pass fixed the
+button/statement overlap this replaced; the below-the-fold trade-off was left as-is).

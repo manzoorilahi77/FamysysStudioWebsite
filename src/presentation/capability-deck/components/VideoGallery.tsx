@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ExternalLink, Maximize2, Play, Volume2, VolumeX, X } from 'lucide-react'
 import { setMediaExpanded } from '../hooks/mediaExpandLock'
+import { usePortalTarget } from '../hooks/usePortalTarget'
 import { useIsMobile } from './ViewportContext'
 import { EASE_LUX } from './motion'
 import type { DeckVideo, MediaRatio } from '../types'
@@ -114,16 +115,23 @@ interface ActiveDrivePlayerProps {
 function ActiveDrivePlayer({ src, title, soundOn, onToggleSound, expanded = false }: ActiveDrivePlayerProps) {
   const fileId = driveFileId(src)
   const candidates = driveStreamCandidates(fileId)
+  const thumb = driveThumbSrc(src)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [mode, setMode] = useState<PlayerMode>(fileId ? 'stream' : 'iframe')
   const [paused, setPaused] = useState(false)
   const [streamIndex, setStreamIndex] = useState(0)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     setMode(fileId ? 'stream' : 'iframe')
     setPaused(false)
     setStreamIndex(0)
+    setReady(false)
   }, [src, fileId])
+
+  useEffect(() => {
+    setReady(false)
+  }, [mode])
 
   useEffect(() => {
     const el = videoRef.current
@@ -141,7 +149,7 @@ function ActiveDrivePlayer({ src, title, soundOn, onToggleSound, expanded = fals
       if (!el || el.readyState < 2 || el.paused) {
         setMode('iframe')
       }
-    }, 2200)
+    }, 1400)
     return () => window.clearTimeout(timer)
   }, [mode, src, streamIndex])
 
@@ -153,33 +161,45 @@ function ActiveDrivePlayer({ src, title, soundOn, onToggleSound, expanded = fals
 
   if (mode === 'iframe' || !fileId) {
     return (
-      <iframe
-        key={`${drivePreviewSrc(src)}-${expanded ? 'lg' : 'sm'}`}
-        style={styles.frame}
-        src={drivePreviewSrc(src)}
-        title={title}
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-        allowFullScreen
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
+      <div style={styles.playerWrap}>
+        {thumb && <img src={thumb} alt="" style={styles.playerThumb} loading="eager" referrerPolicy="no-referrer" />}
+        <iframe
+          key={`${drivePreviewSrc(src)}-${expanded ? 'lg' : 'sm'}`}
+          style={{ ...styles.frame, opacity: ready ? 1 : 0 }}
+          src={drivePreviewSrc(src)}
+          title={title}
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+          allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin"
+          onLoad={() => setReady(true)}
+        />
+      </div>
     )
   }
 
   return (
-    <>
+    <div style={styles.playerWrap}>
+      {thumb && <img src={thumb} alt="" style={styles.playerThumb} loading="eager" referrerPolicy="no-referrer" />}
       <video
         key={`${fileId}-${streamIndex}-${expanded ? 'lg' : 'sm'}`}
         ref={videoRef}
-        style={styles.video}
+        style={{ ...styles.video, opacity: ready ? 1 : 0 }}
         src={candidates[streamIndex]}
+        poster={thumb ?? undefined}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
         controls={false}
-        onLoadedData={(e) => tryPlay(e.currentTarget)}
-        onCanPlay={(e) => tryPlay(e.currentTarget)}
+        onLoadedData={(e) => {
+          tryPlay(e.currentTarget)
+          setReady(true)
+        }}
+        onCanPlay={(e) => {
+          tryPlay(e.currentTarget)
+          setReady(true)
+        }}
         onPlay={() => setPaused(false)}
         onPause={() => setPaused(true)}
         onError={() => {
@@ -208,7 +228,7 @@ function ActiveDrivePlayer({ src, title, soundOn, onToggleSound, expanded = fals
         {soundOn ? <Volume2 size={14} strokeWidth={1.75} /> : <VolumeX size={14} strokeWidth={1.75} />}
         {soundOn ? 'Sound on' : 'Click for sound'}
       </button>
-    </>
+    </div>
   )
 }
 
@@ -424,6 +444,7 @@ interface VideoGalleryProps {
 
 export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = DEFAULT_CARD_HEIGHT }: VideoGalleryProps) {
   const isMobile = useIsMobile()
+  const portalTarget = usePortalTarget()
   const [active, setActive] = useState(0)
   const [soundOn, setSoundOn] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -580,7 +601,7 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
                 }}
                 transition={{ duration: 0.55, ease: EASE_LUX }}
               >
-                {isActive ? (
+                {isActive && !expanded ? (
                   <ActiveDrivePlayer
                     src={video.src}
                     title={video.title}
@@ -589,6 +610,15 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
                   />
                 ) : (
                   <div style={styles.placeholder}>
+                    {driveThumbSrc(video.src) && (
+                      <img
+                        src={driveThumbSrc(video.src) as string}
+                        alt=""
+                        style={styles.placeholderThumb}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
                     <span style={styles.playBadge}>
                       <Play size={12} fill="currentColor" strokeWidth={0} />
                     </span>
@@ -677,7 +707,7 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
             />
           ) : null}
         </AnimatePresence>,
-        document.body,
+        portalTarget,
       )}
     </div>
   )
@@ -826,6 +856,20 @@ const styles = {
     background: 'var(--color-ink-raised)',
     transformStyle: 'preserve-3d',
   },
+  playerWrap: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  },
+  playerThumb: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    zIndex: 0,
+  },
   frame: {
     width: '100%',
     height: '100%',
@@ -834,7 +878,8 @@ const styles = {
     position: 'absolute',
     inset: 0,
     zIndex: 1,
-    background: 'var(--color-ink-raised)',
+    background: 'transparent',
+    transition: 'opacity 0.35s ease',
   },
   video: {
     width: '100%',
@@ -842,10 +887,11 @@ const styles = {
     objectFit: 'contain',
     objectPosition: 'center',
     display: 'block',
-    background: 'var(--color-ink-raised)',
+    background: 'transparent',
     cursor: 'pointer',
     position: 'relative',
     zIndex: 1,
+    transition: 'opacity 0.35s ease',
   },
   soundBtn: {
     position: 'absolute',
@@ -892,13 +938,25 @@ const styles = {
     background: 'transparent',
   },
   placeholder: {
+    position: 'relative',
     width: '100%',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  placeholderThumb: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    opacity: 0.55,
   },
   playBadge: {
+    position: 'relative',
+    zIndex: 1,
     width: '34px',
     height: '34px',
     borderRadius: '999px',

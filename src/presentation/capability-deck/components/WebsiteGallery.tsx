@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react'
 import { setMediaExpanded } from '../hooks/mediaExpandLock'
+import { usePortalTarget } from '../hooks/usePortalTarget'
 import { useIsMobile } from './ViewportContext'
 import { EASE_LUX } from './motion'
 import type { GalleryProject, MediaRatio } from '../types'
@@ -249,6 +250,7 @@ interface WebsiteGalleryProps {
 
 export function WebsiteGallery({ projects, defaultRatio = 'landscape', cardHeight = DEFAULT_CARD_HEIGHT, onActiveChange }: WebsiteGalleryProps) {
   const isMobile = useIsMobile()
+  const portalTarget = usePortalTarget()
   const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(false)
   const activeRef = useRef(0)
@@ -401,7 +403,7 @@ export function WebsiteGallery({ projects, defaultRatio = 'landscape', cardHeigh
             >
               {project.previewUrl ? (
                 <div style={styles.previewFrame} aria-hidden={!isActive}>
-                  {isActive && (
+                  {isActive && !expanded && (
                     <iframe
                       src={project.previewUrl}
                       title={`${project.title} live preview`}
@@ -415,7 +417,7 @@ export function WebsiteGallery({ projects, defaultRatio = 'landscape', cardHeigh
                       tabIndex={-1}
                     />
                   )}
-                  {!isActive && (
+                  {(!isActive || expanded) && (
                     <div style={styles.previewIdle}>
                       <span style={styles.placeholderText}>{project.title}</span>
                     </div>
@@ -509,7 +511,7 @@ export function WebsiteGallery({ projects, defaultRatio = 'landscape', cardHeigh
             />
           ) : null}
         </AnimatePresence>,
-        document.body,
+        portalTarget,
       )}
     </div>
   )
