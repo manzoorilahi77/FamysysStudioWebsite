@@ -45,7 +45,8 @@ export default function ServicesSlide({ meta, content }: SlideProps) {
         <StaggerGroup
           style={{
             ...styles.grid,
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+            gridTemplateRows: isMobile ? 'auto' : 'repeat(2, auto)',
             columnGap: isMobile ? '18px' : '56px',
             rowGap: isMobile ? '18px' : '40px',
             alignContent: 'start',

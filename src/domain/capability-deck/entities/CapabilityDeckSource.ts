@@ -22,6 +22,9 @@ export interface CapabilityDeckSource {
   readonly cover: {
     readonly brand: string;
     readonly headlineLine1: string;
+    /** The plain (non-italic) lead-in of the second headline line — "meets" in "meets speed.". */
+    readonly headlineLead: string;
+    /** The italic accent word that follows the lead-in — "speed.". */
     readonly headlineAccent: string;
     readonly supporting: string;
     readonly decorativeLabel: string;

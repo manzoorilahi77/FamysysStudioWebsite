@@ -14,6 +14,23 @@ interface DeckItemRow extends RowDataPacket {
   sort_order: number;
 }
 
+/**
+ * The field keys `whoWeAreRecord` (deckRecords.ts) produces for the repeated Title/Copy pairs,
+ * in the order it emits them: the headline group owns "copy", so the highlights' copy starts at
+ * "copy-2". Kept beside the reader so the two cannot drift silently — see the test that builds
+ * the record and checks these keys exist on it.
+ */
+export const WHO_WE_ARE_KEYS = {
+  highlights: [
+    { title: "title", copy: "copy-2" },
+    { title: "title-2", copy: "copy-3" },
+  ],
+  visionMission: [
+    { title: "title-3", copy: "copy-4" },
+    { title: "title-4", copy: "copy-5" },
+  ],
+} as const;
+
 /** `text(store, "deck_slide", "cover", "Eyebrow", fallback)` — one accessor, every field. */
 function text(store: ContentStore, _ownerKind: "deck_slide" | "deck_item", ownerKey: string, label: string, fallback: string): string {
   return store.optional(ownerKey, derivedId(label)) ?? fallback;
@@ -45,7 +62,8 @@ export async function readDeckContentFromDatabase(): Promise<PublishedCapability
   const cover = {
     brand: text(slideStore, "deck_slide", "cover", "Eyebrow", staticContent.coverContent.brand),
     headlineLine1: text(slideStore, "deck_slide", "cover", "Headline, first line", staticContent.coverContent.headlineLine1),
-    headlineAccent: text(slideStore, "deck_slide", "cover", "Headline, accent", staticContent.coverContent.headlineAccent),
+    headlineLead: text(slideStore, "deck_slide", "cover", "Headline, second line", staticContent.coverContent.headlineLead),
+    headlineAccent: text(slideStore, "deck_slide", "cover", "Headline, accent word", staticContent.coverContent.headlineAccent),
     supporting: text(slideStore, "deck_slide", "cover", "Supporting line", staticContent.coverContent.supporting),
     decorativeLabel: text(slideStore, "deck_slide", "cover", "Corner label", staticContent.coverContent.decorativeLabel),
     logoMark: slideStore.optional("cover", "media-src") ?? staticContent.coverContent.logoMark,
@@ -56,13 +74,18 @@ export async function readDeckContentFromDatabase(): Promise<PublishedCapability
     copy: text(slideStore, "deck_slide", "who-we-are", "Copy", staticContent.whoWeAre.copy),
     established: text(slideStore, "deck_slide", "who-we-are", "Established", staticContent.whoWeAre.established),
     locations: text(slideStore, "deck_slide", "who-we-are", "Locations", staticContent.whoWeAre.locations),
-    // Fixed at two — see deckRecords.ts's design note. Read by position, matching the
-    // field labels `whoWeAreRecord` gave each of the two.
-    highlights: staticContent.whoWeAre.highlights.map((fallback) => ({
-      title: text(slideStore, "deck_slide", "who-we-are", "Title", fallback.title),
-      copy: text(slideStore, "deck_slide", "who-we-are", "Copy", fallback.copy),
+    // Fixed at two highlights and two vision/mission statements — see deckRecords.ts's design
+    // note. Every one of them is labelled "Title" and "Copy", and `uniqueId` gives the repeats
+    // numeric suffixes in record order (title, title-2, ...; copy, copy-2, ...). Reading them by
+    // label alone returns the FIRST such field every time, so each is read by its own field key.
+    highlights: staticContent.whoWeAre.highlights.map((fallback, i) => ({
+      title: slideStore.optional("who-we-are", WHO_WE_ARE_KEYS.highlights[i]?.title ?? "") ?? fallback.title,
+      copy: slideStore.optional("who-we-are", WHO_WE_ARE_KEYS.highlights[i]?.copy ?? "") ?? fallback.copy,
     })),
-    visionMission: staticContent.whoWeAre.visionMission,
+    visionMission: staticContent.whoWeAre.visionMission.map((fallback, i) => ({
+      title: slideStore.optional("who-we-are", WHO_WE_ARE_KEYS.visionMission[i]?.title ?? "") ?? fallback.title,
+      copy: slideStore.optional("who-we-are", WHO_WE_ARE_KEYS.visionMission[i]?.copy ?? "") ?? fallback.copy,
+    })),
   };
 
   const serviceCategories = itemsFor("services:categories").map((row, i) => {

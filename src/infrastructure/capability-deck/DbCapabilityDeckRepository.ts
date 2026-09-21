@@ -70,19 +70,23 @@ async function loadStrings(): Promise<{
 }
 
 /**
- * THE ONE PLACE A LABEL BECOMES A LOOKUP. `derivedId(label)` is the exact function
- * `buildDeckSlideRecords` used to allocate this field's id — see the design note above.
- * Falls back to `fallback` (the static/seed value) when nothing has been published for
- * this field yet, the same way `ContentStore.optional()` behaves for a field with no row.
+ * THE ONE PLACE A FIELD BECOMES A LOOKUP, BY ITS OWN ID — not by its label. The id is what
+ * `buildDeckSlideRecords` allocated (`derivedId(label)` plus a numeric suffix where a label
+ * repeats within a slide: "title", "title-2", ...; a list item is "examples-0", "examples-1")
+ * and is exactly the `field_key` the seed and every save write. Looking up by label instead
+ * collapses every repeat onto the first field and shifts list items by one, so the panel showed
+ * one highlight's title in every highlight box. Falls back to `fallback` (the static/seed value)
+ * when nothing has been published for this field yet, the same way `ContentStore.optional()`
+ * behaves for a field with no row.
  */
 function resolveText(
   published: Map<string, { value: string; version: number }>,
   ownerKind: "deck_slide" | "deck_item",
   ownerKey: string,
-  label: string,
+  fieldId: string,
   fallback: string,
 ): string {
-  const key = `${ownerKind}:${ownerKey}:${derivedId(label)}`;
+  const key = `${ownerKind}:${ownerKey}:${fieldId}`;
   return published.get(key)?.value ?? fallback;
 }
 
@@ -127,14 +131,14 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
     function overlayPublished(record: CmsRecord, ownerKind: "deck_slide" | "deck_item", ownerKey: string): CmsRecord {
       const groups = record.groups.map((group) => ({
         ...group,
-        values: group.values.map((v) => ({ ...v, value: resolveText(published, ownerKind, ownerKey, v.label, v.value) })),
+        values: group.values.map((v) => ({ ...v, value: resolveText(published, ownerKind, ownerKey, v.id, v.value) })),
         lists: group.lists.map((list) => ({
           ...list,
-          items: list.items.map((v) => ({ ...v, value: resolveText(published, ownerKind, ownerKey, v.label, v.value) })),
+          items: list.items.map((v) => ({ ...v, value: resolveText(published, ownerKind, ownerKey, v.id, v.value) })),
         })),
         media: group.media.map((m) => ({
           ...m,
-          alt: { ...m.alt, value: resolveText(published, ownerKind, ownerKey, m.alt.label, m.alt.value) },
+          alt: { ...m.alt, value: resolveText(published, ownerKind, ownerKey, m.alt.id, m.alt.value) },
         })),
       }));
       return { ...record, groups };
@@ -236,7 +240,7 @@ export class DbCapabilityDeckRepository implements CapabilityDeckRepository {
       const records = dbRows.map((row) => {
         const bareId = row.item_key.slice(group.collectionId.length + 1);
         const builtRecord = byItemKey.get(row.item_key) ?? blankRecordLike(template, group.collectionId, bareId);
-        const resolvedTitle = resolveText(published, "deck_item", row.item_key, "Title", builtRecord.title);
+        const resolvedTitle = resolveText(published, "deck_item", row.item_key, "title", builtRecord.title);
         const overlaid = overlayItem(builtRecord, row.item_key);
         const named: CmsRecord = { ...overlaid, title: resolvedTitle, summary: overlaid.summary || resolvedTitle };
         return row.media_kind === "image" && row.media_path ? applyMediaPathOverride(named, row.media_path) : named;

@@ -51,7 +51,7 @@ export default function CoverSlide({ content }: SlideProps) {
         >
           {cover.headlineLine1}
           <br />
-          <em style={styles.headlineAccent}>{cover.headlineAccent}</em>
+          {cover.headlineLead} <em style={styles.headlineAccent}>{cover.headlineAccent}</em>
         </SectionHeadline>
         <p style={{ ...styles.supporting, fontSize: isMobile ? '14px' : '20px' }}>
           {cover.supporting}

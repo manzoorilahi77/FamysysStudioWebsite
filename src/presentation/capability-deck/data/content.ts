@@ -689,7 +689,8 @@ export const portfolioCategories: ReadonlyArray<PortfolioCategory> = [
 export const coverContent = {
   brand: 'Famysys Studio',
   headlineLine1: 'Where creativity',
-  headlineAccent: 'meets speed.',
+  headlineLead: 'meets',
+  headlineAccent: 'speed.',
   supporting: 'Design • Video • AI Content • Motion • Product Visuals',
   decorativeLabel: 'Corporate Deck',
   logoMark: '/capability-deck/famysys-logo.png',
@@ -698,8 +699,8 @@ export const coverContent = {
 // Promoted out of CTASlide.tsx's inline JSX literals — copy sourced from the live
 // studio.famysys.com contact/CTA section, unchanged from what was already there.
 export const ctaContent = {
-  headline: "Have a creative requirement? Let's talk.",
-  body: "Tell us what you're trying to create. We'll help you determine the right approach, scope and production model.",
+  headline: 'Have a creative requirement? Let’s talk.',
+  body: 'Tell us what you’re trying to create. We’ll help you determine the right approach, scope and production model.',
   ctaLabel: 'Start a Conversation',
   ctaHref: 'https://studio.famysys.com/',
   caption: 'Project-based when you need it. Ongoing when you need more.',

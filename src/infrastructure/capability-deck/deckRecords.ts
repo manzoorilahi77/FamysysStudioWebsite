@@ -63,7 +63,8 @@ function coverRecord(source: CapabilityDeckSource, updatedAt: Date | null): CmsR
         values: [
           textField("Eyebrow", cover.brand),
           textField("Headline, first line", cover.headlineLine1),
-          textField("Headline, accent", cover.headlineAccent),
+          textField("Headline, second line", cover.headlineLead),
+          textField("Headline, accent word", cover.headlineAccent),
           textField("Supporting line", cover.supporting),
           textField("Corner label", cover.decorativeLabel),
         ],
