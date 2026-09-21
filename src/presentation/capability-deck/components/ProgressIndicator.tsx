@@ -53,7 +53,7 @@ const styles = {
   wrapCompact: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
     minWidth: 0,
     flex: 1,
   },
@@ -83,7 +83,7 @@ const styles = {
   trackCompact: {
     display: 'flex',
     flex: 1,
-    gap: '4px',
+    gap: '3px',
     minWidth: 0,
   },
   segmentButton: {
@@ -92,9 +92,13 @@ const styles = {
   // Visual dot stays slim (segmentCompact below); the button itself is the
   // real hit target — flex: 1 so it shares trackCompact's width equally with
   // its siblings, and vertical padding brings it to a 44px-tall tap area.
+  // minWidth is deliberately low: at 7 segments plus the counter and the two
+  // 44px nav buttons, a 320px phone has ~14px of track width per segment
+  // once everything else is accounted for — a higher floor doesn't leave
+  // room to shrink into and the track overflows under the nav buttons.
   segmentButtonCompact: {
     flex: 1,
-    minWidth: '20px',
+    minWidth: '14px',
     padding: '21px 0',
     display: 'flex',
     alignItems: 'center',
