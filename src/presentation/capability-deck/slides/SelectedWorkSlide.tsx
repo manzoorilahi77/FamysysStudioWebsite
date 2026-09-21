@@ -223,15 +223,17 @@ export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTab
               {current.summary}
             </p>
           )}
-          <a
-            href={current.url || current.embedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.openDeckLink}
-          >
-            Open the full deck
-            <ArrowUpRight size={15} strokeWidth={1.75} />
-          </a>
+          {(current.url || current.embedUrl) ? (
+            <a
+              href={current.url || current.embedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.openDeckLink}
+            >
+              Open the full deck
+              <ArrowUpRight size={15} strokeWidth={1.75} />
+            </a>
+          ) : null}
         </div>
       )}
     </div>

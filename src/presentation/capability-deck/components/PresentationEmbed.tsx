@@ -28,7 +28,6 @@ export function PresentationEmbed({ src, href, title, active = true }: Presentat
   function openDeck(e: MouseEvent<HTMLAnchorElement>) {
     e.preventDefault()
     e.stopPropagation()
-    if (!openUrl) return
     window.open(openUrl, '_blank', 'noopener,noreferrer')
   }
 
@@ -46,10 +45,12 @@ export function PresentationEmbed({ src, href, title, active = true }: Presentat
         />
       )}
 
-      <a href={openUrl} target="_blank" rel="noopener noreferrer" onClick={openDeck} style={isMobile ? { ...styles.hint, minHeight: `${TOUCH_TARGET_PX}px` } : styles.hint}>
-        Open full deck
-        <ArrowUpRight size={14} strokeWidth={1.75} />
-      </a>
+      {openUrl ? (
+        <a href={openUrl} target="_blank" rel="noopener noreferrer" onClick={openDeck} style={isMobile ? { ...styles.hint, minHeight: `${TOUCH_TARGET_PX}px` } : styles.hint}>
+          Open full deck
+          <ArrowUpRight size={14} strokeWidth={1.75} />
+        </a>
+      ) : null}
     </div>
   )
 }
