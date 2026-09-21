@@ -50,6 +50,16 @@ export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTab
       block: 'nearest',
     })
   }, [tab, reducedMotion])
+  // A phone on its side is "mobile" by width but has far too little height for a full-width
+  // 16:9 frame, which would be cropped by the stage. Those fit by height, like desktop.
+  const [isShortLandscape, setIsShortLandscape] = useState(false)
+  useEffect(() => {
+    const query = window.matchMedia('(orientation: landscape) and (max-height: 500px)')
+    const sync = () => setIsShortLandscape(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
   const [activeProject, setActiveProject] = useState(0)
   const current = portfolioCategories[tab] as PortfolioCategory
   const hasProjects = Array.isArray(current.projects)
@@ -165,14 +175,31 @@ export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTab
       style={{
         ...styles.presentationStage,
         flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? '12px' : '20px',
+        alignItems: isMobile && !isShortLandscape ? 'stretch' : 'center',
+        justifyContent: 'flex-start',
+        gap: isMobile ? '12px' : '28px',
       }}
     >
       <div
         style={{
           ...styles.presentationFrame,
-          minHeight: isMobile ? '200px' : 0,
-          height: isMobile ? '220px' : '100%',
+          ...(isMobile && !isShortLandscape
+            ? {
+                // No grow: the base `flex: 1 1 auto` would stretch the frame down the
+                // column and override the 16:9 ratio, leaving a tall portrait iframe.
+                flex: '0 0 auto',
+                width: '100%',
+                height: 'auto',
+                aspectRatio: '16 / 9',
+                minHeight: '200px',
+              }
+            : {
+                // Fit the full 16:9 deck inside the available stage — never crop.
+                height: '100%',
+                width: 'auto',
+                maxWidth: isMobile ? '100%' : 'calc(100% - 268px)',
+                aspectRatio: '16 / 9',
+              }),
         }}
       >
         <PresentationEmbed
@@ -184,13 +211,27 @@ export default function SelectedWorkSlide({ meta, active, activeTab, onActiveTab
       </div>
 
       {!isMobile && (
-        <div style={{ ...styles.presentationMeta, width: '200px', gap: '14px' }}>
+        <div style={{ ...styles.presentationMeta, width: '240px', gap: '16px', flexShrink: 0 }}>
           <div>
             <span style={{ ...styles.detailsEyebrow, fontSize: '12px' }}>{current.category}</span>
-            <h3 style={{ ...styles.detailsLabelSmall, fontSize: '26px', margin: '6px 0 0' }}>
+            <h3 style={{ ...styles.detailsLabelSmall, fontSize: '28px', margin: '6px 0 0' }}>
               {current.title || current.label}
             </h3>
           </div>
+          {current.summary && (
+            <p style={{ ...styles.detailsCopy, fontSize: '15px', margin: 0, lineHeight: 1.5 }}>
+              {current.summary}
+            </p>
+          )}
+          <a
+            href={current.url || current.embedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.openDeckLink}
+          >
+            Open the full deck
+            <ArrowUpRight size={15} strokeWidth={1.75} />
+          </a>
         </div>
       )}
     </div>
@@ -539,12 +580,13 @@ const styles = {
     flex: '1 1 auto',
     minWidth: 0,
     minHeight: 0,
-    height: '100%',
-    width: '100%',
+    position: 'relative',
+    alignSelf: 'center',
   },
   presentationMeta: {
     flexShrink: 0,
     display: 'flex',
+    flexDirection: 'column',
     paddingTop: '4px',
   },
   mediaCard: {

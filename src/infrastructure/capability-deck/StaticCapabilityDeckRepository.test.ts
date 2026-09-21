@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { StaticCapabilityDeckRepository } from "./StaticCapabilityDeckRepository";
 
 describe("StaticCapabilityDeckRepository", () => {
-  it("returns every catalog slide, in catalog order, none marked available", async () => {
+  it("returns the six default-deck slides in catalog order, How We Work left available", async () => {
     const repo = new StaticCapabilityDeckRepository();
     const deck = await repo.getDeck();
     expect(deck.slides.map((s) => s.id)).toEqual([
-      "cover", "who-we-are", "how-we-work", "services", "selected-work", "ways-to-work", "lets-talk",
+      "cover", "who-we-are", "services", "selected-work", "ways-to-work", "lets-talk",
     ]);
-    expect(deck.availableSlides).toEqual([]);
+    expect(deck.availableSlides.map((s) => s.slideKey)).toEqual(["how-we-work"]);
   });
 
   it("refuses to save a draft, naming the switch to make", async () => {

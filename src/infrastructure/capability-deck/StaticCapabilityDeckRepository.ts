@@ -39,10 +39,10 @@ export class StaticCapabilityDeckRepository implements CapabilityDeckRepository 
   async getDeck(): Promise<CapabilityDeckDocument> {
     const records = buildDeckSlideRecords(staticDeckSource(), null);
     return {
-      slides: DECK_SLIDE_CATALOG.map((entry) => records.get(entry.slideKey)).filter(
-        (record): record is NonNullable<typeof record> => record !== undefined,
-      ),
-      availableSlides: [],
+      slides: DECK_SLIDE_CATALOG.filter((entry) => entry.inDefaultDeck)
+        .map((entry) => records.get(entry.slideKey))
+        .filter((record): record is NonNullable<typeof record> => record !== undefined),
+      availableSlides: DECK_SLIDE_CATALOG.filter((entry) => !entry.inDefaultDeck),
       updatedAt: null,
     };
   }

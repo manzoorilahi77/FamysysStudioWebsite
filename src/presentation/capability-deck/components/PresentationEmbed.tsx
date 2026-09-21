@@ -1,13 +1,18 @@
-import type { CSSProperties } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 import { ArrowUpRight } from 'lucide-react'
+import { useIsMobile } from './ViewportContext'
 
-const DESIGN_W = 1920
-const DESIGN_H = 1080
+const TOUCH_TARGET_PX = 44
 
 /**
- * Live 1920×1080 deck preview. Cover-scales to fill the slot (no side
- * bars). Click opens the full deck page in a new tab.
+ * Live deck preview in a 16:9 iframe that fills the slot. The embedded deck lays out to the
+ * iframe's own viewport (no cover-crop scale), so its slides stay fully visible and centred.
+ * The corner control opens the full page.
+ *
+ * His version also rewrote `src` through `resolveEmbedSrc` (a Vite dev proxy path, and a
+ * relative `/corporate/` on any famysys.com host). Neither is carried over: `import.meta.env`
+ * does not exist under Next, and `/corporate/` on this host is a 404. `src` is the CMS's
+ * "Embed URL", used as given — see docs/capability-deck-sync-2026-09.md.
  */
 interface PresentationEmbedProps {
   readonly src: string
@@ -17,69 +22,35 @@ interface PresentationEmbedProps {
 }
 
 export function PresentationEmbed({ src, href, title, active = true }: PresentationEmbedProps) {
-  const frameRef = useRef<HTMLButtonElement | null>(null)
-  const [scale, setScale] = useState(1)
+  const isMobile = useIsMobile()
+  const openUrl = href || src
 
-  useEffect(() => {
-    const node = frameRef.current
-    if (!node) return undefined
-
-    const measure = () => {
-      // Layout sizes in stage coords — ignore ancestor CSS transforms.
-      const width = node.offsetWidth
-      const height = node.offsetHeight
-      if (width < 1 || height < 1) return
-      // Cover: fill the whole slot; crop top/bottom or sides as needed.
-      setScale(Math.max(width / DESIGN_W, height / DESIGN_H))
-    }
-
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(node)
-    return () => ro.disconnect()
-  }, [])
-
-  function openDeck() {
-    const target = href || src
-    if (!target) return
-    window.open(target, '_blank', 'noopener,noreferrer')
+  function openDeck(e: MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!openUrl) return
+    window.open(openUrl, '_blank', 'noopener,noreferrer')
   }
 
   return (
-    <button
-      ref={frameRef}
-      type="button"
-      onClick={openDeck}
-      aria-label={`Open ${title || 'presentation'} deck`}
-      style={styles.frame}
-    >
+    <div data-media-player="true" style={styles.frame} aria-label={`${title || 'Presentation'} deck preview`}>
       {active && (
-        <div
-          style={{
-            ...styles.stage,
-            width: DESIGN_W,
-            height: DESIGN_H,
-            transform: `translate(-50%, -50%) scale(${scale})`,
-          }}
-          aria-hidden
-        >
-          <iframe
-            style={styles.iframe}
-            src={src}
-            title={title}
-            allow="fullscreen"
-            loading="lazy"
-            tabIndex={-1}
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
+        <iframe
+          style={styles.iframe}
+          src={src}
+          title={title || 'Presentation deck'}
+          allow="fullscreen; autoplay"
+          allowFullScreen
+          loading="eager"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
       )}
 
-      <span style={styles.hint}>
+      <a href={openUrl} target="_blank" rel="noopener noreferrer" onClick={openDeck} style={isMobile ? { ...styles.hint, minHeight: `${TOUCH_TARGET_PX}px` } : styles.hint}>
         Open full deck
         <ArrowUpRight size={14} strokeWidth={1.75} />
-      </span>
-    </button>
+      </a>
+    </div>
   )
 }
 
@@ -88,32 +59,24 @@ const styles = {
     position: 'relative',
     width: '100%',
     height: '100%',
+    minHeight: '220px',
     overflow: 'hidden',
     border: '1px solid var(--color-ink-line)',
     background: 'var(--deck-embed-backdrop)',
-    padding: 0,
-    cursor: 'pointer',
-    display: 'block',
-  },
-  stage: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transformOrigin: 'center center',
-    pointerEvents: 'none',
   },
   iframe: {
+    position: 'absolute',
+    inset: 0,
     width: '100%',
     height: '100%',
     border: 'none',
     display: 'block',
-    pointerEvents: 'none',
     background: 'var(--deck-embed-backdrop)',
   },
   hint: {
     position: 'absolute',
-    right: '16px',
-    bottom: '16px',
+    right: '12px',
+    bottom: '12px',
     zIndex: 2,
     display: 'inline-flex',
     alignItems: 'center',
@@ -127,6 +90,6 @@ const styles = {
     border: '1px solid var(--color-ink-line)',
     borderRadius: '999px',
     padding: '8px 12px',
-    pointerEvents: 'none',
+    textDecoration: 'none',
   },
 } satisfies Record<string, CSSProperties>

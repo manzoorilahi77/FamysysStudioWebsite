@@ -10,7 +10,7 @@ function fakeDeck(slideKeys: ReadonlyArray<string>) {
   const all = [...records.entries()];
   return new FakeCapabilityDeckRepository({
     slides: slideKeys.map((key) => records.get(key)!),
-    availableSlides: all.filter(([key]) => !slideKeys.includes(key)).map(([slideKey, r]) => ({ slideKey, label: r.title })),
+    availableSlides: all.filter(([key]) => !slideKeys.includes(key)).map(([slideKey, r]) => ({ slideKey, label: r.title, inDefaultDeck: false })),
     updatedAt: null,
   });
 }

@@ -10,7 +10,7 @@ describe("GetCapabilityDeckNavigation", () => {
     const records = buildDeckSlideRecords(staticDeckSource(), null);
     const repo = new FakeCapabilityDeckRepository({
       slides: [records.get("cover")!, records.get("who-we-are")!],
-      availableSlides: [{ slideKey: "services", label: "Services" }],
+      availableSlides: [{ slideKey: "services", label: "Services", inDefaultDeck: true }],
       updatedAt: null,
     });
     const nav = await new GetCapabilityDeckNavigation(repo).execute();
@@ -18,6 +18,6 @@ describe("GetCapabilityDeckNavigation", () => {
       "/admin/capability-deck/cover",
       "/admin/capability-deck/who-we-are",
     ]);
-    expect(nav.availableSlides).toEqual([{ slideKey: "services", label: "Services" }]);
+    expect(nav.availableSlides).toEqual([{ slideKey: "services", label: "Services", inDefaultDeck: true }]);
   });
 });

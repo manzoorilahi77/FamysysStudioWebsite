@@ -14,7 +14,7 @@ lines across 40 source files, plus 15 MB of portfolio assets. It has no router �
 1920×1080 stage scales to fill the viewport and `PresentationShell` swaps six slides
 through framer-motion's `AnimatePresence`, driven by keyboard, wheel, swipe and an
 on-screen control bar. A seventh slide, How We Work, is commented out in his `App.jsx`;
-that comment is preserved verbatim in `CapabilityDeck.tsx`.
+that comment is preserved verbatim in `CapabilityDeck.tsx`. As of 2026-09 it is also out of *our* default deck — see `capability-deck-sync-2026-09.md`.
 
 ## Where it lives now
 

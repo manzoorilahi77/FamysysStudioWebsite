@@ -448,6 +448,9 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
   const [active, setActive] = useState(0)
   const [soundOn, setSoundOn] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  // Stays true through the expand exit animation so the card player does not
+  // remount (and double-play) while the modal is still audible.
+  const [modalOpen, setModalOpen] = useState(false)
   const activeRef = useRef(0)
   const wheelLockRef = useRef(false)
   const stageRef = useRef<HTMLDivElement | null>(null)
@@ -460,12 +463,17 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
     setSoundOn(false)
   }, [active])
 
+  useEffect(() => {
+    if (expanded) setModalOpen(true)
+  }, [expanded])
+
   const videosId = videos?.map((v) => v.src).join('|') ?? ''
 
   useEffect(() => {
     setActive(0)
     setSoundOn(false)
     setExpanded(false)
+    setModalOpen(false)
   }, [videosId])
 
   function go(next: number | ((current: number) => number)) {
@@ -601,7 +609,7 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
                 }}
                 transition={{ duration: 0.55, ease: EASE_LUX }}
               >
-                {isActive && !expanded ? (
+                {isActive && !modalOpen ? (
                   <ActiveDrivePlayer
                     src={video.src}
                     title={video.title}
@@ -688,7 +696,7 @@ export function VideoGallery({ videos, defaultRatio = 'landscape', cardHeight = 
       </div>
 
       {createPortal(
-        <AnimatePresence>
+        <AnimatePresence onExitComplete={() => setModalOpen(false)}>
           {expanded ? (
             <ExpandModal
               key="video-expand-modal"

@@ -510,14 +510,21 @@ async function seedMedia(connection: Connection): Promise<void> {
 async function seedCapabilityDeck(connection: Connection): Promise<void> {
   const records = buildDeckSlideRecords(staticDeckSource(), null);
 
-  for (const [index, entry] of DECK_SLIDE_CATALOG.entries()) {
-    await run(
-      connection,
-      "deck_slides",
-      `INSERT INTO deck_slides (slide_key, sort_order) VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE sort_order = ${force ? "VALUES(sort_order)" : "sort_order"}`,
-      [entry.slideKey, index],
-    );
+  // Placement rows only for the slides a fresh deck contains; a slide type that is not in the
+  // default deck (How We Work) still gets its strings below, so it can be added back later.
+  const placedKeys = DECK_SLIDE_CATALOG.filter((entry) => entry.inDefaultDeck).map((entry) => entry.slideKey);
+
+  for (const entry of DECK_SLIDE_CATALOG) {
+    const placedAt = placedKeys.indexOf(entry.slideKey);
+    if (placedAt !== -1) {
+      await run(
+        connection,
+        "deck_slides",
+        `INSERT INTO deck_slides (slide_key, sort_order) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE sort_order = ${force ? "VALUES(sort_order)" : "sort_order"}`,
+        [entry.slideKey, placedAt],
+      );
+    }
 
     const slide = records.get(entry.slideKey);
     if (!slide) continue;

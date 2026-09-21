@@ -18,16 +18,22 @@
 export interface DeckSlideCatalogEntry {
   readonly slideKey: string;
   readonly label: string;
+  /**
+   * Whether a fresh deck (the seed, the file-backed fallback) places this slide. False means
+   * the slide type exists in code and is offered by "Add a slide", but is not in the deck —
+   * the state How We Work is in as of the six-slide deck (2026-09).
+   */
+  readonly inDefaultDeck: boolean;
 }
 
 export const DECK_SLIDE_CATALOG: ReadonlyArray<DeckSlideCatalogEntry> = [
-  { slideKey: "cover", label: "Cover" },
-  { slideKey: "who-we-are", label: "Who We Are" },
-  { slideKey: "how-we-work", label: "How We Work" },
-  { slideKey: "services", label: "Services" },
-  { slideKey: "selected-work", label: "Selected Work" },
-  { slideKey: "ways-to-work", label: "Ways to Work" },
-  { slideKey: "lets-talk", label: "Let's Talk" },
+  { slideKey: "cover", label: "Cover", inDefaultDeck: true },
+  { slideKey: "who-we-are", label: "Who We Are", inDefaultDeck: true },
+  { slideKey: "how-we-work", label: "How We Work", inDefaultDeck: false },
+  { slideKey: "services", label: "Services", inDefaultDeck: true },
+  { slideKey: "selected-work", label: "Selected Work", inDefaultDeck: true },
+  { slideKey: "ways-to-work", label: "Ways to Work", inDefaultDeck: true },
+  { slideKey: "lets-talk", label: "Let's Talk", inDefaultDeck: true },
 ];
 
 export function catalogLabel(slideKey: string): string {

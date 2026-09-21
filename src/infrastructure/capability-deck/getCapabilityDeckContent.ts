@@ -151,6 +151,10 @@ export async function readDeckContentFromDatabase(): Promise<PublishedCapability
         ...category,
         title: text(slideStore, "deck_slide", "selected-work", "Title", category.title ?? ""),
         embedUrl: text(slideStore, "deck_slide", "selected-work", "Embed URL", category.embedUrl ?? ""),
+        // Summary and the full-deck link are now rendered on the slide (beside the frame), so
+        // the panel fields that were already there have to reach the page too.
+        summary: text(slideStore, "deck_slide", "selected-work", "Summary", category.summary ?? ""),
+        url: text(slideStore, "deck_slide", "selected-work", "Full-deck link", category.url ?? ""),
       };
     }
     return category;
@@ -170,10 +174,10 @@ export async function readDeckContentFromDatabase(): Promise<PublishedCapability
   };
 }
 
-/** Every slide, unmodified content.ts values — used when `CONTENT_SOURCE=static`. */
+/** The default-deck slides, unmodified content.ts values — used when `CONTENT_SOURCE=static`. */
 export function readDeckContentFromFiles(): PublishedCapabilityDeck {
   return {
-    enabledSlideKeys: DECK_SLIDE_CATALOG.map((e) => e.slideKey),
+    enabledSlideKeys: DECK_SLIDE_CATALOG.filter((e) => e.inDefaultDeck).map((e) => e.slideKey),
     source: {
       cover: staticContent.coverContent,
       whoWeAre: staticContent.whoWeAre,
