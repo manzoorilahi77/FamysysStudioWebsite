@@ -44,6 +44,9 @@ export function MobileDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      // The drawer never unmounts — it's shown/hidden with CSS — so without this a group
+      // expanded in a previous visit is still expanded the next time the drawer opens.
+      setOpenGroup(null);
       hasOpenedRef.current = true;
       panelRef.current?.focus();
     } else if (hasOpenedRef.current) {
@@ -81,16 +84,23 @@ export function MobileDrawer({
       }}
     >
       <div className="flex justify-end px-4 py-3">
-        {/* 44px square, and the padding is what makes it one: the word is 11px of tracked
-            capitals and the box around it is the target. `-mr-2` pulls the enlarged box
-            back onto the 24px gutter the rest of the drawer sits on, so growing the target
-            does not move the word. */}
+        {/* 44px square, matching the bar's own trigger — an icon pair (hamburger to open,
+            X to close) reads as one control rather than two differently-styled ones.
+            `-mr-2` pulls the box back onto the 24px gutter the rest of the drawer sits on. */}
         <button
           type="button"
           onClick={onClose}
-          className="label -mr-2 inline-flex min-h-11 min-w-11 items-center justify-end px-2 text-ink-70"
+          aria-label="Close menu"
+          className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-center text-ink-70"
         >
-          Close
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+            <path
+              d="M4 4L16 16M16 4L4 16"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
       </div>
       {/* The two panels collapse into accordion groups here — same content, same

@@ -692,8 +692,10 @@ main > section.bg-ink + section.bg-ink::after {
    within about 40px of each other at the 1280 the inline nav appears at. No label wraps at
    any width above that; see `white-space` on `.nav-link`.
 
-   Below lg the two lists are gone and the drawer trigger takes the right track, so the
-   wordmark stays centred with the Menu word balancing an empty left track. */
+   Below lg the two lists are gone and the drawer trigger takes the right track. The
+   wordmark used to stay centred here, balanced by the trigger opposite it; it now moves
+   into the empty left track and left-aligns instead — see the `max-width: 1023px`
+   override on `.cnav-wordmark` below `.cnav-menu`, a later change from the client. */
 .cnav {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -868,9 +870,17 @@ main > section.bg-ink + section.bg-ink::after {
   align-items: center;
 }
 
-/* The drawer trigger, and the only thing in the right track below lg. */
+/* The drawer trigger, and the only thing in the right track below lg. A 44x44 box
+   around a 22px glyph, same touch-target floor the coarse-pointer rule used to draw
+   around the plain word this replaced. */
 .cnav-menu {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.75rem;
 }
 
 /* THE INLINE BAR NOW STARTS AT LG, NOT XL. It was xl because five page names, a filled
@@ -898,6 +908,16 @@ main > section.bg-ink + section.bg-ink::after {
 @media (max-width: 1023px) {
   .cnav-links {
     display: none;
+  }
+
+  /* LOGO LEFT, TRIGGER RIGHT — a later, deliberate change from the client, reversing the
+     centred layout described above. The wordmark moves into the empty first track
+     (`.cnav-links--start` is `display: none` here, so nothing else wants it) and left-
+     aligns within it instead of sitting centred in the middle track; the trigger stays
+     put in the third. The middle track is simply empty space between the two now. */
+  .cnav-wordmark {
+    grid-column: 1;
+    justify-self: start;
   }
 }
 
@@ -2655,6 +2675,27 @@ div.grid > *:nth-child(even).card-surface-dark {
    silently rendering a chevron that never moves. */
 [aria-expanded="true"] .faq-chevron {
   transform: rotate(180deg);
+}
+
+/* THE PANEL ITSELF, which `.faq-chevron` above never covered — the chevron rotates
+   whether or not the content under it is actually hidden. `inert` (set in
+   MobileDrawer.tsx) takes the closed panel out of tab order and the accessibility tree,
+   but does nothing visual on its own, so without this rule every group's links rendered
+   at full height all the time regardless of which one was "open". `grid-template-rows`
+   between 0fr and 1fr animates to a real zero with no JS height measurement. */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base, 260ms) var(--ease-base);
+}
+
+.faq-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 
 
@@ -7572,18 +7613,9 @@ button.tile-hit {
     align-items: center;
   }
 
-  /* The bar's own controls. The wordmark is a link to the homepage and was 32px tall;
-     the drawer trigger was 41x11, which is the single smallest target on the site and
-     the one every phone reader has to hit first. */
-  .cnav-menu {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    margin-block: -0.75rem;
-  }
-
+  /* The wordmark is a link to the homepage and was 32px tall — the drawer trigger is
+     now a real 44x44 icon button in its own right (see `.cnav-menu`) and needs nothing
+     added here any more. */
   .cnav-wordmark,
   .footer-mark {
     align-items: center;
@@ -7628,21 +7660,24 @@ button.tile-hit {
 /* ---------------------------------------------------------------------------
    THE BAR ON A PHONE — a note about what is NOT here.
    ---------------------------------------------------------------------------
+   UPDATE: the trigger is an icon again (see `.cnav-menu`'s base rule and `MenuIcon` in
+   Header.tsx) and the wordmark moved to the left column below 1024 — a later, deliberate
+   change from the client. The history below is kept because the SIZE lesson still
+   applies: nothing about the mark's or the trigger's dimensions changes below 900, only
+   what is drawn inside the trigger's fixed 44x44 box.
+
    The bar was scaled up below 900: the mark opened from 32px to 43px at 390, the bar's
    padding came in to 1rem, and the drawer trigger became a bordered 44px box with a 12px
    label. Put beside the bar it replaced, the client's answer was that both were too big —
    at that size the mark and a boxed word are the loudest things on a screen whose headline
    is supposed to be. All of it came out. The mark keeps `.cnav-mark`'s own clamp, which
-   floors at 32px and is what the desktop bar uses; the bar keeps its `py-6`; the trigger
-   stays the plain tracked word it is at every width. Nothing below 900 changes the bar.
+   floors at 32px and is what the desktop bar uses; the bar keeps its `py-6`. Nothing below
+   900 changes the bar's dimensions.
 
-   THE 44px TARGET IS UNAFFECTED, and that is the whole point of its being invisible. The
-   coarse-pointer block above gives `.cnav-menu` `min-width: 2.75rem`, `min-height:
-   2.75rem` and a matching negative margin, so the box that answers a thumb is 44x44 while
-   the thing drawn inside it is an 11px word and the row's height does not move. Measured
-   on the built page: 44x44 at 320, 360, 390 and 430, with 79px clear between the mark and
-   the trigger at 320, where the bar is tightest. A border was what made the target LOOK
-   like its own size; it was never what made it that size. */
+   THE 44px TARGET STANDS regardless of what is drawn inside it: `.cnav-menu` is now a
+   fixed 2.75rem square in its own right (see the base rule), not a word with an invisible
+   box drawn around it — the icon that replaced the word sits centred inside the same
+   footprint. */
 
 /* ---------------------------------------------------------------------------
    THE BAR IS SHORTER BELOW THE INLINE NAV.
@@ -7654,14 +7689,13 @@ button.tile-hit {
    underneath is what the page is for.
 
    Half the padding brings it to 68px. The mark keeps `.cnav-mark`'s 32px floor and the
-   trigger keeps the plain tracked word it is at every width; the bar simply stops
-   reserving desktop whitespace on a screen that does not have it to spare.
+   trigger keeps its fixed footprint at every width; the bar simply stops reserving
+   desktop whitespace on a screen that does not have it to spare.
 
-   THE 44px TARGET IS UNAFFECTED — again, and for the same reason. The coarse-pointer
-   block draws `.cnav-menu`'s box from the ROW, with a negative margin that keeps it out
-   of the row's height, so the box that answers a thumb is still 44x44 inside a bar that
-   is 24px shorter. `.cnav-wordmark`'s 44px floor is what sets the row, which is why the
-   padding is the only thing this touches. */
+   THE 44px TARGET IS UNAFFECTED — again, and for the same reason: `.cnav-menu`'s own
+   fixed square is independent of the row's padding, so the box that answers a thumb is
+   still 44x44 inside a bar that is 24px shorter. `.cnav-wordmark`'s 44px floor is what
+   sets the row, which is why the padding is the only thing this touches. */
 @media (max-width: 1023px) {
   [data-header-bar] {
     padding-block: 0.75rem;

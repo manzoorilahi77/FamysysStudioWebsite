@@ -61,6 +61,20 @@ function Chevron() {
   );
 }
 
+/** The drawer trigger's icon, below lg. Same inline-SVG convention as `Chevron`. */
+function MenuIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M3 6h16M3 11h16M3 16h16"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /**
  * FIVE ELEMENTS, CENTRED: two pages, the wordmark, two pages. Three grid tracks — see
  * `.cnav` in globals.css — with two items in each of the outer two. Each item carries a
@@ -366,12 +380,13 @@ export function Header({ navigation, solidAtTop = false }: HeaderProps) {
               ref={drawerTriggerRef}
               id="mobile-drawer-trigger"
               type="button"
-              className="label cnav-menu text-canvas"
+              className="cnav-menu text-canvas"
               aria-expanded={isDrawerOpen}
               aria-controls="mobile-drawer"
+              aria-label="Open menu"
               onClick={() => setIsDrawerOpen(true)}
             >
-              Menu
+              <MenuIcon />
             </button>
           </div>
         </nav>
