@@ -4097,8 +4097,20 @@ div.grid > *:nth-child(even).card-surface-dark {
    of the four rules below rather than given its own block, so the two states can never
    drift into looking like different designs. ServiceGrid writes the attribute onto
    whichever cell's centre is nearest the middle of the screen, and only where there is no
-   cursor to point with — see the spotlight note in ServiceGrid.tsx. */
-.service-cell:hover .service-wash,
+   cursor to point with — see the spotlight note in ServiceGrid.tsx.
+
+   `:hover` ITSELF IS GATED to `(hover: hover) and (pointer: fine)` at every one of these
+   pairs, which it was not before. Without the gate, a phone's own "sticky hover" — most
+   engines apply `:hover` on tap and hold it until a DIFFERENT element is tapped, not until
+   the finger leaves — kept whichever cell was last tapped lit regardless of where the
+   scroll-driven `[data-lit]` spotlight had since moved to. Two cells could read as lit at
+   once: the one actually centred and the one a reader had touched three screens ago. */
+@media (hover: hover) and (pointer: fine) {
+  .service-cell:hover .service-wash {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 .service-cell[data-lit="true"] .service-wash {
   clip-path: inset(0 0 0 0);
 }
@@ -4146,13 +4158,22 @@ div.grid > *:nth-child(even).card-surface-dark {
   transition-timing-function: var(--ease-base);
 }
 
-.service-cell:hover .service-title,
+@media (hover: hover) and (pointer: fine) {
+  .service-cell:hover .service-title {
+    transform: translateY(-3px);
+    color: var(--color-text-on-dark);
+  }
+
+  .service-cell:hover .service-descriptor {
+    color: var(--color-canvas-80);
+  }
+}
+
 .service-cell[data-lit="true"] .service-title {
   transform: translateY(-3px);
   color: var(--color-text-on-dark);
 }
 
-.service-cell:hover .service-descriptor,
 .service-cell[data-lit="true"] .service-descriptor {
   color: var(--color-canvas-80);
 }
@@ -4196,7 +4217,13 @@ div.grid > *:nth-child(even).card-surface-dark {
    terracotta ember glows through from behind it. The colour trails the transform slightly
    so the digits read as rising INTO the lit band rather than switching state. The opacity
    channel keeps its entry delay untouched; colour gets its own 120ms. */
-.service-cell:hover .service-numeral,
+@media (hover: hover) and (pointer: fine) {
+  .service-cell:hover .service-numeral {
+    transform: translateY(-10px);
+    color: var(--color-canvas-16);
+  }
+}
+
 .service-cell[data-lit="true"] .service-numeral {
   transform: translateY(-10px);
   color: var(--color-canvas-16);
@@ -4267,27 +4294,44 @@ div.grid > *:nth-child(even).card-surface-dark {
   /* No shift, no numeral rise, no curtain, no square. The component also declines to
      render the wash and the marker at all under reduced motion; these are the belt to that
      pair of braces. The colour restatements matter most: with no ink wash beneath them,
-     the on-dark hover colours would put cream text on the cream canvas. */
-  .service-cell:hover .service-numeral,
+     the on-dark hover colours would put cream text on the cream canvas.
+
+     `:hover` is gated the same way as above, for the same reason — a phone's sticky hover
+     is orthogonal to reduced motion, and an untouched `:hover` here would strand the same
+     stuck-lit cell even with every transition switched off. */
   .service-cell[data-lit="true"] .service-numeral {
     transform: none;
     color: var(--color-service-numeral);
   }
-  .service-cell:hover .service-title,
   .service-cell[data-lit="true"] .service-title {
     transform: none;
     color: var(--color-ink);
   }
-  .service-cell:hover .service-descriptor,
   .service-cell[data-lit="true"] .service-descriptor {
     color: var(--color-ink-70);
   }
-  .service-cell:hover .service-wash,
   .service-cell[data-lit="true"] .service-wash {
     clip-path: inset(0 0 100% 0);
   }
   .service-marker {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  .service-cell:hover .service-numeral {
+    transform: none;
+    color: var(--color-service-numeral);
+  }
+  .service-cell:hover .service-title {
+    transform: none;
+    color: var(--color-ink);
+  }
+  .service-cell:hover .service-descriptor {
+    color: var(--color-ink-70);
+  }
+  .service-cell:hover .service-wash {
+    clip-path: inset(0 0 100% 0);
   }
 }
 
