@@ -56,13 +56,38 @@ when `(orientation: landscape) and (max-height: 500px)`.
 
 ## Follow-ups, not done
 
-1. **Selected Work "What you send / What comes back" copy is editable in the panel but never read
-   back.** `readDeckContentFromDatabase` overlays videos, websites, print images and the
-   presentation fields only; `process` always comes from `content.ts`. Existing gap, not from
-   this sync. It means the panel cannot edit the Synthesia copy that was just rewritten.
-2. Video pagination dots overflow a 320px viewport by ~15px on the 10-video tabs (Synthesia,
-   Websites). Existing, unchanged by this sync.
-3. Category tab buttons are 30px tall on touch. Existing, unchanged.
+Logged 2026-09-21. Deliberately **not** fixed in the sync or the priority deploy.
+
+### 1. Selected Work "What you send / What comes back" is editable in the panel but never read back
+
+Editing these fields saves and publishes without error, and changes **nothing** the public page
+shows. There is one pair per tab (UGC edits, Motion graphics, Synthesia, AI Video, Digital Print &
+Design); the panel holds them as `what-you-send-input[-N]` and `what-comes-back-output[-N]` on the
+`selected-work` slide.
+
+- **Cause.** `readDeckContentFromDatabase` (`src/infrastructure/capability-deck/getCapabilityDeckContent.ts`)
+  overlays videos, website entries, print images and the Presentation fields onto each portfolio
+  category, but never touches `category.process`, so the slide always renders `content.ts`'s copy.
+  The same is true of "Tab label" and, for Digital Print & Design, "Tab intro".
+- **Fix, when it is done.** Read each field by its own key, the way `WHO_WE_ARE_KEYS` does for Who We
+  Are: the keys are positional (`what-you-send-input`, `-2`, `-3`, ... in category order, with
+  Websites and Presentation having no pair), so add a keys table beside the reader and a test that
+  builds the record and checks each key exists on it. Do not look them up by label; repeated labels
+  are exactly what broke Who We Are.
+- **Where it bites.** The Synthesia copy was rewritten during the September sync. The database
+  holds the new text and so does `content.ts`, so nothing looks wrong today; the first time someone
+  edits it in the panel, nothing will change and nothing will say why.
+
+### 2. Mobile at 320px: pagination dots overflow, and category tabs are below the touch minimum
+
+- **Video pagination dots** overflow the viewport by about 15px on the tabs with the most videos
+  (Synthesia, 10 clips; Websites). At 320px the dot row is wider than the space beside the counter
+  and arrows. It is the `Go to <title>` dot buttons that poke out, not the page: there is no
+  document-level horizontal scroll.
+- **Category tabs** (UGC edits, Motion graphics, ...) are **30px tall** on touch, below the 44px
+  minimum used for every other control on mobile. Their widths are fine.
+- Both were measured with the responsive sweep at 320x640 and 360x740 and are unchanged by the
+  September sync. They were already present before it.
 
 ## Six-slide deck (later the same week)
 
